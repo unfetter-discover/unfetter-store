@@ -1,6 +1,6 @@
 {
   "name": "unfetter-discover-processor",
-  "version": "0.2.11",
+  "version": "0.3.0",
   "description": "Records Processor for Unfetter Discover",
   "private": true,
   "directories": {
