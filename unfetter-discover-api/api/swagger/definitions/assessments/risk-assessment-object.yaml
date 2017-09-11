@@ -1,0 +1,13 @@
+
+  type: object
+  properties:
+    risk:
+      type: number
+    measurements:
+      type: array
+      items:
+        $ref: "#/definitions/riskMeasurements"
+    objects:
+      type: array
+      items:
+        type: object

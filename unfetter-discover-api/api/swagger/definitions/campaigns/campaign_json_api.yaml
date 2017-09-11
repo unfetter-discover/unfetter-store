@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "campaigns"
+    attributes:
+        $ref: "#/definitions/Campaign"
+    links:
+        $ref: "#/definitions/Links"

@@ -1,0 +1,90 @@
+x-swagger-router-controller: observed_data
+get:
+  tags:
+  - STIX
+  - STIX-Observed Data
+  description: Find a model instance by {{id}} from the data source.
+  operationId: getById
+  produces: 
+  - application/vnd.api+json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/ObservedDatasJsonApiSingleItem"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"
+patch:
+  tags:
+  - STIX
+  - STIX-Observed Data
+  description: Patch attributes for a model instance and persist it into the data source.
+  operationId: update
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+    - name: data
+      in: body
+      description: An object of model property name/value pairs
+      required: true
+      schema:
+        $ref: "#/definitions/ObservedDataCreateUpdate"
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/ObservedDatasJsonApiSingleItem"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
+delete:
+  tags:
+  - STIX
+  - STIX-Observed Data
+  description: Delete a model instance by {{id}} from the data source.
+  operationId: deleteById
+  produces: 
+  - application/vnd.api+json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/StixDelete"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

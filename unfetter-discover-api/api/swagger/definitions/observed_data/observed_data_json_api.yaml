@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "observed-data"
+    attributes:
+      $ref: "#/definitions/ObservedData"
+    links:
+        $ref: "#/definitions/Links"

@@ -1,0 +1,23 @@
+  allOf:
+    - $ref: '#/definitions/StixCommon'
+    - properties:
+        data:
+          type: object
+          properties:    
+            type:
+              type: string
+              enum: ['observed-data'] 
+            attributes:
+              type: object
+              properties:            
+                first_observed:
+                  type: string
+                  format: date-time
+                last_observed:
+                  type: string
+                  format: date-time
+                number_observed:
+                  type: number
+                objects:
+                  type: object
+                

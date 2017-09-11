@@ -1,0 +1,28 @@
+x-swagger-router-controller: x_unfetter_assessments
+get:
+  tags:
+  - STIX-Unfetter Assessment
+  - Dashboard-Unfetter Assessment
+  description: Returns the details of an assessment report
+  operationId: riskByAttackPatternAndKillChain
+  parameters:
+  - name: id
+    in: path
+    description: Model ID
+    type: string
+    required: true
+  produces: 
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"

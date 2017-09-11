@@ -1,0 +1,20 @@
+  allOf:
+  - $ref: '#/definitions/StixCommon'
+  - properties:
+      data:
+          type: object
+          properties:      
+            type:
+              type: string
+              enum: ['relationship'] 
+            attributes:
+              type: object
+              properties:          
+                description:
+                  type: string
+                relationship_type:
+                  type: string
+                source_ref:
+                  type: string
+                target_ref:
+                  type: string

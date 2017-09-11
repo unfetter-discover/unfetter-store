@@ -1,0 +1,6 @@
+  version: "0.0.2"
+  title: Unfetter Discover API
+  description: Unfetter Discover API
+  license:
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'

@@ -1,0 +1,108 @@
+# STIX routes
+
+/attack-patterns:
+  $ref: ./attack_patterns/attack_patterns.yaml
+/attack-patterns/{id}:
+  $ref: ./attack_patterns/attack_patterns_by_id.yaml
+
+/campaigns:
+  $ref: ./campaigns/campaigns.yaml
+/campaigns/{id}:
+  $ref: ./campaigns/campaign_by_id.yaml
+
+/course-of-actions:
+  $ref: ./course-of-actions/course-of-actions.yaml
+/course-of-actions/{id}:
+  $ref: ./course-of-actions/course-of-action_by_id.yaml
+
+/identities:
+  $ref: ./identities/identities.yaml
+/identities/{id}:
+  $ref: ./identities/identity_by_id.yaml
+
+/indicators:
+  $ref: ./indicators/indicators.yaml
+/indicators/{id}:
+  $ref: ./indicators/indicator_by_id.yaml
+
+/intrusion-sets:
+  $ref: ./intrusion_sets/intrusion_sets.yaml
+/intrusion-sets/{id}:
+  $ref: ./intrusion_sets/intrusion_set_by_id.yaml
+
+/malwares:
+  $ref: ./malwares/malwares.yaml
+/malwares/{id}:
+  $ref: ./malwares/malware_by_id.yaml
+
+/marking-definitions:
+  $ref: ./marking_definitions/marking_definitions.yaml
+/marking-definitions/{id}:
+  $ref: ./marking_definitions/marking_definition_by_id.yaml
+
+/observed-data:
+  $ref: ./observed_data/observed_data.yaml
+/observed-data/{id}:
+  $ref: ./observed_data/observed_data_by_id.yaml
+
+/relationships:
+  $ref: ./relationships/relationships.yaml
+/relationships/{id}:
+  $ref: ./relationships/relationship_by_id.yaml
+
+/reports:
+  $ref: ./reports/reports.yaml
+/reports/{id}:
+  $ref: ./reports/report_by_id.yaml
+
+/sightings:
+  $ref: ./sightings/sightings.yaml
+/sightings/{id}:
+  $ref: ./sightings/sighting_by_id.yaml
+
+/threat-actors:
+  $ref: ./threat_actors/threat_actors.yaml
+/threat-actors/{id}:
+  $ref: ./threat_actors/threat_actor_by_id.yaml
+
+/tools:
+  $ref: ./tools/tools.yaml
+/tools/{id}:
+  $ref: ./tools/tool_by_id.yaml
+
+/multiples:
+  $ref: ./multiples/multiples.yaml
+
+# Unfetter STIX routes
+
+/x-unfetter-assessments/:
+  $ref: ./x_unfetter_assessments/assessments.yaml
+/x-unfetter-assessments/{id}:
+  $ref: ./x_unfetter_assessments/assessment-by-id.yaml
+/x-unfetter-assessments/{id}/assessed-objects:
+  $ref: ./x_unfetter_assessments/assessed-objects.yaml
+/x-unfetter-assessments/{id}/risk:
+  $ref: ./x_unfetter_assessments/risk.yaml
+/x-unfetter-assessments/{id}/risk-per-kill-chain:
+  $ref: ./x_unfetter_assessments/risk-per-kill-chain.yaml
+/x-unfetter-assessments/{id}/risk-by-attack-pattern:
+  $ref: ./x_unfetter_assessments/risk-by-attack-pattern.yaml
+/x-unfetter-assessments/{id}/summary-aggregations:
+  $ref: ./x_unfetter_assessments/summary-aggregations.yaml
+
+/x-unfetter-control-assessments:
+  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessments.yaml
+/x-unfetter-control-assessments/{id}:
+  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessment_by_id.yaml
+
+/x-unfetter-sensors:
+  $ref: ./x_unfetter_sensors/x_unfetter_sensors.yaml
+/x-unfetter-sensors/{id}:
+  $ref: ./x_unfetter_sensors/x_unfetter_sensor_by_id.yaml
+
+# Other
+
+/dashboards/intrusionSetView:
+  $ref: ./dashboards/intrusion-set-view.yaml
+/downloadBundle:
+  $ref: ./download-bundle.yaml

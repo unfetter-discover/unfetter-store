@@ -1,0 +1,23 @@
+x-swagger-router-controller: dashboards
+get:
+  tags:
+  - Dashboards
+  description: Returns the view for displaying the Intrusion Set Dashboard
+  operationId: intrusionSetView
+  produces: 
+  - application/json
+  parameters:
+    - name: intrusionSetIds
+      in: query
+      description: The array of Intrusion Set ids
+      required: true
+      type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/DashboardsIntrusionSetViewJsonApi"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"

@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "relationships"
+    attributes:
+      $ref: "#/definitions/Relationship"
+    links:
+        $ref: "#/definitions/Links"

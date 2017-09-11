@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "x-unfetter-sensor"
+    attributes:
+      $ref: "#/definitions/XUnfetterSensor"
+    links:
+        $ref: "#/definitions/Links"

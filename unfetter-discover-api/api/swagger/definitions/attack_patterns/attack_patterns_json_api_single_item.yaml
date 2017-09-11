@@ -1,0 +1,7 @@
+    type: object
+    properties:
+      links:
+        $ref: "#/definitions/Links"
+      data:
+        $ref: "#/definitions/AttackPatternJsonApi"
+                

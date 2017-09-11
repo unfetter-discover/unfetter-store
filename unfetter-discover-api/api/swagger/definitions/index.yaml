@@ -1,0 +1,350 @@
+# ~~~ API Generalizations ~~~
+
+
+#Count:
+#  $ref: ./general/count.yaml
+
+Delete:
+  $ref: ./general/delete.yaml
+
+DetailedErrorResponse:
+  $ref: ./general/detailed_error_response.yaml
+
+Error:
+  $ref: ./general/error.yaml
+
+ErrorJsonApi:
+  $ref: ./general/default_error.yaml
+
+Links:
+  $ref: ./general/links.yaml
+
+NotFound:
+  $ref: ./general/not_found.yaml
+
+# ~~~ STIX Generalizations ~~~
+
+ExternalReference:
+  $ref: ./general/external_reference.yaml
+
+GranularMarking:
+  $ref: ./general/granular_marking.yaml
+
+KillChainPhase:
+  $ref: ./general/kill_chain_phase.yaml
+
+Question:
+  $ref: ./general/question.yaml
+
+QuestionOption:
+  $ref: ./general/question-option.yaml
+
+StixBundle:
+  $ref: ./general/stix_bundle.yaml
+
+StixCommon:
+  $ref: ./general/stix-common.yaml
+
+StixDelete:
+  $ref: ./general/stix_delete.yaml
+
+# API's supporting the Assessments workflow
+
+# An assessment object combines a STIX report object with the returned values of the XUnfetterControlAssessment objects
+# Assessment:
+#   type: object
+#   properties:
+#     id: 
+#       type: string
+#     type:
+#       type: string
+#       example: "report"
+#     links:
+#       $ref: "#/definitions/Links"
+#     attributes:
+#       $ref: ./assessments/assessment.yaml
+
+AssessmentsAssessedObjects:
+  type: object
+  # properties:
+  #   id: 
+  #     type: string
+  #   type:
+  #     type: string
+  #     example: "report"
+  #   links:
+  #     $ref: "#/definitions/Links"
+  #   attributes:
+  #     $ref: ./assessments/assessed-object.yaml
+
+# Returns the risk levels per ATTACK Kill Chain
+#AttackKillChainAssessment:
+#  type: object
+#  properties:
+#    id: 
+#      type: string
+#    type:
+#      type: string
+#      example: "attackChainAssessment"
+#    links:
+#      $ref: "#/definitions/Links"
+#    attributes:
+#      $ref: ./assessments/attack-kill-chain-assessment.yaml
+  
+# Overall risk per the assessment.
+AssessmentRisk:
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "attackChainAssessment"
+    links:
+      $ref: "#/definitions/Links"
+    attributes:
+      $ref: ./assessments/assessment-risk.yaml
+
+
+riskMeasurements:
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "attackChainAssessment"
+    links:
+      $ref: "#/definitions/Links"
+    attributes:
+      $ref: ./assessments/risk-measurement.yaml
+
+RiskPerKillChain:
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "attackChainAssessment"
+    links:
+      $ref: "#/definitions/Links"
+    attributes:
+      $ref: ./assessments/risk-per-kill-chain.yaml
+
+
+# ~~~ STIX ~~~
+
+AttackPattern:
+  $ref: ./attack_patterns/attack_patterns.yaml
+AttackPatternCreateUpdate:
+  $ref: ./attack_patterns/attack_pattern_create_update.yaml
+AttackPatternJsonApi:
+  $ref: ./attack_patterns/attack_pattern_json_api.yaml
+AttackPatternsJsonApi:
+  $ref: ./attack_patterns/attack_patterns_json_api.yaml
+AttackPatternsJsonApiSingleItem:
+  $ref: ./attack_patterns/attack_patterns_json_api_single_item.yaml
+
+AssessmentJsonApi:
+  $ref: ./assessments/assessment_json_api.yaml
+AssessmentsJsonApi:
+  $ref: ./assessments/assessments_json_api.yaml
+AssessmentCreateUpdate:
+  $ref: ./assessments/assessment_create_update.yaml
+AssessmentJsonApiSingleItem:
+  $ref: ./assessments/assessments_json_api_single_item.yaml
+Assessment:
+  $ref: ./assessments/assessment.yaml
+
+
+CampaignJsonApi:
+  $ref: ./campaigns/campaign_json_api.yaml
+CampaignsJsonApi:
+  $ref: ./campaigns/campaigns_json_api.yaml
+CampaignCreateUpdate:
+  $ref: ./campaigns/campaign_create_update.yaml
+CampaignJsonApiSingleItem:
+  $ref: ./campaigns/campaigns_json_api_single_item.yaml
+Campaign:
+  $ref: ./campaigns/campaign.yaml
+
+CourseOfActionJsonApi:
+  $ref: ./course_of_actions/course_of_action_json_api.yaml
+CourseOfActionsJsonApi:
+  $ref: ./course_of_actions/course_of_actions_json_api.yaml
+CourseOfActionCreateUpdate:
+  $ref: ./course_of_actions/course_of_action_create_update.yaml
+CourseOfActionsJsonApiSingleItem:
+  $ref: ./course_of_actions/course_of_actions_json_api_single_item.yaml
+CourseOfAction:
+  $ref: ./course_of_actions/course_of_action.yaml
+
+
+IdentityJsonApi:
+  $ref: ./identities/identity_json_api.yaml
+IdentitiesJsonApi:
+  $ref: ./identities/identities_json_api.yaml
+IdentityCreateUpdate:
+  $ref: ./identities/identity_create_update.yaml
+IdentitiesJsonApiSingleItem:
+  $ref: ./identities/identities_json_api_single_item.yaml
+Identity:
+  $ref: ./identities/identity.yaml
+
+IndicatorJsonApi:
+  $ref: ./indicators/indicator_json_api.yaml
+IndicatorsJsonApi:
+  $ref: ./indicators/indicators_json_api.yaml
+IndicatorCreateUpdate:
+  $ref: ./indicators/indicator_create_update.yaml
+IndicatorsJsonApiSingleItem:
+  $ref: ./indicators/indicators_json_api_single_item.yaml
+Indicator:
+  $ref: ./indicators/indicator.yaml
+
+
+IntrusionSetJsonApi:
+  $ref: ./intrusion_sets/intrusion_set_json_api.yaml
+IntrusionSetsJsonApi:
+  $ref: ./intrusion_sets/intrusion_sets_json_api.yaml
+IntrusionSetCreateUpdate:
+  $ref: ./intrusion_sets/intrusion_set_create_update.yaml
+IntrusionSetsJsonApiSingleItem:
+  $ref: ./intrusion_sets/intrusion_sets_json_api_single_item.yaml
+IntrusionSet:
+  $ref: ./intrusion_sets/intrusion_set.yaml
+
+
+MalwareJsonApi:
+  $ref: ./malwares/malware_json_api.yaml
+MalwaresJsonApi:
+  $ref: ./malwares/malwares_json_api.yaml
+MalwareCreateUpdate:
+  $ref: ./malwares/malware_create_update.yaml
+MalwaresJsonApiSingleItem:
+  $ref: ./malwares/malwares_json_api_single_item.yaml
+Malware:
+  $ref: ./malwares/malware.yaml
+
+
+MarkingDefinitionJsonApi:
+  $ref: ./marking_definitions/marking_definition_json_api.yaml
+MarkingDefinitionsJsonApi:
+  $ref: ./marking_definitions/marking_definitions_json_api.yaml
+MarkingDefinitionCreateUpdate:
+  $ref: ./marking_definitions/marking_definition_create_update.yaml
+MarkingDefinitionsJsonApiSingleItem:
+  $ref: ./marking_definitions/marking_definitions_json_api_single_item.yaml
+MarkingDefinition:
+  $ref: ./marking_definitions/marking_definition.yaml
+
+
+
+MultipleJsonApi:
+  $ref: ./multiples/multiple_json_api.yaml
+MultiplesJsonApi:
+  $ref: ./multiples/multiples_json_api.yaml
+
+ObservedDataJsonApi:
+  $ref: ./observed_data/observed_data_json_api.yaml
+ObservedDatasJsonApi:
+  $ref: ./observed_data/observed_datas_json_api.yaml
+ObservedDataCreateUpdate:
+  $ref: ./observed_data/observed_data_create_update.yaml
+ObservedDatasJsonApiSingleItem:
+  $ref: ./observed_data/observed_datas_json_api_single_item.yaml
+ObservedData:
+  $ref: ./observed_data/observed_data.yaml
+
+
+RelationshipJsonApi:
+  $ref: ./relationships/relationship_json_api.yaml
+RelationshipsJsonApi:
+  $ref: ./relationships/relationships_json_api.yaml
+RelationshipCreateUpdate:
+  $ref: ./relationships/relationship_create_update.yaml
+RelationshipJsonApiSingleItem:
+  $ref: ./relationships/relationships_json_api_single_item.yaml
+Relationship:
+  $ref: ./relationships/relationship.yaml
+
+
+
+ReportJsonApi:
+  $ref: ./reports/report_json_api.yaml
+ReportsJsonApi:
+  $ref: ./reports/reports_json_api.yaml
+ReportCreateUpdate:
+  $ref: ./reports/report_create_update.yaml
+ReportsJsonApiSingleItem:
+  $ref: ./reports/reports_json_api_single_item.yaml
+ReportData:
+  $ref: ./reports/report_data.yaml
+Report:
+  $ref: ./reports/report.yaml
+
+
+SightingJsonApi:
+  $ref: ./sightings/sighting_json_api.yaml
+SightingsJsonApi:
+  $ref: ./sightings/sightings_json_api.yaml
+SightingCreateUpdate:
+  $ref: ./sightings/sighting_create_update.yaml
+SightingsJsonApiSingleItem:
+  $ref: ./sightings/sightings_json_api_single_item.yaml
+Sighting:
+  $ref: ./sightings/sighting.yaml
+
+
+ThreatActorJsonApi:
+  $ref: ./threat_actors/threat_actor_json_api.yaml
+ThreatActorsJsonApi:
+  $ref: ./threat_actors/threat_actors_json_api.yaml
+ThreatActorCreateUpdate:
+  $ref: ./threat_actors/threat_actor_create_update.yaml
+ThreatActorsJsonApiSingleItem:
+  $ref: ./threat_actors/threat_actors_json_api_single_item.yaml
+ThreatActor:
+  $ref: ./threat_actors/threat_actor.yaml
+
+
+ToolJsonApi:
+  $ref: ./tools/tool_json_api.yaml
+ToolsJsonApi:
+  $ref: ./tools/tools_json_api.yaml
+ToolCreateUpdate:
+  $ref: ./tools/tool_create_update.yaml
+ToolsJsonApiSingleItem:
+  $ref: ./tools/tools_json_api_single_item.yaml
+Tool:
+  $ref: ./tools/tool.yaml  
+
+# ~~~ Unfetter-STIX ~~~
+
+XUnfetterControlAssessmentJsonApi:
+  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessment_json_api.yaml
+XUnfetterControlAssessmentsJsonApi:
+  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessments_json_api.yaml
+XUnfetterControlAssessmentCreateUpdate:
+  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessment_create_update.yaml
+XUnfetterControlAssessmentsJsonApiSingleItem:
+  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessments_json_api_single_item.yaml
+
+
+
+XUnfetterSensorJsonApi:
+  $ref: ./x_unfetter_sensors/x_unfetter_sensor_json_api.yaml
+XUnfetterSensorsJsonApi:
+  $ref: ./x_unfetter_sensors/x_unfetter_sensors_json_api.yaml
+XUnfetterSensorCreateUpdate:
+  $ref: ./x_unfetter_sensors/x_unfetter_sensor_create_update.yaml
+XUnfetterSensorsJsonApiSingleItem:
+  $ref: ./x_unfetter_sensors/x_unfetter_sensors_json_api_single_item.yaml
+XUnfetterSensor:
+  $ref: ./x_unfetter_sensors/x_unfetter_sensor.yaml  
+
+# Custom Routes
+
+DashboardsIntrusionSetViewJsonApi:
+  $ref: ./dashboards/intrusion_set_view_json_api.yaml

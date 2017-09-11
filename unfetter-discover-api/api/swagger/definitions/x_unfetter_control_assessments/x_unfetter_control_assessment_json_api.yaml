@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "x-unfetter-control-assessment"
+    attributes:
+      type: object
+    links:
+        $ref: "#/definitions/Links"

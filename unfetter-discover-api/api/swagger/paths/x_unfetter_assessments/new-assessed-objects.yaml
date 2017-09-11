@@ -1,0 +1,27 @@
+# NewAssessedObjects will return all potential assessed objects.  if a report ID is provided, then will return only those assessments
+
+x-swagger-router-controller: x_unfetter_assessments
+get:
+  tags:
+  - STIX-Unfetter Assessment
+  - Dashboard-Unfetter Assessment
+  description: Returns all of the objects, grouped by Kill Chain, or a particular object type, that can be assessed.
+  operationId: newAssessedObjects
+  produces: 
+  - application/json
+  parameters:
+    - name: objectType
+      in: query
+      description: An array of object types.
+      required: true
+      type: string
+    - name: 
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/AssessmentsNewAssessedObjectsJsonApi"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"

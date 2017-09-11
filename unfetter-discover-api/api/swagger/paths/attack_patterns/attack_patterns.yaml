@@ -1,0 +1,65 @@
+x-swagger-router-controller: attack_patterns
+get:
+  tags:
+  - STIX
+  - STIX-Attack Pattern
+  description: Find all instances of the model matched by filter from the data source.
+  operationId: get
+  produces: 
+  - application/vnd.api+json
+  parameters:
+    - name: filter
+      in: query
+      description: 'Ex: { "name": "AppInit DLLs" }'
+      required: false
+      type: string
+    - name: sort
+      in: query
+      description: 'Ex: { "name": "1" } or { "name": "-1"}'
+      required: false
+      type: string
+    - name: limit
+      in: query
+      description: 'Ex: 5'
+      required: false
+      type: number
+    - name: skip
+      in: query
+      description: 'Ex: 10'
+      required: false
+      type: number
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/AttackPatternsJsonApi"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
+post:
+  tags:
+  - STIX
+  - STIX-Attack Pattern
+  description: Create a new instance of the model and persist it into the data source.
+  operationId: add
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+    - name: data
+      in: body
+      description: Model instance data
+      required: true
+      schema:
+        $ref: "#/definitions/AttackPatternCreateUpdate"
+  responses:
+    "201":
+      description: Created
+      schema:
+        $ref: "#/definitions/AttackPatternsJsonApi"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

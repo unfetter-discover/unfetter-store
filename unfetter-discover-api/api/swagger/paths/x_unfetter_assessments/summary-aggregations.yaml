@@ -1,0 +1,25 @@
+x-swagger-router-controller: x_unfetter_assessments
+get:
+  tags:
+  - STIX-Unfetter Assessment
+  - Dashboard-Unfetter Assessment
+  description: Find all instances of the model matched by filter from the data source.
+  operationId: summaryAggregations
+  parameters:
+  - name: id
+    in: path
+    description: Model ID
+    type: string
+    required: true
+    format: JSON
+  produces: 
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object     
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"

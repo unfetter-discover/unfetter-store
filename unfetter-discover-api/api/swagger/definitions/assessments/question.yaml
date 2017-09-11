@@ -1,0 +1,22 @@
+  type: object
+  properties:
+    selected_option:
+      type: object
+      properties:
+        risk:
+          type: number
+        title:
+          type: string
+    options:
+      type: array
+      items:
+        type: object
+        properties:
+          risk:
+            type: number
+          title:
+            type: string
+    risk:
+      type: number
+    title:
+      type: string            

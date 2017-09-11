@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "attack-patterns"
+    attributes:
+        $ref: "#/definitions/AttackPattern"
+    links:
+        $ref: "#/definitions/Links"

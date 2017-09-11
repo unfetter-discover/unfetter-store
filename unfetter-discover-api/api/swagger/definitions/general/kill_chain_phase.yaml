@@ -1,0 +1,6 @@
+  type: object
+  properties:
+    kill_chain_name: 
+      type: string
+    phase_name:
+      type: string
