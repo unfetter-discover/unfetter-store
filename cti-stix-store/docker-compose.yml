@@ -1,0 +1,12 @@
+version: '2'
+services:
+  cti-stix-store:
+    container_name: cti-stix-store
+    build: .
+    ports:
+     - "3000:3000"
+    links:
+     - mongo:repository
+  mongo:
+    image: mongo
+    container_name: mongo

@@ -1,0 +1,60 @@
+  type: object
+  properties:
+    name:
+      type: string
+    description:
+      type: string
+    alias:
+      type: array
+      items:
+        type: string
+    first_seen:
+      type: string
+      format: date-time
+    last_seen:
+      type: string
+      format: date-time
+    goals:
+      type: array
+      items:
+        type: string
+    primary_motivation:
+      type: string
+
+    secondary_motivations:
+      type: array
+      items:
+        type: string
+    resource_level:
+      type: string
+
+
+    created: 
+      type: string
+      format: date-time
+    created_by_ref:
+      type: string
+      default: "identity-id"
+    modified:
+      type: string
+      format: date-time
+    revoked:
+      type: boolean
+      default: false
+    labels:
+      type: array
+      items:
+        type: string
+    external_references:
+      type: array
+      items:
+        $ref: "#/definitions/ExternalReference"
+    object_marking_refs:
+      type: array
+      items:
+        type: string
+        default: "marking-definition-id"
+    granular_markings:
+      type: array
+      items:
+        $ref: "#/definitions/GranularMarking"

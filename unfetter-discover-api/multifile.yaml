@@ -1,0 +1,17 @@
+swagger: "2.0"
+host: localhost:3000
+basePath: /
+schemes:
+  - http
+info:
+  $ref: ./api/swagger/info/index.yaml
+consumes:
+  - application/vnd.api+json
+  - application/json
+produces:
+  - application/vnd.api+json
+  - application/json
+paths:
+  $ref: ./api/swagger/paths/index.yaml
+definitions:
+  $ref: ./api/swagger/definitions/index.yaml

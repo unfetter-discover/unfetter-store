@@ -1,0 +1,12 @@
+  type: object
+  properties:
+    status:
+      type: number
+    source:
+      type: string
+    title:
+      type: string
+    code:
+      type: string
+    details:
+      type: string

@@ -1,0 +1,64 @@
+x-swagger-router-controller: x_unfetter_assessments
+get:
+  tags:
+  - STIX-Unfetter Assessment
+  description: Returns the details of an assessment report
+  operationId: get
+  produces: 
+  - application/json
+  parameters:
+    - name: filter
+      in: query
+      description: 'Ex: { "name": "AppInit DLLs" }'
+      required: false
+      type: string
+    - name: sort
+      in: query
+      description: 'Ex: { "name": "1" } or { "name": "-1"}'
+      required: false
+      type: string
+    - name: limit
+      in: query
+      description: 'Ex: 5'
+      required: false
+      type: number
+    - name: skip
+      in: query
+      description: 'Ex: 10'
+      required: false
+      type: number
+  
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/AssessmentsJsonApi"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
+post:
+  tags:
+  - STIX-Unfetter Assessment
+  description: Create a new instance of an Assessment
+  operationId: add
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+    - name: data
+      in: body
+      description: Model instance data
+      required: true
+      schema:
+        $ref: "#/definitions/AssessmentCreateUpdate"
+  responses:
+    "201":
+      description: Success
+      schema:
+        $ref: "#/definitions/AssessmentsJsonApi"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"        

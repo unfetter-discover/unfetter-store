@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "intrusion-set"
+    attributes:
+      $ref: "#/definitions/IntrusionSet"
+    links:
+        $ref: "#/definitions/Links"

@@ -1,0 +1,32 @@
+allOf:
+- $ref: '#/definitions/StixCommon'
+- properties:
+      data:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: ['campaign'] 
+          attributes:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string 
+              labels:
+                type: array
+                items:
+                  type: string
+              aliases:
+                type: array
+                items:
+                  type: string
+              first_seen:
+                type: string
+                format: date-time
+              last_seen:
+                type: string
+                format: date-time
+              objective:
+                type: string

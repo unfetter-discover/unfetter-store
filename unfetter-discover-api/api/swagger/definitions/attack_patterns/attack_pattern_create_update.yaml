@@ -1,0 +1,27 @@
+  allOf:
+  - $ref: '#/definitions/StixCommon'
+  - properties:
+      data:
+        type: object
+        properties: 
+          type:
+            type: string
+            enum: ['attack-pattern']      
+          attributes:
+            type: object
+            properties:
+              name:
+                type: string 
+              description:
+                type: string
+              kill_chain_phases:
+                type: array
+                items:
+                  $ref: "#/definitions/KillChainPhase"
+              x_unfetter_sophistication_level:
+                type: number
+              object_marking_refs:
+                type: array
+                items:
+                  type: string
+                  default: "marking-definition-id"    

@@ -1,0 +1,22 @@
+  allOf:
+    - $ref: '#/definitions/StixCommon'
+    - properties:
+       data:
+          type: object
+          properties:        
+            type:
+              type: string
+              enum: ['x-unfetter-control-assessment'] 
+            attributes:
+              type: object
+              properties:            
+                course_of_action_id:
+                  type: string
+                group_coa_id:
+                  type: string
+                risk:
+                  type: number
+                measurements:
+                  type: array
+                  items:
+                    $ref: "#/definitions/Question"

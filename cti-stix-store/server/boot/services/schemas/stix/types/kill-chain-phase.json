@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Kill Chain Phase",
+  "type": "object",
+  "properties": {
+    "kill_chain_name": {
+      "type": "string"
+    },
+    "phase_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "kill_chain_name",
+    "phase_name"
+  ]
+}

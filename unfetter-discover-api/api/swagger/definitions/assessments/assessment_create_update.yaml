@@ -1,0 +1,39 @@
+  # The main assessment object.  Stores the overall assessment report, the chosen answers
+  #    to the questions, and the risks accepted
+    allOf:
+    - $ref: '#/definitions/StixCommon'
+    - properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: ['x-unfetter-assessment']    
+            attributes:
+              type: object
+              properties:      
+                description:
+                  type: string
+                kill_chain_phases:
+                  type: array
+                  items:
+                    $ref: "#/definitions/KillChainPhase"
+                assessment_objects:
+                  type: array
+                  items:
+                    $ref: "./assessment-object.yaml"
+                labels:
+                  type: array
+                  items:
+                    type: string
+                modified:
+                  type: string
+                  format: date-time
+                name:
+                  type: string
+                risk:
+                  type: number
+                risk_by_question:
+                  type: array
+                  items:
+                    type: object

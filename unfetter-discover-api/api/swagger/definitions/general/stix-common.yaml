@@ -1,0 +1,43 @@
+  type: object
+  discriminator: type
+  properties:
+    data:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        attributes:
+          type: object
+          properties:
+            created: 
+              type: string
+              format: date-time
+            created_by_ref:
+              type: string
+              default: "identity-id"
+            modified:
+              type: string
+              format: date-time
+            revoked:
+              type: boolean
+              default: false
+            labels:
+              type: array
+              items:
+                type: string
+            external_references:
+              type: array
+              items:
+                $ref: "#/definitions/ExternalReference"
+            object_marking_refs:
+              type: array
+              items:
+                type: string
+                default: "marking-definition-id"
+            granular_markings:
+              type: array
+              items:
+                $ref: "#/definitions/GranularMarking"
+            

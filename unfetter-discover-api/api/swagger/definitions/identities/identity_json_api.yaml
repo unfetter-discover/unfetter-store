@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "identities"
+    attributes:
+      $ref: "#/definitions/Identity"
+    links:
+        $ref: "#/definitions/Links"

@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Relationship",
+  "allOf": [
+    {
+      "$ref": "#/definitions/CommonProperties"
+    },
+    {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "relationship"
+          ]
+        },
+        "relationship_type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "source_ref": {
+          "type": "string"
+        },
+        "target_ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "relationship_type",
+        "source_ref",
+        "target_ref"
+      ]
+    }
+  ]
+}

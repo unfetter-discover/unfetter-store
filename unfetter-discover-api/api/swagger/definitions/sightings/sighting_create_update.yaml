@@ -1,0 +1,26 @@
+  allOf:
+    - $ref: '#/definitions/StixCommon'
+    - properties:
+       data:
+          type: object
+          properties:        
+            type:
+              type: string
+              enum: ['sighting'] 
+            attributes:
+              type: object
+              properties:            
+                first_seen:
+                  type: string
+                  format: date-time
+                last_seen:
+                  type: string
+                  format: date-time
+                count:
+                  type: number
+                sighting_of_ref:
+                  type: string
+                observed_data_refs:
+                  type: array
+                  items:
+                   type: string

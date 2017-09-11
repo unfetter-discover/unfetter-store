@@ -1,0 +1,15 @@
+  type: object
+  properties:
+    indicators:
+      type: array
+      items:
+        $ref: ./risk-assessment-object.yaml
+    sensors:
+      type: array
+      items:
+        $ref: ./risk-assessment-object.yaml
+    courseOfActions:
+      type: array
+      items:
+        $ref: ./risk-assessment-object.yaml
+

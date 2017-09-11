@@ -1,0 +1,8 @@
+  type: object
+  properties:
+    marking_ref:
+      type: string
+    selectors:
+      type: array
+      items:
+        type: string

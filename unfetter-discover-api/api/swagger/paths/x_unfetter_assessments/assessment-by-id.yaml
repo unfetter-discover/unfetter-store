@@ -1,0 +1,89 @@
+x-swagger-router-controller: x_unfetter_assessments
+get:
+  tags:
+  - STIX-Unfetter Assessment
+  description: Returns the details of an assessment report
+  operationId: getById
+  parameters:
+  - name: id
+    in: path
+    description: Model ID
+    type: string
+    required: true
+  produces: 
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/AssessmentJsonApiSingleItem"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"
+
+patch:
+  tags:
+  - STIX-Unfetter Assessment
+  description: Patch attributes for a model instance and persist it into the data source.
+  operationId: update
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+    - name: data
+      in: body
+      description: An object of model property name/value pairs
+      required: true
+      schema:
+        $ref: "#/definitions/AssessmentCreateUpdate"
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/AssessmentJsonApiSingleItem"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
+
+delete:
+  tags:
+  - STIX-Unfetter Assessment
+  description: Delete a model instance by {{id}} from the data source.
+  operationId: deleteById
+  produces: 
+  - application/vnd.api+json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/StixDelete"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

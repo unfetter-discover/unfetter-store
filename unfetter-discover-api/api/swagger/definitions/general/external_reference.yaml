@@ -1,0 +1,8 @@
+  type: object
+  properties:
+    external_id:
+      type: string
+    source_name:
+      type: string
+    url:
+      type: string

@@ -1,0 +1,41 @@
+  type: object
+  properties:
+    id:
+      type: string
+    created: 
+      type: string
+      format: date-time
+    description:
+      type: string
+    published:
+      type: string
+      format: date-time
+    object_refs:
+      type: array
+      items:
+        type: string
+    external_references:
+      type: array
+      items:
+        $ref: "#/definitions/ExternalReference" 
+    granular_markings:
+      type: array
+      items:
+        $ref: "#/definitions/GranularMarking"
+    kill_chain_phases:
+      type: array
+      items:
+        $ref: "#/definitions/KillChainPhase"
+    labels:
+      type: array
+      items:
+        type: string
+    modified:
+      type: string
+      format: date-time
+    name:
+      type: string
+    type:
+      type: string
+    version:
+      type: integer

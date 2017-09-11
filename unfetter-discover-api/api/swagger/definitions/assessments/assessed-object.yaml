@@ -1,0 +1,17 @@
+  type: object
+  properties:
+    indicators:
+      type: array
+      items:
+      # This should be SIX objects for Indicators
+        type: object  
+    sensors:
+      type: array
+      items:
+      # This should be SIX objects for X Sensors
+        type: object    
+    courseOfActions:
+      type: array
+      items:
+      # This should be SIX objects for course of action
+        type: object

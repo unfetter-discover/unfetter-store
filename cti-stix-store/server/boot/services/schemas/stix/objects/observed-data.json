@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "ObservedData",
+  "allOf": [
+    {
+      "$ref": "#/definitions/CommonProperties"
+    },
+    {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "observed-data"
+          ]
+        },
+        "first_observed": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "last_observed": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "numbered_observed": {
+          "type": "number"
+        },
+        "objects": {
+          "type": "object"
+        }                      
+      },
+      "required": [
+        "first_observed",
+        "last_observed",
+        "number_observed",
+        "objects"
+      ]
+    }
+  ]
+}
+

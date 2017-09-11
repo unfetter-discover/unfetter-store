@@ -1,0 +1,53 @@
+  type: object
+  properties:
+    first_seen:
+      type: string
+      format: date-time
+    last_seen:
+      type: string
+      format: date-time    
+    count:
+      type: integer
+    sighting_of_ref:
+      type: string
+    observed_data_refs:
+      type: array
+      items:
+        type: string
+    where_sighted_refs:
+      type: array
+      items:
+        type: string
+    summary:
+      type: boolean   
+
+
+    created: 
+      type: string
+      format: date-time
+    created_by_ref:
+      type: string
+      default: "identity-id"
+    modified:
+      type: string
+      format: date-time
+    revoked:
+      type: boolean
+      default: false
+    labels:
+      type: array
+      items:
+        type: string
+    external_references:
+      type: array
+      items:
+        $ref: "#/definitions/ExternalReference"
+    object_marking_refs:
+      type: array
+      items:
+        type: string
+        default: "marking-definition-id"
+    granular_markings:
+      type: array
+      items:
+        $ref: "#/definitions/GranularMarking"

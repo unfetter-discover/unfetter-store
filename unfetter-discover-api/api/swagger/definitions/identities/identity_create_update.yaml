@@ -1,0 +1,28 @@
+  allOf:
+  - $ref: '#/definitions/StixCommon'
+  - properties:
+       data:
+          type: object
+          properties:  
+            type:
+              type: string
+              enum: ['identity'] 
+            attributes:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string 
+                labels:
+                  type: array
+                  items:
+                    type: string
+                identity_class:
+                  type: string
+                sectors:
+                  type: array
+                  items:
+                    type: string
+                contact_information:
+                  type: string

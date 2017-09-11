@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "External Reference",
+  "type": "object",
+  "properties": {
+    "source_name": {
+      "type": "string"
+    },
+    "external_id": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string",
+      "pattern": "^((http[s]?|ftp):\\\/)?\/?([^:\\/\\s]+)((\\\/\\w+)*\\/)([\\w\\-\\.]+[^#?\\s]+)(.*)?(#[\\w\\-]+)?$"
+    }
+  },
+  "required": [
+    "source_name"
+  ]
+}

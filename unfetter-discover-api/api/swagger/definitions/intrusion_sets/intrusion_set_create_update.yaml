@@ -1,0 +1,38 @@
+  allOf:
+    - $ref: '#/definitions/StixCommon'
+    - properties:
+       data:
+          type: object
+          properties:    
+            type:
+              type: string
+              enum: ['intrusion-set']
+            attributes:
+              type: object
+              properties:            
+                name:
+                  type: string 
+                description:
+                  type: string 
+                first_seen:
+                  type: string
+                  format: date-time
+                last_seen:
+                  type: string
+                  format: date-time
+                aliases:
+                  type: array
+                  items:
+                    type: string
+                goals:
+                  type: array
+                  items:
+                    type: string
+                resource_level:
+                  type: string
+                primary_motivation:
+                  type: string
+                secondary_motivations:
+                  type: array
+                  items:
+                    type: string

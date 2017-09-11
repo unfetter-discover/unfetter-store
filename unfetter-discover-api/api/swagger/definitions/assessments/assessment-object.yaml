@@ -1,0 +1,22 @@
+  # The main assessment object, which is a STIX Report object with the additional "assessments" arrays.  This array 
+  #    is an array of the objects found in object_refs, which are x-unfetter-control-assessment objects
+  
+  type: object
+  properties:
+    risk:
+      type: number
+    stix:
+      type: object
+      properties:
+        id: 
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        name:
+          type: string
+    questions:
+      type: array
+      items:
+        $ref: "./question.yaml"

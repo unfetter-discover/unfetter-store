@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Granular Marking",
+  "type": "object",
+  "properties": {
+    "marking_ref": {
+      "type": "string"
+    },
+    "selectors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "marking_ref",
+    "selectors"
+  ]
+}

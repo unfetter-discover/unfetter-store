@@ -1,0 +1,22 @@
+{
+  "name": "unfetter-discover-processor",
+  "version": "0.3.0",
+  "description": "Records Processor for Unfetter Discover",
+  "private": true,
+  "directories": {
+    "doc": "doc",
+    "test": "tests"
+  },
+  "author": "Unfetter",
+  "license": "MIT",
+  "dependencies": {
+    "jsonapi-serializer": "*",
+    "mongoose": "^4.9.9",
+    "node-fetch": "^1.7.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.2.0",
+    "eslint-plugin-import": "^2.3.0"
+  }
+}

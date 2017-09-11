@@ -1,0 +1,12 @@
+  type: object
+  properties:
+    name:
+      type: string
+    risk:
+      type: number
+    options:
+      type: array
+      items:
+        $ref: "#/definitions/QuestionOption"
+    selected_option:
+      type: number

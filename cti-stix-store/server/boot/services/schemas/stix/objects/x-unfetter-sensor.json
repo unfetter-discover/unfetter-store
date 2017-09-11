@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "X Unfetter Sensor",
+  "allOf": [
+    {
+      "$ref": "#/definitions/CommonProperties"
+    },
+    {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "x-unfetter-sensor"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kill_chain_phases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KillChainPhase"
+          }
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  ]
+}

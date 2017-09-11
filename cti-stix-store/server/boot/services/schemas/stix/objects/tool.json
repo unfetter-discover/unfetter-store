@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Tool",
+  "allOf": [
+    {
+      "$ref": "#/definitions/CommonProperties"
+    },
+    {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "tool"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "kill_chain_phases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KillChainPhase"
+          }
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  ]
+}

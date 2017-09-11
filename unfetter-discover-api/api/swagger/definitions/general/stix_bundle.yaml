@@ -1,0 +1,12 @@
+  type: object
+  properties:
+    type: 
+      type: string
+    id:
+      type: string
+    spec_version:
+      type: string
+    objects:
+      type: array
+      items:
+        type: object

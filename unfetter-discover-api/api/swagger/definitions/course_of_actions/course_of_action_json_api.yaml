@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "course-of-action"
+    attributes:
+      $ref: "#/definitions/CourseOfAction"
+    links:
+        $ref: "#/definitions/Links"
