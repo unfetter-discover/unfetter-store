@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Marking Definition",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "marking-definition"
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "definition_type": {
+      "type": "string"
+    },
+    "definition": {
+      "type": "object"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "external_references": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExternalReference"
+      }
+    },
+    "granular_markings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/GranularMarking"
+      }
+    }
+  },
+  "required": [
+    "type",
+    "id",
+    "definition_type",
+    "definition"
+  ]
+}

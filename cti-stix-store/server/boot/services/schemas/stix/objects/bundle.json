@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Bundle",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "bundle"
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "spec_version": {
+      "type": "string",
+      "enum": [
+        "2.0"
+      ]
+    },
+    "attack_patterns": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/AttackPattern"
+      }
+    },
+    "courses_of_action": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/CourseOfAction"
+      }
+    },
+    "indicators": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Indicator"
+      }
+    },
+    "malware": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Malware"
+      }
+    },
+    "marking_definitions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/MarkingDefinition"
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Relationship"
+      }
+    },
+    "reports": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Report"
+      }
+    },
+    "threat_actors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ThreatActor"
+      }
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Tool"
+      }
+    }
+  },
+  "required": [
+    "type",
+    "id",
+    "spec_version"
+  ]
+}

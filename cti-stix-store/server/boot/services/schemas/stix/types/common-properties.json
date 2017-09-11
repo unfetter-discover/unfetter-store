@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Common Properties",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z-]+[a-z]--[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "created_by_ref": {
+      "type": "string"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "modified": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revoked": {
+      "type": "boolean",
+      "default": false
+    },
+    "version": {
+      "type": "integer",
+      "default": "2.0"
+    },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "external_references": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ExternalReference"
+      }
+    },
+    "object_marking_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "granular_markings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/GranularMarking"
+      }
+    }
+  },
+  "required": [
+    "type",
+    "id",
+    "version",
+    "created",
+    "modified"
+  ]
+}

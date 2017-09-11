@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "X Unfetter Control Assessment",
+  "allOf": [
+    {
+      "$ref": "#/definitions/CommonProperties"
+    },
+    {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "x-unfetter-control-assessment"
+          ]
+        },
+        "course_of_action_id":{
+            "type": "string",
+            "pattern": "^[a-z][a-z-]+[a-z]--[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "group_coa_id":{
+          "type": "string",
+          "pattern": "^[a-z][a-z-]+[a-z]--[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+       
+        "risk":{
+          "type": "number"
+        },
+        "measurements":{
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Question"     
+        
+          }
+        }
+      }
+    }
+  ]
+}

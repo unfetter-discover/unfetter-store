@@ -1,0 +1,8 @@
+{
+  "repository": {
+    "connector": "mongodb",
+    "database": "stix",
+    "host": "localhost",
+    "port": 27017
+  }
+}

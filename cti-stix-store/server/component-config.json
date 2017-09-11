@@ -1,0 +1,23 @@
+{
+  "loopback-component-jsonapi": {
+    "restApiRoot": "/cti-stix-store-api"
+  },
+  "loopback-component-explorer": {
+    "mountPath": "/cti-stix-store-api/specifications",
+    "version": "0.2.1",
+    "apiInfo": {
+      "title": "Structured Threat Information eXpression Store Services",
+      "description": "Cyber Threat Intelligence Store Services for Structured Threat Information eXpression 2.0",
+      "license": {
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+      }
+    },
+    "consumes": [
+      "application/vnd.api+json"
+    ],
+    "produces": [
+      "application/vnd.api+json"
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Campaign",
+  "allOf": [
+    {
+      "$ref": "#/definitions/CommonProperties"
+    },
+    {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "campaign"
+          ]
+        },
+      "aliases": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "first_seen": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "objective": {
+            "type": "string"
+        },
+			  "timestamp_precision": {
+				  "type": "string",
+				  "enum": ["year", "month", "day", "hour", "minute", "full"]
+			  }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  ]
+}

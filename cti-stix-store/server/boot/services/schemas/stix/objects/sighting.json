@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Sighting",
+  "allOf": [
+    {
+      "$ref": "#/definitions/CommonProperties"
+    },
+    {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "sighting"
+          ]
+        },
+        "first_seen": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "firstseen_precision": {
+            "type": "string",
+            "enum": ["year", "month", "day", "hour", "minute", "full"]
+        },
+        "last_seen": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "lastseen_precision": {
+            "type": "string",
+            "enum": ["year", "month", "day", "hour", "minute", "full"]
+        },
+        "count": {
+          "type": "number"
+        },
+        "sighting_of_ref": {
+          "type": "string",
+          "pattern": "^[a-z][a-z-]+[a-z]--[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "observed_data_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z-]+[a-z]--[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "where_sighted_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z-]+[a-z]--[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },     
+        "summary": {
+            "type": "string"
+        }                      
+      },
+      "required": [
+        "sighting_of_ref"
+      ]
+    }
+  ]
+}
+

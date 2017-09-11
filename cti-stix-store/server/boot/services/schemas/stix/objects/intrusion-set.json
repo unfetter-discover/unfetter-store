@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Intrusion Set",
+  "allOf": [
+    {
+      "$ref": "#/definitions/CommonProperties"
+    },
+    {
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "intrusion-set"
+          ]
+        },
+      "aliases": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "first_seen": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "last_seen": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "goals": {
+            "type": "string"
+        },
+        "resource_level": {
+            "type": "string"
+        },
+        "primary_motivation": {
+            "type": "string"
+        },
+        "secondary_motivation": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },        
+        "objective": {
+            "type": "string"
+        },
+			  "timestamp_precision": {
+				  "type": "string",
+				  "enum": ["year", "month", "day", "hour", "minute", "full"]
+			  }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  ]
+}

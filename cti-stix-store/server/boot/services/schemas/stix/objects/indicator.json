@@ -1,0 +1,50 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Indicator",
+    "allOf": [{
+            "$ref": "#/definitions/CommonProperties"
+        },
+        {
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "indicator"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "pattern_lang": {
+                    "type": "string"
+                },
+                "pattern_lang_version": {
+                    "type": "string"
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "valid_from": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "valid_until": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "kill_chain_phases": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/KillChainPhase"
+                    }
+                }
+            },
+            "required": [
+                "name"
+            ]
+        }
+    ]
+}
