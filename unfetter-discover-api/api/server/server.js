@@ -1,11 +1,15 @@
 const app = require('../../app');
-const http = require('http');
+const spdy = require('spdy');
 const mongoinit = require('./mongoinit.js')();
+const fs = require('fs');
 
 const port = process.env.PORT || '3000';
 app.set('port', port);
 
-const server = http.createServer(app);
+const server = spdy.createServer({
+  key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
+  cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
+}, app);
 
 server.listen(port);
 server.on('error', onError);
