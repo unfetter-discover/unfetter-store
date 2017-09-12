@@ -20,7 +20,6 @@
     "node-fetch": "^1.6.3",
     "randomcolor": "^0.5.3",
     "should": "^7.1.0",
-    "spdy": "^3.4.7",
     "supertest": "^3.0.0",
     "swagger-express-mw": "^0.1.0",
     "swagger-tools": "0.10.1",
