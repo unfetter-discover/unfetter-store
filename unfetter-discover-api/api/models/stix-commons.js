@@ -73,10 +73,10 @@ stixCommons['baseStix'] = {
     },
     revoked: Boolean,
     version: String,
-    labels: Array,
-    external_references: Array,
-    object_marking_refs: Array,
-    granular_markings: [stixCommons['granular_markings']],
+    labels: { type: Array, default: void 0 },
+    external_references: { type: Array, default: void 0 },
+    object_marking_refs: { type: Array, default: void 0 },
+    granular_markings: { type: [stixCommons['granular_markings']], default: void 0},
 };
 
 stixCommons['makeSchema'] = childSchema => {
