@@ -1,21 +1,18 @@
-FROM mhart/alpine-node:7.10.1
+FROM node:8.4.0-alpine
 
 MAINTAINER "unfetter"
 LABEL Description="Node program that loads STIX data into MongoDB"
 
-ENV MONGO_URL "repository"
+ENV WORKING_DIRECTORY /usr/src/app
 
-ENV WORKING_DIRECTORY $PWD
-ENV EXAMPLES_DIRECTORY $WORKING_DIRECTORY/examples
-ENV BUNDLES_DIRECTORY $EXAMPLES_DIRECTORY/mitre-attack-cis
+RUN mkdir -p $WORKING_DIRECTORY
+WORKDIR $WORKING_DIRECTORY
+ADD . $WORKING_DIRECTORY
 
-USER root
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-COPY processor.js /usr/src/app
-COPY package.json /usr/src/app
-COPY . /usr/src/app
+RUN apk update
 
 RUN npm install
-CMD ["node","/usr/src/app/processor.js","-m", "true", "-h", $MONGO_URL]
-
+RUN find / -name "cb-never*.tgz" -delete && \
+    rm -rf /usr/share/man && \
+    rm -rf /tmp/* && \
+    rm -rf /var/cache/apk/*

@@ -3,7 +3,8 @@
 // The maximum amount of tries mongo will attempt to connect
 const MAX_NUM_CONNECT_ATTEMPTS = 10;
 // The amount of time between each connection attempt in ms
-const CONNECTION_RETRY_TIME = 5000;
+// TODO change back to 5000
+const CONNECTION_RETRY_TIME = 200;
 const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/ATTACK/mitre-attack.json';
 
 /* ~~~ Vendor Libraries ~~~ */
@@ -12,14 +13,15 @@ const argv = require('yargs')
 
     .alias('h', 'host')
     .describe('h', 'Host name and/or IP address for MongoDB')
+    .default('h', process.env.MONGO_HOST || 'localhost')
 
     .alias('d', 'database')
     .describe('d', 'Database for MongoDB')
-    .default('d', 'stix')
+    .default('d', process.env.MONGO_DB || 'stix')
 
     .alias('p', 'port')
     .describe('p', 'Port for MongoDB')
-    .default('p', 27017)
+    .default('p', process.env.MONGO_PORT || 27017)
 
     .alias('s', 'stix')
     .describe('s', 'File paths for STIX bundles (0 to n)')
