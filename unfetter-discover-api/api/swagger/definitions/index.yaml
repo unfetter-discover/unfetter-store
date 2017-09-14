@@ -348,3 +348,10 @@ XUnfetterSensor:
 
 DashboardsIntrusionSetViewJsonApi:
   $ref: ./dashboards/intrusion_set_view_json_api.yaml
+
+ConfigJsonApi:
+  type: object  
+ConfigCreateUpdate:
+  type: object
+ConfigJsonApiSingleItem:
+  type: object

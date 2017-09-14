@@ -19,6 +19,7 @@ mongooseModel['x-unfetter-assessment'] = require('../../models/x-unfetter-assess
 mongooseModel['x-unfetter-control-assessment'] = require('../../models/x-unfetter-control-assessment');
 mongooseModel['x-unfetter-sensor'] = require('../../models/x-unfetter-sensor');
 mongooseModel['schemaless'] = require('../../models/schemaless');
+mongooseModel['config'] = require('../../models/config');
 
 module.exports = {
     getModel: (type) => {
