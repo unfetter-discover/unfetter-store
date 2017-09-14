@@ -1,12 +1,19 @@
 import { Ctf } from './models/ctf';
 import { KillChainPhase } from './models/kill-chain-phase';
 import { Stix } from './models/stix';
+import { StixLookupService } from './services/stix-lookup.service';
 
 /**
  * @description
  *  Mapping keys from ctf datamodel to stix
  */
 export class CtfAdapter {
+
+    private stixLookupService: StixLookupService;
+
+    constructor() {
+        this.stixLookupService = new StixLookupService();
+    }
 
     public convertCtfToStix(ctfArray: Ctf[]): Stix[] {
         // "stix" : {
@@ -97,5 +104,20 @@ export class CtfAdapter {
         stix.name = ctf.afaAction;
 
         return stix;
+    }
+
+    /**
+     *
+     * @param {string} name
+     * @throws {Error} if name is undefined or empty
+     */
+    private lookupAttackPattern(name: string = ''): string {
+        name = name ? name.trim() : '';
+        if (!name || name.length === 0) {
+            throw new Error('name parameter is empty or not defined!');
+        }
+
+        // this.stixLookupService.findAttackPatternByName(name)
+        throw new Error('not implemented');
     }
 }
