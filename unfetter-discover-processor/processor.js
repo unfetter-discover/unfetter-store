@@ -3,8 +3,7 @@
 // The maximum amount of tries mongo will attempt to connect
 const MAX_NUM_CONNECT_ATTEMPTS = 10;
 // The amount of time between each connection attempt in ms
-// TODO change back to 5000
-const CONNECTION_RETRY_TIME = 200;
+const CONNECTION_RETRY_TIME = 5000;
 const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/ATTACK/mitre-attack.json';
 
 /* ~~~ Vendor Libraries ~~~ */
@@ -139,7 +138,8 @@ mongoose.connection.on('connected', function (err) {
     // Config files
     if (argv.config !== undefined) {
         console.log('Processing the following configuration files: ', argv.config);
-        let configToUpload = filesToJson(argv.config);
+        let configToUpload = filesToJson(argv.config)
+            .reduce((prev, cur) => prev.concat(cur), []);
         promises.push(configModel.create(configToUpload));
     } 
 
@@ -180,5 +180,3 @@ let conIntervel = setInterval(() => {
     connAttempts++;
     conn = mongoose.connect(`mongodb://${argv['host']}:${argv['port']}/${argv['database']}`);
 }, CONNECTION_RETRY_TIME);
-
-console.dir(argv);
