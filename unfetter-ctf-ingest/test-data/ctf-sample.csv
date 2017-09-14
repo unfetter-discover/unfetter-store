@@ -1,0 +1,33 @@
+Report Id,Title,Source Type,ALA Stage,AFA Objective,AFA Action,Description,Action Paragraph,Action Classification,Report Classification,Report DTG,Declassification,ALA,AMA,AFA,AUTHOR,ADDED DTG,QC AUTHOR,QC DTG
+https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/rpt-poison-ivy.pdf,"POISON IVY:
+Assessing Damage and
+Extracting Intelligence",open source,Stage 1: Preparation,Planning,Scanning,Poison Ivy remote access tool,"The attacker used injected JavaScript on
+the compromised websites to redirect targets to
+an Internet Explorer exploit that dropped Stage 1
+launcher/downloader mobile code. This
+downloader then retrieved and installed a PIVY
+RAT variant.",,,2014,,,,,Author1,2015,Editor2,11-1-15
+https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/rpt-poison-ivy.pdf,"POISON IVY:
+Assessing Damage and
+Extracting Intelligence",open source,Stage 1: Preparation,Research,Scanning,Poison Ivy remote access tool,"The attacker used injected JavaScript on
+the compromised websites to redirect targets to
+an Internet Explorer exploit that dropped Stage 1
+launcher/downloader mobile code. This
+downloader then retrieved and installed a PIVY
+RAT variant.",,,2014,,,,,Author1,2015,Editor2,11-1-15
+https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/rpt-poison-ivy.pdf,"POISON IVY:
+Assessing Damage and
+Extracting Intelligence",open source,Stage 1: Preparation,Develop resource,Analyze,Poison Ivy remote access tool,"The attacker used injected JavaScript on
+the compromised websites to redirect targets to
+an Internet Explorer exploit that dropped Stage 1
+launcher/downloader mobile code. This
+downloader then retrieved and installed a PIVY
+RAT variant.",,,2014,,,,,Author1,2015,Editor2,11-1-15
+https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/rpt-poison-ivy.pdf,"POISON IVY:
+Assessing Damage and
+Extracting Intelligence",open source,Stage 1: Engagement,Deploy capability,Spear fishing,Poison Ivy remote access tool,"The attacker used injected JavaScript on
+the compromised websites to redirect targets to
+an Internet Explorer exploit that dropped Stage 1
+launcher/downloader mobile code. This
+downloader then retrieved and installed a PIVY
+RAT variant.",,,2014,,,,,Author1,2015,Editor2,11-1-15
