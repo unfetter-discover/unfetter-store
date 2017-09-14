@@ -2,6 +2,7 @@ const BaseController = require('./shared/basecontroller');
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
 const jsonApiConverter = require('../helpers/json_api_converter');
+const uuid = require('uuid');
 
 const model = modelFactory.getModel('config');
 const controller = new BaseController('config');
@@ -50,6 +51,9 @@ module.exports = {
             const data = req.swagger.params.data.value.data;
             // TODO need to put this in a get/try in case these values don't exist
             obj = data.attributes;
+            if(obj._id === undefined) {
+                obj._id = uuid.v4();
+            }
             const newDocument = new model(obj);
 
             const error = newDocument.validateSync();
