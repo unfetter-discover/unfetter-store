@@ -1,185 +1,184 @@
-const JSONAPISerializer = require('jsonapi-serializer').Serializer;
+/* ~~~ Program Constants ~~~ */
 
-/* eslint no-console: 'off' */
+// The maximum amount of tries mongo will attempt to connect
+const MAX_NUM_CONNECT_ATTEMPTS = 10;
+// The amount of time between each connection attempt in ms
+// TODO change back to 5000
+const CONNECTION_RETRY_TIME = 200;
+const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/ATTACK/mitre-attack.json';
+
+/* ~~~ Vendor Libraries ~~~ */
+
+const argv = require('yargs')
+
+    .alias('h', 'host')
+    .describe('h', 'Host name and/or IP address for MongoDB')
+    .default('h', process.env.MONGO_HOST || 'localhost')
+
+    .alias('d', 'database')
+    .describe('d', 'Database for MongoDB')
+    .default('d', process.env.MONGO_DB || 'stix')
+
+    .alias('p', 'port')
+    .describe('p', 'Port for MongoDB')
+    .default('p', process.env.MONGO_PORT || 27017)
+
+    .alias('s', 'stix')
+    .describe('s', 'File paths for STIX bundles (0 to n)')
+    .array('s')
+
+    .alias('e', 'enhanced-stix-properties')
+    .describe('e', 'File paths for enhanced STIX properties bundles (0 to n).  Must map to a an existing STIX id')
+    .array('e')
+
+    .alias('c', 'config')
+    .describe('c', 'File paths for configuration files (0 to n)')
+    .array('c')
+
+    .alias('m', 'add-mitre-data')
+    .describe('m', 'Option to uploaded STIX data from Mite\'s github')    
+    .boolean('m')
+
+    .help('help')
+    .argv;
 const fs = require('fs');
-const http = require('http');
-const process = require('process');
+const mongoose = require('mongoose');
+const fetch = require('node-fetch');
 
-let port = 3000;
-if (process.argv.indexOf('-p') !== -1) {
-  port = process.argv[process.argv.indexOf('-p') + 1];
-}
-let host = 'cti-stix-store';
-if (process.argv.indexOf('-h') !== -1) {
-  host = process.argv[process.argv.indexOf('-h') + 1];
-}
+/* ~~~ Local Imports ~~~ */
 
-const stixContentType = 'application/vnd.api+json';
-const defaultOptions = {
-  host,
-  port,
-  path: '/cti-stix-store-api',
-  method: 'POST',
-  headers: {
-    Accept: stixContentType,
-    'Content-Type': stixContentType
-  }
-};
-
-/**
- * Post Records
- *
- * @param {Array} records Array of records for sending
- * @param {string} resourcePath Relative resource path to server
- */
-function postRecords(records, resourcePath, bundlestring) {
-
-  const options = Object.assign({}, defaultOptions);
-  options.path = `${options.path}/${resourcePath}`;
-
-  console.log(`Processing Started: Records [${records.length}] Type [${resourcePath}]`);
-  let created = 0;
-  let processed = 0;
-  let failed = 0;
-  const attributesList = [];
-
-  const isRelationship = resourcePath === 'relationships';
-
-  records.forEach((record) => {
-    // if it's a relationship, make sure the source_ref and target_ref exist         
-    if (isRelationship && (bundlestring.indexOf('"id":"' + record.source_ref + '"') == -1 || bundlestring.indexOf('"id":"' + record.target_ref + '"') == -1)) {
-      // no need to log it, just carry on...
-      return;
+const stixModel = mongoose.model('stix', new mongoose.Schema({
+    _id: String,
+    stix: {
+        created: Date,
+        modified: Date
     }
+}, { strict: false }), 'stix');
+const configModel = mongoose.model('config', new mongoose.Schema({
+    _id: String
+}, { strict: false }), 'config');
 
-    const has = Object.prototype.hasOwnProperty;
-    for (const propertyKey in record) {
-      if (has.call(record, propertyKey)) {
-        attributesList.push(propertyKey);
-      }
-    }
+/* ~~~ Utility Functions ~~~ */
 
-    const patternSerializer = new JSONAPISerializer(resourcePath, {
-      attributes: attributesList,
-      keyForAttribute: 'snake_case'
-    });
-    const recordSerialized = patternSerializer.serialize(record);
-
-    const request = http.request(options, (response) => {
-      processed += 1;
-      if (response.statusCode === 201) {
-        created += 1;
-      } else {
-        failed += 1;
-      }
-
-      if (processed === records.length) {
-        console.log(`Processing Completed: Records [${processed}] Created [${created}] Failed [${failed}] Type [${resourcePath}]`);
-      }
-    });
-
-    const string = JSON.stringify(recordSerialized);
-    request.write(string);
-
-    request.end();
-  });
-}
-
-/**
- * Read JSON from File Path
- *
- * @param {string} filePath Path of file for parsing
- * @returns {Object} Object parsed from File Path
- */
 function readJson(filePath) {
-  let json;
-
-  if (fs.existsSync(filePath)) {
-    const string = fs.readFileSync(filePath, 'utf-8');
-    json = JSON.parse(string);
-  } else {
-    console.log(`File Path [${filePath}] not found`);
-  }
-
-  return json;
-}
-
-/**
- * Process Bundles of Records
- *
- * @param {Object} bundles STIX Bundle Object
- */
-function processBundlesRecords(bundles) {
-  const bundlestring = JSON.stringify(bundles);
-  bundles.forEach((bundle) => {
-    console.log(`processing bundle id : ${bundle.id}`);
-
-    const records = bundle.objects;
-    const type = bundle.x_unfetter_resource_path;
-    if (records && type) {
-      console.log(`Found ${records.length} ${type} records.`);
-      postRecords(records, type, bundlestring);
-    }
-
-    if (bundle.custom_objects) {
-      if (bundle.custom_objects.length) {
-        const firstObject = bundle.custom_objects[0];
-        const resourcePath = `${firstObject.type}s`;
-        postRecords(bundle.custom_objects, resourcePath);
-      }
-    }
-  });
-}
-
-function run2() {
-  console.log(`Starting processor.js ${new Date().toString()}`);
-
-  if (process.argv.indexOf('-j') === -1) {
-    console.error('The -j argument is required');
-  } else {
-    let bundles = [];
-    for (let i = process.argv.indexOf('-j') + 1, len = process.argv.length; i < len; i += 1) {
-      if (i > 1) {
-        console.log(`Reading file ${process.argv[i]}`);
-        const contents = readJson(process.argv[i]);
-        if (Array.isArray(contents)) {
-          bundles = bundles.concat(contents);
-        } else {
-          bundles.push(contents);
-        }
-      }
-    }
-    processBundlesRecords(bundles);
-  }
-}
-
-function checkUrlExists(hostCheck, portCheck, pathCheck, cb) {
-  http.request({ method: 'HEAD', host: hostCheck, port: portCheck, path: pathCheck }, (r) => {
-    cb(null, r.statusCode > 200 && r.statusCode < 400);
-  }).on('error', cb).end();
-}
-
-function testConnectivity() {
-  console.log('Testing server connnectivity');
-  checkUrlExists(defaultOptions.host, defaultOptions.port, defaultOptions.path, (response) => {
-    if (response && response.code === 'ECONNREFUSED') {
-      const waitFor = 2;
-      console.log(`Connection not ready, will try again in ${waitFor.toString()} seconds.`);
-      setTimeout(testConnectivity, (waitFor * 1000));
+    let json;
+    if (fs.existsSync(filePath)) {
+        const string = fs.readFileSync(filePath, 'utf-8');
+        json = JSON.parse(string);
     } else {
-      run2();
+        console.log(`File Path [${filePath}] not found`);
     }
-  });
+    return json;
 }
 
-/**
- * Run processes files specified as arguments
- *
- */
-function run() {
-  console.log(`Waiting to run - ${new Date().toString()}`);
-  // wait 20 seconds to run the first time
-  setTimeout(testConnectivity, 20000);
+function filesToJson(filePaths) {
+    return filePaths
+        .map(filePath => readJson(filePath))
+        .filter(jsonObj => jsonObj);
 }
 
-run();
+function getMitreData() {
+    return new Promise((resolve, reject) => {
+        fetch(MITRE_STIX_URL)
+            .then(fetchRes => fetchRes.json())
+            .then(fetchRes => {
+                let stixToUpload = fetchRes.objects
+                    .map(stix => {
+                        let retVal = {};
+                        retVal._id = stix.id;
+                        retVal.stix = stix;
+                        return retVal;
+                    });
+                stixModel.create(stixToUpload, (err, mongoRes) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(mongoRes);
+                    }
+                });
+            })
+            .catch(err => reject(err));
+    })
+}
+
+/* ~~~ Driver ~~~ */
+
+let connAttempts = 0;
+let conn;
+let promises = [];
+// Wait for mongoose to connect before processing
+mongoose.connection.on('connected', function (err) {
+    console.log('connected to mongodb');
+    clearInterval(conIntervel);
+
+    // STIX files
+    if (argv['stix'] !== undefined) {
+        console.log('Processing the following STIX files: ', argv.stix);
+        let stixToUpload = filesToJson(argv.stix)
+            .map(bundle => bundle.objects)
+            .reduce((prev, cur) => prev.concat(cur), [])
+            .map(stix => {
+                let retVal = {};
+                retVal._id = stix.id;
+                retVal.stix = stix;
+                return retVal;
+            });
+        promises.push(stixModel.create(stixToUpload));
+    } 
+
+    // Enhanced stix files
+    if (argv.enhancedStixProperties !== undefined) {
+        console.log('Processing the following enhanced STIX properties files: ', argv.enhancedStixProperties);
+        if(promises.length) {
+            let stixArr = promises[0];
+            // TODO update STIX in STIX arr if they exist
+        }
+        // TODO find and update existing records in mongo
+    } 
+
+    // Config files
+    if (argv.config !== undefined) {
+        console.log('Processing the following configuration files: ', argv.config);
+        let configToUpload = filesToJson(argv.config);
+        promises.push(configModel.create(configToUpload));
+    } 
+
+    // Add mitre data
+    if (argv.addMitreData !== undefined && argv.addMitreData === true) {
+        console.log('Adding Mitre data');
+        promises.push(getMitreData());
+    }
+
+    if (promises !== undefined && promises.length) {
+        Promise.all(promises)
+            .then(results => {
+                console.log('Successfully executed all operations');
+                mongoose.connection.close(() => {
+                    console.log('closed mongo connection');
+                });
+            })
+            .catch(err => {
+                console.log('Error: ', err.message);
+                mongoose.connection.close(() => {
+                    console.log('closed mongo connection');
+                });
+            })
+    } else {
+        mongoose.connection.close(() => {
+            console.log('closed mongo connection');
+        });
+    }
+});
+mongoose.connection.on('error', function (err) {
+    console.log('Mongoose default connection error: ' + err);
+    if (connAttempts >= MAX_NUM_CONNECT_ATTEMPTS) {
+        clearInterval(conIntervel);
+        console.log('Maximum number of connection attempts exceeded. Terminating program.');
+    }
+});
+let conIntervel = setInterval(() => {
+    connAttempts++;
+    conn = mongoose.connect(`mongodb://${argv['host']}:${argv['port']}/${argv['database']}`);
+}, CONNECTION_RETRY_TIME);
+
+console.dir(argv);
