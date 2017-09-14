@@ -4,7 +4,7 @@
       type: string
     type:
       type: string
-      example: "identities"
+      example: "identity"
     attributes:
       $ref: "#/definitions/Identity"
     links:
