@@ -1,0 +1,32 @@
+x-swagger-router-controller: x_unfetter_assessments
+get:
+  tags:
+  - STIX-Unfetter Assessment
+  description: Returns the assessment Questions for a particular assessed object
+  operationId: getQuestionByAssessedObject
+  parameters:
+  - name: id
+    in: path
+    description: Model ID
+    type: string
+    required: true
+  - name: objectId
+    in: path
+    description: Model ID
+    type: string
+    required: true
+  produces: 
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/Question"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"

@@ -636,6 +636,67 @@ const summaryAggregations = (req, res) => {
   );
 };
 
+
+
+// Get the total Risk of a single Assessed Object of a certain Assessed Object
+const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
+  if (err) {
+    return res.status(500).json({
+      errors: [{
+        status: 500,
+        source: '',
+        title: 'Error',
+        code: '',
+        detail: 'An unknown error has occurred.'
+      }]
+    });
+  }
+  const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
+  let assessed_object = result[0].stix.assessment_objects.find(o => o.stix.id == objectId);
+  const returnObject = assessed_object.risk;
+  const requestedUrl = apiRoot + req.originalUrl;
+  res.header('Content-Type', 'application/json');
+  res.json({
+    data: returnObject,
+    links: {
+      self: requestedUrl,
+    },
+  });
+});
+
+// Get the total Risk of a single Assessed Object of a certain Assessed Object
+const getQuestionByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
+  if (err) {
+    return res.status(500).json({
+      errors: [{
+        status: 500,
+        source: '',
+        title: 'Error',
+        code: '',
+        detail: 'An unknown error has occurred.'
+      }]
+    });
+  }
+  console.log('aaaaaa');
+  const questionNumber = req.swagger.params.questionNumber ? req.swagger.params.questionNumber.value : 0;
+  const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
+  let assessed_object = result[0].stix.assessment_objects.find(o => o.stix.id == objectId);
+  console.log(assessed_object);
+  console.log(id);
+  console.log(objectId);
+  const returnObject = assessed_object.questions[questionNumber].selected_value;
+  console.log(returnObject);
+  const requestedUrl = apiRoot + req.originalUrl;
+  res.header('Content-Type', 'application/json');
+  res.json({
+    data: returnObject,
+    links: {
+      self: requestedUrl,
+    },
+  });
+});
+
+
 module.exports = {
   get: controller.get(),
   getById: controller.getById(),
@@ -647,4 +708,7 @@ module.exports = {
   riskPerKillChain,
   riskByAttackPatternAndKillChain,
   summaryAggregations,
+  getRiskByAssessedObject,
+  getQuestionByAssessedObject,
+  
 };

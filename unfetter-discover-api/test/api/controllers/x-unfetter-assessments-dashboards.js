@@ -43,7 +43,7 @@ const controllers = [{
                 },
                 "questions": [
                     {
-                        "selected_option": {
+                        "selected_value": {
                             "risk": 0.25,
                             "title": "0.25 test"
                         },
@@ -84,7 +84,7 @@ const controllers = [{
                 },
                 "questions": [
                     {
-                        "selected_option": {
+                        "selected_value": {
                             "risk": 0.25,
                             "title": "0.25 test"
                         },
@@ -125,7 +125,7 @@ const controllers = [{
                 },
                 "questions": [
                     {
-                        "selected_option": {
+                        "selected_value": {
                             "risk": 0.25,
                             "title": "0.25 test"
                         },
@@ -209,8 +209,27 @@ describe('x-unfetter-assessments specific routes', () => {
 
     describe('GET /x-unfetter-assessments/{id}/assessed-objects', () => {
         it('Returns arrays of objects assessed.', (done) => {
+            request(server)
+                .get(`/${controller.endpoint}/${controller.testId}/assessed-objects/`)
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    should.not.exist(err);
+                    should.equal(false, res.error, 'Error found');
+                    should.exist(res.body.data, 'No "data" found');
+                    should.equal(res.body.data.length, 3, 'Wrong number of assessed objects were returned.  Expected 3, received '+res.body.data.length);
+                    done();
+            });
+        });
+    });
+
+    describe('GET /x-unfetter-assessments/{id}/assessed-object-risk/{objectId}', () => {
+        it('Returns the Risk of an object.', (done) => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+            
         request(server)
-            .get(`/${controller.endpoint}/${controller.testId}/assessed-objects`)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)
             .expect(200)
@@ -218,11 +237,32 @@ describe('x-unfetter-assessments specific routes', () => {
                 should.not.exist(err);
                 should.equal(false, res.error, 'Error found');
                 should.exist(res.body.data, 'No "data" found');
-                should.equal(res.body.data.length, 3, 'Wrong number of assessed objects were returned.  Expected 3, received '+res.body.data.length);
+                should.equal(res.body.data, 0.25, 'Risk should be 0.25 rather than '+res.body.data);
                 done();
             });
         });
     });
+
+    describe('GET /x-unfetter-assessments/{id}/assessed-object-question/{objectId}', () => {
+        it('Returns the Question of an object.', (done) => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+            
+        request(server)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-question/${objectId}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.equal(res.body.data, 0.25, 'Risk should be 0.25 rather than '+res.body.data);
+                done();
+            });
+        });
+    });
+
+
 
     describe('GET /x-unfetter-assessments/{id}/risk', () => {
         it('Returns the risk for the entire assessment, and the risk per measurement.', (done) => {

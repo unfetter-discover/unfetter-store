@@ -1,8 +1,12 @@
 # ~~~ API Generalizations ~~~
 
 
-#Count:
-#  $ref: ./general/count.yaml
+Count:
+  $ref: ./general/count.yaml
+
+Risk:
+  $ref: ./general/risk.yaml
+
 
 Delete:
   $ref: ./general/delete.yaml
