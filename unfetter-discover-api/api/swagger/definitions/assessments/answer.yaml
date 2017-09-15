@@ -1,0 +1,7 @@
+  type: object
+  properties:
+    risk:
+      type: number
+    name: 
+      type: string
+  

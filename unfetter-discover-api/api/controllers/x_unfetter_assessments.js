@@ -665,7 +665,7 @@ const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id)
 });
 
 // Get the total Risk of a single Assessed Object of a certain Assessed Object
-const getQuestionByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
+const getAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
   if (err) {
     return res.status(500).json({
       errors: [{
@@ -677,15 +677,10 @@ const getQuestionByAssessedObject = controller.getByIdCb((err, result, req, res,
       }]
     });
   }
-  console.log('aaaaaa');
-  const questionNumber = req.swagger.params.questionNumber ? req.swagger.params.questionNumber.value : 0;
+  const questionNumber = req.swagger.params.question ? req.swagger.params.question.value : 0;
   const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
   let assessed_object = result[0].stix.assessment_objects.find(o => o.stix.id == objectId);
-  console.log(assessed_object);
-  console.log(id);
-  console.log(objectId);
   const returnObject = assessed_object.questions[questionNumber].selected_value;
-  console.log(returnObject);
   const requestedUrl = apiRoot + req.originalUrl;
   res.header('Content-Type', 'application/json');
   res.json({
@@ -695,7 +690,6 @@ const getQuestionByAssessedObject = controller.getByIdCb((err, result, req, res,
     },
   });
 });
-
 
 module.exports = {
   get: controller.get(),
@@ -709,6 +703,5 @@ module.exports = {
   riskByAttackPatternAndKillChain,
   summaryAggregations,
   getRiskByAssessedObject,
-  getQuestionByAssessedObject,
-  
+  getAnswerByAssessedObject,
 };

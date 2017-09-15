@@ -91,8 +91,9 @@
   $ref: ./x_unfetter_assessments/summary-aggregations.yaml
 /x-unfetter-assessments/{id}/assessed-object-risk/{objectId}:
   $ref: ./x_unfetter_assessments/assessment-object-risk.yaml
-/x-unfetter-assessments/{id}/assessed-object-question/{objectId}:
-  $ref: ./x_unfetter_assessments/assessment-object-question.yaml
+/x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}:
+  $ref: ./x_unfetter_assessments/assessment-object-answer.yaml
+
 /x-unfetter-control-assessments:
   $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessments.yaml
 /x-unfetter-control-assessments/{id}:

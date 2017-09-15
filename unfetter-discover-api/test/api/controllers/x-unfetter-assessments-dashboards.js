@@ -45,32 +45,32 @@ const controllers = [{
                     {
                         "selected_value": {
                             "risk": 0.25,
-                            "title": "0.25 test"
+                            "name": "0.25 test"
                         },
                         "options": [
                             {
                                 "risk": 1.0,
-                                "title": "1 test"
+                                "name": "1 test"
                             },
                             {
                                 "risk": 0.75,
-                                "title": "0.75 test"
+                                "name": "0.75 test"
                             },
                             {
                                 "risk": 0.5,
-                                "title": "0.50 test"
+                                "name": "0.50 test"
                             },
                             {
                                 "risk": 0.25,
-                                "title": "0.25 test"
+                                "name": "0.25 test"
                             },
                             {
                                 "risk": 0.0,
-                                "title": "0 test"
+                                "name": "0 test"
                             }
                         ],
                         "risk": 0.25,
-                        "title": "0.5 test"
+                        "name": "0.5 test"
                     }
                 ]
             },
@@ -86,7 +86,7 @@ const controllers = [{
                     {
                         "selected_value": {
                             "risk": 0.25,
-                            "title": "0.25 test"
+                            "name": "0.25 test"
                         },
                         "options": [
                             {
@@ -111,7 +111,7 @@ const controllers = [{
                             }
                         ],
                         "risk": 0.25,
-                        "title": "0.5 test"
+                        "name": "0.5 test"
                     }
                 ]
             },
@@ -127,32 +127,32 @@ const controllers = [{
                     {
                         "selected_value": {
                             "risk": 0.25,
-                            "title": "0.25 test"
+                            "name": "0.25 test"
                         },
                         "options": [
                             {
                                 "risk": 1.0,
-                                "title": "1 test"
+                                "name": "1 test"
                             },
                             {
                                 "risk": 0.75,
-                                "title": "0.75 test"
+                                "name": "0.75 test"
                             },
                             {
                                 "risk": 0.5,
-                                "title": "0.50 test"
+                                "name": "0.50 test"
                             },
                             {
                                 "risk": 0.25,
-                                "title": "0.25 test"
+                                "name": "0.25 test"
                             },
                             {
                                 "risk": 0.0,
-                                "title": "0 test"
+                                "name": "0 test"
                             }
                         ],
                         "risk": 0.25,
-                        "title": "0.5 test"
+                        "name": "0.5 test"
                     }
                 ]
             }
@@ -243,12 +243,12 @@ describe('x-unfetter-assessments specific routes', () => {
         });
     });
 
-    describe('GET /x-unfetter-assessments/{id}/assessed-object-question/{objectId}', () => {
-        it('Returns the Question of an object.', (done) => {
+    describe('GET /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}', () => {
+        it('Returns the Answer of a particular question of an object.', (done) => {
         let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
             
         request(server)
-            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-question/${objectId}`)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-answer/${objectId}/0`)
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)
             .expect(200)
@@ -256,7 +256,8 @@ describe('x-unfetter-assessments specific routes', () => {
                 should.not.exist(err);
                 should.equal(false, res.error, 'Error found');
                 should.exist(res.body.data, 'No "data" found');
-                should.equal(res.body.data, 0.25, 'Risk should be 0.25 rather than '+res.body.data);
+                should.exist(res.body.data.risk, 'No "risk" found');
+                should.exist(res.body.data.name, 'No "name" found');
                 done();
             });
         });

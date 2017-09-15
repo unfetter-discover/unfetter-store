@@ -37,6 +37,9 @@ GranularMarking:
 KillChainPhase:
   $ref: ./general/kill_chain_phase.yaml
 
+Answer:
+  $ref: ./general/answer.yaml
+
 Question:
   $ref: ./general/question.yaml
 

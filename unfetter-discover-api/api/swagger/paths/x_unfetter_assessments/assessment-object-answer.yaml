@@ -3,16 +3,21 @@ get:
   tags:
   - STIX-Unfetter Assessment
   description: Returns the assessment Questions for a particular assessed object
-  operationId: getQuestionByAssessedObject
+  operationId: getAnswerByAssessedObject
   parameters:
   - name: id
     in: path
-    description: Model ID
+    description: Assessment Id
     type: string
     required: true
   - name: objectId
     in: path
-    description: Model ID
+    description: ID of the assessed object
+    type: string
+    required: true
+  - name: question
+    in: path
+    description: The question id
     type: string
     required: true
   produces: 
@@ -21,7 +26,7 @@ get:
     "200":
       description: Success
       schema:
-        $ref: "#/definitions/Question"
+        $ref: "#/definitions/Answer"
     "404":
       description: Item Not Found
       schema:

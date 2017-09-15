@@ -1,11 +1,11 @@
   type: object
   properties:
-    selected_option:
+    selected_value:
       type: object
       properties:
         risk:
           type: number
-        title:
+        name:
           type: string
     options:
       type: array
@@ -14,9 +14,9 @@
         properties:
           risk:
             type: number
-          title:
+          name:
             type: string
     risk:
       type: number
-    title:
+    name:
       type: string            
