@@ -43,7 +43,7 @@ const controllers = [{
                 },
                 "questions": [
                     {
-                        "selected_option": {
+                        "selected_value": {
                             "risk": 0.25,
                             "title": "0.25 test"
                         },
@@ -84,7 +84,7 @@ const controllers = [{
                 },
                 "questions": [
                     {
-                        "selected_option": {
+                        "selected_value": {
                             "risk": 0.25,
                             "title": "0.25 test"
                         },
@@ -125,7 +125,7 @@ const controllers = [{
                 },
                 "questions": [
                     {
-                        "selected_option": {
+                        "selected_value": {
                             "risk": 0.25,
                             "title": "0.25 test"
                         },
