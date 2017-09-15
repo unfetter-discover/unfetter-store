@@ -15,7 +15,8 @@
         "variable-name": [
             true,
             "allow-snake-case"
-        ]
+        ],
+        "interface-name": false
     },
     "rulesDirectory": []
 }

@@ -4,22 +4,24 @@
   "description": "ingest cyber threat framework data into unfetter",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc src/*.ts --outDir dist/",
+    "build": "tsc -v && tsc -p . --outDir dist/",
     "build:watch": "npm run build -- --watch",
     "clean": "rimraf dist/",
-    "lint": "tslint src*.ts",
-    "ctf-ingest": "node  --experimental-modules dist/ctf-ingest-cli.js"
+    "lint": "tsc -v && tslint src*.ts",
+    "ctf-ingest": "node -v && node --experimental-modules dist/ctf-ingest-cli.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "camelcase": "^4.1.0",
+    "moment": "^2.18.1",
     "node-fetch": "^1.7.3",
     "papaparse": "^4.3.6",
     "yargs": "^8.0.2"
   },
   "devDependencies": {
     "@types/camelcase": "^4.1.0",
+    "@types/moment": "^2.13.0",
     "@types/node": "^8.0.28",
     "@types/node-fetch": "^1.6.7",
     "@types/papaparse": "^4.1.30",

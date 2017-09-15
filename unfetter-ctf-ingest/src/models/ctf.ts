@@ -18,7 +18,7 @@ export class Ctf {
     public addedDtg: any;
     public qcAuthor: any;
     public qcDtg: any;
-    
+
     public toJson(): string {
         return JSON.stringify(this, undefined, '\t');
     }
