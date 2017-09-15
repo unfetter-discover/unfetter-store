@@ -63,11 +63,26 @@ export class CtfToStixAdapter {
 
         if (ctf.actionClassification || ctf.reportClassification
             || ctf.declassification) {
-            const arr = [ctf.actionClassification,
+            const classifications = [ctf.actionClassification,
             ctf.reportClassification, ctf.declassification];
             stix.granular_markings = stix.granular_markings || [];
-            stix.granular_markings = stix.granular_markings
-                    .concat(arr).filter((el) => el.trim().length > 1);
+            const markings = await Promise.all(classifications
+                .filter((classif) => classif && classif.trim().length > 0)
+                .map((classif) => {
+                    return this.stixLookupService
+                        .findMarkingDefinitionByLabel(ctf.actionClassification);
+                }));
+            const markingRefs = markings
+                .reduce((memo, curMarkings) => memo.concat(...curMarkings), [])
+                .filter((el) => el.id)
+                .map((marking) => {
+                    return {
+                        marking_ref: marking.id,
+                        selectors: [ 'name', 'description', 'title', 'x_unfetter_object_actions' ],
+                    };
+                });
+            console.log('found markings', markings);
+            stix.granular_markings = [...stix.granular_markings, ...markingRefs];
         }
 
         if (ctf.addedDtg) {

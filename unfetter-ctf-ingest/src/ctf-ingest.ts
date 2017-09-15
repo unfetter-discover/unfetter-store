@@ -15,17 +15,29 @@ export class CtfIngest {
 
     public async ingestCsv(fileName: string = ''): Promise<void> {
         const stixToJson = new StixToJsonSchemaAdapter();
-
-        const stixies = await this.csvToStix(fileName);
-        const jsonArr = stixToJson.convertStixToJsonSchema(stixies);
-        console.log(`json data to post ${jsonArr}`);
-        jsonArr.forEach((json) => {
-            console.log(json.toJson());
-        });
-        // post to reports endpoint
-        const unfetterPoster = new UnfetterPosterService();
-        const results  = await unfetterPoster.uploadJsonSchema(jsonArr);
-        console.log(results);
+        try {
+            const stixies = await this.csvToStix(fileName);
+            const jsonArr = stixToJson.convertStixToJsonSchema(stixies);
+            console.log(`json data to post ${jsonArr}`);
+            jsonArr.forEach((json) => {
+                console.log(json.toJson());
+            });
+            // post to reports endpoint
+            const unfetterPoster = new UnfetterPosterService();
+            const results  = await unfetterPoster.uploadJsonSchema(jsonArr);
+            console.log(`results ${results.length}`);
+            if (results) {
+                results.forEach((result) => {
+                    console.log(result);
+                    const r = result.results || result.errors;
+                    if (r) {
+                        console.log(JSON.stringify(r, undefined, '\t'));
+                    }
+                });
+            }
+        } catch (e) {
+            console.log(e);
+        }
         return Promise.resolve();
     }
 
@@ -41,7 +53,6 @@ export class CtfIngest {
 
         if (stixies && stixies.length > 1) {
             console.log(`generated ${stixies.length} stix objects.`);
-            // console.log(stixies[0].toJson());
             // stixies.forEach((el) => console.log(el.toJson()));
         }
         return Promise.resolve(stixies);

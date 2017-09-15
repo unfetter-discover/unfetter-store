@@ -15,11 +15,15 @@ export class Stix {
     public created: string;
     public modified: string;
     public created_by_ref: string;
-    public granular_markings: string[];
+    public granular_markings: GranularMarking[];
     public x_unfetter_object_actions: string[];
 
     public toJson(): string {
         return JSON.stringify(this, undefined, '\t');
     }
 
+}
+
+export interface GranularMarking {
+    marking_ref: string;
 }

@@ -27,14 +27,14 @@ export class UnfetterPosterService {
                 method: 'POST',
                 body,
             })
-            .then((res) => {
-                return res.json();
-            });
-    });
+                .then((res) => {
+                    return res.json();
+                });
+        });
         return Promise.all(promises);
     }
 
-    protected genHeaders(): {[key: string]: string} {
-        return { 'content-type': 'application/vnd.api+json' };
+    protected genHeaders(): { [key: string]: string } {
+        return { 'content-type': 'application/json' };
     }
 }
