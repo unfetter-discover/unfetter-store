@@ -6,9 +6,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -v && tsc -p . --outDir dist/",
     "build:watch": "npm run build -- --watch",
-    "clean": "rimraf dist/",
+    "clean": "rimraf dist/ tsdocs/",
     "lint": "tsc -v && tslint src*.ts",
-    "ctf-ingest": "node -v && node --experimental-modules dist/ctf-ingest-cli.js"
+    "ctf-ingest": "node -v && node --experimental-modules dist/ctf-ingest-cli.js",
+    "docs": "typedoc --out tsdocs --ignoreCompilerErrors"
   },
   "author": "",
   "license": "ISC",
@@ -27,7 +28,9 @@
     "@types/papaparse": "^4.1.30",
     "@types/yargs": "^8.0.2",
     "rimraf": "^2.6.2",
+    "tsdoc": "0.0.4",
     "tslint": "^5.7.0",
+    "typedoc": "^0.8.0",
     "typescript": "^2.5.2"
   }
 }
