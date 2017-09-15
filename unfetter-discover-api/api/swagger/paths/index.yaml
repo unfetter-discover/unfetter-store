@@ -106,3 +106,8 @@
   $ref: ./dashboards/intrusion-set-view.yaml
 /downloadBundle:
   $ref: ./download-bundle.yaml
+
+/config:
+  $ref: ./config/config.yaml
+/config/{id}:
+  $ref: ./config/config_by_id.yaml
