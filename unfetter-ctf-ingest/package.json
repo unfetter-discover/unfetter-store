@@ -8,7 +8,7 @@
     "build:watch": "npm run build -- --watch",
     "clean": "rimraf dist/ tsdocs/",
     "lint": "tsc -v && tslint src*.ts",
-    "ctf-ingest": "node -v && node --experimental-modules dist/ctf-ingest-cli.js",
+    "ctf-ingest": "node -v && node dist/ctf-ingest-cli.js",
     "docs": "typedoc --out tsdocs --ignoreCompilerErrors"
   },
   "author": "",
