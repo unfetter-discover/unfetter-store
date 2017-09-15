@@ -122,18 +122,36 @@ mongoose.connection.on('connected', function (err) {
                 retVal.stix = stix;
                 return retVal;
             });
-        promises.push(stixModel.create(stixToUpload));
-    } 
 
-    // Enhanced stix files
-    if (argv.enhancedStixProperties !== undefined) {
-        console.log('Processing the following enhanced STIX properties files: ', argv.enhancedStixProperties);
-        if(promises.length) {
-            let stixArr = promises[0];
-            // TODO update STIX in STIX arr if they exist
-        }
-        // TODO find and update existing records in mongo
-    } 
+        // Enhanced stix files
+        if (argv.enhancedStixProperties !== undefined) {
+            console.log('Processing the following enhanced STIX properties files: ', argv.enhancedStixProperties);
+            let enhancedPropsToUpload = filesToJson(argv.enhancedStixProperties)
+                .reduce((prev, cur) => prev.concat(cur), []);
+
+            enhancedPropsToUpload.forEach(enhancedProps => {
+                let stixToEnhance = stixToUpload.find(stix => stix._id === enhancedProps.id);
+                if (stixToEnhance) {
+                    if (enhancedProps.extendedProperties !== undefined) {
+                        stixToEnhance.extendedProperties = enhancedProps.extendedProperties;
+                    }
+
+                    if (enhancedProps.metaProperties !== undefined) {
+                        stixToEnhance.metaProperties = enhancedProps.metaProperties;
+                    }
+                } else {
+                    // TODO attempt to upload to database if not in processed STIX document
+                    console.log('STIX property enhancement failed - Unable to find matching stix for: ', enhancedProps._id);
+                }
+            }); 
+        } 
+        promises.push(stixModel.create(stixToUpload));
+        
+    } else if (argv.enhancedStixProperties !== undefined) {
+        // TODO attempt to upload to database if not STIX document provided
+        console.log('Enhanced STIX files require a base STIX file');
+    }
+    
 
     // Config files
     if (argv.config !== undefined) {
@@ -161,19 +179,22 @@ mongoose.connection.on('connected', function (err) {
                 console.log('Error: ', err.message);
                 mongoose.connection.close(() => {
                     console.log('closed mongo connection');
+                    process.exit(1);
                 });
             })
     } else {
+        console.log('There are no operations to perform');
         mongoose.connection.close(() => {
             console.log('closed mongo connection');
         });
     }
 });
 mongoose.connection.on('error', function (err) {
-    console.log('Mongoose default connection error: ' + err);
+    console.log('Mongoose connection error: ' + err);
     if (connAttempts >= MAX_NUM_CONNECT_ATTEMPTS) {
         clearInterval(conIntervel);
         console.log('Maximum number of connection attempts exceeded. Terminating program.');
+        process.exit(1);
     }
 });
 let conIntervel = setInterval(() => {
