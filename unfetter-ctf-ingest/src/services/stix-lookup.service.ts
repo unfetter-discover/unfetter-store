@@ -25,7 +25,7 @@ export class StixLookupService {
      */
     public findAttackPatternByName(name: string): Promise<AttackPattern[]> {
         if (!name) {
-            Promise.resolve('');
+            Promise.resolve([]);
         }
 
         const filter = JSON.stringify({
@@ -72,7 +72,7 @@ export class StixLookupService {
      */
     public findMarkingDefinitionByLabel(label: string): Promise<MarkingDefinition[]> {
         if (!label) {
-            Promise.resolve('');
+            Promise.resolve([]);
         }
 
         const filter = JSON.stringify({

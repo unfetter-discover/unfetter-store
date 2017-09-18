@@ -10,14 +10,18 @@ import { StixLookupService } from './services/stix-lookup.service';
  */
 export class CtfToStixAdapter {
 
-    private stixLookupService: StixLookupService;
+    protected stixLookupService: StixLookupService;
 
     constructor() {
         this.stixLookupService = new StixLookupService();
     }
 
+    public setStixLookupService(service: StixLookupService): void {
+        this.stixLookupService = service;
+    }
+
     public async convertCtfToStix(ctfArray: Ctf[]): Promise<Stix[]> {
-        const stixies = ctfArray.map(async (ctf) => await this.mapCtfToStix(ctf));
+        const stixies = ctfArray.map((ctf) => this.mapCtfToStix(ctf));
         return Promise.all(stixies);
     }
 

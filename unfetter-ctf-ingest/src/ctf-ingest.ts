@@ -5,7 +5,7 @@ import * as Papa from 'papaparse';
 import { CtfToStixAdapter } from './ctf-to-stix-adapter';
 import { Ctf } from './models/ctf';
 import { Stix } from './models/stix';
-import { UnfetterPosterService } from './services/unfetter-poster-service';
+import { UnfetterPosterService } from './services/unfetter-poster.service';
 import { StixToJsonSchemaAdapter } from './stix-to-jsonschema-adapter';
 
 /**

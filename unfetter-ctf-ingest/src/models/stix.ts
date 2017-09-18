@@ -1,3 +1,4 @@
+import { GranularMarking } from './granular-marking';
 import { KillChainPhase } from './kill-chain-phase';
 import { StixLabelEnum } from './stix-label.enum';
 
@@ -22,8 +23,4 @@ export class Stix {
         return JSON.stringify(this, undefined, '\t');
     }
 
-}
-
-export interface GranularMarking {
-    marking_ref: string;
 }
