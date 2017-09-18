@@ -31,14 +31,14 @@ function calculateRiskByQuestion(assessments) {
       total += currentQuestion.risk;
       count += 1;
       const foundQuestion = questions.find(function (object) {
-        return object.title === currentQuestion.title;
+        return object.name === currentQuestion.name;
       });
       if (foundQuestion) {
         foundQuestion.risk += currentQuestion.risk;
         foundQuestion.total += 1;
       } else {
         const riskObject = {};
-        riskObject.title = currentQuestion.title;
+        riskObject.name = currentQuestion.name;
         riskObject.risk = currentQuestion.risk;
         riskObject.total = 1;
         questions.push(riskObject);
@@ -691,6 +691,75 @@ const getAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, i
   });
 });
 
+
+// With a given assessmentID, and assessedObjectId, and a new answer value, go through the questions
+//   of that assessed object and give the new answers.  
+//   Recalculate the updated risks.
+//    Updates mongo with the new values
+
+const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
+  // If there was an error returning the assessment object, return error.
+  if (err) {
+    return res.status(500).json({
+      errors: [{
+        status: 500,
+        source: '',
+        title: 'Error',
+        code: '',
+        detail: 'An unknown error has occurred.'
+      }]
+    });
+  }
+  
+  //  The ObjectId is the assessed Object id.  Indicator, sensor or mitigations, more likely
+  const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
+  //  The answer is a value of the index of the answer to select for each question.  We assume
+  //  we are changing all the values back to the same answer.
+  const answer = req.swagger.params.data.attributes ? req.swagger.params.data.attributes.answer.value : 0;
+  
+  // answer should be an integer to represent an index value of the array of question options.
+  if ((answer >= 0)){
+    const assessment = result[0];
+    // The array of assessed objects
+    let assessed_object = result[0].stix.assessment_objects.find(o => o.stix.id == objectId);
+    
+    // go through and change the answer to each of these questions.
+    let risk = 0;
+    lodash.forEach(assessed_object.questions, (question) => {
+      if (answer <= question.options.length) {
+        question.selected_value = question.options[answer];
+        risk += question.selected_value.risk;
+        question.risk = question.selected_value.risk;
+      }
+    });
+    assessed_object.risk = risk/assessed_object.questions.length;
+    
+    // TODO : Need to now update the entire assessment
+
+    console.log(JSON.stringify(assessment, null, 4));
+    const returnObject = assessed_object.questions[0].selected_value;
+    const requestedUrl = apiRoot + req.originalUrl;
+    res.header('Content-Type', 'application/json');
+    res.json({
+      data: returnObject,
+      links: {
+        self: requestedUrl,
+      },
+    });
+  } else {
+
+    return res.status(404).json({
+      errors: [{
+        status: 404,
+        source: '',
+        title: 'Error',
+        code: '',
+        detail: 'Answer was not valid for this system.'
+      }]
+    });
+  }
+});
+    
 module.exports = {
   get: controller.get(),
   getById: controller.getById(),
@@ -704,4 +773,5 @@ module.exports = {
   summaryAggregations,
   getRiskByAssessedObject,
   getAnswerByAssessedObject,
+  updateAnswerByAssessedObject,
 };

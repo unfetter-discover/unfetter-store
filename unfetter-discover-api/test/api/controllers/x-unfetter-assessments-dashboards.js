@@ -75,7 +75,7 @@ const controllers = [{
                 ]
             },
             {
-                "risk": 0.5,
+                "risk": 0.25,
                 "stix": {
                     "id": "indicator--0fb3bf0b-f3a4-4c75-bc34-492a7433f33b",
                     "type": "indicator",
@@ -224,6 +224,7 @@ describe('x-unfetter-assessments specific routes', () => {
         });
     });
 
+
     describe('GET /x-unfetter-assessments/{id}/assessed-object-risk/{objectId}', () => {
         it('Returns the Risk of an object.', (done) => {
         let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
@@ -237,12 +238,11 @@ describe('x-unfetter-assessments specific routes', () => {
                 should.not.exist(err);
                 should.equal(false, res.error, 'Error found');
                 should.exist(res.body.data, 'No "data" found');
-                should.equal(res.body.data, 0.25, 'Risk should be 0.25 rather than '+res.body.data);
+                should.equal(res.body.data, 1, 'Risk should have been updated to 1 in the previous test '+res.body.data);
                 done();
             });
         });
     });
-
     describe('GET /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}', () => {
         it('Returns the Answer of a particular question of an object.', (done) => {
         let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
@@ -263,6 +263,48 @@ describe('x-unfetter-assessments specific routes', () => {
         });
     });
 
+    describe('GET /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}', () => {
+        it('Returns the Risk of an object.', (done) => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+            
+        request(server)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.equal(res.body.data, 0.25, 'Risk should be 0.25 rather than '+res.body.data);
+                done();
+            });
+        });
+    });
+
+    // update
+    describe(`PATCH /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}`, () => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+        it(`should update a ${controller.endpoint}`, (done) => {
+            request(server)
+                .patch(`/${controller.endpoint}/${controller.testId}/assessed-object-answer/${objectId}`)
+                .send({
+                    data: {
+                        attributes: {
+                            risk: 1
+                        }
+                    }
+                })
+                .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
+                .expect(200)
+                .end((err, res) => {
+                    should.not.exist(err);
+                    should.equal(false, res.error, 'Error found');
+                    should.exist(res.body.data, `No ${controller.endpoint} updated`);
+                    done();
+                });
+        });
+    });
 
 
     describe('GET /x-unfetter-assessments/{id}/risk', () => {

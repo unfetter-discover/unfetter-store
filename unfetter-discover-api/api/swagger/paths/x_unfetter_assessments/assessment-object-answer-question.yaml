@@ -15,6 +15,11 @@ get:
     description: ID of the assessed object
     type: string
     required: true
+  - name: question
+    in: path
+    description: The question idb
+    type: string
+    required: true
   produces: 
   - application/json
   responses:
@@ -50,6 +55,11 @@ patch:
       description: Assessed Object ID
       type: string
       required: true
+    - name: question
+      in: path
+      description: The question idb
+      type: string
+      required: true      
     - name: data
       in: body
       description: The new answers
