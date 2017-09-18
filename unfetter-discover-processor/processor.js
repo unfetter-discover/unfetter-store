@@ -8,6 +8,9 @@ const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/ATTAC
 
 /* ~~~ Vendor Libraries ~~~ */
 
+const fs = require('fs');
+const mongoose = require('mongoose');
+const fetch = require('node-fetch');
 const argv = require('yargs')
 
     .alias('h', 'host')
@@ -35,14 +38,11 @@ const argv = require('yargs')
     .array('c')
 
     .alias('m', 'add-mitre-data')
-    .describe('m', 'Option to uploaded STIX data from Mite\'s github')    
+    .describe('m', 'Option to uploaded STIX data from Mite\'s github')
     .boolean('m')
 
     .help('help')
     .argv;
-const fs = require('fs');
-const mongoose = require('mongoose');
-const fetch = require('node-fetch');
 
 /* ~~~ Local Imports ~~~ */
 
@@ -143,15 +143,15 @@ mongoose.connection.on('connected', function (err) {
                     // TODO attempt to upload to database if not in processed STIX document
                     console.log('STIX property enhancement failed - Unable to find matching stix for: ', enhancedProps._id);
                 }
-            }); 
-        } 
+            });
+        }
         promises.push(stixModel.create(stixToUpload));
-        
+
     } else if (argv.enhancedStixProperties !== undefined) {
         // TODO attempt to upload to database if not STIX document provided
         console.log('Enhanced STIX files require a base STIX file');
     }
-    
+
 
     // Config files
     if (argv.config !== undefined) {
@@ -159,7 +159,7 @@ mongoose.connection.on('connected', function (err) {
         let configToUpload = filesToJson(argv.config)
             .reduce((prev, cur) => prev.concat(cur), []);
         promises.push(configModel.create(configToUpload));
-    } 
+    }
 
     // Add mitre data
     if (argv.addMitreData !== undefined && argv.addMitreData === true) {
