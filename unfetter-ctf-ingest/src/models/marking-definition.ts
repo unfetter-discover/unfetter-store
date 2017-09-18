@@ -1,7 +1,7 @@
 export class MarkingDefinition {
     public definition_type: string;
-    public definition: { rating: number, label: string };
+    public definition = {} as { rating: number, label: string };
     public created: Date;
-    public type: string;
+    public readonly type = 'marking­-definition';
     public id: string;
 }

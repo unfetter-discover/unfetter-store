@@ -1,5 +1,5 @@
 export class AttackPattern {
-    public type: string;
+    public readonly type = 'attack-pattern';
     public id: string;
-    public attributes: {[key: string]: string};
+    public attributes = { } as {[key: string]: string};
 }
