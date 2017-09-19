@@ -16,7 +16,8 @@
             true,
             "allow-snake-case"
         ],
-        "interface-name": false
+        "interface-name": false,
+        "no-string-literal": false
     },
     "rulesDirectory": []
 }

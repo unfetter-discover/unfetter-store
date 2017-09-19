@@ -1,5 +1,6 @@
 import * as https from 'https';
 import fetch from 'node-fetch';
+import { Environment } from '../environment';
 import { AttackPattern } from '../models/attack-pattern';
 import { MarkingDefinition } from '../models/marking-definition';
 
@@ -9,12 +10,14 @@ import { MarkingDefinition } from '../models/marking-definition';
  */
 export class StixLookupService {
 
-    protected static readonly apiUrl = `https://localhost/api`;
-    protected static readonly attackPatternPath = `/attack-patterns`;
-    protected static readonly markingDefinitionsPath = `/marking-definitions`;
+    protected readonly attackPatternPath = `attack-patterns`;
+    protected readonly markingDefinitionsPath = `marking-definitions`;
+    protected readonly apiUrl: string;
+
     constructor() {
         // fix the self signed cert error
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+        this.apiUrl = `https://${Environment.apiHost}:${Environment.apiPort}${Environment.context}`;
     }
 
     /**
@@ -43,7 +46,7 @@ export class StixLookupService {
         //     }})
 
         const queryParams = `filter=${encodeURIComponent(filter)}`;
-        const url = `${StixLookupService.apiUrl}${StixLookupService.attackPatternPath}?${queryParams}`;
+        const url = `${this.apiUrl}${this.attackPatternPath}?${queryParams}`;
         const resp = fetch(url)
             .then((res) => {
                 // console.log(res.headers.get('content-type'));
@@ -80,7 +83,7 @@ export class StixLookupService {
         });
 
         const queryParams = `filter=${encodeURIComponent(filter)}`;
-        const url = `${StixLookupService.apiUrl}${StixLookupService.markingDefinitionsPath}?${queryParams}`;
+        const url = `${this.apiUrl}${this.markingDefinitionsPath}?${queryParams}`;
         const resp = fetch(url)
             .then((res) => {
                 const result = res.json().then((json) => {
