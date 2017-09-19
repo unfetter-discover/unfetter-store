@@ -45,37 +45,37 @@ const controllers = [{
                     {
                         "selected_value": {
                             "risk": 0.25,
-                            "title": "0.25 test"
+                            "name": "0.25 test"
                         },
                         "options": [
                             {
                                 "risk": 1.0,
-                                "title": "1 test"
+                                "name": "1 test"
                             },
                             {
                                 "risk": 0.75,
-                                "title": "0.75 test"
+                                "name": "0.75 test"
                             },
                             {
                                 "risk": 0.5,
-                                "title": "0.50 test"
+                                "name": "0.50 test"
                             },
                             {
                                 "risk": 0.25,
-                                "title": "0.25 test"
+                                "name": "0.25 test"
                             },
                             {
                                 "risk": 0.0,
-                                "title": "0 test"
+                                "name": "0 test"
                             }
                         ],
                         "risk": 0.25,
-                        "title": "0.5 test"
+                        "name": "0.5 test"
                     }
                 ]
             },
             {
-                "risk": 0.5,
+                "risk": 0.25,
                 "stix": {
                     "id": "indicator--0fb3bf0b-f3a4-4c75-bc34-492a7433f33b",
                     "type": "indicator",
@@ -86,7 +86,7 @@ const controllers = [{
                     {
                         "selected_value": {
                             "risk": 0.25,
-                            "title": "0.25 test"
+                            "name": "0.25 test"
                         },
                         "options": [
                             {
@@ -111,7 +111,7 @@ const controllers = [{
                             }
                         ],
                         "risk": 0.25,
-                        "title": "0.5 test"
+                        "name": "0.5 test"
                     }
                 ]
             },
@@ -127,32 +127,32 @@ const controllers = [{
                     {
                         "selected_value": {
                             "risk": 0.25,
-                            "title": "0.25 test"
+                            "name": "0.25 test"
                         },
                         "options": [
                             {
                                 "risk": 1.0,
-                                "title": "1 test"
+                                "name": "1 test"
                             },
                             {
                                 "risk": 0.75,
-                                "title": "0.75 test"
+                                "name": "0.75 test"
                             },
                             {
                                 "risk": 0.5,
-                                "title": "0.50 test"
+                                "name": "0.50 test"
                             },
                             {
                                 "risk": 0.25,
-                                "title": "0.25 test"
+                                "name": "0.25 test"
                             },
                             {
                                 "risk": 0.0,
-                                "title": "0 test"
+                                "name": "0 test"
                             }
                         ],
                         "risk": 0.25,
-                        "title": "0.5 test"
+                        "name": "0.5 test"
                     }
                 ]
             }
@@ -209,8 +209,27 @@ describe('x-unfetter-assessments specific routes', () => {
 
     describe('GET /x-unfetter-assessments/{id}/assessed-objects', () => {
         it('Returns arrays of objects assessed.', (done) => {
+            request(server)
+                .get(`/${controller.endpoint}/${controller.testId}/assessed-objects/`)
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    should.not.exist(err);
+                    should.equal(false, res.error, 'Error found');
+                    should.exist(res.body.data, 'No "data" found');
+                    should.equal(res.body.data.length, 3, 'Wrong number of assessed objects were returned.  Expected 3, received '+res.body.data.length);
+                    done();
+            });
+        });
+    });
+
+    describe('GET /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}', () => {
+        it('Returns the Answer of a particular question of an object.', (done) => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+            
         request(server)
-            .get(`/${controller.endpoint}/${controller.testId}/assessed-objects`)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-answer/${objectId}/0`)
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)
             .expect(200)
@@ -218,11 +237,117 @@ describe('x-unfetter-assessments specific routes', () => {
                 should.not.exist(err);
                 should.equal(false, res.error, 'Error found');
                 should.exist(res.body.data, 'No "data" found');
-                should.equal(res.body.data.length, 3, 'Wrong number of assessed objects were returned.  Expected 3, received '+res.body.data.length);
+                should.exist(res.body.data.risk, 'No "risk" found');
+                should.exist(res.body.data.name, 'No "name" found');
                 done();
             });
         });
     });
+
+    describe('GET /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}', () => {
+        it('Returns the Risk of an object.', (done) => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+            
+        request(server)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.equal(res.body.data, 0.25, 'Risk should be 0.25 rather than '+res.body.data);
+                done();
+            });
+        });
+    });
+
+    // update
+    describe(`PATCH /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}`, () => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+        it(`should update a ${controller.endpoint}`, (done) => {
+            request(server)
+                .patch(`/${controller.endpoint}/${controller.testId}/assessed-object-answer/${objectId}`)
+                .send({
+                    data: {
+                        attributes: {
+                            answer: 1
+                        }
+                    }
+                })
+                .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
+                .expect(200)
+                .end((err, res) => {
+                    should.not.exist(err);
+                    should.equal(false, res.error, 'Error found');
+                    should.exist(res.body.data, `No ${controller.endpoint} updated`);
+                    done();
+                });
+        });
+    });
+    // Testing that the previous update worked
+    describe('GET /x-unfetter-assessments/{id}/assessed-object-risk/{objectId}', () => {
+        it('Returns the Risk of an object.', (done) => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+        request(server)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.equal(res.body.data, 0.75, 'Risk should have been updated to 0.75 in the previous test rather than '+res.body.data);
+                done();
+            });
+        });
+    });
+
+    // update
+    describe(`PATCH /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}`, () => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+        let questionIndex = 0;
+        it(`should update a ${controller.endpoint}`, (done) => {
+            request(server)
+                .patch(`/${controller.endpoint}/${controller.testId}/assessed-object-answer/${objectId}/${questionIndex}`)
+                .send({
+                    data: {
+                        attributes: {
+                            answer: 2
+                        }
+                    }
+                })
+                .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
+                .expect(200)
+                .end((err, res) => {
+                    should.not.exist(err);
+                    should.equal(false, res.error, 'Error found');
+                    should.exist(res.body.data, `No ${controller.endpoint} updated`);
+                    done();
+                });
+        });
+    });
+
+    describe('GET /x-unfetter-assessments/{id}/assessed-object-risk/{objectId}', () => {
+        it('Returns the Risk of an object.', (done) => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+        request(server)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.equal(res.body.data, .5, 'Risk should have been updated to .5 in the previous test '+res.body.data);
+                done();
+            });
+        });
+    });
+
 
     describe('GET /x-unfetter-assessments/{id}/risk', () => {
         it('Returns the risk for the entire assessment, and the risk per measurement.', (done) => {

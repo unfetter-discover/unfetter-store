@@ -1,8 +1,12 @@
 # ~~~ API Generalizations ~~~
 
 
-#Count:
-#  $ref: ./general/count.yaml
+Count:
+  $ref: ./general/count.yaml
+
+Risk:
+  $ref: ./general/risk.yaml
+
 
 Delete:
   $ref: ./general/delete.yaml
@@ -32,6 +36,14 @@ GranularMarking:
 
 KillChainPhase:
   $ref: ./general/kill_chain_phase.yaml
+
+Answer:
+  $ref: ./general/answer.yaml
+
+
+AnswerIndexJsonApi:
+  $ref: ./general/answer_index.yaml
+
 
 Question:
   $ref: ./general/question.yaml
