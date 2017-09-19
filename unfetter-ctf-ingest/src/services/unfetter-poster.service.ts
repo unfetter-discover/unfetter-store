@@ -23,7 +23,7 @@ export class UnfetterPosterService {
         const url = `${this.apiUrl}${this.path}`;
         const promises = arr.map((jsonSchema) => {
             const body = JSON.stringify(jsonSchema);
-            console.log(body);
+            // console.log(body);
             return fetch(url, {
                 headers: this.genHeaders(),
                 method: 'POST',
