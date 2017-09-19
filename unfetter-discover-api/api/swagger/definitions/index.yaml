@@ -40,6 +40,11 @@ KillChainPhase:
 Answer:
   $ref: ./general/answer.yaml
 
+
+AnswerIndexJsonApi:
+  $ref: ./general/answer_index.yaml
+
+
 Question:
   $ref: ./general/question.yaml
 

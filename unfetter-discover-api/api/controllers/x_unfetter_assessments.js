@@ -715,18 +715,22 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
   const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
   //  The answer is a value of the index of the answer to select for each question.  We assume
   //  we are changing all the values back to the same answer.
-  const answer = req.swagger.params.data.attributes ? req.swagger.params.data.attributes.answer.value : 0;
+  
+  const answer = req.swagger.params.data.value.data.attributes.answer ? req.swagger.params.data.value.data.attributes.answer : 0;
+  const questionId = req.swagger.params.question ? req.swagger.params.question.value : "";
   
   // answer should be an integer to represent an index value of the array of question options.
-  if ((answer >= 0)){
+  if ((answer >= 0)) {
     const assessment = result[0];
     // The array of assessed objects
-    let assessed_object = result[0].stix.assessment_objects.find(o => o.stix.id == objectId);
+    let assessed_object = assessment.stix.assessment_objects.find(o => o.stix.id == objectId);
     
     // go through and change the answer to each of these questions.
     let risk = 0;
-    lodash.forEach(assessed_object.questions, (question) => {
-      if (answer <= question.options.length) {
+
+    lodash.forEach(assessed_object.questions, (question, index) => {
+
+      if ((answer <= question.options.length) && ((questionId=="") || (questionId == index))) {
         question.selected_value = question.options[answer];
         risk += question.selected_value.risk;
         question.risk = question.selected_value.risk;
@@ -734,18 +738,51 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
     });
     assessed_object.risk = risk/assessed_object.questions.length;
     
-    // TODO : Need to now update the entire assessment
 
-    console.log(JSON.stringify(assessment, null, 4));
-    const returnObject = assessed_object.questions[0].selected_value;
-    const requestedUrl = apiRoot + req.originalUrl;
-    res.header('Content-Type', 'application/json');
-    res.json({
-      data: returnObject,
-      links: {
-        self: requestedUrl,
-      },
-    });
+    // Update the Mongoose model
+    try {
+      const model = modelFactory.getModel(assessment.stix.type);  
+      const newDocument = new model(assessment);
+      const error = newDocument.validateSync();
+      if (error) {
+        const errors = [];
+        lodash.forEach(error.errors, (field) => {
+            errors.push(field.message);
+        });
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+      }
+      model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+
+        if (errUpdate) {
+            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+        }
+
+        if (resultUpdate) {
+            const requestedUrl = apiRoot + req.originalUrl;
+            const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
+            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+        }
+
+        return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
+      });
+    }
+    catch (err) {
+      console.log("error "+err);
+      return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+    }
+
+
+
+   // console.log(JSON.stringify(assessment, null, 4));
+   // const returnObject = assessed_object.questions[0].selected_value;
+   // const requestedUrl = apiRoot + req.originalUrl;
+   // res.header('Content-Type', 'application/json');
+   // res.json({
+   //   data: returnObject,
+   //   links: {
+   //     self: requestedUrl,
+   //   },
+    
   } else {
 
     return res.status(404).json({

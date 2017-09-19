@@ -52,10 +52,10 @@ patch:
       required: true
     - name: data
       in: body
-      description: The new answers
+      description: The array index of the answer to select
       required: true
       schema:
-        $ref: "#/definitions/Answer"
+        $ref: "#/definitions/AnswerIndexJsonApi"
 
   responses:
     "200":

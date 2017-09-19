@@ -65,7 +65,7 @@ patch:
       description: The new answers
       required: true
       schema:
-        $ref: "#/definitions/Answer"
+        $ref: "#/definitions/AnswerIndexJsonApi"
 
   responses:
     "200":

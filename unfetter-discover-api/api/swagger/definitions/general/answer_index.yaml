@@ -1,0 +1,10 @@
+  type: object
+  properties:
+    data:
+      type: object
+      properties:
+        attributes:
+          type: object
+          properties:
+            answer:
+              type: number
