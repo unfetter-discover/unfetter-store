@@ -18,23 +18,23 @@ export class CtfIngest {
         try {
             const stixies = await this.csvToStix(fileName);
             const jsonArr = stixToJson.convertStixToJsonSchema(stixies);
-            console.log(`json data to post ${jsonArr}`);
-            jsonArr.forEach((json) => {
-                console.log(json.toJson());
-            });
+            // console.log(`json data to post ${jsonArr}`);
+            // jsonArr.forEach((json) => {
+            //     console.log(json.toJson());
+            // });
             // post to reports endpoint
             const unfetterPoster = new UnfetterPosterService();
             const results  = await unfetterPoster.uploadJsonSchema(jsonArr);
             console.log(`results ${results.length}`);
-            if (results) {
-                results.forEach((result) => {
-                    console.log(result);
-                    const r = result.results || result.errors;
-                    if (r) {
-                        console.log(JSON.stringify(r, undefined, '\t'));
-                    }
-                });
-            }
+            // if (results) {
+            //     results.forEach((result) => {
+            //         console.log(result);
+            //         const r = result.results || result.errors;
+            //         if (r) {
+            //             console.log(JSON.stringify(r, undefined, '\t'));
+            //         }
+            //     });
+            // }
         } catch (e) {
             console.log(e);
         }

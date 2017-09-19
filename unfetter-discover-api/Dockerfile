@@ -1,4 +1,4 @@
-FROM node:8.4.0-alpine
+FROM node:8.5.0-alpine
 
 # Install packages
 RUN npm install -g multi-file-swagger && npm install -g json2yaml && npm install -g swagger && apk add --update curl

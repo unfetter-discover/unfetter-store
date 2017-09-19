@@ -85,7 +85,7 @@ export class CtfToStixAdapter {
                         selectors: [ 'name', 'description', 'title', 'x_unfetter_object_actions' ],
                     };
                 });
-            console.log('found markings', markings);
+            // console.log('found markings', markings);
             stix.granular_markings = [...stix.granular_markings, ...markingRefs];
         }
 

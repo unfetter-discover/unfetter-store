@@ -1,4 +1,4 @@
-FROM node:8.4.0-alpine
+FROM node:8.5.0-alpine
 
 MAINTAINER "unfetter"
 LABEL Description="Node program that loads STIX data into MongoDB"
