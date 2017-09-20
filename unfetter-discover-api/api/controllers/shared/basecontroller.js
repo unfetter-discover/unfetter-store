@@ -13,6 +13,60 @@ module.exports = class BaseController {
         this.model = modelFactory.getModel(type);      
     }
 
+    getEnhancedData(result, swaggerParams) {
+        let data;
+        // no extended or meta properties
+        if (swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && (swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+            data = result
+                .map(res => res.toObject())
+                .map(res => res.stix);
+
+        // both extended and meta properties
+        } else if ((swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true){
+            data = result
+                .map(res => res.toObject())
+                .map(res => {
+                    let temp = res.stix;
+                    if (res.extendedProperties !== undefined) {
+                        temp = {...temp, ...res.extendedProperties};
+                    } 
+                    if (res.metaProperties !== undefined) {
+                        temp = { ...temp, ...res.metaProperties };
+                    } 
+                    return temp;
+                });
+
+        // Exteded properties only
+        } else if ((swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+            data = result
+                .map(res => res.toObject())
+                .map(res => {
+                    if (res.extendedProperties !== undefined) {
+                        return { ...res.stix, ...res.extendedProperties };
+                    } else {
+                        return res.stix;
+                    }
+                });
+
+        // Meta properties only
+        } else if (swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
+            data = result
+                .map(res => res.toObject())
+                .map(res => {
+                    if (res.metaProperties !== undefined) {
+                        return { ...res.stix, ...res.metaProperties };
+                    } else {
+                        return res.stix;
+                    }
+                });
+
+        // Delete this if this function works!
+        } else {
+            console.log('DOOOOM!!!! This block should never be reached.');
+        }
+        return data;
+    }
+
     aggregate() {
         const type = this.type;
         const model = this.model;
@@ -42,6 +96,7 @@ module.exports = class BaseController {
     get() {
         const type = this.type;
         const model = this.model;
+        const getEnhancedData = this.getEnhancedData;
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -63,22 +118,7 @@ module.exports = class BaseController {
 
                     const requestedUrl = apiRoot + req.originalUrl;
 
-                    let data;
-                    if (req.swagger.params.extendedproperties !== undefined && req.swagger.params.extendedproperties.value === false) {
-                        data = result
-                            .map(res => res.toObject())
-                            .map(res => res.stix);
-                    } else {
-                        data = result
-                            .map(res => res.toObject())
-                            .map(res => {
-                                if (res.extendedProperties !== undefined) {
-                                    return { ...res.stix, ...res.extendedProperties };
-                                } else {
-                                    return res.stix;
-                                }
-                            });
-                    }
+                    let data = getEnhancedData(result, req.swagger.params);                    
 
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi(data, type, requestedUrl);
                     return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
