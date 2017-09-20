@@ -15,14 +15,21 @@ module.exports = class BaseController {
 
     getEnhancedData(result, swaggerParams) {
         let data;
+        // No params present
+        if (swaggerParams.extendedproperties === undefined && swaggerParams.metaproperties === undefined) {
+            return result
+                .map(res => res.toObject())
+                .map(res => res.stix);
+        }
+
         // no extended or meta properties
-        if (swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && (swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+        if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
             data = result
                 .map(res => res.toObject())
                 .map(res => res.stix);
 
         // both extended and meta properties
-        } else if ((swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true){
+        } else if ((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true){
             data = result
                 .map(res => res.toObject())
                 .map(res => {
@@ -37,7 +44,7 @@ module.exports = class BaseController {
                 });
 
         // Exteded properties only
-        } else if ((swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+        } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
             data = result
                 .map(res => res.toObject())
                 .map(res => {
@@ -49,7 +56,7 @@ module.exports = class BaseController {
                 });
 
         // Meta properties only
-        } else if (swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
+        } else if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
             data = result
                 .map(res => res.toObject())
                 .map(res => {
