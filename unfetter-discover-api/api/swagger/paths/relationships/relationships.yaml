@@ -28,6 +28,14 @@ get:
       description: 'Ex: 10'
       required: false
       type: number
+    - name: extendedproperties
+      in: query
+      type: boolean
+      description: boolean to include extended stix properties
+    - name: metaproperties
+      in: query
+      type: boolean
+      description: boolean to include extended meta properties
   responses:
     "200":
       description: Success

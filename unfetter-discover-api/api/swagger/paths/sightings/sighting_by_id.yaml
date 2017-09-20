@@ -13,6 +13,14 @@ get:
       description: Model id
       required: true
       type: string
+    - name: extendedproperties
+      in: query
+      type: boolean
+      description: boolean to include extended stix properties
+    - name: metaproperties
+      in: query
+      type: boolean
+      description: boolean to include extended meta properties
   responses:
     "200":
       description: Success

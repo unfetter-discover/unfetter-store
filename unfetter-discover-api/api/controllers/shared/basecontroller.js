@@ -62,7 +62,25 @@ module.exports = class BaseController {
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
-                    const convertedResult = jsonApiConverter.convertJsonToJsonApi(result.map(res => res.stix), type, requestedUrl);
+
+                    let data;
+                    if (req.swagger.params.extendedproperties !== undefined && req.swagger.params.extendedproperties.value === false) {
+                        data = result
+                            .map(res => res.toObject())
+                            .map(res => res.stix);
+                    } else {
+                        data = result
+                            .map(res => res.toObject())
+                            .map(res => {
+                                if (res.extendedProperties !== undefined) {
+                                    return { ...res.stix, ...res.extendedProperties };
+                                } else {
+                                    return res.stix;
+                                }
+                            });
+                    }
+
+                    const convertedResult = jsonApiConverter.convertJsonToJsonApi(data, type, requestedUrl);
                     return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                 });
         }
@@ -78,7 +96,23 @@ module.exports = class BaseController {
 
             if (result && result.length === 1) {
                 const requestedUrl = apiRoot + req.originalUrl;
-                const convertedResult = jsonApiConverter.convertJsonToJsonApi(result[0].stix, type, requestedUrl);
+
+                let data;
+                if (req.swagger.params.extendedproperties !== undefined && req.swagger.params.extendedproperties.value === false) {
+                    data = result.map(res => res.toObject())
+                        .map(res => res.stix);
+                } else {
+                    data = result.map(res => res.toObject())
+                        .map(res => {
+                            if (res.extendedProperties !== undefined) {
+                                return { ...res.stix, ...res.extendedProperties };
+                            } else {
+                                return res.stix;
+                            }
+                        });                    
+                }
+                
+                const convertedResult = jsonApiConverter.convertJsonToJsonApi(data[0], type, requestedUrl);
                 return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
             }
 
