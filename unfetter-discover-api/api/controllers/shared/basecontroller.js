@@ -129,6 +129,7 @@ module.exports = class BaseController {
     getById() {
         const type = this.type;
         const model = this.model;
+        const getEnhancedData = this.getEnhancedData;
         return this.getByIdCb((err, result, req, res, id) => {
             if (err) {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
@@ -137,20 +138,7 @@ module.exports = class BaseController {
             if (result && result.length === 1) {
                 const requestedUrl = apiRoot + req.originalUrl;
 
-                let data;
-                if (req.swagger.params.extendedproperties !== undefined && req.swagger.params.extendedproperties.value === false) {
-                    data = result.map(res => res.toObject())
-                        .map(res => res.stix);
-                } else {
-                    data = result.map(res => res.toObject())
-                        .map(res => {
-                            if (res.extendedProperties !== undefined) {
-                                return { ...res.stix, ...res.extendedProperties };
-                            } else {
-                                return res.stix;
-                            }
-                        });                    
-                }
+                let data = getEnhancedData(result, req.swagger.params);
                 
                 const convertedResult = jsonApiConverter.convertJsonToJsonApi(data[0], type, requestedUrl);
                 return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
