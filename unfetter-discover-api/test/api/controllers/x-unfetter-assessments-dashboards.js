@@ -381,6 +381,22 @@ describe('x-unfetter-assessments specific routes', () => {
         });
     });
 
+    describe('GET /x-unfetter-assessments/{id}/summary-aggregations', () => {
+        it('Returns attack pattern aggregations for the summary dashboard.', (done) => {
+            request(server)
+                .get(`/${controller.endpoint}/${controller.testId}/summary-aggregations`)
+                .set('Accept', 'application/json')
+                .expect('Content-Type', /json/)
+                .expect(200)
+                .end((err, res) => {
+                    should.not.exist(err);
+                    should.not.exist(res.body.error, 'Error found');
+                    should.exist(res.body.data, 'No "data" found');
+                    done();
+                });
+        });
+    });
+
     // Only ensure that the assessment for the following tests is deleted
     // The test for the shared rotues are done in the controllers test
     describe(`DELETE /x-unfetter-assessments/{id}`, () => {
