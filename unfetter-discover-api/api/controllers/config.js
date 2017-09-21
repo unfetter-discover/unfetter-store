@@ -33,7 +33,6 @@ module.exports = {
                 const convertedResult = result
                     .map(res => res.toObject())
                     .map(res => {
-                        console.log(res);
                         let retVal = {};
                         retVal.links = {};
                         retVal.links.self = `${requestedUrl}/${res._id}`;

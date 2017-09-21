@@ -334,17 +334,6 @@ Tool:
 
 # ~~~ Unfetter-STIX ~~~
 
-XUnfetterControlAssessmentJsonApi:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessment_json_api.yaml
-XUnfetterControlAssessmentsJsonApi:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessments_json_api.yaml
-XUnfetterControlAssessmentCreateUpdate:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessment_create_update.yaml
-XUnfetterControlAssessmentsJsonApiSingleItem:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessments_json_api_single_item.yaml
-
-
-
 XUnfetterSensorJsonApi:
   $ref: ./x_unfetter_sensors/x_unfetter_sensor_json_api.yaml
 XUnfetterSensorsJsonApi:

@@ -146,8 +146,8 @@ function groupByKillChain(distinctKillChainPhaseNames, objects) {
   lodash.forEach(distinctKillChainPhaseNames, (phaseName) => {
     const aps = lodash.filter(objects, (object) => {
       // If "phase" is found in any of object.kill_chain_phases....
-      const found = lodash.some(object.kill_chain_phases, (phase) => {
-        const phaseMatch = phase.phase_name === phaseName;
+      const found = lodash.some(object.groupings, (phase) => {
+        const phaseMatch = phase.groupingValue === phaseName;
         return phaseMatch;
       });
       return found;
@@ -162,7 +162,7 @@ function groupByKillChain(distinctKillChainPhaseNames, objects) {
 
 // Will group the objects by the kill chain phase name, and will group the risk for each group.
 function calculateRiskPerKillChain(workingObjects) {
-  const killChains = lodash.sortBy(lodash.uniqBy(lodash.flatMap(lodash.flatMapDeep(workingObjects, 'kill_chain_phases'), 'phase_name')));
+  const killChains = lodash.sortBy(lodash.uniqBy(lodash.flatMap(lodash.flatMapDeep(workingObjects, 'groupings'), 'groupingValue')));
   const groupedObjects = groupByKillChain(killChains, workingObjects);
   const returnObjects = [];
   lodash.forEach(groupedObjects, (killChainGroup) => {
@@ -196,11 +196,11 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
   return Promise.all(getPromises(assessment))
     .then((results) => {
       assessment = assessment.toObject().stix;
-      const indicators = results[0].map(doc => doc.toObject().stix);
+      const indicators = results[0].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
       const indicatorRisks = [];
-      const sensors = results[1].map(doc => doc.toObject().stix);
+      const sensors = results[1].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
       const sensorRisks = [];
-      const courseOfActions = results[2].map(doc => doc.toObject().stix);
+      const courseOfActions = results[2].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
       const coaRisks = [];
       const returnObject = {};
       returnObject.indicators = [];
@@ -453,7 +453,7 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
         "attackPatterns": {
           $addToSet: {
             name: "$stix.name",
-            x_unfetter_sophistication_level: "$stix.x_unfetter_sophistication_level",
+            x_unfetter_sophistication_level: "$extendedProperties.x_unfetter_sophistication_level",
             description: "$stix.description",
             kill_chain_phases: "$kill_chain_phases_copy",
             external_references: "$stix.external_references",
@@ -551,7 +551,7 @@ const summaryAggregations = (req, res) => {
     },
     {
       $match: {
-        'attackPatterns.stix.x_unfetter_sophistication_level': {
+        'attackPatterns.extendedProperties.x_unfetter_sophistication_level': {
           $ne: null
         }
       }
@@ -562,7 +562,7 @@ const summaryAggregations = (req, res) => {
         'attackPatterns': {
           $addToSet: {
             'attackPatternId': '$attackPatterns.stix.id',
-            'x_unfetter_sophistication_level': '$attackPatterns.stix.x_unfetter_sophistication_level',
+            'x_unfetter_sophistication_level': '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
             'kill_chain_phases': '$attackPatterns.stix.kill_chain_phases'
           }
         },
@@ -572,7 +572,7 @@ const summaryAggregations = (req, res) => {
 
   Promise.all([
     aggregationModel.aggregate(attackPatternsByAssessedObject),
-    models['attack-pattern'].find({'stix.x_unfetter_sophistication_level': {'$ne': null}}),
+    models['attack-pattern'].find({'extendedProperties.x_unfetter_sophistication_level': {'$ne': null}}),
   ])
   .then(results => {
     if (results) {
@@ -601,10 +601,10 @@ const summaryAggregations = (req, res) => {
       let allAttackPatternTallyMap = {};
       // Map all attack pattern to a total tally
       allAttackPattenrns.forEach(ap => {
-        if (allAttackPatternTallyMap[ap['stix']['x_unfetter_sophistication_level']] === undefined) {
-          allAttackPatternTallyMap[ap['stix']['x_unfetter_sophistication_level']] = 0;
+        if (allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] === undefined) {
+          allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] = 0;
         }
-        ++allAttackPatternTallyMap[ap['stix']['x_unfetter_sophistication_level']];
+        ++allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']];
       });
 
       returnObj.attackPatternsByAssessedObject = tempAttackPatternsByAssessedObject;

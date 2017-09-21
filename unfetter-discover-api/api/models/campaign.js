@@ -2,28 +2,6 @@ const mongoose = require('mongoose');
 const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
-// const ExtendedSchema = new mongoose.Schema({
-//     _id: String,
-//     name: {
-//         type: String,
-//         required: [true, 'name is required']
-//     },
-//     description: {
-//         type: String
-//     },
-//     aliases: [String],
-//     first_seen: {
-//         type: Date,
-//         default: Date.now()
-//     }, 
-//     last_seen: {
-//         type: Date,
-//         default: Date.now()
-//     },
-//     objective: String
-// });
-// const Campaign = mongoose.model('Campaign', BaseSchema, 'Campaign').discriminator('campaign', ExtendedSchema);
-
 const ExtendedSchema = {
     id: String,
     name: {
