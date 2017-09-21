@@ -6,6 +6,11 @@ get:
   operationId: downloadBundle
   produces:
   - application/json
+  parameters:
+  - name: extendedproperties
+    in: query
+    type: boolean
+    description: boolean to include extended stix properties
   responses:
     "200":
       description: Success

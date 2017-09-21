@@ -113,7 +113,7 @@
 /dashboards/intrusionSetView:
   $ref: ./dashboards/intrusion-set-view.yaml
 /downloadBundle:
-  $ref: ./download-bundle.yaml
+  $ref: ./downloads/download-bundle.yaml
 
 /config:
   $ref: ./config/config.yaml

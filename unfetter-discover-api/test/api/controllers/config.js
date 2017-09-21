@@ -128,7 +128,6 @@ describe('config controllers', () => {
                     .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
                     .expect(200)
                     .end((err, res) => {
-                        // console.log(res.body.data);
                         should.not.exist(err);
                         should.equal(false, res.error, 'Error found');
                         should.equal(res.body.data.length, 1, `There should be exactly 1 ${controller.endpoint} returned.`);
@@ -150,7 +149,6 @@ describe('config controllers', () => {
                     .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
                     .expect(200)
                     .end((err, res) => {
-                        // console.log(res.body.data);
                         should.not.exist(err);
                         should.equal(false, res.error, 'Error found');
                         should.equal(res.body.data.length, 1, `There should be exactly 1 ${controller.endpoint} returned.`);

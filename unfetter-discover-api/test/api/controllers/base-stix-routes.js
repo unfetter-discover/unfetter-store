@@ -35,7 +35,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -72,7 +73,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -104,7 +106,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
 
     },
@@ -135,7 +138,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -166,7 +170,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -199,7 +204,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -232,7 +238,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -264,7 +271,8 @@ const controllers = [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
             ],
-            "version": "2.0"
+            "version": "2.0",
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -305,7 +313,8 @@ const controllers = [
             ],
             "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
             "revoked": false,
-            "number_observed": 0
+            "number_observed": 0,
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -337,7 +346,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -372,7 +382,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -404,7 +415,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -433,7 +445,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     {
@@ -465,7 +478,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
     
@@ -486,6 +500,7 @@ const controllers = [
                 "url": "https://capec.mitre.org/data/definitions/98.html",
                 "external_id": "CAPEC-98"
             }],
+            "x_extended_property_test": "testvalue",
             "granular_markings": [{
                 "marking_ref": "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "selectors": [
@@ -659,7 +674,8 @@ const controllers = [
             "object_marking_refs": [
                 "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
                 "marking-definition--d771aceb-3148-4315-b4b4-130b888533d0"
-            ]
+            ],
+            "x_extended_property_test": "testvalue"
         }
     },
 ];
@@ -744,6 +760,23 @@ describe('stix controllers', () => {
                         .end((err, res) => {
                             should.not.exist(err);
                             should.equal(false, res.error, 'Error found');
+                            should.exist(res.body.data.attributes.x_extended_property_test);
+                            should(typeof res.body.data).equal('object', `There should be exactly 1 ${controller.endpoint} returned.`);
+                            done();
+                        });
+                });
+            });
+
+            // get by id without extended properties
+            describe(`GET /${controller.endpoint}/{id}?extendedproperties=false`, () => {
+                it(`should return the ${controller.endpoint} matching the id in the path without extended properties`, (done) => {
+                    request(server)
+                        .get(`/${controller.endpoint}/${controller.testId}?extendedproperties=false`)
+                        .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
+                        .expect(200)
+                        .end((err, res) => {
+                            should.not.exist(err);
+                            should.not.exist(res.body.data.attributes.x_extended_property_test);
                             should(typeof res.body.data).equal('object', `There should be exactly 1 ${controller.endpoint} returned.`);
                             done();
                         });
@@ -803,7 +836,6 @@ describe('stix controllers', () => {
                         .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
                         .expect(200)
                         .end((err, res) => {
-                            // console.log(res.body.data);
                             should.not.exist(err);
                             should.equal(false, res.error, 'Error found');
                             should.equal(res.body.data.length, 1, `There should be exactly 1 ${controller.endpoint} returned.`);
@@ -825,7 +857,6 @@ describe('stix controllers', () => {
                         .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
                         .expect(200)
                         .end((err, res) => {
-                            // console.log(res.body.data);
                             should.not.exist(err);
                             should.equal(false, res.error, 'Error found');
                             should.equal(res.body.data.length, 1, `There should be exactly 1 ${controller.endpoint} returned.`);

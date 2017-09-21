@@ -13,6 +13,67 @@ module.exports = class BaseController {
         this.model = modelFactory.getModel(type);      
     }
 
+    getEnhancedData(result, swaggerParams) {
+        let data;
+        // No params present
+        if (swaggerParams.extendedproperties === undefined && swaggerParams.metaproperties === undefined) {
+            return result
+                .map(res => res.toObject())
+                .map(res => res.stix);
+        }
+
+        // no extended or meta properties
+        if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+            data = result
+                .map(res => res.toObject())
+                .map(res => res.stix);
+
+        // both extended and meta properties
+        } else if ((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true){
+            data = result
+                .map(res => res.toObject())
+                .map(res => {
+                    let temp = res.stix;
+                    if (res.extendedProperties !== undefined) {
+                        temp = {...temp, ...res.extendedProperties};
+                    } 
+                    if (res.metaProperties !== undefined) {
+                        temp = { ...temp, ...res.metaProperties };
+                    } 
+                    return temp;
+                });
+
+        // Exteded properties only
+        } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+            data = result
+                .map(res => res.toObject())
+                .map(res => {
+                    if (res.extendedProperties !== undefined) {
+                        return { ...res.stix, ...res.extendedProperties };
+                    } else {
+                        return res.stix;
+                    }
+                });
+
+        // Meta properties only
+        } else if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
+            data = result
+                .map(res => res.toObject())
+                .map(res => {
+                    if (res.metaProperties !== undefined) {
+                        return { ...res.stix, ...res.metaProperties };
+                    } else {
+                        return res.stix;
+                    }
+                });
+
+        // Delete this if this function works!
+        } else {
+            console.log('DOOOOM!!!! This block should never be reached.');
+        }
+        return data;
+    }
+
     aggregate() {
         const type = this.type;
         const model = this.model;
@@ -42,6 +103,7 @@ module.exports = class BaseController {
     get() {
         const type = this.type;
         const model = this.model;
+        const getEnhancedData = this.getEnhancedData;
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -62,7 +124,10 @@ module.exports = class BaseController {
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
-                    const convertedResult = jsonApiConverter.convertJsonToJsonApi(result.map(res => res.stix), type, requestedUrl);
+
+                    let data = getEnhancedData(result, req.swagger.params);                    
+
+                    const convertedResult = jsonApiConverter.convertJsonToJsonApi(data, type, requestedUrl);
                     return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                 });
         }
@@ -71,6 +136,7 @@ module.exports = class BaseController {
     getById() {
         const type = this.type;
         const model = this.model;
+        const getEnhancedData = this.getEnhancedData;
         return this.getByIdCb((err, result, req, res, id) => {
             if (err) {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
@@ -78,7 +144,10 @@ module.exports = class BaseController {
 
             if (result && result.length === 1) {
                 const requestedUrl = apiRoot + req.originalUrl;
-                const convertedResult = jsonApiConverter.convertJsonToJsonApi(result[0].stix, type, requestedUrl);
+
+                let data = getEnhancedData(result, req.swagger.params);
+                
+                const convertedResult = jsonApiConverter.convertJsonToJsonApi(data[0], type, requestedUrl);
                 return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
             }
 
@@ -122,6 +191,19 @@ module.exports = class BaseController {
                     obj.stix.type = this.type;
                 }
                 obj.stix.id = stix.id(obj.stix.type);
+
+                // Process extended properties
+                let extendedProperties = {};
+                for(let prop of Object.keys(data.attributes)) {
+                    if(prop.match(/^x_/) !== null) {
+                        extendedProperties[prop] = data.attributes[prop];
+                        delete obj.stix[prop];
+                    }
+                }
+                if(Object.keys(extendedProperties).length > 0) {
+                    obj.extendedProperties = extendedProperties;
+                }
+
                 const newDocument = new model(obj);
 
                 const error = newDocument.validateSync();
@@ -140,11 +222,12 @@ module.exports = class BaseController {
                         console.log(err);
                         return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                     }
-
                     const requestedUrl = apiRoot + req.originalUrl;
-                    const convertedResult = jsonApiConverter.convertJsonToJsonApi([result.stix], type, requestedUrl);
-                    return res.status(201).json({ links: { self: requestedUrl, }, data: convertedResult });
+                    const convertedResult = jsonApiConverter.convertJsonToJsonApi([
+                            result.extendedProperties !== undefined ? { ...result.stix, ...result.extendedProperties } : result.stix
+                        ], type, requestedUrl);
 
+                    return res.status(201).json({ links: { self: requestedUrl, }, data: convertedResult });
                 });
             } else {
                 return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
@@ -168,11 +251,16 @@ module.exports = class BaseController {
 
                     // set the new values
                     const resultObj = result.toObject();
-                    const obj = req.swagger.params.data ? req.swagger.params.data.value.data.attributes : {};
+                    const incomingObj = req.swagger.params.data ? req.swagger.params.data.value.data.attributes : {};
                     const has = Object.prototype.hasOwnProperty;
-                    for (const key in obj) {
-                        if (has.call(obj, key)) {
-                            resultObj.stix[key] = obj[key];
+                    for (const key in incomingObj) {
+                        if (key.match(/^x_/) === null && has.call(incomingObj, key)) {
+                            resultObj.stix[key] = incomingObj[key];
+                        } else if (key.match(/^x_/) !== null && has.call(incomingObj, key)) {
+                            if (resultObj.extendedProperties === undefined) {
+                                resultObj.extendedProperties = {};
+                            }
+                            resultObj.extendedProperties[key] = incomingObj[key];
                         }
                     }
 
@@ -197,7 +285,7 @@ module.exports = class BaseController {
 
                     if (resultUpdate) {
                         const requestedUrl = apiRoot + req.originalUrl;
-                        const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, type, requestedUrl);
+                        const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.extendedProperties !== undefined ? { ...resultUpdate.stix, ...resultUpdate.extendedProperties } : resultUpdate.stix, type, requestedUrl);
                         return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                     }
 

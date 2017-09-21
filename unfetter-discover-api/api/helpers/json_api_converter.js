@@ -1,7 +1,9 @@
 const lodash = require('lodash');
 
 const transform = function transformFun(obj, type, urlRoot) {
-  obj = obj.toObject();
+  if(!(obj instanceof Object)) {
+    obj = obj.toObject();
+  }
   const apiObj = {
     type,
     id: obj.id,
