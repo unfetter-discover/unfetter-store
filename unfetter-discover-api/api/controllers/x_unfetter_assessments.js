@@ -453,7 +453,7 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
         "attackPatterns": {
           $addToSet: {
             name: "$stix.name",
-            x_unfetter_sophistication_level: "$stix.x_unfetter_sophistication_level",
+            x_unfetter_sophistication_level: "$extendedProperties.x_unfetter_sophistication_level",
             description: "$stix.description",
             kill_chain_phases: "$kill_chain_phases_copy",
             external_references: "$stix.external_references",
@@ -551,7 +551,7 @@ const summaryAggregations = (req, res) => {
     },
     {
       $match: {
-        'attackPatterns.stix.x_unfetter_sophistication_level': {
+        'attackPatterns.extendedProperties.x_unfetter_sophistication_level': {
           $ne: null
         }
       }
@@ -562,7 +562,7 @@ const summaryAggregations = (req, res) => {
         'attackPatterns': {
           $addToSet: {
             'attackPatternId': '$attackPatterns.stix.id',
-            'x_unfetter_sophistication_level': '$attackPatterns.stix.x_unfetter_sophistication_level',
+            'x_unfetter_sophistication_level': '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
             'kill_chain_phases': '$attackPatterns.stix.kill_chain_phases'
           }
         },
@@ -572,7 +572,7 @@ const summaryAggregations = (req, res) => {
 
   Promise.all([
     aggregationModel.aggregate(attackPatternsByAssessedObject),
-    models['attack-pattern'].find({'stix.x_unfetter_sophistication_level': {'$ne': null}}),
+    models['attack-pattern'].find({'extendedProperties.x_unfetter_sophistication_level': {'$ne': null}}),
   ])
   .then(results => {
     if (results) {
@@ -601,10 +601,10 @@ const summaryAggregations = (req, res) => {
       let allAttackPatternTallyMap = {};
       // Map all attack pattern to a total tally
       allAttackPattenrns.forEach(ap => {
-        if (allAttackPatternTallyMap[ap['stix']['x_unfetter_sophistication_level']] === undefined) {
-          allAttackPatternTallyMap[ap['stix']['x_unfetter_sophistication_level']] = 0;
+        if (allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] === undefined) {
+          allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] = 0;
         }
-        ++allAttackPatternTallyMap[ap['stix']['x_unfetter_sophistication_level']];
+        ++allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']];
       });
 
       returnObj.attackPatternsByAssessedObject = tempAttackPatternsByAssessedObject;
