@@ -2,19 +2,6 @@ const mongoose = require('mongoose');
 const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
-// const StixSchema = new mongoose.Schema({
-//     _id: String,
-//     name: {
-//         type: String,
-//         required: [true, 'name is required']
-//     },
-//     kill_chain_phases: [stixCommons['kill_chain_phases']],
-//     aliases: [String],
-//     description: String
-// });
-
-// const sensor = mongoose.model('XUnfetterSensor', BaseSchema, 'XUnfetterSensor');
-
 const StixSchema = {
     id: String,
     name: {

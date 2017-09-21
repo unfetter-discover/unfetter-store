@@ -2,38 +2,6 @@ const mongoose = require('mongoose');
 const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
-// const StixSchema = new mongoose.Schema({
-//   _id: String,
-//   assessment_objects: [{
-//     risk: Number,
-//     stix: {
-//       id: String,
-//       description: String,
-//       type: {
-//         type: String
-//       },
-//       name: String,
-//     },
-//     questions: [{
-//       selected_option: {
-//         risk: Number,
-//         title: String
-//       },
-//       options: [{
-//         risk: Number,
-//         title: String
-//       }],
-//       risk: Number,
-//       title: String
-//     }]
-//   }],
-//   description: String,
-//   target_ref: String,
-// });
-
-// const XUnfetterAssessment = mongoose.model('XUnfetterAssessment', BaseSchema, 'XUnfetterAssessment')
-//   .discriminator('x-unfetter-assessment', StixSchema);
-
 const StixSchema = {
   id: String,
   name: {
