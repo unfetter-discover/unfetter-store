@@ -146,8 +146,8 @@ function groupByKillChain(distinctKillChainPhaseNames, objects) {
   lodash.forEach(distinctKillChainPhaseNames, (phaseName) => {
     const aps = lodash.filter(objects, (object) => {
       // If "phase" is found in any of object.kill_chain_phases....
-      const found = lodash.some(object.kill_chain_phases, (phase) => {
-        const phaseMatch = phase.phase_name === phaseName;
+      const found = lodash.some(object.groupings, (phase) => {
+        const phaseMatch = phase.groupingValue === phaseName;
         return phaseMatch;
       });
       return found;
@@ -162,7 +162,7 @@ function groupByKillChain(distinctKillChainPhaseNames, objects) {
 
 // Will group the objects by the kill chain phase name, and will group the risk for each group.
 function calculateRiskPerKillChain(workingObjects) {
-  const killChains = lodash.sortBy(lodash.uniqBy(lodash.flatMap(lodash.flatMapDeep(workingObjects, 'kill_chain_phases'), 'phase_name')));
+  const killChains = lodash.sortBy(lodash.uniqBy(lodash.flatMap(lodash.flatMapDeep(workingObjects, 'groupings'), 'groupingValue')));
   const groupedObjects = groupByKillChain(killChains, workingObjects);
   const returnObjects = [];
   lodash.forEach(groupedObjects, (killChainGroup) => {
@@ -196,11 +196,11 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
   return Promise.all(getPromises(assessment))
     .then((results) => {
       assessment = assessment.toObject().stix;
-      const indicators = results[0].map(doc => doc.toObject().stix);
+      const indicators = results[0].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
       const indicatorRisks = [];
-      const sensors = results[1].map(doc => doc.toObject().stix);
+      const sensors = results[1].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
       const sensorRisks = [];
-      const courseOfActions = results[2].map(doc => doc.toObject().stix);
+      const courseOfActions = results[2].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
       const coaRisks = [];
       const returnObject = {};
       returnObject.indicators = [];
