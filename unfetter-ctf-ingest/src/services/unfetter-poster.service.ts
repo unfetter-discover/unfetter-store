@@ -13,7 +13,8 @@ export class UnfetterPosterService {
     constructor() {
         // fix the self signed cert error
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-        this.apiUrl = `https://${Environment.apiHost}:${Environment.apiPort}${Environment.context}`;
+        this.apiUrl =
+            `${Environment.apiProtocol}://${Environment.apiHost}:${Environment.apiPort}${Environment.context}`;
     }
 
     public async uploadJsonSchema(arr: JsonSchema[] = []): Promise<any[]> {
