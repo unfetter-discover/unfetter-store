@@ -15,13 +15,17 @@ Yarg.usage('Usage: $0 -h localhost -f [csvFile]')
     .default('p', process.env.API_PORT || '443')
     .alias('c', 'context')
     .describe('c', 'context root for the API')
-    .default('c', process.env.API_CONTEXT || '/api/')
+    .default('c', process.env.API_CONTEXT || '/api')
+    .alias('pr', 'protocol')
+    .describe('pr', 'protocol for the API')
+    .default('pr', process.env.API_PROTOCOL || 'https')
     .alias('f', 'file')
     .describe('f', 'file name of the csv file to ingest')
     .demandOption(['f']);
 
 const argv = Yarg.argv;
 if (argv) {
+    Environment.apiProtocol = argv['protocol'];
     Environment.apiHost = argv['host'];
     Environment.apiPort = argv['port'];
     Environment.context = argv['context'];
