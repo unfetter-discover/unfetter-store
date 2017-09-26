@@ -197,7 +197,6 @@ mongoose.connection.on('connected', function (err) {
         console.log('Adding Mitre data');
         getMitreData()
             .then(res => {
-                console.log(res[0]);
                 run(res);
             })
             .catch(err => {
