@@ -85,31 +85,28 @@ function getMitreData() {
                     .map(stix => {
                         let retVal = {};
                         retVal._id = stix.id;
-                        retVal.stix = stix;
+                        retVal.stix = {};
+                        for(let prop in stix) {
+                            if(prop.match(/^x_/) !== null) {
+                                if(retVal.extendedProperties === undefined) {
+                                    retVal.extendedProperties = {};
+                                }
+                                retVal.extendedProperties[prop] = stix[prop];
+                            } else {
+                                retVal.stix[prop] = stix[prop];
+                            }
+                        }
                         return retVal;
                     });
-                stixModel.create(stixToUpload, (err, mongoRes) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(mongoRes);
-                    }
-                });
+                resolve(stixToUpload);
             })
             .catch(err => reject(err));
     })
 }
 
-/* ~~~ Driver ~~~ */
+/* ~~~ Main Function ~~~ */
 
-let connAttempts = 0;
-let conn;
-let promises = [];
-// Wait for mongoose to connect before processing
-mongoose.connection.on('connected', function (err) {
-    console.log('connected to mongodb');
-    clearInterval(conIntervel);
-
+function run(stixObjects = []) {
     // STIX files
     if (argv['stix'] !== undefined) {
         console.log('Processing the following STIX files: ', argv.stix);
@@ -121,7 +118,8 @@ mongoose.connection.on('connected', function (err) {
                 retVal._id = stix.id;
                 retVal.stix = stix;
                 return retVal;
-            });
+            })
+            .concat(stixObjects);
 
         // Enhanced stix files
         if (argv.enhancedStixProperties !== undefined) {
@@ -161,12 +159,6 @@ mongoose.connection.on('connected', function (err) {
         promises.push(configModel.create(configToUpload));
     }
 
-    // Add mitre data
-    if (argv.addMitreData !== undefined && argv.addMitreData === true) {
-        console.log('Adding Mitre data');
-        promises.push(getMitreData());
-    }
-
     if (promises !== undefined && promises.length) {
         Promise.all(promises)
             .then(results => {
@@ -187,6 +179,36 @@ mongoose.connection.on('connected', function (err) {
         mongoose.connection.close(() => {
             console.log('closed mongo connection');
         });
+    }
+}
+
+/* ~~~ Driver ~~~ */
+
+let connAttempts = 0;
+let conn;
+let promises = [];
+// Wait for mongoose to connect before processing
+mongoose.connection.on('connected', function (err) {
+    console.log('connected to mongodb');
+    clearInterval(conIntervel);
+
+    // Add mitre data
+    if (argv.addMitreData !== undefined && argv.addMitreData === true) {
+        console.log('Adding Mitre data');
+        getMitreData()
+            .then(res => {
+                console.log(res[0]);
+                run(res);
+            })
+            .catch(err => {
+                console.log(err);
+                mongoose.connection.close(() => {
+                    console.log('closed mongo connection');
+                    process.exit(1);
+                });
+            });
+    } else {
+        run();
     }
 });
 mongoose.connection.on('error', function (err) {
