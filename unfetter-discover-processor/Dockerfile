@@ -1,6 +1,6 @@
-FROM node:8.5.0-alpine
+FROM node:8.5-alpine
 
-MAINTAINER "unfetter"
+LABEL MAINTAINER="unfetter"
 LABEL Description="Node program that loads STIX data into MongoDB"
 
 ENV WORKING_DIRECTORY /usr/src/app
