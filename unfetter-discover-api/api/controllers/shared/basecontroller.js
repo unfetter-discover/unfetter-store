@@ -284,8 +284,9 @@ module.exports = class BaseController {
                     }
 
                     if (resultUpdate) {
+                        let resObj = resultUpdate.toObject();
                         const requestedUrl = apiRoot + req.originalUrl;
-                        const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.extendedProperties !== undefined ? { ...resultUpdate.stix, ...resultUpdate.extendedProperties } : resultUpdate.stix, type, requestedUrl);
+                        const convertedResult = jsonApiConverter.convertJsonToJsonApi(resObj.extendedProperties !== undefined ? { ...resObj.stix, ...resObj.extendedProperties } : resObj.stix, type, requestedUrl);
                         return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                     }
 
