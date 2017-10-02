@@ -36,6 +36,11 @@ get:
       in: query
       type: boolean
       description: boolean to include extended meta properties
+    - name: project
+      in: query
+      description: 'Ex: { "name": 1 } or { "name": 0}'
+      required: false
+      type: string
   responses:
     "200":
       description: Success
