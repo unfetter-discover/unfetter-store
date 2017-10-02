@@ -117,6 +117,7 @@ module.exports = class BaseController {
                 .sort(query.sort)
                 .limit(query.limit)
                 .skip(query.skip)
+                .select(query.project)
                 .exec((err, result) => {
 
                     if (err) {
