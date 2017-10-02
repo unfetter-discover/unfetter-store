@@ -1,13 +1,14 @@
 {
   "name": "unfetter-utils",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.3.0",
+  "description": "Unfetter Utilities",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Unfetter",
+  "license": "MIT",
   "dependencies": {
     "node-fetch": "^1.7.3"
   }
