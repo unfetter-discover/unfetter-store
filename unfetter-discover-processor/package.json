@@ -1,6 +1,6 @@
 {
   "name": "unfetter-discover-processor",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Records Processor for Unfetter Discover",
   "private": true,
   "directories": {
@@ -10,9 +10,9 @@
   "author": "Unfetter",
   "license": "MIT",
   "dependencies": {
-    "jsonapi-serializer": "*",
     "mongoose": "^4.9.9",
-    "node-fetch": "^1.7.1"
+    "node-fetch": "^1.7.3",
+    "yargs": "^8.0.2"
   },
   "devDependencies": {
     "eslint": "^3.19.0",

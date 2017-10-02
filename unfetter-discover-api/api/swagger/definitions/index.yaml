@@ -1,8 +1,12 @@
 # ~~~ API Generalizations ~~~
 
 
-#Count:
-#  $ref: ./general/count.yaml
+Count:
+  $ref: ./general/count.yaml
+
+Risk:
+  $ref: ./general/risk.yaml
+
 
 Delete:
   $ref: ./general/delete.yaml
@@ -32,6 +36,14 @@ GranularMarking:
 
 KillChainPhase:
   $ref: ./general/kill_chain_phase.yaml
+
+Answer:
+  $ref: ./general/answer.yaml
+
+
+AnswerIndexJsonApi:
+  $ref: ./general/answer_index.yaml
+
 
 Question:
   $ref: ./general/question.yaml
@@ -322,17 +334,6 @@ Tool:
 
 # ~~~ Unfetter-STIX ~~~
 
-XUnfetterControlAssessmentJsonApi:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessment_json_api.yaml
-XUnfetterControlAssessmentsJsonApi:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessments_json_api.yaml
-XUnfetterControlAssessmentCreateUpdate:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessment_create_update.yaml
-XUnfetterControlAssessmentsJsonApiSingleItem:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessments_json_api_single_item.yaml
-
-
-
 XUnfetterSensorJsonApi:
   $ref: ./x_unfetter_sensors/x_unfetter_sensor_json_api.yaml
 XUnfetterSensorsJsonApi:
@@ -348,3 +349,10 @@ XUnfetterSensor:
 
 DashboardsIntrusionSetViewJsonApi:
   $ref: ./dashboards/intrusion_set_view_json_api.yaml
+
+ConfigJsonApi:
+  type: object  
+ConfigCreateUpdate:
+  type: object
+ConfigJsonApiSingleItem:
+  type: object

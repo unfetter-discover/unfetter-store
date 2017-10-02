@@ -50,7 +50,9 @@ stixCommons['resource_level'] = [
 
 stixCommons['mongoRoot'] = {
     _id: String,
-    organization: String
+    organization: String,
+    extendedProperties: Object,
+    metaProperties: Object
 };
 
 // TODO delete if not used
@@ -73,28 +75,20 @@ stixCommons['baseStix'] = {
     },
     revoked: Boolean,
     version: String,
-    labels: Array,
-    external_references: Array,
-    object_marking_refs: Array,
-    granular_markings: [stixCommons['granular_markings']],
+    labels: { type: Array, default: void 0 },
+    external_references: { type: Array, default: void 0 },
+    object_marking_refs: { type: Array, default: void 0 },
+    granular_markings: { type: [stixCommons['granular_markings']], default: void 0},
 };
 
 stixCommons['makeSchema'] = childSchema => {
-    // let schema = Object.assign({}, stixCommons['mongoRoot']); // Safe copy of mongoRoot object
-    // schema.stix = Object.assign(stixCommons['baseStix'], childSchema);
-    let schema = {}; 
-    
-    for (let prop of Object.keys(stixCommons['mongoRoot'])) {
-        schema[prop] = stixCommons['mongoRoot'][prop];
-    }
-
-    schema.stix = {};
-    for (let prop of Object.keys(stixCommons['baseStix'])) {
-        schema.stix[prop] = stixCommons['baseStix'][prop];
-    }
-    for (let prop of Object.keys(childSchema)) {
-        schema.stix[prop] = childSchema[prop];
-    }
+    let schema = { 
+        ...stixCommons['mongoRoot'],
+        stix: {
+            ...stixCommons['baseStix'], 
+            ...childSchema
+        }
+    }; 
     return mongoose.Schema(schema);
 };
 

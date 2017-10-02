@@ -1,22 +1,18 @@
-FROM mhart/alpine-node:7.10.1
+FROM node:8.5-alpine
 
-MAINTAINER "unfetter"
-LABEL Description="Node program that loads STIX data into cti-stix-store"
+LABEL MAINTAINER="unfetter"
+LABEL Description="Node program that loads STIX data into MongoDB"
 
-ENV HOST "cti-stix-store"
-ENV PORT 3000
-ENV WORKING_DIRECTORY $PWD
-ENV EXAMPLES_DIRECTORY $WORKING_DIRECTORY/examples
-ENV BUNDLES_DIRECTORY $EXAMPLES_DIRECTORY/mitre-attack-cis
+ENV WORKING_DIRECTORY /usr/src/app
 
+RUN mkdir -p $WORKING_DIRECTORY
+WORKDIR $WORKING_DIRECTORY
+ADD . $WORKING_DIRECTORY
 
-USER root
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-COPY processor.js /usr/src/app
-COPY package.json /usr/src/app
-COPY . /usr/src/app
+RUN apk update
 
 RUN npm install
-CMD ["node","/usr/src/app/processor.js","-p",$PORT,"-h",$HOST,"-j","mitre-attack-cis/attack-patterns.json mitre-attack-cis/course-of-actions.json mitre-attack-cis/indicators.json mitre-attack-cis/malwards.json mitre-attack-cis/marking-definition-rating.json mitre-attack-cis/relationships.json mitre-attack-cis/reports.json mitre-attack-cis/tools.json"]
-
+RUN find / -name "cb-never*.tgz" -delete && \
+    rm -rf /usr/share/man && \
+    rm -rf /tmp/* && \
+    rm -rf /var/cache/apk/*

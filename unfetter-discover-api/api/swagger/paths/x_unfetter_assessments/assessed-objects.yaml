@@ -12,6 +12,14 @@ get:
     type: string
     required: true
     format: JSON
+  - name: extendedproperties
+    in: query
+    type: boolean
+    description: boolean to include extended stix properties
+  - name: metaproperties
+    in: query
+    type: boolean
+    description: boolean to include extended meta properties
   produces: 
   - application/json
   responses:

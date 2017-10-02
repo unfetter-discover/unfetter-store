@@ -1,0 +1,72 @@
+x-swagger-router-controller: x_unfetter_assessments
+get:
+  tags:
+  - STIX-Unfetter Assessment
+  description: Returns the assessment Questions for a particular assessed object
+  operationId: getAnswerByAssessedObject
+  parameters:
+  - name: id
+    in: path
+    description: Assessment Id
+    type: string
+    required: true
+  - name: objectId
+    in: path
+    description: ID of the assessed object
+    type: string
+    required: true
+  produces: 
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/Answer"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"
+patch:
+  tags:
+  - STIX-Unfetter Assessment
+  description: For a given assessment and assessed object, change all the answers to questions to the inputed value
+  operationId: updateAnswerByAssessedObject
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+    - name: objectId
+      in: path
+      description: Assessed Object ID
+      type: string
+      required: true
+    - name: data
+      in: body
+      description: The array index of the answer to select
+      required: true
+      schema:
+        $ref: "#/definitions/AnswerIndexJsonApi"
+
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

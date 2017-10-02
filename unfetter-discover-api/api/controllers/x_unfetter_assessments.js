@@ -31,14 +31,14 @@ function calculateRiskByQuestion(assessments) {
       total += currentQuestion.risk;
       count += 1;
       const foundQuestion = questions.find(function (object) {
-        return object.title === currentQuestion.title;
+        return object.name === currentQuestion.name;
       });
       if (foundQuestion) {
         foundQuestion.risk += currentQuestion.risk;
         foundQuestion.total += 1;
       } else {
         const riskObject = {};
-        riskObject.title = currentQuestion.title;
+        riskObject.name = currentQuestion.name;
         riskObject.risk = currentQuestion.risk;
         riskObject.total = 1;
         questions.push(riskObject);
@@ -146,8 +146,8 @@ function groupByKillChain(distinctKillChainPhaseNames, objects) {
   lodash.forEach(distinctKillChainPhaseNames, (phaseName) => {
     const aps = lodash.filter(objects, (object) => {
       // If "phase" is found in any of object.kill_chain_phases....
-      const found = lodash.some(object.kill_chain_phases, (phase) => {
-        const phaseMatch = phase.phase_name === phaseName;
+      const found = lodash.some(object.groupings, (phase) => {
+        const phaseMatch = phase.groupingValue === phaseName;
         return phaseMatch;
       });
       return found;
@@ -162,7 +162,7 @@ function groupByKillChain(distinctKillChainPhaseNames, objects) {
 
 // Will group the objects by the kill chain phase name, and will group the risk for each group.
 function calculateRiskPerKillChain(workingObjects) {
-  const killChains = lodash.sortBy(lodash.uniqBy(lodash.flatMap(lodash.flatMapDeep(workingObjects, 'kill_chain_phases'), 'phase_name')));
+  const killChains = lodash.sortBy(lodash.uniqBy(lodash.flatMap(lodash.flatMapDeep(workingObjects, 'groupings'), 'groupingValue')));
   const groupedObjects = groupByKillChain(killChains, workingObjects);
   const returnObjects = [];
   lodash.forEach(groupedObjects, (killChainGroup) => {
@@ -196,11 +196,11 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
   return Promise.all(getPromises(assessment))
     .then((results) => {
       assessment = assessment.toObject().stix;
-      const indicators = results[0].map(doc => doc.toObject().stix);
+      const indicators = results[0].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
       const indicatorRisks = [];
-      const sensors = results[1].map(doc => doc.toObject().stix);
+      const sensors = results[1].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
       const sensorRisks = [];
-      const courseOfActions = results[2].map(doc => doc.toObject().stix);
+      const courseOfActions = results[2].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
       const coaRisks = [];
       const returnObject = {};
       returnObject.indicators = [];
@@ -453,7 +453,7 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
         "attackPatterns": {
           $addToSet: {
             name: "$stix.name",
-            x_unfetter_sophistication_level: "$stix.x_unfetter_sophistication_level",
+            x_unfetter_sophistication_level: "$extendedProperties.x_unfetter_sophistication_level",
             description: "$stix.description",
             kill_chain_phases: "$kill_chain_phases_copy",
             external_references: "$stix.external_references",
@@ -551,7 +551,7 @@ const summaryAggregations = (req, res) => {
     },
     {
       $match: {
-        'attackPatterns.stix.x_unfetter_sophistication_level': {
+        'attackPatterns.extendedProperties.x_unfetter_sophistication_level': {
           $ne: null
         }
       }
@@ -562,7 +562,7 @@ const summaryAggregations = (req, res) => {
         'attackPatterns': {
           $addToSet: {
             'attackPatternId': '$attackPatterns.stix.id',
-            'x_unfetter_sophistication_level': '$attackPatterns.stix.x_unfetter_sophistication_level',
+            'x_unfetter_sophistication_level': '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
             'kill_chain_phases': '$attackPatterns.stix.kill_chain_phases'
           }
         },
@@ -572,7 +572,7 @@ const summaryAggregations = (req, res) => {
 
   Promise.all([
     aggregationModel.aggregate(attackPatternsByAssessedObject),
-    models['attack-pattern'].find({'stix.x_unfetter_sophistication_level': {'$ne': null}}),
+    models['attack-pattern'].find({'extendedProperties.x_unfetter_sophistication_level': {'$ne': null}}),
   ])
   .then(results => {
     if (results) {
@@ -601,10 +601,10 @@ const summaryAggregations = (req, res) => {
       let allAttackPatternTallyMap = {};
       // Map all attack pattern to a total tally
       allAttackPattenrns.forEach(ap => {
-        if (allAttackPatternTallyMap[ap['stix']['x_unfetter_sophistication_level']] === undefined) {
-          allAttackPatternTallyMap[ap['stix']['x_unfetter_sophistication_level']] = 0;
+        if (allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] === undefined) {
+          allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] = 0;
         }
-        ++allAttackPatternTallyMap[ap['stix']['x_unfetter_sophistication_level']];
+        ++allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']];
       });
 
       returnObj.attackPatternsByAssessedObject = tempAttackPatternsByAssessedObject;
@@ -636,6 +636,167 @@ const summaryAggregations = (req, res) => {
   );
 };
 
+
+
+// Get the total Risk of a single Assessed Object of a certain Assessed Object
+const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
+  if (err) {
+    return res.status(500).json({
+      errors: [{
+        status: 500,
+        source: '',
+        title: 'Error',
+        code: '',
+        detail: 'An unknown error has occurred.'
+      }]
+    });
+  }
+  const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
+  let assessed_object = result[0].stix.assessment_objects.find(o => o.stix.id == objectId);
+  const returnObject = assessed_object.risk;
+  const requestedUrl = apiRoot + req.originalUrl;
+  res.header('Content-Type', 'application/json');
+  res.json({
+    data: returnObject,
+    links: {
+      self: requestedUrl,
+    },
+  });
+});
+
+// Get the total Risk of a single Assessed Object of a certain Assessed Object
+const getAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
+  if (err) {
+    return res.status(500).json({
+      errors: [{
+        status: 500,
+        source: '',
+        title: 'Error',
+        code: '',
+        detail: 'An unknown error has occurred.'
+      }]
+    });
+  }
+  const questionNumber = req.swagger.params.question ? req.swagger.params.question.value : 0;
+  const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
+  let assessed_object = result[0].stix.assessment_objects.find(o => o.stix.id == objectId);
+  const returnObject = assessed_object.questions[questionNumber].selected_value;
+  const requestedUrl = apiRoot + req.originalUrl;
+  res.header('Content-Type', 'application/json');
+  res.json({
+    data: returnObject,
+    links: {
+      self: requestedUrl,
+    },
+  });
+});
+
+
+// With a given assessmentID, and assessedObjectId, and a new answer value, go through the questions
+//   of that assessed object and give the new answers.  
+//   Recalculate the updated risks.
+//    Updates mongo with the new values
+
+const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
+  // If there was an error returning the assessment object, return error.
+  if (err) {
+    return res.status(500).json({
+      errors: [{
+        status: 500,
+        source: '',
+        title: 'Error',
+        code: '',
+        detail: 'An unknown error has occurred.'
+      }]
+    });
+  }
+  
+  //  The ObjectId is the assessed Object id.  Indicator, sensor or mitigations, more likely
+  const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
+  //  The answer is a value of the index of the answer to select for each question.  We assume
+  //  we are changing all the values back to the same answer.
+  
+  const answer = req.swagger.params.data.value.data.attributes.answer ? req.swagger.params.data.value.data.attributes.answer : 0;
+  const questionId = req.swagger.params.question ? req.swagger.params.question.value : "";
+  
+  // answer should be an integer to represent an index value of the array of question options.
+  if ((answer >= 0)) {
+    const assessment = result[0];
+    // The array of assessed objects
+    let assessed_object = assessment.stix.assessment_objects.find(o => o.stix.id == objectId);
+    
+    // go through and change the answer to each of these questions.
+    let risk = 0;
+
+    lodash.forEach(assessed_object.questions, (question, index) => {
+
+      if ((answer <= question.options.length) && ((questionId=="") || (questionId == index))) {
+        question.selected_value = question.options[answer];
+        risk += question.selected_value.risk;
+        question.risk = question.selected_value.risk;
+      }
+    });
+    assessed_object.risk = risk/assessed_object.questions.length;
+    
+
+    // Update the Mongoose model
+    try {
+      const model = modelFactory.getModel(assessment.stix.type);  
+      const newDocument = new model(assessment);
+      const error = newDocument.validateSync();
+      if (error) {
+        const errors = [];
+        lodash.forEach(error.errors, (field) => {
+            errors.push(field.message);
+        });
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+      }
+      model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+
+        if (errUpdate) {
+            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+        }
+
+        if (resultUpdate) {
+            const requestedUrl = apiRoot + req.originalUrl;
+            const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
+            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+        }
+
+        return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
+      });
+    }
+    catch (err) {
+      console.log("error "+err);
+      return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+    }
+
+
+
+   // console.log(JSON.stringify(assessment, null, 4));
+   // const returnObject = assessed_object.questions[0].selected_value;
+   // const requestedUrl = apiRoot + req.originalUrl;
+   // res.header('Content-Type', 'application/json');
+   // res.json({
+   //   data: returnObject,
+   //   links: {
+   //     self: requestedUrl,
+   //   },
+    
+  } else {
+
+    return res.status(404).json({
+      errors: [{
+        status: 404,
+        source: '',
+        title: 'Error',
+        code: '',
+        detail: 'Answer was not valid for this system.'
+      }]
+    });
+  }
+});
+    
 module.exports = {
   get: controller.get(),
   getById: controller.getById(),
@@ -647,4 +808,7 @@ module.exports = {
   riskPerKillChain,
   riskByAttackPatternAndKillChain,
   summaryAggregations,
+  getRiskByAssessedObject,
+  getAnswerByAssessedObject,
+  updateAnswerByAssessedObject,
 };

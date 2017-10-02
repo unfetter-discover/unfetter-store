@@ -1,0 +1,43 @@
+{
+  "name": "unfetter-ctf-ingest",
+  "version": "0.3.1",
+  "description": "ingest cyber threat framework data into unfetter",
+  "scripts": {
+    "test": "jasmine-ts --config=jasmine.json",
+    "coverage": "nyc --extension .ts --reporter=lcov --reporter=text-lcov npm test && nyc report",
+    "build": "tsc -v && tsc -p . --outDir dist/",
+    "build:watch": "npm run build -- --watch",
+    "clean": "rimraf dist/ tsdocs/ coverage/ .nyc_output/",
+    "lint": "tsc -v && tslint src/**/*.ts",
+    "ctf-ingest": "ts-node -v && ts-node src/ctf-ingest-cli.ts",
+    "docs": "typedoc --out tsdocs --ignoreCompilerErrors"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "camelcase": "^4.1.0",
+    "moment": "^2.18.1",
+    "node-fetch": "^1.7.3",
+    "papaparse": "^4.3.6",
+    "yargs": "^8.0.2"
+  },
+  "devDependencies": {
+    "@types/camelcase": "^4.1.0",
+    "@types/istanbul": "^0.4.29",
+    "@types/jasmine": "^2.6.0",
+    "@types/node": "^8.0.28",
+    "@types/node-fetch": "^1.6.7",
+    "@types/papaparse": "^4.1.30",
+    "@types/yargs": "^8.0.2",
+    "istanbul": "^0.4.5",
+    "jasmine": "^2.8.0",
+    "jasmine-spec-reporter": "^4.2.1",
+    "jasmine-ts": "^0.2.1",
+    "nyc": "^11.2.1",
+    "rimraf": "^2.6.2",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.7.0",
+    "typedoc": "^0.8.0",
+    "typescript": "^2.5.2"
+  }
+}

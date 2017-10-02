@@ -89,11 +89,13 @@
   $ref: ./x_unfetter_assessments/risk-by-attack-pattern.yaml
 /x-unfetter-assessments/{id}/summary-aggregations:
   $ref: ./x_unfetter_assessments/summary-aggregations.yaml
+/x-unfetter-assessments/{id}/assessed-object-risk/{objectId}:
+  $ref: ./x_unfetter_assessments/assessment-object-risk.yaml
+/x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}:
+  $ref: ./x_unfetter_assessments/assessment-object-answer-question.yaml
 
-/x-unfetter-control-assessments:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessments.yaml
-/x-unfetter-control-assessments/{id}:
-  $ref: ./x_unfetter_control_assessments/x_unfetter_control_assessment_by_id.yaml
+/x-unfetter-assessments/{id}/assessed-object-answer/{objectId}:
+  $ref: ./x_unfetter_assessments/assessment-object-answer.yaml
 
 /x-unfetter-sensors:
   $ref: ./x_unfetter_sensors/x_unfetter_sensors.yaml
@@ -105,4 +107,9 @@
 /dashboards/intrusionSetView:
   $ref: ./dashboards/intrusion-set-view.yaml
 /downloadBundle:
-  $ref: ./download-bundle.yaml
+  $ref: ./downloads/download-bundle.yaml
+
+/config:
+  $ref: ./config/config.yaml
+/config/{id}:
+  $ref: ./config/config_by_id.yaml
