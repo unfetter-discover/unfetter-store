@@ -9,7 +9,7 @@ const transform = function transformFun(obj, type, urlRoot) {
     id: obj.id,
     attributes: obj,
     links: {
-      self: `${urlRoot}/${obj._id}`
+      self: `${urlRoot}/${obj.id}`
     }
   };
   // delete apiObj.attributes._id;
