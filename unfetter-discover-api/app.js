@@ -2,6 +2,8 @@ const SwaggerExpress = require('swagger-express-mw');
 const path = require('path');
 const bodyParser = require('body-parser');
 const app = require('express')();
+const passport = require('passport');
+const mongoose = require('mongoose');
 
 process.env.STIX_API_PROTOCOL = process.env.STIX_API_PROTOCOL || 'https';
 process.env.STIX_API_HOST = process.env.STIX_API_HOST || 'localhost';
@@ -20,6 +22,21 @@ app.use(bodyParser.urlencoded({
   extended: true,
   limit: '5mb'
 }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+require('./api/config/passport-config')['setStrategy'](passport);
+
+app.get('/test', (req, res) => {
+  res.send('App works');
+});
+app.use((req, res, next) => {
+  console.log('***Middleware works***');
+  next();
+});
+
+app.use('/auth', require('./api/express-controllers/auth'));
 
 const config = {
   appRoot: __dirname,
