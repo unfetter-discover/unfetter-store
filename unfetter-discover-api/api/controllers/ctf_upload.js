@@ -2,9 +2,9 @@
 
 const fetch = require('node-fetch');
 
-const CTF_PARSE_HOST = process.env.CTF_PARSE_HOST || 'https://localhost';
-const CTF_PARSE_PORT = process.env.CTF_PARSE_PORT || 443;
-const CTF_PARSE_PATH = process.env.CTF_PARSE_PATH || '/api/ctf/parser/upload';
+const CTF_PARSE_HOST = process.env.CTF_PARSE_HOST || 'http://localhost';
+const CTF_PARSE_PORT = process.env.CTF_PARSE_PORT || 10010;
+const CTF_PARSE_PATH = process.env.CTF_PARSE_PATH || '/upload';
 
 const upload = (req, res) => {
 
@@ -25,28 +25,31 @@ const upload = (req, res) => {
     console.log(fName);
     const contents = req.swagger.params.upfile.value.buffer.toString('utf8');
     console.log(`csv.length=${contents.length}`);
-
+    // console.log(contents);
     // const timestamp = new Date().getMilliseconds();
     // const tmpFileName = `${fName}-${timestamp}`;
     // fs.writeFileSync(tmpFileName, contents);
 
-    const body = { data: JSON.stringify(contents) };
-    const headers = { 'content-type': 'application/json' };
+    const body = JSON.stringify({ data: contents });
+    const headers = { 'content-type': 'application/json', 'accept': 'application/json' };
     const url = `${CTF_PARSE_HOST}:${CTF_PARSE_PORT}${CTF_PARSE_PATH}`;
-    // console.log(url);
+    console.log(url);
+    console.log(body);
     fetch(url, {
         headers,
         method: 'POST',
         body
-    }).then((jsonSchema) => {
-        // console.log(jsonSchema);
-        res.json(jsonSchema);
+    }).then((response) => {
+        // console.log('response', response);
+        // console.log('response', response.json());
+        response.json().then((json) => {
+            console.log('upload response', json);
+            res.json(json);
+        });
     }).catch((ex) => {
         err.error.detail = ex;
         return res.status(500).json(err);
     })
-
-    // res.json({ count: -1 });
 
 };
 

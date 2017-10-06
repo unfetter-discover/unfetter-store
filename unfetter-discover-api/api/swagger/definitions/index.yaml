@@ -356,3 +356,14 @@ ConfigCreateUpdate:
   type: object
 ConfigJsonApiSingleItem:
   type: object
+
+JsonSchema:
+  type: array
+  items:
+      $ref: '#/definitions/JsonSchemaObject'
+
+JsonSchemaObject:
+  type: object
+  properties:
+    data:
+      type: object

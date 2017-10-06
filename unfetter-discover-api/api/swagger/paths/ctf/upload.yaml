@@ -15,7 +15,7 @@ post:
     "200":
       description: Success
       schema:
-        $ref: "#/definitions/Count"
+        $ref: "#/definitions/JsonSchema"
     default:
       description: Error
       schema:
