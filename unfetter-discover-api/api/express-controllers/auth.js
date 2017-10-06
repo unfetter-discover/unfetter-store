@@ -4,15 +4,14 @@ const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const GithubStrategy = require('passport-github').Strategy;
 
-const config = require('../config/passport-config');
-const githubConfig = require('../config/github-config');
+const config = require('../config/private-config');
 const User = require('../models/user');
 
 // Github
 passport.use(new GithubStrategy({
-    clientID: githubConfig.clientID,
-    clientSecret: githubConfig.clientSecret,
-    callbackURL: githubConfig.callbackURL
+    clientID: config.github.clientID,
+    clientSecret: config.github.clientSecret,
+    callbackURL: config.github.callbackURL
 },
 function (accessToken, refreshToken, profile, cb) {
     // TODO process token here
@@ -29,7 +28,7 @@ passport.deserializeUser(function (obj, cb) {
 });
 
 router.use(require('express-session')({ 
-    secret: 'keyboard cat', 
+    secret: config.sessionSecret, 
     resave: true, 
     saveUninitialized: true 
 }));
@@ -48,13 +47,8 @@ router.get('/github-callback', passport.authenticate('github', { failureRedirect
         user.loginMethod = 'github';
         user.githubUsername = githubUser.username;  
         user.githubId = githubUser.id;
-        const code = req.query.code;
-        if(!code) {
-            console.log('Code is empty');
-        } else {
-            user.githubCode = code;
-        }
-        const token = jwt.sign(user, config.secret, {
+
+        const token = jwt.sign(user, config.jwtSecret, {
             expiresIn: 604800 // 1 week
         });
         // TODO redirect this to angular
