@@ -13,10 +13,21 @@ import { StixToJsonSchemaAdapter } from './stix-to-jsonschema-adapter';
  */
 export class CtfIngest {
 
+    /**
+     * @description ingest a csv file
+     * @param {string} fileName
+     * @return {Promise<void>}
+     */
     public async ingestCsv(fileName: string = ''): Promise<void> {
+        console.log(`ingest csv = ${fileName}`);
+        if (!fs.existsSync(fileName)) {
+            const msg = `${fileName} does not exist!`;
+            throw msg;
+        }
+        const csv = fs.readFileSync(fileName).toString();
         const stixToJson = new StixToJsonSchemaAdapter();
         try {
-            const stixies = await this.csvToStix(fileName);
+            const stixies = await this.csvToStix(csv);
             const jsonArr = stixToJson.convertStixToJsonSchema(stixies);
             // console.log(`json data to post ${jsonArr}`);
             // jsonArr.forEach((json) => {
@@ -42,12 +53,16 @@ export class CtfIngest {
     }
 
     /**
-     * @description
-     *  reads a well know ctf csv file and converts it to stix objects
-     * @param {string} fileName
+     * @description reads a well know ctf csv file and converts it to stix objects
+     * @param {string} csv representing the data
      */
-    public async csvToStix(fileName: string = ''): Promise<Stix[]> {
-        const arr = this.csvToCtf(fileName);
+    public async csvToStix(csv = ''): Promise<Stix[]> {
+        if (!csv || csv.trim().length === 0) {
+            return Promise.resolve([]);
+        }
+
+        console.log(`parse ${csv}`);
+        const arr = this.csvToCtf(csv);
         const adapter = new CtfToStixAdapter();
         const stixies = await adapter.convertCtfToStix(arr);
 
@@ -61,11 +76,12 @@ export class CtfIngest {
     /**
      * @description
      *  reads a well know ctf csv file and loads to csv
+     * @param {string} csv representing the data
      * @throws {Error} if file does not exist
      * @returns {Ctf[]} array of parse object
      */
-    public csvToCtf(fileName: string = ''): Ctf[] {
-        const parseResults = this.csvToJson(fileName);
+    public csvToCtf(csv = ''): Ctf[] {
+        const parseResults = this.csvToJson(csv);
         if (parseResults.data) {
             const arr = parseResults.data.map((el) => this.jsonLineToCtf(el));
             if (arr && arr.length > 1) {
@@ -81,18 +97,12 @@ export class CtfIngest {
     /**
      * @description
      *  reads this classess csv file and loads to csv
+     * @param {string} csv representing the data
      * @throws {Error} if file does not exist
      * @returns {PapaParse.ParseResult} results from parse
      */
-    public csvToJson(fileName: string = ''): PapaParse.ParseResult {
-        console.log(`parse csv to json file = ${fileName}`);
-        if (!fs.existsSync(fileName)) {
-            const msg = `${fileName} does not exist!`;
-            throw msg;
-        }
-
-        const csvData = fs.readFileSync(fileName).toString();
-        const parseResults = Papa.parse(csvData, {
+    public csvToJson(csv = ''): PapaParse.ParseResult {
+        const parseResults = Papa.parse(csv, {
             quoteChar: '"',
             delimiter: ',',
             header: true,

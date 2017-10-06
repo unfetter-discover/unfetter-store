@@ -104,6 +104,9 @@
 
 # Other
 
+/ctf/upload:
+  $ref: './ctf/upload.yaml'
+
 /dashboards/intrusionSetView:
   $ref: ./dashboards/intrusion-set-view.yaml
 /downloadBundle:

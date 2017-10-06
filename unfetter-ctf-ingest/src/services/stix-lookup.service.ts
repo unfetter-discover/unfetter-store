@@ -27,8 +27,8 @@ export class StixLookupService {
      * @param {string} name
      * @returns {AttackPattern[]}
      */
-    public findAttackPatternByName(name: string): Promise<AttackPattern[]> {
-        if (!name) {
+    public findAttackPatternByName(name = ''): Promise<AttackPattern[]> {
+        if (!name || name.trim().length === 0) {
             Promise.resolve([]);
         }
 
@@ -48,6 +48,7 @@ export class StixLookupService {
 
         const queryParams = `filter=${encodeURIComponent(filter)}`;
         const url = `${this.apiUrl}${this.attackPatternPath}?${queryParams}`;
+        console.log(`fetch ${url}`);
         const resp = fetch(url)
             .then((res) => {
                 // console.log(res.headers.get('content-type'));
