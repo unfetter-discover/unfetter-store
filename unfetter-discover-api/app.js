@@ -3,6 +3,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const app = require('express')();
 const passport = require('passport');
+const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
 process.env.STIX_API_PROTOCOL = process.env.STIX_API_PROTOCOL || 'https';
@@ -28,16 +29,10 @@ app.use(passport.session());
 
 require('./api/config/passport-config')['setStrategy'](passport);
 
-app.get('/test', (req, res) => {
-  res.send('App works');
-});
-app.use((req, res, next) => {
-  console.log('***Middleware works***');
-  next();
-});
-
 app.use('/auth', require('./api/express-controllers/auth'));
-
+// app.use('*', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+//   next();
+// });
 const config = {
   appRoot: __dirname,
   swaggerFile: path.join(__dirname, '/api/swagger/swagger.yaml')

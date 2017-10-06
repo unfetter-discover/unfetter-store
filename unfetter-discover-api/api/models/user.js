@@ -2,24 +2,39 @@ const mongoose = require('mongoose');
 
 // User Schema
 const UserSchema = mongoose.Schema({
-    name: {
+    firstName: {
         type: String
     },
+    lastName: {
+        type: String
+    },
+    organizations: {
+        type: [String]
+    },
     email: {
-        type: String,
-        required: true
+        type: String
     },
-    username: {
-        type: String,
-        required: true
+    userName: {
+        type: String
     },
-    password: {
-        type: String,
-        required: true
+    registered: {
+        type: Boolean,
+        default: false
+    },
+    github: {
+        userName: {
+            type: String
+        },
+        id: {
+            type: String
+        },
+        avatar_url: {
+            type: String
+        }
     }
 });
 
-const User = module.exports = mongoose.model('User', UserSchema);
+const User = module.exports = mongoose.model('User', UserSchema, 'user');
 
 // module.exports.getUserById = function (id, callback) {
 //     User.findById(id, callback);
