@@ -1,0 +1,22 @@
+x-swagger-router-controller: ctf_upload
+post:
+  tags:
+    - CTF Uploads
+  description: Uploads a ctf file.
+  operationId: upload
+  consumes:
+    - multipart/form-data
+  parameters:
+    - in: formData
+      name: upfile
+      type: file
+      description: The file to upload.
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/JsonSchema"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"
