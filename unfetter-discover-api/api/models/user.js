@@ -21,6 +21,14 @@ const UserSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
+    approved: {
+        type: Boolean,
+        default: false
+    },
+    locked: {
+        type: Boolean,
+        default: false
+    },
     github: {
         userName: {
             type: String

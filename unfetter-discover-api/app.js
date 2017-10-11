@@ -27,9 +27,14 @@ app.use(bodyParser.urlencoded({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Set passport strategy
 require('./api/config/passport-config')['setStrategy'](passport);
 
+// Express controllers
 app.use('/auth', require('./api/express-controllers/auth'));
+app.use('/admin', require('./api/express-controllers/admin'));
+
+// Auth middleware
 app.use('*', passport.authenticate('jwt', { session: false }), (req, res, next) => {
   console.log('In JWT middleware');
   next();
