@@ -107,7 +107,15 @@ router.get('/user-from-token', (req, res) => {
     if(!token) {
         return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: '' }] });
     } else {
-        jwt.verify(token, config.jwtSecret, (err, decoded) => {
+
+        let tokenHash;
+        if(token.match(/^Bearer\ /) !== null) {
+            tokenHash = token.split('Bearer ')[1].trim()
+        } else {
+            tokenHash = token;
+        }
+
+        jwt.verify(tokenHash, config.jwtSecret, (err, decoded) => {
             if(err) {
                 console.log(`Error in /auth/user-from-token:\n${JSON.stringify(err, null, 2)}`);
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
@@ -117,7 +125,7 @@ router.get('/user-from-token', (req, res) => {
                     return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'Malformed token' }] });
                 } else {
                     userModel.findById(id, (err, result) => {
-                        if(err) {
+                        if (err || !result) {
                             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                         } else {
                             return res.json({
@@ -135,7 +143,6 @@ router.get('/user-from-token', (req, res) => {
 
 router.post('/finalize-registration', (req, res) => {
     let user = req.body.data.attributes;
-    console.log(user);
     if(user) {
         userModel.findById(user._id, (err, result) => {
             if (err || !result) {
@@ -158,7 +165,7 @@ router.post('/finalize-registration', (req, res) => {
                         } else {
                             return res.json({
                                 "data": {
-                                    "attributes": resultInner.toObject()
+                                    "attributes": newDocument.toObject()
                                 }
                             });
                         }

@@ -30,9 +30,10 @@ app.use(passport.session());
 require('./api/config/passport-config')['setStrategy'](passport);
 
 app.use('/auth', require('./api/express-controllers/auth'));
-// app.use('*', passport.authenticate('jwt', { session: false }), (req, res, next) => {
-//   next();
-// });
+app.use('*', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+  console.log('In JWT middleware');
+  next();
+});
 const config = {
   appRoot: __dirname,
   swaggerFile: path.join(__dirname, '/api/swagger/swagger.yaml')
