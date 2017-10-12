@@ -12,10 +12,12 @@ const UserSchema = mongoose.Schema({
         type: [String]
     },
     email: {
-        type: String
+        type: String,
+        unique: true
     },
     userName: {
-        type: String
+        type: String,
+        unique: true
     },
     registered: {
         type: Boolean,
@@ -29,12 +31,22 @@ const UserSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
+    role: {
+        type: String,
+        enum: [
+            'STANDARD_USER',
+            'ORG_LEADER',
+            'ADMIN'
+        ],
+        default: 'STANDARD_USER'
+    },
     github: {
         userName: {
             type: String
         },
         id: {
-            type: String
+            type: String,
+            unique: true
         },
         avatar_url: {
             type: String

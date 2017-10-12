@@ -1,9 +1,11 @@
+process.env.RUN_MODE = 'STANDARD';
+const port = process.env.PORT || '3000';
+
 const app = require('../../app');
 const spdy = require('spdy');
 const mongoinit = require('./mongoinit.js')();
 const fs = require('fs');
 
-const port = process.env.PORT || '3000';
 app.set('port', port);
 
 const server = spdy.createServer({
