@@ -215,6 +215,12 @@ module.exports = class BaseController {
                     obj.extendedProperties = extendedProperties;
                 }
 
+                if (obj.stix.metaProperties !== undefined) {
+                    let tempMeta = obj.stix.metaProperties;
+                    delete obj.stix.metaProperties;
+                    obj.metaProperties = tempMeta;
+                }
+
                 const newDocument = new model(obj);
 
                 const error = newDocument.validateSync();
@@ -265,7 +271,14 @@ module.exports = class BaseController {
                     const incomingObj = req.swagger.params.data ? req.swagger.params.data.value.data.attributes : {};
                     const has = Object.prototype.hasOwnProperty;
                     for (const key in incomingObj) {
-                        if (key.match(/^x_/) === null && has.call(incomingObj, key)) {
+                        if (key === 'metaProperties') {
+                            for (const metaKey in incomingObj.metaProperties) {
+                                if (resultObj.metaProperties === undefined) {
+                                    resultObj.metaProperties = {};
+                                }
+                                resultObj.metaProperties[metaKey] = incomingObj.metaProperties[metaKey];
+                            }
+                        } else if (key.match(/^x_/) === null && has.call(incomingObj, key)) {
                             resultObj.stix[key] = incomingObj[key];
                         } else if (key.match(/^x_/) !== null && has.call(incomingObj, key)) {
                             if (resultObj.extendedProperties === undefined) {
