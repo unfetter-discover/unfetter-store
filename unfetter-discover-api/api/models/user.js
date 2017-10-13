@@ -57,15 +57,13 @@ const UserSchema = mongoose.Schema({
     identity: {
         id: String,
         name: {
-            type: String,
-            required: [true, 'name is required']
+            type: String
         },
         description: {
             type: String
         },
         identity_class: {
-            type: String,
-            required: [true, 'identity class is required']
+            type: String
         },
         sectors: [String],
         contract_information: String,
