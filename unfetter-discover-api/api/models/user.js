@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
-// User Schema
+const BaseSchema = require('./stix-base');
+const stixCommons = require('./stix-commons');
+
 const UserSchema = mongoose.Schema({
     firstName: {
         type: String
@@ -50,6 +52,27 @@ const UserSchema = mongoose.Schema({
         },
         avatar_url: {
             type: String
+        }
+    },
+    identity: {
+        id: String,
+        name: {
+            type: String,
+            required: [true, 'name is required']
+        },
+        description: {
+            type: String
+        },
+        identity_class: {
+            type: String,
+            required: [true, 'identity class is required']
+        },
+        sectors: [String],
+        contract_information: String,
+        type: {
+            type: String,
+            enum: ['identity'],
+            default: 'identity'
         }
     }
 });
