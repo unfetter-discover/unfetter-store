@@ -2,3 +2,4 @@
 /node_modules
 
 api/config/private-config.js
+api/config/private-config.json
