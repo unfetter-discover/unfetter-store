@@ -1,7 +1,4 @@
-const SwaggerExpress = require('swagger-express-mw');
-const path = require('path');
-const bodyParser = require('body-parser');
-const app = require('express')();
+// ~~~ Environmental Variables ~~~
 
 process.env.STIX_API_PROTOCOL = process.env.STIX_API_PROTOCOL || 'https';
 process.env.STIX_API_HOST = process.env.STIX_API_HOST || 'localhost';
@@ -15,11 +12,50 @@ if (process.env.ENV === 'dev') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
+// ~~~ Module Imports ~~~ 
+
+const SwaggerExpress = require('swagger-express-mw');
+const path = require('path');
+const bodyParser = require('body-parser');
+const app = require('express')();
+const passport = require('passport');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+
+// ~~~ Unfetter Imports ~~~
+
+const passportConfig = require('./api/config/passport-config');
+
+// ~~~ Middleware ~~~
+
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({
   extended: true,
   limit: '5mb'
 }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Don't use auth middleware during unit testing
+if (!process.env.RUN_MODE || process.env.RUN_MODE !== 'TEST') {
+  // Set passport strategy
+  passportConfig.setStrategy(passport);
+
+  // Express controllers
+  app.use('/auth', require('./api/express-controllers/auth'));
+  app.use('/admin', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+    passportConfig.jwtAdmin(req, res, next);
+  });
+  app.use('/admin', require('./api/express-controllers/admin'));
+
+  // Auth middleware
+  app.use('*', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+    passportConfig.jwtStandard(req, res, next);
+  });
+}
+
+// ~~~ Swagger ~~~
 
 const config = {
   appRoot: __dirname,
@@ -28,8 +64,6 @@ const config = {
 
 SwaggerExpress.create(config, (err, swaggerExpress) => {
   if (err) { throw err; }
-
-  // install middleware
   swaggerExpress.register(app);
 });
 

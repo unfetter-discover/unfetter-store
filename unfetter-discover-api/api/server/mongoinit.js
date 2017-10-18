@@ -1,8 +1,9 @@
-const mongoose = require('mongoose');
-
 process.env.MONGO_REPOSITORY = process.env.MONGO_REPOSITORY || 'localhost';
 process.env.MONGO_PORT = process.env.MONGO_PORT || 27018;
 process.env.MONGO_DBNAME = process.env.MONGO_DBNAME || 'stix';
+
+const mongoose = require('mongoose');
+mongoose.Promise = global.Promise;
 
 module.exports = () => {
     if (global.conn === undefined) {
@@ -21,7 +22,6 @@ module.exports = () => {
         db.on('error', console.error.bind(console, 'connection error:'));
         db.on('connected', () => console.log('connected to mongodb'));
         db.on('disconnected', () => console.log('disconnected from mongodb'));
-        db.once('open', () => console.log('mongo db connection open'));
         process.on('SIGINT', function () {
             db.close(function () {
                 console.log('Safely closed MongoDB Connection');
