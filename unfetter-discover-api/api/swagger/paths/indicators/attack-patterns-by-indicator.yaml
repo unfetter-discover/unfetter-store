@@ -1,0 +1,39 @@
+x-swagger-router-controller: indicators
+get:
+  tags:
+  - STIX
+  - STIX-Indicators
+  description: Find all instances of the model matched by filter from the data source.
+  operationId: attackPatternsByIndicator
+  produces: 
+  - application/vnd.api+json
+  parameters:
+    - name: filter
+      in: query
+      description: 'Ex: { "name": "Cryptolocker" }'
+      required: false
+      type: string
+    - name: sort
+      in: query
+      description: 'Ex: { "name": "1" } or { "name": "-1"}'
+      required: false
+      type: string
+    - name: limit
+      in: query
+      description: 'Ex: 5'
+      required: false
+      type: number
+    - name: skip
+      in: query
+      description: 'Ex: 10'
+      required: false
+      type: number
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
