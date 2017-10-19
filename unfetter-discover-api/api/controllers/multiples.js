@@ -99,9 +99,10 @@ const addComment = (req, res) => {
 
                 if (resultUpdate) {
                     const requestedUrl = apiRoot + req.originalUrl;
+                    const obj = newDocument.toObject();
                     return res.status(200).json({
                         links: { self: requestedUrl, },
-                        data: { attributes: newDocument.toObject() }
+                        data: { attributes:  { ...obj.stix, ...obj.metaProperties, ...obj.extendedProperties } }
                     });
                 }
 
