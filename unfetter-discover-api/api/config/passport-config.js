@@ -27,6 +27,7 @@ passportConfig.setStrategy = (passport) => {
 
 passportConfig.jwtStandard = (req, res, next) => {
     // Do nothing if they pass strategy
+    console.log(req.user);
     next();
 };
 

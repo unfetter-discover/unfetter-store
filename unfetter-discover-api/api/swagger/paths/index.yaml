@@ -74,6 +74,8 @@
 
 /multiples:
   $ref: ./multiples/multiples.yaml
+/multiples/{id}/comment:
+  $ref: ./multiples/add_comment.yaml
 
 # Unfetter STIX routes
 
