@@ -1,0 +1,36 @@
+x-swagger-router-controller: multiples
+patch:
+  tags:
+  - STIX
+  - STIX-Multiples
+  description: Ability to add label to an existing STIX object
+  operationId: addLabel
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+    - name: data
+      in: body
+      description: An object of model property name/value pairs
+      required: true
+      schema:
+        type: object
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    "404":
+      description: Item Not Found
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
