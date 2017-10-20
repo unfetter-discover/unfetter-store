@@ -1,12 +1,12 @@
 import { JsonSchema } from '../models/json-schema';
-import { UnfetterPosterService } from './unfetter-poster.service';
+import { UnfetterPosterRestService } from './unfetter-poster-rest.service';
 
 describe('Unfetter poster service', () => {
 
-    let unfetterPosterService: UnfetterPosterService;
+    let unfetterPosterService: UnfetterPosterRestService;
 
     beforeEach(() => {
-        unfetterPosterService = new UnfetterPosterService();
+        unfetterPosterService = new UnfetterPosterRestService();
     });
 
     it('should have a constructor', () => {

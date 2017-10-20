@@ -3,7 +3,7 @@ import { CtfMock } from './mocks/ctf-mock';
 import { AttackPattern } from './models/attack-pattern';
 import { Ctf } from './models/ctf';
 import { MarkingDefinition } from './models/marking-definition';
-import { StixLookupService } from './services/stix-lookup.service';
+import { StixLookupMongoService } from './services/stix-lookup-mongo.service';
 
 /**
  * convert to stix
@@ -12,13 +12,13 @@ import { StixLookupService } from './services/stix-lookup.service';
 describe('ctf to stix conversion', () => {
 
     let ctfToStixAdapter: CtfToStixAdapter;
-    let stixLookupService: StixLookupService;
+    let stixLookupService: StixLookupMongoService;
     let ctfArr: Ctf[];
 
     beforeEach(() => {
         ctfToStixAdapter = new CtfToStixAdapter();
         ctfArr = new CtfMock().mockMany(2);
-        stixLookupService = new StixLookupService();
+        stixLookupService = new StixLookupMongoService();
 
     });
 

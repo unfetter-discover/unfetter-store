@@ -3,12 +3,13 @@ import fetch from 'node-fetch';
 import { Environment } from '../environment';
 import { AttackPattern } from '../models/attack-pattern';
 import { MarkingDefinition } from '../models/marking-definition';
+import { StixLookupService } from './stix-lookup-service';
 
 /**
  * @description
  *  class to make calls to the backend API
  */
-export class StixLookupService {
+export class StixLookupRestService implements StixLookupService {
 
     protected readonly attackPatternPath = `attack-patterns`;
     protected readonly markingDefinitionsPath = `marking-definitions`;
@@ -29,7 +30,7 @@ export class StixLookupService {
      */
     public findAttackPatternByName(name = ''): Promise<AttackPattern[]> {
         if (!name || name.trim().length === 0) {
-            Promise.resolve([]);
+            return Promise.resolve([]);
         }
 
         const filter = JSON.stringify({
@@ -77,7 +78,7 @@ export class StixLookupService {
      */
     public findMarkingDefinitionByLabel(label: string): Promise<MarkingDefinition[]> {
         if (!label) {
-            Promise.resolve([]);
+            return Promise.resolve([]);
         }
 
         const filter = JSON.stringify({
