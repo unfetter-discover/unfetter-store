@@ -67,7 +67,7 @@ if __name__ == '__main__':
         try:
             out_file = open(inp_file, 'w')
             json.dump(private_config, out_file)
-            print 'Configuration successfully written to file.'
+            print 'Configuration successfully written to ' + inp_file
         except:
             print 'Unable to write configuration to file'
 

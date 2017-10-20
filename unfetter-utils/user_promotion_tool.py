@@ -21,19 +21,24 @@ if __name__ == '__main__':
     users = [user for user in users_raw]
     print users[0]
 
-    print 'Registered users:\n\tIndex - User Name - User Role'
+    print '\n***************\n\nRegistered Users:\n\n\tIndex - User Name - User Role'
     for i in range(0, len(users)):
         print '\t' + str(i) + ' -- ' + users[i][u'userName'] + ' -- ' + users[i][u'role']
 
+    print '\n***************\n'
+
     inp = 'y'
+    first_go = True
     while inp == 'Y' or inp =='y':
-        inp = str(raw_input('Do you wish to promote a/another user? [y/n]: '))
+        if first_go == False:
+            inp = str(raw_input('Do you wish to edit another user? [y/n]: '))
+
+        first_go = False
+
         if inp != 'Y' and inp !='y':
             break
 
-        user_index = int(raw_input('Enter the index of the user you wish to promote: '))
-        print str(user_index)
-        print users[user_index]
+        user_index = int(raw_input('Enter the index of the user you wish to edit: '))
 
         print 'Enter the index of the role you wish this user to be:\n\tIndex - User Role'
         for i in range(0, len(UNFETTER_USER_ROLES)):
