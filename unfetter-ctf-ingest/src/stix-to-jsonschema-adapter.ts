@@ -3,7 +3,6 @@ import { Ctf } from './models/ctf';
 import { JsonSchema } from './models/json-schema';
 import { KillChainPhase } from './models/kill-chain-phase';
 import { Stix } from './models/stix';
-import { StixLookupService } from './services/stix-lookup.service';
 
 /**
  * @description

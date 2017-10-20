@@ -6,14 +6,15 @@ import { Stix } from '../models/stix';
 /**
  * @description class to post stix objects to UNFETTER API
  */
-export class UnfetterPosterService {
+export class UnfetterPosterRestService {
     protected readonly path = `reports`;
     protected apiUrl: string;
 
-    constructor(host = 'localhost') {
+    constructor() {
         // fix the self signed cert error
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-        this.apiUrl = `https://${Environment.apiHost}:${Environment.apiPort}${Environment.context}`;
+        this.apiUrl =
+            `${Environment.apiProtocol}://${Environment.apiHost}:${Environment.apiPort}${Environment.context}`;
     }
 
     public async uploadJsonSchema(arr: JsonSchema[] = []): Promise<any[]> {
@@ -29,9 +30,9 @@ export class UnfetterPosterService {
                 method: 'POST',
                 body,
             })
-                .then((res) => {
-                    return res.json();
-                });
+            .then((res) => {
+                return res.json();
+            });
         });
         return Promise.all(promises);
     }

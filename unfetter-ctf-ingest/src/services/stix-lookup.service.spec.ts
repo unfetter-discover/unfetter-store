@@ -1,14 +1,14 @@
 import { AttackPattern } from '../models/attack-pattern';
 import { JsonSchema } from '../models/json-schema';
 import { MarkingDefinition } from '../models/marking-definition';
-import { StixLookupService } from './stix-lookup.service';
+import { StixLookupRestService } from './stix-lookup-rest.service';
 
 describe('Stix lookup service', () => {
 
-    let stixLookupService: StixLookupService;
+    let stixLookupService: StixLookupRestService;
 
     beforeEach(() => {
-        stixLookupService = new StixLookupService();
+        stixLookupService = new StixLookupRestService();
     });
 
     it('should have a constructor', () => {
