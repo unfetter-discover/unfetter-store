@@ -4,7 +4,7 @@ LABEL MAINTAINER="unfetter"
 LABEL Description="REST endpoints and Swagger documentation"
 
 # Install packages
-RUN npm install -g multi-file-swagger && npm install -g json2yaml && npm install -g swagger && apk add --update curl
+RUN npm --loglevel error install -g multi-file-swagger && npm --loglevel error install -g json2yaml && npm --loglevel error install -g swagger && apk add --update curl
 
 ENV WORKING_DIRECTORY /usr/share/unfetter-discover-api
 
@@ -15,7 +15,7 @@ WORKDIR $WORKING_DIRECTORY
 # Install Dependencies
 COPY package.json $WORKING_DIRECTORY
 RUN apk update && \
-    npm install && \
+    npm --loglevel error install && \
     # The NPM package depends on TAR package, which has a test directory with an encrypted tgz file, that gets blocked by some antivirus scanners. Removing it.
     find / -name "cb-never*.tgz" -delete && \
     rm -rf /usr/share/man && \
@@ -41,4 +41,4 @@ EXPOSE 3000
 # Open debugging ports
 EXPOSE 5555
 # Start Application
-CMD [ "npm", "start" ]
+CMD [ "npm --loglevel error", "start" ]
