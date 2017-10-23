@@ -6,6 +6,7 @@ const GithubStrategy = require('passport-github').Strategy;
 
 const config = require('../config/config');
 const userModel = require('../models/user');
+const generateId = require('../helpers/stix').id;
 
 // Github
 passport.use(new GithubStrategy({
@@ -141,7 +142,7 @@ router.get('/user-from-token', (req, res) => {
     }
 });
 
-router.post('/finalize-registration', (req, res) => {
+router.post('/finalize-registration', passport.authenticate('jwt', { session: false }), (req, res) => {
     let user = req.body.data.attributes;
     if(user) {
         userModel.findById(user._id, (err, result) => {
@@ -149,6 +150,7 @@ router.post('/finalize-registration', (req, res) => {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             } else {
                 user.registered = true;
+                user.identity.id = generateId('identity');
                 const newDocument = new userModel(user);
                 const error = newDocument.validateSync();
                 if (error) {
@@ -178,8 +180,17 @@ router.post('/finalize-registration', (req, res) => {
     }
 });
 
-router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res, next) => {    
-    res.send('in profile');
+router.get('/profile/:id', passport.authenticate('jwt', { session: false }), (req, res) => {   
+    const userId = req.params.id;
+    userModel.findById(userId, (err, result) => {
+        if (err || !result) {
+            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+        } else {
+            console.log('RES', result);
+            const user = result.toObject();
+            res.json({data: { attributes: user } });
+        }
+    });
 });
 
 module.exports = router;
