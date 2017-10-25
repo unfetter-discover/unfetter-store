@@ -55,7 +55,9 @@ const UserSchema = mongoose.Schema({
         }
     },
     identity: {
-        id: String,
+        id: {
+            type: String
+        },
         name: {
             type: String
         },
@@ -72,6 +74,11 @@ const UserSchema = mongoose.Schema({
             enum: ['identity'],
             default: 'identity'
         }
+    },
+    created: {
+        type: Date,
+        default: Date.now,
+        required: [true, 'created is required']
     }
 });
 
