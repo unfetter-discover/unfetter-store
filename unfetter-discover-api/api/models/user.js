@@ -55,7 +55,9 @@ const UserSchema = mongoose.Schema({
         }
     },
     identity: {
-        id: String,
+        id: {
+            type: String
+        },
         name: {
             type: String
         },
