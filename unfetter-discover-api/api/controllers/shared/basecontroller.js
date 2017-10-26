@@ -323,21 +323,28 @@ module.exports = class BaseController {
         };
     }
 
-    deleteById() {
-        const type = this.type;
-        const model = this.model;
-        const relationshipModel = modelFactory.getModel('relationship');
+    deleteByIdCb(callback) {
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
             const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
+            callback(req, res, id);
+        };
+    }     
+
+    deleteById() {
+        const type = this.type;
+        const model = this.model;
+        const relationshipModel = modelFactory.getModel('relationship');
+
+        return this.deleteByIdCb((req, res, id) => {
             const promises = [];
             // per mongo documentation
             // Mongoose queries are not promises. However, they do have a .then() function for yield and async/await.
             // If you need a fully- fledged promise, use the .exec() function.
             promises.push(model.remove({ _id: id }).exec());
-            promises.push(relationshipModel.remove({ $or: [{ source_ref: id }, { target_ref: id }] }).exec());
+            promises.push(relationshipModel.remove({ $or: [{ 'stix.source_ref': id }, { 'stix.target_ref': id }] }).exec());
             Promise.all(promises).then((response) => {
                 if (response && response.length > 0 && response[0].result && response[0].result.n === 1) {
                     return res.status(200).json({ data: { type: 'Success', message: `Deleted id ${id}` } });
@@ -347,6 +354,6 @@ module.exports = class BaseController {
             }).catch((err) => {
                 res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             });
-        };
+        });
     } 
 }
