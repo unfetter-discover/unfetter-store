@@ -53,6 +53,7 @@ if (!process.env.RUN_MODE || process.env.RUN_MODE !== 'TEST') {
   app.use('*', passport.authenticate('jwt', { session: false }), (req, res, next) => {
     passportConfig.jwtStandard(req, res, next);
   });
+  app.use('/web-analytics', require('./api/express-controllers/web-analytics'));
 }
 
 // ~~~ Swagger ~~~
