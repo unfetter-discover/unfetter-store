@@ -8,23 +8,30 @@ const config = require('../config/config');
 const userModel = require('../models/user');
 const generateId = require('../helpers/stix').id;
 
-// Github
-passport.use(new GithubStrategy({
+const githubStrategy = new GithubStrategy({
     clientID: config.github.clientID,
     clientSecret: config.github.clientSecret,
     callbackURL: config.github.callbackURL
-},
-function (accessToken, refreshToken, profile, cb) {
-    // TODO process token here
-    console.log(accessToken);
+}, (accessToken, refreshToken, profile, cb) => {
     return cb(null, profile);
-}));
+});
 
-passport.serializeUser(function (user, cb) {
+if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
+    console.log('Attempting to configure proxy');
+    const HttpsProxyAgent = require('https-proxy-agent');
+    githubStrategy._oauth2.setAgent(new HttpsProxyAgent(process.env.HTTPS_PROXY_URL));
+} else {
+    console.log('Not using a proxy');
+}
+
+// Github
+passport.use(githubStrategy);
+
+passport.serializeUser((user, cb) => {
     cb(null, user);
 });
 
-passport.deserializeUser(function (obj, cb) {
+passport.deserializeUser((obj, cb) => {
     cb(null, obj);
 });
 
