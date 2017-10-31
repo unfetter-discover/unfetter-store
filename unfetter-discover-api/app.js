@@ -34,12 +34,11 @@ app.use(bodyParser.urlencoded({
   limit: '5mb'
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Don't use auth middleware during unit testing
-if (!process.env.RUN_MODE || process.env.RUN_MODE !== 'TEST') {
+// Use auth middleware when runmode is UAC, or as a safeguard when RUN_MODE isn't specified
+if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
   // Set passport strategy
+  app.use(passport.initialize());
+  app.use(passport.session());
   passportConfig.setStrategy(passport);
 
   // Express controllers

@@ -55,8 +55,19 @@ const addComment = (req, res) => {
         && req.swagger.params.data.value.data.attributes.comment !== undefined) {
 
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-        const user = req.user;
         const comment = req.swagger.params.data.value.data.attributes.comment;
+        
+        let user;
+        if (process.env.RUN_MODE === 'DEMO') {
+            user = {
+                _id: '1234',
+                userName: 'Demo-User',
+                firstName: 'Demo',
+                lastName: 'User'
+            };
+        } else {
+            user = req.user
+        }
 
         model.findById({ _id: id }, (err, result) => {
             if (err || !result) {
@@ -71,15 +82,20 @@ const addComment = (req, res) => {
                 resultObj.metaProperties.comments = [];
             } 
 
-            resultObj.metaProperties.comments.push({
+            const commentObj = {
                 "user": {
-                    "id": user._id, 
-                    "userName": user.userName,
-                    "avatar_url": user.github.avatar_url
+                    "id": user._id,
+                    "userName": user.userName
                 },
                 "submitted": new Date(),
                 "comment": comment
-            });
+            };
+
+            if (user.github && user.github.avatar_url) {
+                commentObj['avatar_url'] = user.github.avatar_url;
+            }
+
+            resultObj.metaProperties.comments.push(commentObj);
 
             const newDocument = new model(resultObj);
             const error = newDocument.validateSync();
@@ -122,7 +138,18 @@ const addLike = (req, res) => {
     if (req.swagger.params.id.value !== undefined) {
 
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-        const user = req.user;
+
+        let user;
+        if (process.env.RUN_MODE === 'DEMO') {
+            user = {
+                _id: '1234',
+                userName: 'Demo-User',
+                firstName: 'Demo',
+                lastName: 'User'
+            };
+        } else {
+            user = req.user
+        }
 
         model.findById({ _id: id }, (err, result) => {
             if (err || !result) {
