@@ -78,6 +78,8 @@
   $ref: ./multiples/add_comment.yaml
 /multiples/{id}/like:
   $ref: ./multiples/add_like.yaml
+/multiples/{id}/interaction:
+  $ref: ./multiples/add_interaction.yaml
 /multiples/{id}/label:
   $ref: ./multiples/add_label.yaml
 

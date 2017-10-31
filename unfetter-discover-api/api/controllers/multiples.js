@@ -249,9 +249,81 @@ const addLabel = (req, res) => {
     }
 };
 
+const addInteraction = (req, res) => {
+    res.header('Content-Type', 'application/vnd.api+json');
+
+    // get the old item
+    if (req.swagger.params.id.value !== undefined) {
+
+        const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+        const user = req.user;
+
+        model.findById({ _id: id }, (err, result) => {
+            if (err || !result) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            }
+            const resultObj = result.toObject();
+            if (resultObj.metaProperties === undefined) {
+                resultObj.metaProperties = {};
+            }
+
+            if (resultObj.metaProperties.interactions === undefined) {
+                resultObj.metaProperties.interactions = [];
+            } else {
+                const interactedByUser = resultObj.metaProperties.interactions
+                    .find((interaction) => interaction.user.id.toString() === user._id.toString());
+
+                if (interactedByUser) {
+                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'User has already interacted with this' }] });
+                }
+            }
+
+            resultObj.metaProperties.interactions.push({
+                "user": {
+                    "id": user._id,
+                    "userName": user.userName
+                },
+                "submitted": new Date()
+            });
+
+            const newDocument = new model(resultObj);
+            const error = newDocument.validateSync();
+            if (error) {
+                const errors = [];
+                lodash.forEach(error.errors, (field) => {
+                    errors.push(field.message);
+                });
+                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+            }
+
+            // guard pass complete
+            model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+                if (errUpdate) {
+                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                }
+
+                if (resultUpdate) {
+                    const requestedUrl = apiRoot + req.originalUrl;
+                    const obj = newDocument.toObject();
+                    return res.status(200).json({
+                        links: { self: requestedUrl, },
+                        data: { attributes: { ...obj.stix, ...obj.metaProperties, ...obj.extendedProperties } }
+                    });
+                }
+
+                return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
+            });
+
+        });
+    } else {
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
+    }
+};
+
 module.exports = {
     get,
     addComment,
     addLike,
-    addLabel
+    addLabel,
+    addInteraction
 };
