@@ -18,10 +18,6 @@ const UserSchema = mongoose.Schema({
                 type: String,
                 default: 'STANDARD_USER'
             }
-        }],
-        default: [{
-            // Unfetter Identity ID
-            id: 'identity--4ac44385-691d-411a-bda8-027c61d68e99'
         }]
     },
     email: {
