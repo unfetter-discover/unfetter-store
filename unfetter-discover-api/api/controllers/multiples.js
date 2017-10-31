@@ -92,7 +92,7 @@ const addComment = (req, res) => {
             };
 
             if (user.github && user.github.avatar_url) {
-                commentObj['avatar_url'] = user.github.avatar_url;
+                commentObj['user']['avatar_url'] = user.github.avatar_url;
             }
 
             resultObj.metaProperties.comments.push(commentObj);
