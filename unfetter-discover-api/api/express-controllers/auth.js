@@ -193,7 +193,6 @@ router.get('/profile/:id', passport.authenticate('jwt', { session: false }), (re
         if (err || !result) {
             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
         } else {
-            console.log('RES', result);
             const user = result.toObject();
             res.json({data: { attributes: user } });
         }
