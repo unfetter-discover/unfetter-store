@@ -1,4 +1,4 @@
-process.env.RUN_MODE = 'STANDARD';
+process.env.RUN_MODE = process.env.RUN_MODE || 'DEMO';
 const port = process.env.PORT || '3000';
 
 const app = require('../../app');
