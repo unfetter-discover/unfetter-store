@@ -158,6 +158,18 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
             } else {
                 user.registered = true;
                 user.identity.id = generateId('identity');
+
+                if (!user.organizations) {
+                    user.organizations = [];
+                }
+
+                // Unfetter open
+                user.organizations.push({
+                    id: 'identity--e240b257-5c42-402e-a0e8-7b81ecc1c09a',
+                    approved: true,
+                    role: 'STANDARD_USER'
+                });
+
                 const newDocument = new userModel(user);
                 const error = newDocument.validateSync();
                 if (error) {
