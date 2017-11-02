@@ -16,7 +16,7 @@ const StixSchema = {
         required: [true, 'identity class is required']
     },
     sectors: [String],
-    contract_information: String,
+    contact_information: String,
     type: {
         type: String,
         enum: ['identity'],

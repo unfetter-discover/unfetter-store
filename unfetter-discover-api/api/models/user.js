@@ -76,10 +76,12 @@ const UserSchema = mongoose.Schema({
             type: String
         },
         identity_class: {
-            type: String
+            type: String,
+            enum: ['individual'],
+            default: 'individual'
         },
         sectors: [String],
-        contract_information: String,
+        contact_information: String,
         type: {
             type: String,
             enum: ['identity'],
