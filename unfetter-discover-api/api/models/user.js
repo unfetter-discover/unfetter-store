@@ -17,6 +17,10 @@ const UserSchema = mongoose.Schema({
             role: {
                 type: String,
                 default: 'STANDARD_USER'
+            },
+            approved: {
+                type: Boolean,
+                default: false
             }
         }]
     },
