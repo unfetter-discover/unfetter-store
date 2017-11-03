@@ -17,11 +17,11 @@ const UserSchema = mongoose.Schema({
             role: {
                 type: String,
                 default: 'STANDARD_USER'
+            },
+            approved: {
+                type: Boolean,
+                default: false
             }
-        }],
-        default: [{
-            // Unfetter Identity ID
-            id: 'identity--4ac44385-691d-411a-bda8-027c61d68e99'
         }]
     },
     email: {
@@ -76,10 +76,12 @@ const UserSchema = mongoose.Schema({
             type: String
         },
         identity_class: {
-            type: String
+            type: String,
+            enum: ['individual'],
+            default: 'individual'
         },
         sectors: [String],
-        contract_information: String,
+        contact_information: String,
         type: {
             type: String,
             enum: ['identity'],

@@ -15,6 +15,78 @@ router.get('/users-pending-approval', (req, res) => {
     });
 });
 
+router.get('/organization-leader-applicants', (req, res) => {
+    const query = [
+        {
+            $unwind: '$organizations'
+        },
+        {
+            $match: {
+                'organizations.role': 'ORG_LEADER_APPLICANT'
+            }
+        }
+    ];
+
+    userModel.aggregate(query, (err, result) => {
+        if (err) {
+            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+        } else {
+            console.log(result);
+            return res.json({ data: result });
+        }
+    });
+});
+
+router.post('/process-organization-applicant/:userId', (req, res) => {
+
+    const userId = req.params.userId;
+    // Note, since organizations is unwinded, its an object, not an array of objects
+    const organizations = req.body.data && req.body.data.organizations ? req.body.data.organizations : undefined;
+
+    if (userId === undefined || organizations === undefined || organizations.approved === undefined || organizations.id === undefined) {
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'Malformed request' }] });
+    } else {
+        userModel.findById(userId, (err, result) => {
+            if (err || !result) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            } else {
+                const user = result.toObject();
+                const matchingOrg = user.organizations.find((org) => org.id === organizations.id);
+
+                if (!matchingOrg) {
+                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                } else {
+
+                    matchingOrg.role = organizations.role;
+
+                    const newDocument = new userModel(user);
+                    const error = newDocument.validateSync();
+                    if (error) {
+                        console.log(error);
+                        const errors = [];
+                        error.errors.forEach((field) => {
+                            errors.push(field.message);
+                        });
+                        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                    } else {
+                        userModel.findByIdAndUpdate(user._id, newDocument, (errInner, resultInner) => {
+                            if (errInner || !resultInner) {
+                                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                            } else {
+                                return res.json({
+                                    "data": {
+                                        "attributes": newDocument.toObject()
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+});
+
 router.post('/process-user-approval', (req, res) => {
     let requestData = req.body.data && req.body.data.attributes ? req.body.data.attributes : {};
     if (requestData._id === undefined || requestData.approved === undefined || requestData.locked === undefined) {

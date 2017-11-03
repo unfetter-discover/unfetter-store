@@ -48,10 +48,16 @@ if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
   });
   app.use('/admin', require('./api/express-controllers/admin'));
 
+  app.use('/organizations-management', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+    passportConfig.jwtOrganizations(req, res, next);
+  });
+  app.use('/organizations-management', require('./api/express-controllers/organizations-management'));
+
   // Auth middleware
   app.use('*', passport.authenticate('jwt', { session: false }), (req, res, next) => {
     passportConfig.jwtStandard(req, res, next);
   });
+  app.use('/organizations', require('./api/express-controllers/organizations'));
   app.use('/web-analytics', require('./api/express-controllers/web-analytics'));
 }
 

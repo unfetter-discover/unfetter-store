@@ -158,6 +158,18 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
             } else {
                 user.registered = true;
                 user.identity.id = generateId('identity');
+
+                if (!user.organizations) {
+                    user.organizations = [];
+                }
+
+                // Unfetter open
+                user.organizations.push({
+                    id: 'identity--e240b257-5c42-402e-a0e8-7b81ecc1c09a',
+                    approved: true,
+                    role: 'STANDARD_USER'
+                });
+
                 const newDocument = new userModel(user);
                 const error = newDocument.validateSync();
                 if (error) {
@@ -193,7 +205,6 @@ router.get('/profile/:id', passport.authenticate('jwt', { session: false }), (re
         if (err || !result) {
             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
         } else {
-            console.log('RES', result);
             const user = result.toObject();
             res.json({data: { attributes: user } });
         }
