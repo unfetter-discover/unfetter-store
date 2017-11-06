@@ -221,6 +221,19 @@ module.exports = class BaseController {
                     obj.metaProperties = tempMeta;
                 }
 
+                // If using UAC, confirm user can post to that group
+                if (process.env.RUN_MODE === 'UAC' && req.user && req.user.role !== 'ADMIN' && obj.stix.created_by_ref) {
+                    const userOrgIds = req.user.organizations
+                        .filter((org) => org.approved)
+                        .map((org) => org.id);
+
+
+                    if (!userOrgIds.includes(obj.stix.created_by_ref)) {
+                        console.log(req.user.userName, 'attempted to add a STIX message to a organization he/she does not belong to');
+                        return res.status(500).json({ errors: [{ status: 401, source: '', title: 'Error', code: '', detail: 'User is not allowed to create a STIX for this organization.' }] });
+                    }
+                }
+
                 const newDocument = new model(obj);
 
                 const error = newDocument.validateSync();
