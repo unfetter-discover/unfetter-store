@@ -283,7 +283,8 @@ router.get('/site-visits-graph/:days', (req, res) => {
             const formatedRes = results
                 .concat(zeroDates)
                 .sort((a, b) => b._id - a._id)
-                .slice(0, numDays);
+                .slice(0, numDays)
+                .sort((a, b) => a._id - b._id);
 
             return res.json({ data: formatedRes });
         }
