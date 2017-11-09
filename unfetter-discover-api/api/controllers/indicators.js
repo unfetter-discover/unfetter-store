@@ -72,6 +72,7 @@ const attackPatternsByIndicator = (req, res) => {
                         'name': '$attackPatterns.stix.name',
                         'kill_chain_phases': '$attackPatterns.stix.kill_chain_phases',
                         'x_unfetter_sophistication_level': '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
+                        'x_mitre_platforms': '$attackPatterns.extendedProperties.x_mitre_platforms'
                     }
                 }
             }

@@ -213,4 +213,83 @@ router.get('/site-visits', (req, res) => {
     });
 });
 
+router.get('/site-visits-graph/:days', (req, res) => {
+    const numDays = req.params.days;
+    const query = [
+        {
+            $match: {
+                eventType: 'visit'
+            }
+        },
+        {
+            $project: {
+                userId: '$eventData.userId',
+                day: {
+                    $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$eventData.date"
+                    }
+                }
+            }
+        },
+        {
+            $group: {
+                _id: '$day',
+                users: {
+                    $addToSet: {
+                        userId: '$userId'
+                    }
+                },
+                appLoads: {
+                    $sum: 1
+                }
+            }
+        },
+        {
+            $project: {
+                users: { $size: '$users' },
+                appLoads: '$appLoads'
+            }
+        },
+        {
+            $sort: {
+                _id: -1
+            }
+        }
+    ];
+
+    webAnalyticsModel.aggregate(query, (err, results) => {
+        if (err || !results) {
+            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+        } else {
+            results = results.map((res) => {
+                const retVal = res;
+                retVal._id = new Date(res._id)
+                return retVal;
+            });
+            const startDate = new Date(results[results.length - 1]._id);
+            const endDate = new Date(results[0]._id);
+            const zeroDates = [];
+            for (let iDate = new Date(startDate); iDate < endDate; iDate.setDate(iDate.getDate() + 1)) {      
+                let findDate = results.find((res) => res._id.toDateString() === iDate.toDateString());
+                if (!findDate) {
+                    zeroDates.push({
+                        _id: new Date(iDate.getTime()),
+                        users: 0,
+                        appLoads: 0
+                    });
+                }
+            }
+            const formatedRes = results
+                .concat(zeroDates)
+                .sort((a, b) => b._id - a._id)
+                .slice(0, numDays)
+                .sort((a, b) => a._id - b._id);
+
+            return res.json({ data: formatedRes });
+        }
+    });
+
+});
+
 module.exports = router;
