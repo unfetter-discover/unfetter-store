@@ -53,9 +53,9 @@ export class AttackPatternIngestService {
 
         if (stixies && stixies.length > 1) {
             console.log(`generated ${stixies.length} stix objects.`);
-            stixies.forEach((el) => console.log(JSON.stringify(el)));
+            // stixies.forEach((el) => console.log(el.toJson()));
         }
-        return Promise.resolve([]);
+        return Promise.resolve(stixies);
     }
 
 }

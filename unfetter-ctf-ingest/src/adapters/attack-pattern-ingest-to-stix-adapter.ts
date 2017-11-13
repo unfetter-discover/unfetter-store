@@ -45,7 +45,8 @@ export class AttackPatternIngestToStixAdapter {
         }
 
         stix.created = new Date().toISOString();
-        stix.created_by_ref = (await this.lookupSystemIdentity()).id;
+        const ident: any = await this.lookupSystemIdentity();
+        stix.created_by_ref = ident.stix.id;
         stix.description = attackPatternIngest.description;
         stix.name = attackPatternIngest.action;
 
