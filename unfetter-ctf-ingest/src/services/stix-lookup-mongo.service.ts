@@ -4,8 +4,9 @@ import fetch from 'node-fetch';
 import { Environment } from '../environment';
 import { AttackPattern } from '../models/attack-pattern';
 import { MarkingDefinition } from '../models/marking-definition';
+import { Stix } from '../models/stix';
 import { MongoConnectionService } from './mongo-connection.service';
-import { StixLookupService } from './stix-lookup-service';
+import { StixLookupService } from './stix-lookup.service';
 
 /**
  * @description class to make calls to the Mongo database directly
@@ -61,4 +62,35 @@ export class StixLookupMongoService {
             .catch((error: any) => console.log(error)));
     }
 
+    /**
+     * @description lookup up marking definition by label
+     * @param {string} name
+     * @returns {Stix}
+     */
+    public async findIdentityByName(name = ''): Promise<Stix> {
+        if (!name || name.trim().length === 0) {
+            return Promise.reject('');
+        }
+
+        const collection = await MongoConnectionService.getCollection();
+
+        const filter = {
+            'stix.name': name,
+        };
+
+        return Promise.resolve(collection.findOne(filter)
+            .then((result: any) => {
+                return result;
+            })
+            .catch((error: any) => console.log(error)));
+    }
+
+    /**
+     * @description lookup up the unfetter system identity
+     * @param {string} name
+     * @returns {Stix}
+     */
+    public async findSystemIdentity(): Promise<Stix> {
+        return this.findIdentityByName('Unfetter of NSA');
+    }
 }

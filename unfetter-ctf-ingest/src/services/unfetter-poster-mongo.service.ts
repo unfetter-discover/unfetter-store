@@ -22,20 +22,29 @@ export class UnfetterPosterMongoService {
         console.log(`inserting ${arr.length} stix objects`);
         const collection = await MongoConnectionService.getCollection();
 
-        arr = arr.map((el) => {
+        // generate id and wrap in stix
+        const wrappedArr: WrappedStix[] = arr.map((el) => {
             const v4 = UUID.v4();
             const id = el.type + '-' + v4;
-            el['_id'] = id;
-            return el;
+            const wrapper: WrappedStix = {
+                _id: id,
+                stix: Object.assign({}, el),
+            };
+            return wrapper;
         });
 
-        return Promise.resolve(collection.insertMany(arr)
+        return Promise.resolve(collection.insertMany(wrappedArr)
             .then((res: any) => {
                 console.log(res.result);
-                console.log( `inserted ${res.insertedCount} objects`);
+                console.log(`inserted ${res.insertedCount} objects`);
                 console.log(res);
             })
             .catch((err: any) => console.log(err)));
     }
 
+}
+
+interface WrappedStix {
+    _id: string;
+    stix: Stix;
 }

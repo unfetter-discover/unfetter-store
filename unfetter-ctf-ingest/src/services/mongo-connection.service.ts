@@ -67,7 +67,6 @@ export class MongoConnectionService {
     protected static readonly mongoDbName = process.env.MONGO_DBNAME || 'stix';
     protected static readonly monogCollectionName = process.env.MONGO_COLLECTION_NAME || 'stix';
     // tslint:disable-next-line:max-line-length
-    protected static readonly mongoUrl =
-        `mongodb://${MongoConnectionService.mongoRepo}:${MongoConnectionService.mongoPort}/${MongoConnectionService.mongoDbName}`;
+    protected static readonly mongoUrl = `mongodb://${MongoConnectionService.mongoRepo}:${MongoConnectionService.mongoPort}/${MongoConnectionService.mongoDbName}`;
     protected static readonly waitTime = 600;
 }

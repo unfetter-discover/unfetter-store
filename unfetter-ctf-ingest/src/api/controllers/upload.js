@@ -1,6 +1,6 @@
 'use strict';
 
-const CtfIngest = require('../../ctf-ingest');
+const CtfIngestService = require('../../services/ctf-ingest-service');
 const StixToJsonSchemaAdapter = require('../../stix-to-jsonschema-adapter');
 
 const upload = (req, res) => {
@@ -9,7 +9,7 @@ const upload = (req, res) => {
     const csv = body.data || '';
     // console.log(csv.split('\n')[0]);
 
-    const ctfIngest = new CtfIngest.CtfIngest();
+    const ctfIngest = new CtfIngestService.CtfIngestService();
     ctfIngest.csvToStix(csv)
         .then((stixies) => {
             // console.log(`stixies ${stixies}`);

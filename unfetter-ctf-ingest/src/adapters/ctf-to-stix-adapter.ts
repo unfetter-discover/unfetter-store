@@ -1,9 +1,9 @@
-import { AttackPattern } from './models/attack-pattern';
-import { Ctf } from './models/ctf';
-import { KillChainPhase } from './models/kill-chain-phase';
-import { MarkingDefinition } from './models/marking-definition';
-import { Stix } from './models/stix';
-import { StixLookupMongoService } from './services/stix-lookup-mongo.service';
+import { AttackPattern } from '../models/attack-pattern';
+import { Ctf } from '../models/ctf';
+import { KillChainPhase } from '../models/kill-chain-phase';
+import { MarkingDefinition } from '../models/marking-definition';
+import { Stix } from '../models/stix';
+import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
 
 /**
  * @description
