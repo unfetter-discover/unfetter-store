@@ -104,6 +104,15 @@ module.exports = class BaseController {
         const type = this.type;
         const model = this.model;
         const getEnhancedData = this.getEnhancedData;
+        return this.getCb((err, convertedResult, requestedUrl, req, res) => {
+            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+        });
+    }
+
+    getCb(callback) {
+        const type = this.type;
+        const model = this.model;
+        const getEnhancedData = this.getEnhancedData;
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -113,10 +122,11 @@ module.exports = class BaseController {
             }
 
             model
-                .find(Object.assign({'stix.type': type}, query.filter))
+                .find(Object.assign({ 'stix.type': type }, query.filter))
                 .sort(query.sort)
                 .limit(query.limit)
                 .skip(query.skip)
+                .select(query.project)
                 .exec((err, result) => {
 
                     if (err) {
@@ -125,10 +135,11 @@ module.exports = class BaseController {
 
                     const requestedUrl = apiRoot + req.originalUrl;
 
-                    let data = getEnhancedData(result, req.swagger.params);                    
+                    let data = getEnhancedData(result, req.swagger.params);
 
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi(data, type, requestedUrl);
-                    return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+                    // return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+                    callback(err, convertedResult, requestedUrl, req, res);
                 });
         }
     }
@@ -204,6 +215,25 @@ module.exports = class BaseController {
                     obj.extendedProperties = extendedProperties;
                 }
 
+                if (obj.stix.metaProperties !== undefined) {
+                    let tempMeta = obj.stix.metaProperties;
+                    delete obj.stix.metaProperties;
+                    obj.metaProperties = tempMeta;
+                }
+
+                // If using UAC, confirm user can post to that group
+                if (process.env.RUN_MODE === 'UAC' && req.user && req.user.role !== 'ADMIN' && obj.stix.created_by_ref) {
+                    const userOrgIds = req.user.organizations
+                        .filter((org) => org.approved)
+                        .map((org) => org.id);
+
+
+                    if (!userOrgIds.includes(obj.stix.created_by_ref)) {
+                        console.log(req.user.userName, 'attempted to add a STIX message to a organization he/she does not belong to');
+                        return res.status(500).json({ errors: [{ status: 401, source: '', title: 'Error', code: '', detail: 'User is not allowed to create a STIX for this organization.' }] });
+                    }
+                }
+
                 const newDocument = new model(obj);
 
                 const error = newDocument.validateSync();
@@ -254,7 +284,14 @@ module.exports = class BaseController {
                     const incomingObj = req.swagger.params.data ? req.swagger.params.data.value.data.attributes : {};
                     const has = Object.prototype.hasOwnProperty;
                     for (const key in incomingObj) {
-                        if (key.match(/^x_/) === null && has.call(incomingObj, key)) {
+                        if (key === 'metaProperties') {
+                            for (const metaKey in incomingObj.metaProperties) {
+                                if (resultObj.metaProperties === undefined) {
+                                    resultObj.metaProperties = {};
+                                }
+                                resultObj.metaProperties[metaKey] = incomingObj.metaProperties[metaKey];
+                            }
+                        } else if (key.match(/^x_/) === null && has.call(incomingObj, key)) {
                             resultObj.stix[key] = incomingObj[key];
                         } else if (key.match(/^x_/) !== null && has.call(incomingObj, key)) {
                             if (resultObj.extendedProperties === undefined) {
@@ -299,21 +336,28 @@ module.exports = class BaseController {
         };
     }
 
-    deleteById() {
-        const type = this.type;
-        const model = this.model;
-        const relationshipModel = modelFactory.getModel('relationship');
+    deleteByIdCb(callback) {
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
             const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
+            callback(req, res, id);
+        };
+    }     
+
+    deleteById() {
+        const type = this.type;
+        const model = this.model;
+        const relationshipModel = modelFactory.getModel('relationship');
+
+        return this.deleteByIdCb((req, res, id) => {
             const promises = [];
             // per mongo documentation
             // Mongoose queries are not promises. However, they do have a .then() function for yield and async/await.
             // If you need a fully- fledged promise, use the .exec() function.
             promises.push(model.remove({ _id: id }).exec());
-            promises.push(relationshipModel.remove({ $or: [{ source_ref: id }, { target_ref: id }] }).exec());
+            promises.push(relationshipModel.remove({ $or: [{ 'stix.source_ref': id }, { 'stix.target_ref': id }] }).exec());
             Promise.all(promises).then((response) => {
                 if (response && response.length > 0 && response[0].result && response[0].result.n === 1) {
                     return res.status(200).json({ data: { type: 'Success', message: `Deleted id ${id}` } });
@@ -323,6 +367,6 @@ module.exports = class BaseController {
             }).catch((err) => {
                 res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             });
-        };
+        });
     } 
 }

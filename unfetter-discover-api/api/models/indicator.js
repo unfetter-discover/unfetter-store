@@ -17,10 +17,12 @@ const StixSchema = {
         default: Date.now
     },
     valid_until: {
-        type: Date,
-        default: Date.now
+        type: Date
     },
-    kill_chain_phases: [stixCommons['kill_chain_phases']],
+    kill_chain_phases: {
+        type: [stixCommons['kill_chain_phases']],
+        default: void 0
+    },
     type: {
         type: String,
         enum: ['indicator'],

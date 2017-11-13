@@ -19,6 +19,11 @@ mongooseModel['x-unfetter-assessment'] = require('../../models/x-unfetter-assess
 mongooseModel['x-unfetter-sensor'] = require('../../models/x-unfetter-sensor');
 mongooseModel['schemaless'] = require('../../models/schemaless');
 mongooseModel['config'] = require('../../models/config');
+mongooseModel['user'] = require('../../models/user');
+
+const stixSchema = mongoose.Schema({}, { strict: false });
+
+const stixAggregationModel = mongoose.model(`stixAggregations`, stixSchema, 'stix');
 
 module.exports = {
     getModel: (type) => {
@@ -30,8 +35,12 @@ module.exports = {
         }
     },
     getAggregationModel: (type) => {
-        const schema = mongoose.Schema({}, {strict: false});
+        if(type === 'stix') {
+            return stixAggregationModel;
+        } else {
+            const schema = mongoose.Schema({}, { strict: false });
 
-        return mongoose.model(`${type}Aggregations`, schema, type);
+            return mongoose.model(`${type}Aggregations`, schema, type);
+        }        
     }
 };

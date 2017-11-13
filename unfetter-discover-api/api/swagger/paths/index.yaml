@@ -22,6 +22,8 @@
 
 /indicators:
   $ref: ./indicators/indicators.yaml
+/indicators/attack-patterns-by-indicator:
+  $ref: ./indicators/attack-patterns-by-indicator.yaml
 /indicators/{id}:
   $ref: ./indicators/indicator_by_id.yaml
 
@@ -72,6 +74,14 @@
 
 /multiples:
   $ref: ./multiples/multiples.yaml
+/multiples/{id}/comment:
+  $ref: ./multiples/add_comment.yaml
+/multiples/{id}/like:
+  $ref: ./multiples/add_like.yaml
+/multiples/{id}/interaction:
+  $ref: ./multiples/add_interaction.yaml
+/multiples/{id}/label:
+  $ref: ./multiples/add_label.yaml
 
 # Unfetter STIX routes
 
@@ -103,6 +113,9 @@
   $ref: ./x_unfetter_sensors/x_unfetter_sensor_by_id.yaml
 
 # Other
+
+/ctf/upload:
+  $ref: './ctf/upload.yaml'
 
 /dashboards/intrusionSetView:
   $ref: ./dashboards/intrusion-set-view.yaml

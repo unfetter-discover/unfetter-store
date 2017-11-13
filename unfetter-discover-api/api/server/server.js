@@ -1,8 +1,10 @@
+process.env.RUN_MODE = process.env.RUN_MODE || 'DEMO';
+const port = process.env.PORT || '3000';
+
 const app = require('../../app');
 const http = require('http');
 const mongoinit = require('./mongoinit.js')();
 
-const port = process.env.PORT || '3000';
 app.set('port', port);
 
 const server = http.createServer(app);

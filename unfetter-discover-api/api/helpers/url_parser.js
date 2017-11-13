@@ -27,6 +27,12 @@ const dbQueryParams = function filterFunc(req) {
   } catch (e) {
     errors.push('Cannot parse the skip value.');
   }
+  let project;
+  try {
+    project = req.swagger.params.project && req.swagger.params.project.value ? JSON.parse(req.swagger.params.project.value) : 0;
+  } catch (e) {
+    errors.push('Cannot parse the skip value.');
+  }
 
   if (errors.length > 0) {
     return {
@@ -38,7 +44,8 @@ const dbQueryParams = function filterFunc(req) {
     filter,
     sort,
     limit,
-    skip
+    skip,
+    project
   };
 };
 

@@ -4,6 +4,7 @@ import * as Yarg from 'yargs';
 import { CtfIngest } from './ctf-ingest';
 import { CtfToStixAdapter } from './ctf-to-stix-adapter';
 import { Environment } from './environment';
+import { MongoConnectionService } from './services/mongo-connection.service';
 
 // 'read csv ctf data, map to stix, ingest using unfetter api'
 Yarg.usage('Usage: $0 -h localhost -f [csvFile]')
@@ -15,7 +16,7 @@ Yarg.usage('Usage: $0 -h localhost -f [csvFile]')
     .default('p', process.env.API_PORT || '443')
     .alias('c', 'context')
     .describe('c', 'context root for the API')
-    .default('c', process.env.API_CONTEXT || '/api')
+    .default('c', process.env.API_CONTEXT || '/api/')
     .alias('pr', 'protocol')
     .describe('pr', 'protocol for the API')
     .default('pr', process.env.API_PROTOCOL || 'https')
@@ -31,5 +32,10 @@ if (argv) {
     Environment.context = argv['context'];
     const fileName = argv['file'];
     const ctfIngest = new CtfIngest();
-    ctfIngest.ingestCsv(fileName);
+    ctfIngest.ingestCsv(fileName).then(() => {
+        console.log('closing connection');
+        MongoConnectionService.closeConnection();
+    }).catch((err) => {
+        console.log(err);
+    });
 }

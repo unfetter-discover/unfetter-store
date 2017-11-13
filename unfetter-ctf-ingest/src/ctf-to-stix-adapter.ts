@@ -1,8 +1,9 @@
 import { AttackPattern } from './models/attack-pattern';
 import { Ctf } from './models/ctf';
 import { KillChainPhase } from './models/kill-chain-phase';
+import { MarkingDefinition } from './models/marking-definition';
 import { Stix } from './models/stix';
-import { StixLookupService } from './services/stix-lookup.service';
+import { StixLookupMongoService } from './services/stix-lookup-mongo.service';
 
 /**
  * @description
@@ -10,13 +11,13 @@ import { StixLookupService } from './services/stix-lookup.service';
  */
 export class CtfToStixAdapter {
 
-    protected stixLookupService: StixLookupService;
+    protected stixLookupService: StixLookupMongoService;
 
     constructor() {
-        this.stixLookupService = new StixLookupService();
+        this.stixLookupService = new StixLookupMongoService();
     }
 
-    public setStixLookupService(service: StixLookupService): void {
+    public setStixLookupService(service: StixLookupMongoService): void {
         this.stixLookupService = service;
     }
 
@@ -67,8 +68,9 @@ export class CtfToStixAdapter {
 
         if (ctf.actionClassification || ctf.reportClassification
             || ctf.declassification) {
-            const classifications = [ctf.actionClassification,
-            ctf.reportClassification, ctf.declassification];
+            // console.log('setting classifications');
+            const classifications =
+                [ctf.actionClassification, ctf.reportClassification, ctf.declassification];
             stix.granular_markings = stix.granular_markings || [];
             const markings = await Promise.all(classifications
                 .filter((classif) => classif && classif.trim().length > 0)
@@ -76,16 +78,17 @@ export class CtfToStixAdapter {
                     return this.stixLookupService
                         .findMarkingDefinitionByLabel(ctf.actionClassification);
                 }));
+            // console.log('found markings', markings);
             const markingRefs = markings
-                .reduce((memo, curMarkings) => memo.concat(...curMarkings), [])
-                .filter((el) => el.id)
+                .reduce((memo, curMarkings) => memo.concat(curMarkings), [] as MarkingDefinition[])
+                .map(this.mapMongoId)
                 .map((marking) => {
                     return {
                         marking_ref: marking.id,
-                        selectors: [ 'name', 'description', 'title', 'x_unfetter_object_actions' ],
+                        selectors: ['name', 'description', 'title', 'x_unfetter_object_actions'],
                     };
                 });
-            // console.log('found markings', markings);
+            // console.log('found markings', markingRefs);
             stix.granular_markings = [...stix.granular_markings, ...markingRefs];
         }
 
@@ -93,11 +96,16 @@ export class CtfToStixAdapter {
             stix.modified = ctf.addedDtg;
         }
 
+        // console.log('setting attackpatterns');
         const attackPatternName = ctf.afaAction;
         stix.object_refs = stix.object_refs || [];
         const attackPatterns = await this.lookupAttackPattern(attackPatternName);
-        const patternIds = attackPatterns.map((attackPattern) => attackPattern.id);
+        // console.log('found attackpatterns, ', attackPatterns);
+        const patternIds = attackPatterns
+            .map(this.mapMongoId)
+            .map((attackPattern) => attackPattern.id);
         stix.object_refs = stix.object_refs.concat(patternIds);
+        // console.log(stix.object_refs);
 
         if (ctf.actionParagraph) {
             stix.x_unfetter_object_actions = stix.x_unfetter_object_actions || [];
@@ -111,12 +119,24 @@ export class CtfToStixAdapter {
      * @param {Promise<AttackPattern[]>} name
      * @throws {Error} if name is undefined or empty
      */
-    private lookupAttackPattern(name: string = ''): Promise<AttackPattern[]> {
-        name = name ? name.trim() : '';
-        if (!name || name.length === 0) {
+    private async lookupAttackPattern(name: string = ''): Promise<AttackPattern[]> {
+        if (!name || name.trim().length === 0) {
             throw new Error('name parameter is empty or not defined!');
         }
 
         return this.stixLookupService.findAttackPatternByName(name);
+    }
+
+    /**
+     * @description map mongo _id to .id
+     * @param obj
+     * @return {any} obj given, but with ._id assigend to .id
+     */
+    private mapMongoId(obj: any): any {
+        const tmp: any = obj;
+        if (tmp['_id'] && !tmp.id) {
+            tmp.id = tmp['_id'];
+        }
+        return tmp;
     }
 }

@@ -11,8 +11,9 @@ ADD . $WORKING_DIRECTORY
 
 RUN apk update
 
-RUN npm install
+RUN npm --loglevel error install
 RUN find / -name "cb-never*.tgz" -delete && \
     rm -rf /usr/share/man && \
     rm -rf /tmp/* && \
     rm -rf /var/cache/apk/*
+

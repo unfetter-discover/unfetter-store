@@ -1,7 +1,4 @@
-const SwaggerExpress = require('swagger-express-mw');
-const path = require('path');
-const bodyParser = require('body-parser');
-const app = require('express')();
+// ~~~ Environmental Variables ~~~
 
 process.env.STIX_API_PROTOCOL = process.env.STIX_API_PROTOCOL || 'https';
 process.env.STIX_API_HOST = process.env.STIX_API_HOST || 'localhost';
@@ -15,11 +12,56 @@ if (process.env.ENV === 'dev') {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
+// ~~~ Module Imports ~~~ 
+
+const SwaggerExpress = require('swagger-express-mw');
+const path = require('path');
+const bodyParser = require('body-parser');
+const app = require('express')();
+const passport = require('passport');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+
+// ~~~ Unfetter Imports ~~~
+
+const passportConfig = require('./api/config/passport-config');
+
+// ~~~ Middleware ~~~
+
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({
   extended: true,
   limit: '5mb'
 }));
+
+// Use auth middleware when runmode is UAC, or as a safeguard when RUN_MODE isn't specified
+if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
+  // Set passport strategy
+  app.use(passport.initialize());
+  app.use(passport.session());
+  passportConfig.setStrategy(passport);
+
+  // Express controllers
+  app.use('/auth', require('./api/express-controllers/auth'));
+  app.use('/admin', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+    passportConfig.jwtAdmin(req, res, next);
+  });
+  app.use('/admin', require('./api/express-controllers/admin'));
+
+  app.use('/organizations-management', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+    passportConfig.jwtOrganizations(req, res, next);
+  });
+  app.use('/organizations-management', require('./api/express-controllers/organizations-management'));
+
+  // Auth middleware
+  app.use('*', passport.authenticate('jwt', { session: false }), (req, res, next) => {
+    passportConfig.jwtStandard(req, res, next);
+  });
+  app.use('/organizations', require('./api/express-controllers/organizations'));
+  app.use('/web-analytics', require('./api/express-controllers/web-analytics'));
+}
+
+// ~~~ Swagger ~~~
 
 const config = {
   appRoot: __dirname,
@@ -28,8 +70,6 @@ const config = {
 
 SwaggerExpress.create(config, (err, swaggerExpress) => {
   if (err) { throw err; }
-
-  // install middleware
   swaggerExpress.register(app);
 });
 
