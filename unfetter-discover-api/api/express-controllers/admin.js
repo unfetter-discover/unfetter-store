@@ -205,7 +205,7 @@ router.get('/site-visits', (req, res) => {
     ];
 
     webAnalyticsModel.aggregate(visitsAggregation, (err, results) => {
-        if (err || !results) {
+        if (err || !results || !results.length) {
             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
         } else {
             return res.json({ data: results});
@@ -259,7 +259,7 @@ router.get('/site-visits-graph/:days', (req, res) => {
     ];
 
     webAnalyticsModel.aggregate(query, (err, results) => {
-        if (err || !results) {
+        if (err || !results || !results.length) {
             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
         } else {
             results = results.map((res) => {
