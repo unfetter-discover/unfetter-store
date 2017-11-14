@@ -4,7 +4,6 @@ const port = process.env.PORT || '3000';
 const app = require('../../app');
 const fs = require('fs');
 const spdy = require('spdy');
-const http = require('http');
 const mongoinit = require('./mongoinit.js')();
 
 app.set('port', port);
