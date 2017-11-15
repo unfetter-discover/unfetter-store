@@ -4,7 +4,8 @@ import { StixLabelEnum } from './stix-label.enum';
 
 export class Stix {
     public id: string;
-    public _id: string;
+    // tslint:disable-next-line:variable-name
+    // public _id: string;
     public name: string;
     public description: string;
     public labels: StixLabelEnum[];
