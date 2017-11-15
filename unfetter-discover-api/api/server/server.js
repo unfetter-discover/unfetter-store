@@ -2,17 +2,16 @@ process.env.RUN_MODE = process.env.RUN_MODE || 'DEMO';
 const port = process.env.PORT || '3000';
 
 const app = require('../../app');
-<<<<<<< 0bcdeabbdbe5339657a4089a66f217d7383e6e9d
 const fs = require('fs');
 const spdy = require('spdy');
-=======
-const http = require('http');
->>>>>>> Release 0.3.2 (#49)
 const mongoinit = require('./mongoinit.js')();
 
 app.set('port', port);
 
-const server = http.createServer(app);
+const server = spdy.createServer({
+  key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
+  cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
+}, app);
 
 server.listen(port);
 server.on('error', onError);
