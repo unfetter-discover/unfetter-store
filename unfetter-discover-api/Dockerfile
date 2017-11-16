@@ -4,7 +4,7 @@ LABEL MAINTAINER="unfetter"
 LABEL Description="REST endpoints and Swagger documentation"
 
 # Install packages
-RUN npm --loglevel error install -g multi-file-swagger && npm --loglevel error install -g json2yaml && npm --loglevel error install -g swagger && apk add --update curl
+RUN npm --loglevel error install -g multi-file-swagger && npm --loglevel error install -g pm2 && npm --loglevel error install -g json2yaml && npm --loglevel error install -g swagger && apk add --update curl
 
 ENV WORKING_DIRECTORY /usr/share/unfetter-discover-api
 

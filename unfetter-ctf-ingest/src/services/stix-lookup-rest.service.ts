@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { Environment } from '../environment';
 import { AttackPattern } from '../models/attack-pattern';
 import { MarkingDefinition } from '../models/marking-definition';
-import { StixLookupService } from './stix-lookup-service';
+import { StixLookupService } from './stix-lookup.service';
 
 /**
  * @description
@@ -104,5 +104,48 @@ export class StixLookupRestService implements StixLookupService {
             });
 
         return resp;
+    }
+
+    /**
+     * @description lookup up identity by name
+     * @param {string} name
+     * @returns {any[]}
+     */
+    public findIdentityByName(name: string): Promise<any[]> {
+        if (!name) {
+            return Promise.resolve([]);
+        }
+
+        const filter = JSON.stringify({
+            'stix.name': name,
+        });
+
+        const queryParams = `filter=${encodeURIComponent(filter)}`;
+        const url = `${this.apiUrl}${this.markingDefinitionsPath}?${queryParams}`;
+        const resp = fetch(url)
+            .then((res) => {
+                const result = res.json().then((json) => {
+                    if (!json || !json.data || json.data.length < 1 || !json.data[0].id) {
+                        const msg = `did not find an identity for ${name}`;
+                        throw new Error(msg);
+                    }
+                    return json.data as any[];
+                });
+                return result;
+            })
+            .catch((err) => {
+                console.log(err);
+                return Promise.reject([]);
+            });
+
+        return resp;
+    }
+
+    /**
+     * @description find the system unfetter ident
+     */
+    public findSystemIdentity(): Promise<any> {
+        const unfetter = 'Unfetter of NSA';
+        return this.findIdentityByName(unfetter);
     }
 }
