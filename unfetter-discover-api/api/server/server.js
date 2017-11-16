@@ -8,7 +8,10 @@ const mongoinit = require('./mongoinit.js')();
 
 app.set('port', port);
 
-const server = http.createServer(app);
+const server = spdy.createServer({
+  key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
+  cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
+}, app);
 
 server.listen(port);
 server.on('error', onError);
