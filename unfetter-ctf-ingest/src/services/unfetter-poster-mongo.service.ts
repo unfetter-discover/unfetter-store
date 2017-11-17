@@ -26,8 +26,10 @@ export class UnfetterPosterMongoService {
         const wrappedArr: WrappedStix[] = arr.map((el) => {
             const v4 = UUID.v4();
             const id = el.type + '-' + v4;
+            el.id = id;
             const wrapper: WrappedStix = {
                 _id: id,
+                id,
                 stix: Object.assign({}, el),
             };
             return wrapper;
@@ -46,5 +48,6 @@ export class UnfetterPosterMongoService {
 
 interface WrappedStix {
     _id: string;
+    id: string;
     stix: Stix;
 }
