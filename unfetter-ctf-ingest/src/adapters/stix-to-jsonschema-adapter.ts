@@ -1,8 +1,8 @@
-import { AttackPattern } from './models/attack-pattern';
-import { Ctf } from './models/ctf';
-import { JsonSchema } from './models/json-schema';
-import { KillChainPhase } from './models/kill-chain-phase';
-import { Stix } from './models/stix';
+import { AttackPattern } from '../models/attack-pattern';
+import { Ctf } from '../models/ctf';
+import { JsonSchema } from '../models/json-schema';
+import { KillChainPhase } from '../models/kill-chain-phase';
+import { Stix } from '../models/stix';
 
 /**
  * @description

@@ -1,9 +1,9 @@
+import { CtfMock } from '../mocks/ctf-mock';
+import { AttackPattern } from '../models/attack-pattern';
+import { Ctf } from '../models/ctf';
+import { MarkingDefinition } from '../models/marking-definition';
+import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
 import { CtfToStixAdapter } from './ctf-to-stix-adapter';
-import { CtfMock } from './mocks/ctf-mock';
-import { AttackPattern } from './models/attack-pattern';
-import { Ctf } from './models/ctf';
-import { MarkingDefinition } from './models/marking-definition';
-import { StixLookupMongoService } from './services/stix-lookup-mongo.service';
 
 /**
  * convert to stix

@@ -1,6 +1,6 @@
+import { StixMock } from '../mocks/stix-mock';
+import { Stix } from '../models/stix';
 import { CtfToStixAdapter } from './ctf-to-stix-adapter';
-import { StixMock } from './mocks/stix-mock';
-import { Stix } from './models/stix';
 import { StixToJsonSchemaAdapter } from './stix-to-jsonschema-adapter';
 
 /**
