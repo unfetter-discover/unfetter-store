@@ -24,6 +24,17 @@ stixCommons['granular_markings'] = mongoose.Schema({
     }
 }, { _id: false });
 
+stixCommons['external_references'] = mongoose.Schema({
+    source_name: {
+        type: String,
+        required: [true, 'Source name is required']
+    },
+    description: String,
+    url: String,
+    hashes: Object,
+    external_id: String
+}, { _id: false });
+
 stixCommons['motivations'] = [
     "accidental",
     "coercion",
@@ -76,7 +87,7 @@ stixCommons['baseStix'] = {
     revoked: Boolean,
     version: String,
     labels: { type: Array, default: void 0 },
-    external_references: { type: Array, default: void 0 },
+    external_references: { type: [stixCommons['external_references']], default: void 0 },
     object_marking_refs: { type: Array, default: void 0 },
     granular_markings: { type: [stixCommons['granular_markings']], default: void 0},
 };
