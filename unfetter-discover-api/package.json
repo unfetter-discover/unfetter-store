@@ -46,6 +46,7 @@
     "debugdev": "npm run compileswagger && nodemon --inspect=0.0.0.0:5555 --watch ./api --ignore 'api/swagger/swagger*.*' -e js,yaml,json,yml api/server/server.js",
     "swaggerdev": "multi-file-swagger multifile-remote.yaml > api/swagger/swagger-remote.json && json2yaml ./api/swagger/swagger-remote.json > ./api/swagger/swagger-remote.yaml && swagger validate ./api/swagger/swagger.yaml && nodemon --watch ./api --ignore 'api/swagger/swagger*.*' -e js,yaml,json,yml app-editor.js",
     "swagger-editor": "multi-file-swagger multifile-remote.yaml > api/swagger/swagger-remote.json && json2yaml ./api/swagger/swagger-remote.json > ./api/swagger/swagger-remote.yaml && node app-editor.js",
-    "test": "multi-file-swagger multifile.yaml > api/swagger/swagger.json && json2yaml ./api/swagger/swagger.json > ./api/swagger/swagger.yaml && swagger validate ./api/swagger/swagger.yaml && swagger project test"
+    "test": "multi-file-swagger multifile.yaml > api/swagger/swagger.json && json2yaml ./api/swagger/swagger.json > ./api/swagger/swagger.yaml && swagger validate ./api/swagger/swagger.yaml && swagger project test",
+    "lint": "eslint ./api/**"
   }
 }
