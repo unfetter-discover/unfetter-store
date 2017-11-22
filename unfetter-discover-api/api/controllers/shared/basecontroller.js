@@ -10,7 +10,7 @@ const apiRoot = 'https://localhost/api';
 module.exports = class BaseController {
     constructor(type) {
         this.type = type;
-        this.model = modelFactory.getModel(type);      
+        this.model = modelFactory.getModel(type);
     }
 
     getEnhancedData(result, swaggerParams) {
@@ -28,22 +28,22 @@ module.exports = class BaseController {
                 .map(res => res.toObject())
                 .map(res => res.stix);
 
-        // both extended and meta properties
-        } else if ((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true){
+            // both extended and meta properties
+        } else if ((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
             data = result
                 .map(res => res.toObject())
                 .map(res => {
                     let temp = res.stix;
                     if (res.extendedProperties !== undefined) {
-                        temp = {...temp, ...res.extendedProperties};
-                    } 
+                        temp = { ...temp, ...res.extendedProperties };
+                    }
                     if (res.metaProperties !== undefined) {
                         temp = { ...temp, ...res.metaProperties };
-                    } 
+                    }
                     return temp;
                 });
 
-        // Exteded properties only
+            // Exteded properties only
         } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
             data = result
                 .map(res => res.toObject())
@@ -55,7 +55,7 @@ module.exports = class BaseController {
                     }
                 });
 
-        // Meta properties only
+            // Meta properties only
         } else if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
             data = result
                 .map(res => res.toObject())
@@ -67,7 +67,7 @@ module.exports = class BaseController {
                     }
                 });
 
-        // Delete this if this function works!
+            // Delete this if this function works!
         } else {
             console.log('DOOOOM!!!! This block should never be reached.');
         }
@@ -157,7 +157,7 @@ module.exports = class BaseController {
                 const requestedUrl = apiRoot + req.originalUrl;
 
                 let data = getEnhancedData(result, req.swagger.params);
-                
+
                 const convertedResult = jsonApiConverter.convertJsonToJsonApi(data[0], type, requestedUrl);
                 return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
             }
@@ -189,12 +189,16 @@ module.exports = class BaseController {
     add() {
         const type = this.type;
         const model = this.model;
+        const relationshipModel = modelFactory.getModel('relationship');
+
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
             const obj = {};
             if (req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const data = req.swagger.params.data.value.data;
-                    // TODO need to put this in a get/try in case these values don't exist
+                const relationships = [];
+                let relatedIds;
+
                 obj.stix = data.attributes;
                 if (data.type !== undefined) {
                     obj.stix.type = data.type;
@@ -205,17 +209,21 @@ module.exports = class BaseController {
 
                 // Process extended properties
                 let extendedProperties = {};
-                for(let prop of Object.keys(data.attributes)) {
-                    if(prop.match(/^x_/) !== null) {
+                for (let prop of Object.keys(data.attributes)) {
+                    if (prop.match(/^x_/) !== null) {
                         extendedProperties[prop] = data.attributes[prop];
                         delete obj.stix[prop];
                     }
                 }
-                if(Object.keys(extendedProperties).length > 0) {
+                if (Object.keys(extendedProperties).length > 0) {
                     obj.extendedProperties = extendedProperties;
                 }
 
                 if (obj.stix.metaProperties !== undefined) {
+                    if (obj.stix.metaProperties.relationships !== undefined) {
+                        relatedIds = obj.stix.metaProperties.relationships;
+                        delete obj.stix.metaProperties.relationships;
+                    }
                     let tempMeta = obj.stix.metaProperties;
                     delete obj.stix.metaProperties;
                     obj.metaProperties = tempMeta;
@@ -247,6 +255,46 @@ module.exports = class BaseController {
 
                 newDocument._id = newDocument.stix.id;
 
+                if (relatedIds) {
+                    for (let relatedId of relatedIds) {
+                        const relId = stix.id('relationship');
+                        let relType = '';
+                        // TODO make this better
+                        switch (type) {
+                            case 'indicator':
+                                relType = 'indicates';
+                                break;
+                        }
+                        const tempRelationship = {
+                            'stix': {
+                                'id': relId,
+                                'source_ref': newDocument.stix.id,
+                                'target_ref': relatedId,
+                                'relationship_type': relType
+                            }
+                        };
+
+                        const newRelationshipDocument = new relationshipModel(tempRelationship);
+                        const relationshipErrors = newRelationshipDocument.validateSync();
+                        if (relationshipErrors) {
+                            console.log('Error attempting to synchronize a relationship obj', relationshipErrors);
+                        } else {
+                            newRelationshipDocument._id = newRelationshipDocument.stix.id;
+                            relationships.push(newRelationshipDocument);
+                        }
+                    }
+                }
+
+                if (relationships.length) {
+                    relationshipModel.insertMany(relationships, (err, results) => {
+                        if (err) {
+                            console.log('Error while creating relationships for ', newDocument._id, ': ', err);
+                        } else {
+                            console.log('Successfully created ', results.length, ' relationships for: ', newDocument._id);
+                        }
+                    });
+                }
+
                 model.create(newDocument, (err, result) => {
                     if (err) {
                         console.log(err);
@@ -254,14 +302,14 @@ module.exports = class BaseController {
                     }
                     const requestedUrl = apiRoot + req.originalUrl;
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi([
-                            result.extendedProperties !== undefined ? { ...result.stix, ...result.extendedProperties } : result.stix
-                        ], type, requestedUrl);
+                        result.extendedProperties !== undefined ? { ...result.stix, ...result.extendedProperties } : result.stix
+                    ], type, requestedUrl);
 
                     return res.status(201).json({ links: { self: requestedUrl, }, data: convertedResult });
                 });
             } else {
                 return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
-            }            
+            }
         };
     }
 
@@ -276,7 +324,7 @@ module.exports = class BaseController {
                 const id = req.swagger.params.id ? req.swagger.params.id.value : '';
                 model.findById({ _id: id }, (err, result) => {
                     if (err) {
-                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                     }
 
                     // set the new values
@@ -307,32 +355,32 @@ module.exports = class BaseController {
                     const newDocument = new model(resultObj);
                     const error = newDocument.validateSync();
                     if (error) {
-                    const errors = [];
-                    lodash.forEach(error.errors, (field) => {
-                        errors.push(field.message);
-                    });
-                    return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                        const errors = [];
+                        lodash.forEach(error.errors, (field) => {
+                            errors.push(field.message);
+                        });
+                        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
                     }
 
                     // guard pass complete
                     model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
-                    if (errUpdate) {
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
-                    }
+                        if (errUpdate) {
+                            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        }
 
-                    if (resultUpdate) {
-                        let resObj = resultUpdate.toObject();
-                        const requestedUrl = apiRoot + req.originalUrl;
-                        const convertedResult = jsonApiConverter.convertJsonToJsonApi(resObj.extendedProperties !== undefined ? { ...resObj.stix, ...resObj.extendedProperties } : resObj.stix, type, requestedUrl);
-                        return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
-                    }
+                        if (resultUpdate) {
+                            let resObj = resultUpdate.toObject();
+                            const requestedUrl = apiRoot + req.originalUrl;
+                            const convertedResult = jsonApiConverter.convertJsonToJsonApi(resObj.extendedProperties !== undefined ? { ...resObj.stix, ...resObj.extendedProperties } : resObj.stix, type, requestedUrl);
+                            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+                        }
 
-                    return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
+                        return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
                     });
                 });
             } else {
                 return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
-            }  
+            }
         };
     }
 
@@ -344,7 +392,7 @@ module.exports = class BaseController {
 
             callback(req, res, id);
         };
-    }     
+    }
 
     deleteById() {
         const type = this.type;
@@ -368,5 +416,5 @@ module.exports = class BaseController {
                 res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             });
         });
-    } 
+    }
 }
