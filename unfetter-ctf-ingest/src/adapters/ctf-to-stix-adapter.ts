@@ -48,7 +48,7 @@ export class CtfToStixAdapter {
             //  so should I consider it an id or url?
             const externalRef = {
                 external_id: ctf.reportId,
-                external_url: ctf.reportId,
+                url: ctf.reportId,
                 source_name: sourceType,
                 description,
             };
