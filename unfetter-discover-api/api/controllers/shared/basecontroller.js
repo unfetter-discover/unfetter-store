@@ -10,7 +10,7 @@ const apiRoot = 'https://localhost/api';
 module.exports = class BaseController {
     constructor(type) {
         this.type = type;
-        this.model = modelFactory.getModel(type);      
+        this.model = modelFactory.getModel(type); 
     }
 
     getEnhancedData(result, swaggerParams) {
@@ -189,12 +189,16 @@ module.exports = class BaseController {
     add() {
         const type = this.type;
         const model = this.model;
+        const relationshipModel = modelFactory.getModel('relationship');
+
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
             const obj = {};
             if (req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const data = req.swagger.params.data.value.data;
-                    // TODO need to put this in a get/try in case these values don't exist
+                const relationships = [];
+                let relatedIds;
+
                 obj.stix = data.attributes;
                 if (data.type !== undefined) {
                     obj.stix.type = data.type;
@@ -216,6 +220,10 @@ module.exports = class BaseController {
                 }
 
                 if (obj.stix.metaProperties !== undefined) {
+                    if (obj.stix.metaProperties.relationships !== undefined) {
+                        relatedIds = obj.stix.metaProperties.relationships;
+                        delete obj.stix.metaProperties.relationships;
+                    }
                     let tempMeta = obj.stix.metaProperties;
                     delete obj.stix.metaProperties;
                     obj.metaProperties = tempMeta;
@@ -243,9 +251,49 @@ module.exports = class BaseController {
                         errors.push(field.message);
                     });
                     return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
-                }
+                }                
 
                 newDocument._id = newDocument.stix.id;
+
+                if (relatedIds) {
+                    for (let relatedId of relatedIds) {
+                        const relId = stix.id('relationship');
+                        let relType = '';
+                        // TODO make this better
+                        switch (type) {
+                            case 'indicator':
+                                relType = 'indicates';
+                                break;
+                        }
+                        const tempRelationship = {
+                            'stix': {
+                                'id': relId,
+                                'source_ref': newDocument.stix.id,
+                                'target_ref': relatedId,
+                                'relationship_type': relType
+                            }
+                        };
+
+                        const newRelationshipDocument = new relationshipModel(tempRelationship);
+                        const relationshipErrors = newRelationshipDocument.validateSync();
+                        if (relationshipErrors) {
+                            console.log('Error attempting to synchronize a relationship obj', relationshipErrors);
+                        } else {
+                            newRelationshipDocument._id = newRelationshipDocument.stix.id;
+                            relationships.push(newRelationshipDocument);
+                        }
+                    }
+                }
+
+                if (relationships.length) {
+                    relationshipModel.insertMany(relationships, (err, results) => {
+                        if (err) {
+                            console.log('Error while creating relationships for ', newDocument._id, ': ', err);
+                        } else {
+                            console.log('Successfully created ', results.length ,' relationships for: ', newDocument._id);
+                        }
+                    });
+                }
 
                 model.create(newDocument, (err, result) => {
                     if (err) {
