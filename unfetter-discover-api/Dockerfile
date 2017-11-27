@@ -19,8 +19,7 @@ RUN npm --loglevel error install -g multi-file-swagger && npm --loglevel error i
 
 # Install Dependencies
 COPY package.json $WORKING_DIRECTORY
-RUN apk update && \
-    npm --loglevel error install && \
+RUN npm --loglevel error install && \
     # The NPM package depends on TAR package, which has a test directory with an encrypted tgz file, that gets blocked by some antivirus scanners. Removing it.
     find / -name "cb-never*.tgz" -delete && \
     rm -rf /usr/share/man && \
