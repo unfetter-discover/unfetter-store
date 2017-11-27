@@ -1,16 +1,21 @@
-FROM node:8.5-alpine
+FROM node:9.2-alpine
 
 LABEL MAINTAINER="unfetter"
 LABEL Description="REST endpoints and Swagger documentation"
 
-# Install packages
-RUN npm --loglevel error install -g multi-file-swagger && npm --loglevel error install -g pm2 && npm --loglevel error install -g json2yaml && npm --loglevel error install -g swagger && apk add --update curl
-
 ENV WORKING_DIRECTORY /usr/share/unfetter-discover-api
-
 # Create Application Directory
 RUN mkdir -p $WORKING_DIRECTORY
 WORKDIR $WORKING_DIRECTORY
+
+COPY docker/set-linux-repo.sh $WORKING_DIRECTORY
+COPY docker/set-npm-repo.sh $WORKING_DIRECTORY
+RUN chmod 700 $WORKING_DIRECTORY/*.sh
+RUN $WORKING_DIRECTORY/set-linux-repo.sh
+RUN $WORKING_DIRECTORY/set-npm-repo.sh
+
+# Install packages
+RUN npm --loglevel error install -g multi-file-swagger && npm --loglevel error install -g pm2 && npm --loglevel error install -g json2yaml && npm --loglevel error install -g swagger && apk add --update curl
 
 # Install Dependencies
 COPY package.json $WORKING_DIRECTORY
@@ -36,7 +41,7 @@ RUN sleep 5
 RUN json2yaml ./api/swagger/swagger.json > ./api/swagger/swagger.yaml
 RUN json2yaml ./api/swagger/swagger-remote.json > ./api/swagger/swagger-remote.yaml
 RUN swagger validate ./api/swagger/swagger.yaml
-# Applicaiton port
+# Application port
 EXPOSE 3000
 # Open debugging ports
 EXPOSE 5555

@@ -1,4 +1,4 @@
-FROM node:8.5-alpine
+FROM node:9.2-alpine
 
 LABEL MAINTAINER="unfetter"
 LABEL Description="Node program that loads STIX data into MongoDB"
@@ -7,9 +7,12 @@ ENV WORKING_DIRECTORY /usr/src/app
 
 RUN mkdir -p $WORKING_DIRECTORY
 WORKDIR $WORKING_DIRECTORY
-ADD . $WORKING_DIRECTORY
 
-RUN apk update
+COPY docker/set-linux-repo.sh $WORKING_DIRECTORY
+COPY docker/set-npm-repo.sh $WORKING_DIRECTORY
+RUN chmod 700 $WORKING_DIRECTORY/*.sh
+RUN $WORKING_DIRECTORY/set-linux-repo.sh
+RUN $WORKING_DIRECTORY/set-npm-repo.sh
 
 RUN npm --loglevel error install
 RUN find / -name "cb-never*.tgz" -delete && \
@@ -17,3 +20,4 @@ RUN find / -name "cb-never*.tgz" -delete && \
     rm -rf /tmp/* && \
     rm -rf /var/cache/apk/*
 
+ADD . $WORKING_DIRECTORY
