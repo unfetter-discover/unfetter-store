@@ -95,15 +95,16 @@ module.exports = {
         res.header('Content-Type', 'application/vnd.api+json');
 
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-        model.remove({ _id: id }).exec()
-            .then((response) => {
-                if (response) {
-                    return res.status(200).json({ data: { type: 'Success', message: `Deleted id ${id}` } });
-                }
+        model.findOneAndRemove({ _id: id }, (err, result) => {
+            if(err) {
+                console.log(err);
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            } else if (!result) {
                 return res.status(404).json({ message: `Unable to delete the item.  No item found with id ${id}` });
-            }).catch((err) => {
-                res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
-            });
+            } else {
+                return res.status(200).json({ data: { type: 'Success', message: `Deleted id ${id}` } });
+            }
+        });
     },
     update: (req, res) => {
         res.header('Content-Type', 'application/vnd.api+json');
@@ -114,6 +115,8 @@ module.exports = {
             model.findById({ _id: id }, (err, result) => {
                 if (err) {
                     return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                } else if(!result) {
+                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'Item not found' }] });
                 }
 
                 // set the new values

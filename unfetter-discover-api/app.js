@@ -33,7 +33,9 @@ app.use(bodyParser.urlencoded({
   extended: true,
   limit: '5mb'
 }));
-
+app.get('/test', (req, res) => {
+  res.json({'a':1});
+});
 // Use auth middleware when runmode is UAC, or as a safeguard when RUN_MODE isn't specified
 if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
   // Set passport strategy
@@ -57,6 +59,16 @@ if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
   app.use('*', passport.authenticate('jwt', { session: false }), (req, res, next) => {
     passportConfig.jwtStandard(req, res, next);
   });
+
+  // Restrict config route based on request method
+  app.use('/config', (req, res, next) => {
+    if(req.method === 'GET') {
+      next();
+    } else {
+      passportConfig.jwtAdmin(req, res, next);
+    }
+  });
+
   app.use('/organizations', require('./api/express-controllers/organizations'));
   app.use('/web-analytics', require('./api/express-controllers/web-analytics'));
 }
