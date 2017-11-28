@@ -1,23 +1,23 @@
 export class Ctf {
-    public reportId: any;
-    public title: any;
-    public sourceType: any;
-    public alaStage: any;
-    public afaObjective: any;
-    public afaAction: any;
-    public description: any;
-    public actionParagraph: any;
-    public actionClassification: any;
-    public reportClassification: any;
-    public reportDtg: any;
-    public declassification: any;
-    public ala: any;
-    public ama: any;
-    public afa: any;
-    public author: any;
-    public addedDtg: any;
-    public qcAuthor: any;
-    public qcDtg: any;
+    public reportId = '';
+    public title = '';
+    public sourceType = '';
+    public alaStage = '';
+    public afaObjective = '';
+    public afaAction= '';
+    public description = '';
+    public actionParagraph = '';
+    public actionClassification = '';
+    public reportClassification = '';
+    public reportDtg = '';
+    public declassification = '';
+    public ala = '';
+    public ama = '';
+    public afa = '';
+    public author = '';
+    public addedDtg = '';
+    public qcAuthor = '';
+    public qcDtg = '';
 
     public toJson(): string {
         return JSON.stringify(this, undefined, '\t');

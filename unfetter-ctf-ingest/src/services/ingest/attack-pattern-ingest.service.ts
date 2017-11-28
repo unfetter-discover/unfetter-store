@@ -1,11 +1,12 @@
 import * as fs from 'fs';
-import { AttackPatternIngestToStixAdapter } from '../adapters/attack-pattern-ingest-to-stix-adapter';
-import { AttackPatternIngest } from '../models/attack-pattern-ingest';
-import { Stix } from '../models/stix';
-import { MongoConnectionService } from '../services/mongo-connection.service';
-import { UnfetterPosterMongoService } from '../services/unfetter-poster-mongo.service';
+import { AttackPatternIngestToStixAdapter } from '../../adapters/attack-pattern-ingest-to-stix-adapter';
+import { AttackPatternIngest } from '../../models/attack-pattern-ingest';
+import { Stix } from '../../models/stix';
+import { MongoConnectionService } from '../../services/mongo-connection.service';
+import { UnfetterPosterMongoService } from '../../services/unfetter-poster-mongo.service';
+import { CollectionType } from '../collection-type.enum';
+import { StixLookupMongoService } from '../stix-lookup-mongo.service';
 import { CsvParseService } from './parse-csv-service';
-import { StixLookupMongoService } from './stix-lookup-mongo.service';
 
 /**
  * @description reads a defined attack pattern csv file, converts to stix, ingests into unfetter db
@@ -24,15 +25,10 @@ export class AttackPatternIngestService {
             throw msg;
         }
         const csv = fs.readFileSync(fileName).toString();
-        try {
-            const stixies = await this.csvToStix(csv);
-            const unfetterPoster = new UnfetterPosterMongoService();
-            // post to reports endpoint
-            return Promise.resolve(unfetterPoster.uploadStix(stixies));
-        } catch (e) {
-            console.log(e);
-        }
-        return Promise.resolve();
+        const stixies = await this.csvToStix(csv);
+        const unfetterPoster = new UnfetterPosterMongoService();
+        // post to reports endpoint
+        return Promise.resolve(unfetterPoster.uploadStix(stixies));
     }
 
     /**
@@ -45,7 +41,7 @@ export class AttackPatternIngestService {
         }
 
         // important, set up the mongo connection for the app
-        const collection = await MongoConnectionService.getCollection();
+        const collection = await MongoConnectionService.getCollection(CollectionType.CONFIG);
         const parseService = new CsvParseService<AttackPatternIngest>();
         const arr = parseService.parseCsv(csv);
         const adapter = new AttackPatternIngestToStixAdapter();
