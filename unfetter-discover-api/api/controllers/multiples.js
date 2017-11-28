@@ -118,7 +118,7 @@ const addComment = (req, res) => {
                     const obj = newDocument.toObject();
                     return res.status(200).json({
                         links: { self: requestedUrl, },
-                        data: { attributes:  { ...obj.stix, ...obj.metaProperties, ...obj.extendedProperties } }
+                        data: { attributes: { ...obj.stix, ...obj.extendedProperties, metaProperties: obj.metaProperties } }
                     });
                 }
 
@@ -200,7 +200,7 @@ const addLike = (req, res) => {
                     const obj = newDocument.toObject();
                     return res.status(200).json({
                         links: { self: requestedUrl, },
-                        data: { attributes: { ...obj.stix, ...obj.metaProperties, ...obj.extendedProperties } }
+                        data: { attributes: { ...obj.stix, ...obj.extendedProperties, metaProperties: obj.metaProperties } }
                     });
                 }
 
@@ -275,7 +275,7 @@ const removeLike = (req, res) => {
                     const obj = newDocument.toObject();
                     return res.status(200).json({
                         links: { self: requestedUrl, },
-                        data: { attributes: { ...obj.stix, ...obj.metaProperties, ...obj.extendedProperties } }
+                        data: { attributes: { ...obj.stix, ...obj.extendedProperties, metaProperties: obj.metaProperties } }
                     });
                 }
 
@@ -338,7 +338,7 @@ const addLabel = (req, res) => {
                     const obj = newDocument.toObject();
                     return res.status(200).json({
                         links: { self: requestedUrl, },
-                        data: { attributes: { ...obj.stix, ...obj.metaProperties, ...obj.extendedProperties } }
+                        data: { attributes: { ...obj.stix, ...obj.extendedProperties, metaProperties: obj.metaProperties } }
                     });
                 }
 

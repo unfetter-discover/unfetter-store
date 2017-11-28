@@ -38,7 +38,7 @@ module.exports = class BaseController {
                         temp = { ...temp, ...res.extendedProperties };
                     }
                     if (res.metaProperties !== undefined) {
-                        temp = { ...temp, ...res.metaProperties };
+                        temp = { ...temp, metaProperties: res.metaProperties };
                     }
                     return temp;
                 });
@@ -61,7 +61,7 @@ module.exports = class BaseController {
                 .map(res => res.toObject())
                 .map(res => {
                     if (res.metaProperties !== undefined) {
-                        return { ...res.stix, ...res.metaProperties };
+                        return { ...res.stix, metaProperties: res.metaProperties };
                     } else {
                         return res.stix;
                     }
