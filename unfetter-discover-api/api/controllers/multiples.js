@@ -213,6 +213,81 @@ const addLike = (req, res) => {
     }
 };
 
+const removeLike = (req, res) => {
+    res.header('Content-Type', 'application/vnd.api+json');
+
+    if (req.swagger.params.id.value !== undefined) {
+
+        const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+
+        let user;
+        if (process.env.RUN_MODE === 'DEMO') {
+            user = {
+                _id: '1234',
+                userName: 'Demo-User',
+                firstName: 'Demo',
+                lastName: 'User'
+            };
+        } else {
+            user = req.user
+        }
+
+        model.findById({ _id: id }, (err, result) => {
+            if (err || !result) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            }
+            const resultObj = result.toObject();
+            if (resultObj.metaProperties === undefined) {
+                resultObj.metaProperties = {};
+            }
+
+            if (resultObj.metaProperties.likes === undefined) {
+                resultObj.metaProperties.likes = [];
+            } else {
+                const likedByUser = resultObj.metaProperties.likes
+                    .find((like) => like.user.id.toString() === user._id.toString());
+
+                if (!likedByUser) {
+                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'User has not liked this item' }] });
+                }
+            }
+
+            resultObj.metaProperties.likes = resultObj.metaProperties.likes.filter((like) => like.user.id.toString() !== user._id.toString());
+
+            const newDocument = new model(resultObj);
+            const error = newDocument.validateSync();
+            if (error) {
+                const errors = [];
+                lodash.forEach(error.errors, (field) => {
+                    errors.push(field.message);
+                });
+                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+            }
+
+            // guard pass complete
+            model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+                if (errUpdate) {
+                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                }
+
+                if (resultUpdate) {
+                    const requestedUrl = apiRoot + req.originalUrl;
+                    const obj = newDocument.toObject();
+                    return res.status(200).json({
+                        links: { self: requestedUrl, },
+                        data: { attributes: { ...obj.stix, ...obj.metaProperties, ...obj.extendedProperties } }
+                    });
+                }
+
+                return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
+            });
+
+        });
+    } else {
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
+    }
+};
+
 const addLabel = (req, res) => {
     res.header('Content-Type', 'application/vnd.api+json');
 
@@ -351,6 +426,7 @@ module.exports = {
     get,
     addComment,
     addLike,
+    removeLike,
     addLabel,
     addInteraction
 };
