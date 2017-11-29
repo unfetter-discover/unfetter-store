@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { AttackPatternIngestToStixAdapter } from '../../adapters/attack-pattern-ingest-to-stix-adapter';
+import { AttackPatternIngestToStixAdapter } from '../../adapters/attack-pattern-ingest-to-stix.adapter';
 import { AttackPatternIngest } from '../../models/attack-pattern-ingest';
 import { Stix } from '../../models/stix';
 import { MongoConnectionService } from '../../services/mongo-connection.service';

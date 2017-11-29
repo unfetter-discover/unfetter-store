@@ -59,18 +59,6 @@ export class AttackPatternIngestToStixAdapter {
     }
 
     /**
-     * @param {Promise<AttackPattern[]>} name
-     * @throws {Error} if name is undefined or empty
-     */
-    private async lookupAttackPattern(name: string = ''): Promise<AttackPattern[]> {
-        if (!name || name.trim().length === 0) {
-            throw new Error('name parameter is empty or not defined!');
-        }
-
-        return this.stixLookupService.findAttackPatternByName(name);
-    }
-
-    /**
      * @description
      */
     private async lookupSystemIdentity(): Promise<Stix> {

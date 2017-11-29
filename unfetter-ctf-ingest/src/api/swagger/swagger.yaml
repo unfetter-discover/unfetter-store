@@ -124,7 +124,7 @@ definitions:
   TranslateUrlRequest:
     type: object
     properties:
-      type: 
+      systemName: 
         type: string
         description: the target url to translate
       url:
@@ -132,7 +132,7 @@ definitions:
         description: the target url to translate
     required:
       - url
-      - type
+      - systemName
   TranslateUrlResponse:
     type: object
     required:
@@ -141,7 +141,7 @@ definitions:
     properties:
       request:
         properties:
-          system:
+          systemName:
             type: string
             description: the system this url represents
           url:

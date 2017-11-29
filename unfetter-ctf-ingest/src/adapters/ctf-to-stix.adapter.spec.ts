@@ -3,7 +3,7 @@ import { AttackPattern } from '../models/attack-pattern';
 import { Ctf } from '../models/ctf';
 import { MarkingDefinition } from '../models/marking-definition';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
-import { CtfToStixAdapter } from './ctf-to-stix-adapter';
+import { CtfToStixAdapter } from './ctf-to-stix.adapter';
 
 /**
  * convert to stix

@@ -1,7 +1,7 @@
 import * as camelcase from 'camelcase';
 import * as fs from 'fs';
 import * as Papa from 'papaparse';
-import { CtfToStixAdapter } from '../../adapters/ctf-to-stix-adapter';
+import { CtfToStixAdapter } from '../../adapters/ctf-to-stix.adapter';
 import { Ctf } from '../../models/ctf';
 import { Stix } from '../../models/stix';
 import { MongoConnectionService } from '../../services/mongo-connection.service';

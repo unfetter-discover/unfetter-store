@@ -21,6 +21,8 @@ export class Stix {
     public granular_markings: GranularMarking[];
     public x_unfetter_object_actions: string[];
 
+    public stix?: any;
+
     public toJson(): string {
         return JSON.stringify(this, undefined, '\t');
     }

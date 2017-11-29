@@ -1,7 +1,7 @@
 'use strict';
 
 const CtfIngestService = require('../../services/ingest/ctf-ingest.service');
-const StixToJsonSchemaAdapter = require('../../adapters/stix-to-jsonschema-adapter');
+const StixToJsonSchemaAdapter = require('../../adapters/stix-to-jsonschema.adapter');
 
 const upload = (req, res) => {
     // console.log('req', req);
