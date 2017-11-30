@@ -13,6 +13,16 @@ import { CsvParseService } from './parse-csv-service';
  */
 export class AttackPatternIngestService {
 
+    protected adapter: AttackPatternIngestToStixAdapter;
+
+    constructor() {
+        this.adapter = new AttackPatternIngestToStixAdapter();
+    }
+
+    public setAttackPatternIngestToStixAdapter(adapter: AttackPatternIngestToStixAdapter): void {
+        this.adapter = adapter;
+    }
+
     /**
      * @description ingest a csv file
      * @param {string} fileName
@@ -44,8 +54,7 @@ export class AttackPatternIngestService {
         const collection = await MongoConnectionService.getCollection(CollectionType.CONFIG);
         const parseService = new CsvParseService<AttackPatternIngest>();
         const arr = parseService.parseCsv(csv);
-        const adapter = new AttackPatternIngestToStixAdapter();
-        const stixies = await adapter.convertAttackPatternIngestToStix(arr);
+        const stixies = await this.adapter.convertAttackPatternIngestToStix(arr);
 
         if (stixies && stixies.length > 1) {
             console.log(`generated ${stixies.length} stix objects.`);
@@ -53,5 +62,7 @@ export class AttackPatternIngestService {
         }
         return Promise.resolve(stixies);
     }
+
+
 
 }

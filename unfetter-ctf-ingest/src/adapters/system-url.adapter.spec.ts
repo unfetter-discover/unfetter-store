@@ -33,7 +33,6 @@ describe('URL Adapter spec', () => {
         req.url = 'https://domain.org/report/path/123';
 
         const res = await service.translateUrl(req);
-        console.log(res);
         expect(res).toBeDefined();
         expect(res.translated.success).toBeTruthy();
     });
@@ -43,10 +42,10 @@ describe('URL Adapter spec', () => {
         req.systemName = 'abc';
         req.url = 'notaURL';
 
-        const res: UrlTranslationResponse = await service.translateUrl(req)
-            .catch((ex) => {
-                return ex;
-            });
+        const res: UrlTranslationResponse = await service.translateUrl(req);
+            // .catch((ex) => {
+            //     return ex;
+            // });
         expect(res).toBeDefined();
         expect(res.request).toBeDefined();
         expect(res.translated.success).toBeFalsy();

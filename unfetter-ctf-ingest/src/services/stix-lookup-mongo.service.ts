@@ -2,6 +2,7 @@ import * as https from 'https';
 import { MongoClient } from 'mongodb';
 import fetch from 'node-fetch';
 import { Environment } from '../environment';
+import { DataTranslationRules } from '../models/adapter/data-translation-rules';
 import { UrlTranslationRule } from '../models/adapter/url-translation-rule';
 import { AttackPattern } from '../models/attack-pattern';
 import { MarkingDefinition } from '../models/marking-definition';
@@ -113,6 +114,30 @@ export class StixLookupMongoService {
         return Promise.resolve(collection.findOne(filter)
             .then((result: UrlTranslationRule) => {
                 return result as UrlTranslationRule;
+            })
+            .catch((error: any) => console.log(error)));
+    }
+
+    /**
+     * @description lookup rules to translate external report data for a given system
+     * @param {string} systemName
+     * @returns {DataTranslationRules}
+     */
+    public async findDataAdapterRules(systemName = ''): Promise<DataTranslationRules> {
+        if (!systemName || systemName.trim().length === 0) {
+            return Promise.reject('');
+        }
+
+        const collection = await MongoConnectionService.getCollection(CollectionType.CONFIG);
+
+        const filter = {
+            'configKey': 'adapter.rules.data',
+            'configValue.system': systemName,
+        };
+
+        return Promise.resolve(collection.findOne(filter)
+            .then((result: DataTranslationRules) => {
+                return result as DataTranslationRules;
             })
             .catch((error: any) => console.log(error)));
     }

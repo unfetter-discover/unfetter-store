@@ -1,13 +1,15 @@
 'use strict';
 
 const SystemUrlAdapter = require('../../adapters/system-url.adapter');
+const ExternalDataToStixAdapter = require('../../adapters/external-data-to-stix.adapter');
 
 const translate_report_data = (req, res) => {
-    console.log(req.swagger);
     const body = req.swagger.params.data.value || '';
-    const data = body.data || '';
-    console.log(data);
-    res.json(data);
+    console.log(body);
+    const adapter = new ExternalDataToStixAdapter.ExternalDataToStixAdapter();
+    const translated = adapter.translateData(body);
+    console.log(translated);
+    res.json(translated);
 }
 
 const translate_report_url = (req, res) => {
@@ -16,7 +18,7 @@ const translate_report_url = (req, res) => {
     console.log(body);
     const adapter = new SystemUrlAdapter.SystemUrlAdapter();
     const translated = adapter.translateUrl(body);
-    console.log(translated);
+    console.log(translated);    
     res.json(translated);
 }
 

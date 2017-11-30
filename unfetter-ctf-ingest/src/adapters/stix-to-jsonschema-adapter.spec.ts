@@ -24,7 +24,6 @@ describe('reorder stix to be in jsonschema format', () => {
 
     it('should convert stix to jsonschema', () => {
         const arr = stixToJsonSchemaAdapter.convertStixToJsonSchema(stixArr);
-        console.log(arr);
         expect(arr).toBeDefined();
         expect(arr.length).toEqual(4);
         arr.forEach((el) => {

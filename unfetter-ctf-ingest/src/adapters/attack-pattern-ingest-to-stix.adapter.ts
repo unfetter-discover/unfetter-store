@@ -61,7 +61,7 @@ export class AttackPatternIngestToStixAdapter {
     /**
      * @description
      */
-    private async lookupSystemIdentity(): Promise<Stix> {
+    public async lookupSystemIdentity(): Promise<Stix> {
         return this.stixLookupService.findSystemIdentity();
     }
 
