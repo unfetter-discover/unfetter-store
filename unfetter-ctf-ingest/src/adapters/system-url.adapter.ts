@@ -35,7 +35,7 @@ export class SystemUrlAdapter {
         res.translated.success = false;
         res.translated.url = url;
         if (!Validator.isURL(url, this.parseOpts)) {
-            return Promise.reject(res);
+            return Promise.resolve(res);
         }
 
         const translationRule = await this.stixLookupService.findUrlAdapterRule(translationReq.systemName);
