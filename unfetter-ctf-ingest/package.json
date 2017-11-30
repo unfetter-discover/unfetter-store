@@ -3,7 +3,7 @@
   "version": "0.3.2",
   "description": "ingest cyber threat framework data into unfetter",
   "scripts": {
-    "checkup": "npm run clean && npm run build && npm run lint && && npm run coverage && npm run test && npm run swagger:verify",
+    "checkup": "npm run clean && npm run build && npm run lint && npm run coverage && npm run test && npm run swagger:verify",
     "test": "jasmine-ts --config=jasmine.json",
     "coverage": "nyc --extension .ts --reporter=lcov --reporter=text-lcov npm test && nyc report",
     "copy:config": "cp -R config dist/config",
