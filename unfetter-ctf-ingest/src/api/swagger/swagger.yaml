@@ -1,14 +1,12 @@
 swagger: "2.0"
 info:
-  version: "0.0.1"
+  version: "0.1.0"
   title: Unfetter Ctf Ingest App
 # during dev, should point to your local machine
 host: localhost:10010
 # basePath prefixes all resource paths 
 basePath: /
-# 
 schemes:
-  # tip: remove http to make production-grade
   - http
   - https
 consumes: 
@@ -16,35 +14,6 @@ consumes:
 produces: 
   - "application/json"
 paths:
-  /hello:
-    # binds a127 app logic to a route
-    x-swagger-router-controller: hello_world
-    get:
-      description: Returns 'Hello' to the caller
-      # used as the method name of the controller
-      consumes:
-        - application/json
-      # format of the responses to the client (Accepts)
-      produces:
-        - application/json
-      parameters:
-        - name: name
-          in: query
-          description: The name of the person to whom to say hello
-          required: false
-          type: string
-      responses:
-        "200":
-          description: Success
-          schema:
-            # a pointer to a definition
-            $ref: "#/definitions/HelloWorldResponse"
-        # responses may fall through to errors
-        default: 
-          description: "Error"
-          schema: 
-            $ref: "#/definitions/ErrorResponse"
-
   /upload:
     x-swagger-router-controller: upload
     post:
@@ -60,8 +29,8 @@ paths:
         parameters: 
           - name: "data"
             in: "body"
-            description: "Model instance data"
             required: true
+            description: "Model instance data"
             schema: 
               $ref: "#/definitions/UploadRequest"
         responses: 
@@ -73,26 +42,76 @@ paths:
             description: "Error"
             schema: 
               $ref: "#/definitions/ErrorResponse"
+
+  /translate/report/url:
+    x-swagger-router-controller: translate_report
+    post:
+      operationId: translate_report_url
+      tags: 
+        - "CTF"
+        - "Translate Report URL"
+      description: > 
+        Take a report URL translate the URL to that reports JSON equivalent
+      produces: 
+        - "application/json"
+      consumes: 
+        - "application/json"
+      parameters: 
+        - in: "body"
+          name: "url"
+          description: "Request model"
+          schema:
+            $ref: "#/definitions/TranslateUrlRequest"
+      responses: 
+        "201": 
+          description: "Created"
+          schema: 
+            $ref: "#/definitions/TranslateUrlResponse"
+        default: 
+          description: "Error"
+          schema: 
+            $ref: "#/definitions/ErrorResponse"
+
+  /translate/report/data:
+    x-swagger-router-controller: translate_report
+    post:
+        operationId: translate_report_data
+        tags: 
+          - "CTF"
+          - "Translate Report JSON Data"
+        description: > 
+          Take a report JSON data translate the data to a STIX like equivalent, based on mappings confiured in the database
+        produces: 
+          - "application/json"
+        consumes: 
+          - "application/json"
+        parameters: 
+          - name: "data"
+            in: "body"
+            description: "Request model"
+            required: true
+            schema: 
+              $ref: "#/definitions/TranslateReportData"
+        responses:
+          "201":
+            description: "Created"
+            schema: 
+              $ref: "#/definitions/ReportData"
+          default: 
+            description: "Error"
+            schema: 
+              $ref: "#/definitions/ErrorResponse"
+
 definitions:
-  HelloWorldResponse:
-    required:
-      - message
-    properties:
-      message:
-        type: string
   SuccessResponse:
+    type: object
     required:
       - count
     properties:
       count:
         type: number
-  DetailedErrorResponse:
-    required:
-      - message
-    properties:
-      message:
-        type: string
   ErrorResponse:
+    type: object
     required:
       - message
     properties:
@@ -100,5 +119,51 @@ definitions:
         type: string
   UploadRequest:
     properties:
-      body: 
+      data:
+        type: string
+  TranslateUrlRequest:
+    type: object
+    properties:
+      systemName: 
+        type: string
+        description: the target url to translate
+      url:
+        type: string
+        description: the target url to translate
+    required:
+      - url
+      - systemName
+  TranslateUrlResponse:
+    type: object
+    required:
+      - request
+      - translated
+    properties:
+      request:
+        properties:
+          systemName:
+            type: string
+            description: the system this url represents
+          url:
+            type: string
+            description: the target url to translate
+      translated:
+        properties:
+          success:
+            type: boolean
+            description: true if the url was translated successfully
+          url:
+            type: string
+            description: translated url
+  TranslateReportData:
+    type: object
+    properties:
+      report: 
+        type: object
+  ReportData:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
         type: string

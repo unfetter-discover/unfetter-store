@@ -2,9 +2,11 @@ import * as https from 'https';
 import { MongoClient } from 'mongodb';
 import fetch from 'node-fetch';
 import { Environment } from '../environment';
+import { UrlTranslationRule } from '../models/adapter/url-translation-rule';
 import { AttackPattern } from '../models/attack-pattern';
 import { MarkingDefinition } from '../models/marking-definition';
 import { Stix } from '../models/stix';
+import { CollectionType } from './collection-type.enum';
 import { MongoConnectionService } from './mongo-connection.service';
 import { StixLookupService } from './stix-lookup.service';
 
@@ -12,9 +14,6 @@ import { StixLookupService } from './stix-lookup.service';
  * @description class to make calls to the Mongo database directly
  */
 export class StixLookupMongoService {
-
-    protected readonly attackPatternPath = `attack-patterns`;
-    protected readonly markingDefinitionsPath = `marking-definitions`;
 
     /**
      * @description
@@ -92,5 +91,29 @@ export class StixLookupMongoService {
      */
     public async findSystemIdentity(): Promise<Stix> {
         return this.findIdentityByName('Unfetter of NSA');
+    }
+
+    /**
+     * @description lookup rules to translate report urls for a given system
+     * @param {string} systemName
+     * @returns {UrlTranslationRule}
+     */
+    public async findUrlAdapterRule(systemName = ''): Promise<UrlTranslationRule> {
+        if (!systemName || systemName.trim().length === 0) {
+            return Promise.reject('');
+        }
+
+        const collection = await MongoConnectionService.getCollection(CollectionType.CONFIG);
+
+        const filter = {
+            'configKey': 'adapter.rules.url',
+            'configValue.system': systemName,
+        };
+
+        return Promise.resolve(collection.findOne(filter)
+            .then((result: UrlTranslationRule) => {
+                return result as UrlTranslationRule;
+            })
+            .catch((error: any) => console.log(error)));
     }
 }

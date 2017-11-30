@@ -2,7 +2,7 @@
 
 import * as Yarg from 'yargs';
 import { Environment } from '../environment';
-import { CtfIngestService } from '../services/ctf-ingest.service';
+import { CtfIngestService } from '../services/ingest/ctf-ingest.service';
 import { MongoConnectionService } from '../services/mongo-connection.service';
 
 // 'read csv ctf data, map to stix, ingest using unfetter api'

@@ -14,6 +14,10 @@ RUN chmod 700 $WORKING_DIRECTORY/*.sh
 RUN $WORKING_DIRECTORY/set-linux-repo.sh
 RUN $WORKING_DIRECTORY/set-npm-repo.sh
 
+# Install Dependencies
+# COPY package-lock.json $WORKING_DIRECTORY
+COPY package.json $WORKING_DIRECTORY
+
 RUN npm --loglevel error install
 RUN find / -name "cb-never*.tgz" -delete && \
     rm -rf /usr/share/man && \

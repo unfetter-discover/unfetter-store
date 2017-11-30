@@ -2,7 +2,7 @@
 
 import * as Yarg from 'yargs';
 import { Environment } from '../environment';
-import { AttackPatternIngestService } from '../services/attack-pattern-ingest.service';
+import { AttackPatternIngestService } from '../services/ingest/attack-pattern-ingest.service';
 import { MongoConnectionService } from '../services/mongo-connection.service';
 
 // 'read csv attack pattern data, map to stix, ingest using unfetter api'

@@ -13,13 +13,18 @@ export class CsvParseService<Out> {
      * @description
      *  reads a well know csv file and loads to csv
      * @param {string} csv representing the data
-     * @throws {Error} if file does not exist
      * @returns {Out[]} array of parse object
      */
     public parseCsv(csv = ''): Out[] {
+        if (!csv || csv.trim().length === 0) {
+            return [];
+        }
+
         const parseResults = this.csvToJson(csv);
         if (parseResults.data) {
-            const arr = parseResults.data.map((el) => this.jsonLineToType(el));
+            const arr = parseResults.data
+                .map((el) => this.jsonLineToType(el))
+                .filter((el) => typeof el !== 'undefined') as Out[];
             if (arr && arr.length > 1) {
                 console.log(`parsed ${arr.length} objects`);
                 // console.log(arr[0].toJson());
@@ -50,19 +55,26 @@ export class CsvParseService<Out> {
 
     /**
      * @description
-     *  csv json line to normalized headers
+     *  csv json line to normalized headers, using camelcase
+     * @param {any} json representing a single record
+     * @return {Out | undefined}
      */
-    protected jsonLineToType(json: any): Out {
+    protected jsonLineToType(json: any): Out | undefined {
         const ap: any = {};
         if (!json) {
             return ap;
         }
 
         const keys = Object.keys(json);
+        // bad or empty row
+        if (!keys || keys.length < 1) {
+            return undefined;
+        }
+
         keys.forEach((key) => {
             const camelKey = camelcase(key);
             ap[camelKey] = json[key];
         });
-        return ap;
+        return ap as Out;
     }
 }
