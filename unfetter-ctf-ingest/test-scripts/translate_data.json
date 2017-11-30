@@ -1,0 +1,13 @@
+{
+	"systemName":"123",
+	"payload": {
+		"id": "123",
+		"description": "descrip",
+		"protection": {
+			"level": "Medium"
+		}, 
+		"report": { 
+			"url": "report.url"
+		}
+	}
+}

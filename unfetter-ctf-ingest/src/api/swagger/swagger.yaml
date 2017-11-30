@@ -96,7 +96,7 @@ paths:
           "201":
             description: "Created"
             schema: 
-              $ref: "#/definitions/ReportData"
+              $ref: "#/definitions/TranslateReportDataResponse"
           default: 
             description: "Error"
             schema: 
@@ -158,12 +158,31 @@ definitions:
   TranslateReportData:
     type: object
     properties:
-      report: 
+      systemName:
+        type: string
+        description: the system this data came from
+      payload:
         type: object
-  ReportData:
+        description: the data to translate 
+  TranslateReportDataResponse:
     type: object
+    required:
+      - request
+      - translated
     properties:
-      name:
-        type: string
-      description:
-        type: string
+      request:
+        properties:
+          systemName:
+            type: string
+            description: the system this data represents
+          payload:
+            type: string
+            description: the target data to translate
+      translated:
+        properties:
+          success:
+            type: boolean
+            description: true if the data was translated successfully
+          payload:
+            type: string
+            description: translated data
