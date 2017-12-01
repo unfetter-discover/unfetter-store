@@ -30,6 +30,7 @@ export class ExternalDataToStixAdapter {
 
         const systemName = req.systemName ? req.systemName.trim() : '';
         const translationRules = await this.stixLookupService.findDataAdapterRules(systemName);
+        console.log(translationRules);
         if (!translationRules || !translationRules.rules || translationRules.rules.length === 0) {
             res.translated.success = false;
             return Promise.resolve(res);

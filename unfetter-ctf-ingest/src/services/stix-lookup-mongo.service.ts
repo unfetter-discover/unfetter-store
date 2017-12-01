@@ -2,6 +2,7 @@ import * as https from 'https';
 import { MongoClient } from 'mongodb';
 import fetch from 'node-fetch';
 import { Environment } from '../environment';
+import { Config } from '../models/adapter/config';
 import { DataTranslationRules } from '../models/adapter/data-translation-rules';
 import { UrlTranslationRule } from '../models/adapter/url-translation-rule';
 import { AttackPattern } from '../models/attack-pattern';
@@ -108,12 +109,17 @@ export class StixLookupMongoService {
 
         const filter = {
             'configKey': 'adapter.rules.url',
-            'configValue.system': systemName,
+            'configValue.systemName': systemName,
         };
 
         return Promise.resolve(collection.findOne(filter)
-            .then((result: UrlTranslationRule) => {
-                return result as UrlTranslationRule;
+            .then((result: Config) => {
+                const rule = new UrlTranslationRule();
+                const value = result.configValue;
+                rule.replacementPattern = value.replacementPattern;
+                rule.searchPattern = value.searchPattern;
+                rule.systemName = value.systemName;
+                return rule;
             })
             .catch((error: any) => console.log(error)));
     }
@@ -132,12 +138,16 @@ export class StixLookupMongoService {
 
         const filter = {
             'configKey': 'adapter.rules.data',
-            'configValue.system': systemName,
+            'configValue.systemName': systemName,
         };
 
         return Promise.resolve(collection.findOne(filter)
-            .then((result: DataTranslationRules) => {
-                return result as DataTranslationRules;
+            .then((result: Config) => {
+                const rules = new DataTranslationRules();
+                const val = result.configValue;
+                rules.systemName = val.systemName;
+                rules.rules = val.rules;
+                return rules;
             })
             .catch((error: any) => console.log(error)));
     }

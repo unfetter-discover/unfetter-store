@@ -1,13 +1,16 @@
 {
-	"systemName":"123",
+	"systemName":"sample-report-system",
 	"payload": {
 		"id": "123",
 		"description": "descrip",
+		"published": "2017-12-01",
 		"protection": {
 			"level": "Medium"
 		}, 
 		"report": { 
-			"url": "report.url"
+			"url": "report.url",
+			"id": "https://reports.org/report.id",
+			"description": "report description"
 		}
 	}
 }
