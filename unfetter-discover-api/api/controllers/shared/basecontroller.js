@@ -301,8 +301,19 @@ module.exports = class BaseController {
                         return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                     }
                     const requestedUrl = apiRoot + req.originalUrl;
+                    const resObj = result.toObject();
+                    let returnObj = { ...resObj.stix };
+
+                    if (resObj.extendedProperties) {
+                        returnObj = { ...returnObj, ...resObj.extendedProperties }
+                    }
+
+                    if (resObj.metaProperties) {
+                        returnObj.metaProperties = resObj.metaProperties;
+                    }
+                    
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi([
-                        result.extendedProperties !== undefined ? { ...result.stix, ...result.extendedProperties } : result.stix
+                        returnObj
                     ], type, requestedUrl);
 
                     return res.status(201).json({ links: { self: requestedUrl, }, data: convertedResult });
