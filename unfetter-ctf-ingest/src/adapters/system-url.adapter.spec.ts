@@ -17,7 +17,7 @@ describe('URL Adapter spec', () => {
         rule = new UrlTranslationRule();
         rule.systemName = 'abc';
         rule.searchPattern = 'https://(.*)\/(.*)$';
-        rule.replacementPattern = 'https://domian.next/report/path/$1?accept=application/json';
+        rule.replacementPattern = 'https://domian.next/report/$2?accept=application/json';
 
         spyOn(stixLookupService, 'findUrlAdapterRule').and.returnValue(rule);
         service.setStixLookupService(stixLookupService);
@@ -35,6 +35,7 @@ describe('URL Adapter spec', () => {
         const res = await service.translateUrl(req);
         expect(res).toBeDefined();
         expect(res.translated.success).toBeTruthy();
+        expect(res.translated.url).toEqual('https://domian.next/report/123?accept=application/json');
     });
 
     it('should reject an malformed URL', async () => {

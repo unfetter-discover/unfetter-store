@@ -35,16 +35,20 @@ export class SystemUrlAdapter {
         res.translated.success = false;
         res.translated.url = url;
         if (!Validator.isURL(url, this.parseOpts)) {
+            console.log(url, ' is not a url');
             return Promise.resolve(res);
         }
 
         const translationRule = await this.stixLookupService.findUrlAdapterRule(translationReq.systemName);
+        console.log(translationRule);
         if (!translationRule) {
             return Promise.resolve(res);
         }
 
         const searchPattern = new RegExp(translationRule.searchPattern, 'gim');
-        const replacePattern = translationRule.replacementPattern;
+        const replacePattern = translationRule.replacementPattern
+        ;
+        console.log('translating', url, searchPattern.toString(), replacePattern);
         const translated = url.replace(searchPattern, replacePattern);
         res.translated.success = true;
         res.translated.url = translated;

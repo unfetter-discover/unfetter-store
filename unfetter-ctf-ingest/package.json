@@ -3,7 +3,7 @@
   "version": "0.3.2",
   "description": "ingest cyber threat framework data into unfetter",
   "scripts": {
-    "checkup": "npm run clean && npm run build && npm run lint && npm run coverage && npm run test && npm run swagger:verify",
+    "checkup": "npm run clean && npm run build && npm run lint && npm run docs && npm run coverage && npm run swagger:verify",
     "test": "jasmine-ts --config=jasmine.json",
     "coverage": "nyc --extension .ts --reporter=lcov --reporter=text-lcov npm test && nyc report",
     "copy:config": "cp -R config dist/config",
@@ -14,7 +14,7 @@
     "lint": "tsc -v && tslint src/**/*.ts",
     "ingest:ctf": "ts-node -v && ts-node src/cli/ctf-ingest.cli.ts",
     "ingest:attack-pattern": "ts-node -v && ts-node src/cli/attack-pattern-ingest.cli.ts",
-    "docs": "typedoc --out tsdocs --ignoreCompilerErrors",
+    "docs": "typedoc --out tsdocs --ignoreCompilerErrors src/",
     "swagger:test": "swagger_swagger_fileName='src/api/swagger/swagger.yaml' swagger project test",
     "swagger:verify": "swagger_swagger_fileName='src/api/swagger/swagger.yaml' swagger project verify",
     "swagger:start": "npm run build && swagger_swagger_fileName='src/api/swagger/swagger.yaml' swagger project start",

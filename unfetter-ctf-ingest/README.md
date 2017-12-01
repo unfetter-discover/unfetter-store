@@ -1,18 +1,32 @@
 # UNFETTER-CTF-STORE
+Project takes custom data models (kill chain, attack pattern, etc) and generates STIX and ingests to UNFETTER DB
 
-## To Test
-To read from a sample test file and ingest into a local UNFETTER endpoint
+## Integration tests
+To read a reports test file and ingest into the UNFETTER DB
 
-	 npm run ctf-ingest -- -f test-data/ctf-sample.csv 
+	 npm run ingest:ctf -- -f test-data/ctf-sample.csv 
 
-## Run lint and code coverage
+To read a attack patterns and kill chain file and ingest into a local UNFETTER DB
 
-	npm run lint && npm run coverage
+	 npm run ingest:attack-pattern -- -f test-data/attack-patterns/attack-patterns-sample.csv
 
-## Run unit tests
+To test swagger endpoints
 
-	npm test
+	npm start
+	./test-script/translate_data.sh
+	./test-script/translate_url.sh
+	./test-script/upload.sh
 
-## Generate docs
+## Unit tests
+
+	npm run checkup
+
+or
+
+	npm run clean && npm run build && npm run lint && npm run docs && npm run coverage && npm run swagger:verify
+
+## Typedocs
 
 	npm run docs
+
+Browse tsdocs/index.html
