@@ -1,0 +1,19 @@
+x-swagger-router-controller: translate_data
+get:
+  tags:
+    - CTF sample report data in generic format
+  description: sample report in generic format
+  operationId: translateDataSample
+  consumes: 
+    - application/json
+  produces: 
+    - application/vnd.api+json
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/JsonSchemaObject"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"
