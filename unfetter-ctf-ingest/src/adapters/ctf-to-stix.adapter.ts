@@ -4,6 +4,7 @@ import { KillChainPhase } from '../models/kill-chain-phase';
 import { MarkingDefinition } from '../models/marking-definition';
 import { Stix } from '../models/stix';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
+import { StixLookupService } from '../services/stix-lookup.service';
 
 /**
  * @description
@@ -11,14 +12,13 @@ import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
  */
 export class CtfToStixAdapter {
 
-    protected stixLookupService: StixLookupMongoService;
-
+    protected lookupService: StixLookupService;
     constructor() {
-        this.stixLookupService = new StixLookupMongoService();
+        this.lookupService = new StixLookupMongoService();
     }
 
-    public setStixLookupService(service: StixLookupMongoService): void {
-        this.stixLookupService = service;
+    public setLookupService(service: StixLookupService): void {
+        this.lookupService = service;
     }
 
     public async convertCtfToStix(ctfArray: Ctf[]): Promise<Stix[]> {
@@ -75,7 +75,7 @@ export class CtfToStixAdapter {
             const markings = await Promise.all(classifications
                 .filter((classif) => classif && classif.trim().length > 0)
                 .map((classif) => {
-                    return this.stixLookupService
+                    return this.lookupService
                         .findMarkingDefinitionByLabel(ctf.actionClassification);
                 }));
             // console.log('found markings', markings);
@@ -124,7 +124,7 @@ export class CtfToStixAdapter {
             throw new Error('name parameter is empty or not defined!');
         }
 
-        return this.stixLookupService.findAttackPatternByName(name);
+        return this.lookupService.findAttackPatternByName(name);
     }
 
     /**

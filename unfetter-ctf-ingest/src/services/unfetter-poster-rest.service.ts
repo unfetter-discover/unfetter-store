@@ -5,6 +5,8 @@ import { Stix } from '../models/stix';
 
 /**
  * @description class to post stix objects to UNFETTER API
+ * @deprecated service not maintained
+ * @see UnfetterPosterMongoService
  */
 export class UnfetterPosterRestService {
     protected readonly path = `reports`;

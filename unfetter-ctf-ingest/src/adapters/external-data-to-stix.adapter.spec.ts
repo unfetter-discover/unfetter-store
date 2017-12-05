@@ -7,7 +7,7 @@ import { ExternalDataToStixAdapter } from './external-data-to-stix.adapter';
 describe('External Data to Stix Adapter spec', () => {
 
     let service: ExternalDataToStixAdapter;
-    let stixLookupService: StixLookupMongoService;
+    let lookupService: StixLookupMongoService;
     let rules: DataTranslationRules;
 
     const buildMockRules = (): DataTranslationRules => {
@@ -54,10 +54,10 @@ describe('External Data to Stix Adapter spec', () => {
 
     beforeEach(() => {
         service = new ExternalDataToStixAdapter();
-        stixLookupService = new StixLookupMongoService();
+        lookupService = new StixLookupMongoService();
         rules = buildMockRules();
-        spyOn(stixLookupService, 'findDataAdapterRules').and.returnValue(rules);
-        service.setStixLookupService(stixLookupService);
+        spyOn(lookupService, 'findDataAdapterRules').and.returnValue(rules);
+        service.setLookupService(lookupService);
     });
 
     it('should have a constructor', () => {
@@ -73,9 +73,9 @@ describe('External Data to Stix Adapter spec', () => {
     });
 
     it('should report a failure, if system configuration is not found', async () => {
-        const lookupService = new StixLookupMongoService();
-        spyOn(lookupService, 'findDataAdapterRules').and.returnValue(undefined);
-        service.setStixLookupService(lookupService);
+        const mongoService = new StixLookupMongoService();
+        spyOn(mongoService, 'findDataAdapterRules').and.returnValue(undefined);
+        service.setLookupService(mongoService);
 
         const req = new ExternalDataTranslationRequest();
         req.systemName = 'xxxx';

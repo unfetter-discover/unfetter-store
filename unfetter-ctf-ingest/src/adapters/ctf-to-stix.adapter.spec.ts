@@ -12,13 +12,13 @@ import { CtfToStixAdapter } from './ctf-to-stix.adapter';
 describe('ctf to stix conversion', () => {
 
     let ctfToStixAdapter: CtfToStixAdapter;
-    let stixLookupService: StixLookupMongoService;
+    let lookupService: StixLookupMongoService;
     let ctfArr: Ctf[];
 
     beforeEach(() => {
         ctfToStixAdapter = new CtfToStixAdapter();
         ctfArr = new CtfMock().mockMany(2);
-        stixLookupService = new StixLookupMongoService();
+        lookupService = new StixLookupMongoService();
 
     });
 
@@ -27,11 +27,11 @@ describe('ctf to stix conversion', () => {
     });
 
     it('should convert ctf to stix', async () => {
-        spyOn(stixLookupService, 'findAttackPatternByName')
+        spyOn(lookupService, 'findAttackPatternByName')
             .and.returnValue([new AttackPattern()]);
-        spyOn(stixLookupService, 'findMarkingDefinitionByLabel')
+        spyOn(lookupService, 'findMarkingDefinitionByLabel')
             .and.returnValue([new MarkingDefinition()]);
-        ctfToStixAdapter.setStixLookupService(stixLookupService);
+        ctfToStixAdapter.setLookupService(lookupService);
 
         const stixArr = await ctfToStixAdapter.convertCtfToStix(ctfArr);
         expect(stixArr).toBeDefined();

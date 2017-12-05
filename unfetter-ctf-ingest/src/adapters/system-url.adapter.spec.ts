@@ -7,20 +7,20 @@ import { SystemUrlAdapter } from './system-url.adapter';
 describe('URL Adapter spec', () => {
 
     let service: SystemUrlAdapter;
-    let stixLookupService: StixLookupMongoService;
+    let lookupService: StixLookupMongoService;
     let rule: UrlTranslationRule;
 
     beforeEach(() => {
         service = new SystemUrlAdapter();
-        stixLookupService = new StixLookupMongoService();
+        lookupService = new StixLookupMongoService();
 
         rule = new UrlTranslationRule();
         rule.systemName = 'abc';
         rule.searchPattern = 'https://(.*)\/(.*)$';
         rule.replacementPattern = 'https://domian.next/report/$2?accept=application/json';
 
-        spyOn(stixLookupService, 'findUrlAdapterRule').and.returnValue(rule);
-        service.setStixLookupService(stixLookupService);
+        spyOn(lookupService, 'findUrlAdapterRule').and.returnValue(rule);
+        service.setLookupService(lookupService);
     });
 
     it('should have a constructor', () => {

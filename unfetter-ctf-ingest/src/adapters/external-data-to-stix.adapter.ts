@@ -2,6 +2,7 @@ import { ExternalDataTranslationRequest } from '../models/adapter/external-data-
 import { ExternalDataTranslationResponse } from '../models/adapter/external-data-translation-response';
 import { WrappedStix } from '../models/wrapped-stix';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
+import { StixLookupService } from '../services/stix-lookup.service';
 
 // tslint:disable-next-line:no-var-requires
 const jspath = require('jspath');
@@ -11,14 +12,13 @@ const jspath = require('jspath');
  */
 export class ExternalDataToStixAdapter {
 
-    protected stixLookupService: StixLookupMongoService;
-
+    protected lookupService: StixLookupService;
     constructor() {
-        this.stixLookupService = new StixLookupMongoService();
+        this.lookupService = new StixLookupMongoService();
     }
 
-    public setStixLookupService(service: StixLookupMongoService): void {
-        this.stixLookupService = service;
+    public setLookupService(service: StixLookupService): void {
+        this.lookupService = service;
     }
 
     public async translateData(req: ExternalDataTranslationRequest): Promise<ExternalDataTranslationResponse> {
@@ -29,8 +29,7 @@ export class ExternalDataToStixAdapter {
         }
 
         const systemName = req.systemName ? req.systemName.trim() : '';
-        const translationRules = await this.stixLookupService.findDataAdapterRules(systemName);
-        console.log(translationRules);
+        const translationRules = await this.lookupService.findDataAdapterRules(systemName);
         if (!translationRules || !translationRules.rules || translationRules.rules.length === 0) {
             res.translated.success = false;
             return Promise.resolve(res);
