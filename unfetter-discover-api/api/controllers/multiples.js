@@ -409,7 +409,7 @@ const addInteraction = (req, res) => {
                     const obj = newDocument.toObject();
                     return res.status(200).json({
                         links: { self: requestedUrl, },
-                        data: { attributes: { ...obj.stix, ...obj.metaProperties, ...obj.extendedProperties } }
+                        data: { attributes: { ...obj.stix, ...obj.metaProperties, ...obj.extendedProperties, metaProperties: obj.metaProperties } }
                     });
                 }
 
