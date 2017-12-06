@@ -71,7 +71,8 @@ export class CtfIngestService {
             return Promise.reject([]);
         }
 
-        const data = csv.split(lineDelim);
+        let data = csv.split(lineDelim);
+        data = data.splice(1, data.length);
         const translatedData = [translatedHeaders.join(','), ...data];
         const translatedCsv = translatedData.join(lineDelim);
         const collection = await MongoConnectionService.getCollection(CollectionType.DATA);
