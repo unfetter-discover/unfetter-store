@@ -14,6 +14,7 @@ export class CtfMock extends Mock<Ctf> {
         ctf.afaAction = 'Scanning';
         ctf.afaObjective = 'Prepare';
         ctf.alaStage = 'Stage-1';
+        ctf.reportId = '123' + new Date().getTime();
         return ctf;
     }
 

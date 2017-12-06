@@ -22,7 +22,9 @@ export class CtfToStixAdapter {
     }
 
     public async convertCtfToStix(ctfArray: Ctf[]): Promise<Stix[]> {
-        const stixies = ctfArray.map((ctf) => this.mapCtfToStix(ctf));
+        const stixies = ctfArray
+            .filter((ctf) => ctf && ctf.reportId && ctf.afaObjective && ctf.afaAction)
+            .map((ctf) => this.mapCtfToStix(ctf));
         return Promise.all(stixies);
     }
 
@@ -121,7 +123,8 @@ export class CtfToStixAdapter {
      */
     private async lookupAttackPattern(name: string = ''): Promise<AttackPattern[]> {
         if (!name || name.trim().length === 0) {
-            throw new Error('name parameter is empty or not defined!');
+            // throw new Error('name parameter is empty or not defined!');
+            return Promise.resolve([]);
         }
 
         return this.lookupService.findAttackPatternByName(name);
