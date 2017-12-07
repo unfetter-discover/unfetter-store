@@ -26,19 +26,33 @@ export class AttackPatternIngestService {
     /**
      * @description ingest a csv file
      * @param {string} fileName
+     * @param {string} outFile optional
      * @return {Promise<void>}
      */
-    public async ingestCsv(fileName: string = ''): Promise<void> {
+    public async ingestCsv(fileName: string = '', outFile?: string): Promise<void> {
         console.log(`ingest csv = ${fileName}`);
         if (!fs.existsSync(fileName)) {
             const msg = `${fileName} does not exist!`;
             throw msg;
         }
+
+        if (outFile && fs.existsSync(outFile)) {
+            const msg = `${outFile} already exists!`;
+            throw msg;
+        }
+
         const csv = fs.readFileSync(fileName).toString();
         const stixies = await this.csvToStix(csv);
-        const unfetterPoster = new UnfetterPosterMongoService();
-        // post to reports endpoint
-        return Promise.resolve(unfetterPoster.uploadStix(stixies));
+
+        if (!outFile) {
+            const unfetterPoster = new UnfetterPosterMongoService();
+            // post to reports endpoint
+            return Promise.resolve(unfetterPoster.uploadStix(stixies));
+        } else {
+            console.log('saving to file ', outFile);
+            const json = JSON.stringify(stixies, undefined, '\t');
+            fs.writeFileSync(outFile, json);
+        }
     }
 
     /**

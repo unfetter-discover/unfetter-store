@@ -14,7 +14,7 @@ import { CtfToStixAdapter } from './ctf-to-stix.adapter';
 describe('attack pattern csv to stix conversion', () => {
 
     let adapter: AttackPatternIngestToStixAdapter;
-    let stixLookupService: StixLookupMongoService;
+    let lookupService: StixLookupMongoService;
     let attackPatterns: AttackPatternIngest[];
     let mockIdent: Stix;
     let mockAttackPatterns: AttackPattern[];
@@ -30,15 +30,15 @@ describe('attack pattern csv to stix conversion', () => {
         ap.id = 'xxx';
         mockAttackPatterns = [ap];
         adapter = new AttackPatternIngestToStixAdapter();
-        stixLookupService = new StixLookupMongoService();
+        lookupService = new StixLookupMongoService();
 
-        spyOn(stixLookupService, 'findAttackPatternByName')
+        spyOn(lookupService, 'findAttackPatternByName')
             .and.returnValue(mockAttackPatterns);
-        spyOn(stixLookupService, 'findMarkingDefinitionByLabel')
+        spyOn(lookupService, 'findMarkingDefinitionByLabel')
             .and.returnValue([new MarkingDefinition()]);
-        spyOn(stixLookupService, 'findSystemIdentity')
+        spyOn(lookupService, 'findSystemIdentity')
             .and.returnValue(mockIdent);
-        adapter.setStixLookupService(stixLookupService);
+        adapter.setLookupService(lookupService);
 
         attackPatterns = new AttackPatternIngestMock().mockMany();
     });

@@ -8,8 +8,10 @@ import { StixLookupService } from './stix-lookup.service';
 /**
  * @description
  *  class to make calls to the backend API
+ * @deprecated service not maintained
+ * @see StixLookupMongoService
  */
-export class StixLookupRestService implements StixLookupService {
+export class StixLookupRestService {
 
     protected readonly attackPatternPath = `attack-patterns`;
     protected readonly markingDefinitionsPath = `marking-definitions`;

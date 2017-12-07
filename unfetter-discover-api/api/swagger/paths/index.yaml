@@ -118,6 +118,12 @@
 
 /ctf/upload:
   $ref: './ctf/upload.yaml'
+/ctf/translate/report/url:
+  $ref: './ctf/translate_url.yaml'
+/ctf/translate/report/data:
+  $ref: './ctf/translate_data.yaml'
+/ctf/translate/report/data/sample:
+  $ref: './ctf/translate_data_sample.yaml'
 
 /dashboards/intrusionSetView:
   $ref: ./dashboards/intrusion-set-view.yaml

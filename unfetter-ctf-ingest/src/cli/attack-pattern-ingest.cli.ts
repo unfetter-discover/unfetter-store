@@ -19,7 +19,9 @@ Yarg.usage('Usage: $0 -h localhost -f [csvFile]')
     .alias('pr', 'protocol')
     .describe('pr', 'protocol for the API')
     .default('pr', process.env.API_PROTOCOL || 'https')
-    .alias('f', 'file')
+    .alias('o', 'outfile')
+    .describe('o', 'file name to output vs saving to the db')
+    .alias('f', 'infile')
     .describe('f', 'file name of the csv file to ingest')
     .demandOption(['f']);
 
@@ -29,9 +31,10 @@ if (argv) {
     Environment.apiHost = argv['host'];
     Environment.apiPort = argv['port'];
     Environment.context = argv['context'];
-    const fileName = argv['file'];
+    const infileName = argv['infile'];
+    const outFileName = argv['outfile'] || undefined;
     const ingest = new AttackPatternIngestService();
-    ingest.ingestCsv(fileName).then(() => {
+    ingest.ingestCsv(infileName, outFileName).then(() => {
         console.log('closing connection');
         MongoConnectionService.closeConnection();
     }).catch((err) => {

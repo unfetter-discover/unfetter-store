@@ -12,27 +12,34 @@ import { CtfToStixAdapter } from './ctf-to-stix.adapter';
 describe('ctf to stix conversion', () => {
 
     let ctfToStixAdapter: CtfToStixAdapter;
-    let stixLookupService: StixLookupMongoService;
+    let lookupService: StixLookupMongoService;
     let ctfArr: Ctf[];
 
     beforeEach(() => {
         ctfToStixAdapter = new CtfToStixAdapter();
         ctfArr = new CtfMock().mockMany(2);
-        stixLookupService = new StixLookupMongoService();
+        lookupService = new StixLookupMongoService();
 
+        spyOn(lookupService, 'findAttackPatternByName')
+            .and.returnValue([new AttackPattern()]);
+        spyOn(lookupService, 'findMarkingDefinitionByLabel')
+            .and.returnValue([new MarkingDefinition()]);
+        ctfToStixAdapter.setLookupService(lookupService);
     });
 
     it('should have a constructor', () => {
         expect(ctfToStixAdapter).toBeDefined();
     });
 
-    it('should convert ctf to stix', async () => {
-        spyOn(stixLookupService, 'findAttackPatternByName')
-            .and.returnValue([new AttackPattern()]);
-        spyOn(stixLookupService, 'findMarkingDefinitionByLabel')
-            .and.returnValue([new MarkingDefinition()]);
-        ctfToStixAdapter.setStixLookupService(stixLookupService);
+    it('should accept and not parse bad ctf objects', async () => {
+        expect(ctfToStixAdapter).toBeDefined();
+        const ctf = [new Ctf(), new Ctf(), ...ctfArr];
+        const stixArr = await ctfToStixAdapter.convertCtfToStix(ctf);
+        expect(stixArr).toBeDefined();
+        expect(stixArr.length).toEqual(2);
+    });
 
+    it('should convert ctf to stix', async () => {
         const stixArr = await ctfToStixAdapter.convertCtfToStix(ctfArr);
         expect(stixArr).toBeDefined();
         expect(stixArr.length).toEqual(ctfArr.length);

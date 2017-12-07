@@ -2,21 +2,22 @@ import * as Validator from 'validator';
 import { UrlTranslationRequest } from '../models/adapter/url-translation-request';
 import { UrlTranslationResponse } from '../models/adapter/url-translation-response';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
+import { StixLookupService } from '../services/stix-lookup.service';
 
 /**
  * @description adapt system urls from one form to another
  */
 export class SystemUrlAdapter {
 
-    protected stixLookupService: StixLookupMongoService;
+    protected lookupService: StixLookupMongoService;
     protected readonly parseOpts = { require_valid_protocol: true, require_host: false, require_protocol: false };
 
     constructor() {
-        this.stixLookupService = new StixLookupMongoService();
+        this.lookupService = new StixLookupMongoService();
     }
 
-    public setStixLookupService(service: StixLookupMongoService): void {
-        this.stixLookupService = service;
+    public setLookupService(service: StixLookupService): void {
+        this.lookupService = service;
     }
 
     /**
@@ -39,8 +40,7 @@ export class SystemUrlAdapter {
             return Promise.resolve(res);
         }
 
-        const translationRule = await this.stixLookupService.findUrlAdapterRule(translationReq.systemName);
-        console.log(translationRule);
+        const translationRule = await this.lookupService.findUrlAdapterRule(translationReq.systemName);
         if (!translationRule) {
             return Promise.resolve(res);
         }
@@ -48,7 +48,6 @@ export class SystemUrlAdapter {
         const searchPattern = new RegExp(translationRule.searchPattern, 'gim');
         const replacePattern = translationRule.replacementPattern
         ;
-        console.log('translating', url, searchPattern.toString(), replacePattern);
         const translated = url.replace(searchPattern, replacePattern);
         res.translated.success = true;
         res.translated.url = translated;

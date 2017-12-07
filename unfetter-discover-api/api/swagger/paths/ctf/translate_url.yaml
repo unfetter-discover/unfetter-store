@@ -1,0 +1,26 @@
+x-swagger-router-controller: translate_url
+post:
+  tags:
+    - CTF translate url
+  description: translates generic url
+  operationId: translateUrl
+  consumes: 
+    - application/json
+  produces: 
+    - application/vnd.api+json
+  parameters:
+    - name: data
+      in: body
+      description: "Request"
+      required: true
+      schema:
+        $ref: "#/definitions/JsonSchemaObject"
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/JsonSchemaObject"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"

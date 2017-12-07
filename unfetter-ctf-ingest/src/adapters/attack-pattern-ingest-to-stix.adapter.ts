@@ -5,6 +5,7 @@ import { KillChainPhase } from '../models/kill-chain-phase';
 import { MarkingDefinition } from '../models/marking-definition';
 import { Stix } from '../models/stix';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
+import { StixLookupService } from '../services/stix-lookup.service';
 
 /**
  * @description
@@ -12,14 +13,13 @@ import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
  */
 export class AttackPatternIngestToStixAdapter {
 
-    protected stixLookupService: StixLookupMongoService;
-
+    protected lookupService: StixLookupService;
     constructor() {
-        this.stixLookupService = new StixLookupMongoService();
+        this.lookupService = new StixLookupMongoService();
     }
 
-    public setStixLookupService(service: StixLookupMongoService): void {
-        this.stixLookupService = service;
+    public setLookupService(service: StixLookupService): void {
+        this.lookupService = service;
     }
 
     /**
@@ -62,7 +62,7 @@ export class AttackPatternIngestToStixAdapter {
      * @description
      */
     public async lookupSystemIdentity(): Promise<Stix> {
-        return this.stixLookupService.findSystemIdentity();
+        return this.lookupService.findSystemIdentity();
     }
 
     /**

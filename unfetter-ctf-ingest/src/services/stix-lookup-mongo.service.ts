@@ -4,6 +4,7 @@ import fetch from 'node-fetch';
 import { Environment } from '../environment';
 import { Config } from '../models/adapter/config';
 import { DataTranslationRules } from '../models/adapter/data-translation-rules';
+import { HeaderTranslationRules } from '../models/adapter/header-translation-rules';
 import { UrlTranslationRule } from '../models/adapter/url-translation-rule';
 import { AttackPattern } from '../models/attack-pattern';
 import { MarkingDefinition } from '../models/marking-definition';
@@ -15,13 +16,13 @@ import { StixLookupService } from './stix-lookup.service';
 /**
  * @description class to make calls to the Mongo database directly
  */
-export class StixLookupMongoService {
+export class StixLookupMongoService implements StixLookupService {
 
     /**
      * @description
      *  lookup up attack pattern by name
      * @param {string} name
-     * @returns {AttackPattern[]}
+     * @returns {Promise<AttackPattern[]>}
      */
     public async findAttackPatternByName(name = ''): Promise<AttackPattern[]> {
         if (!name || name.trim().length === 0) {
@@ -43,7 +44,7 @@ export class StixLookupMongoService {
     /**
      * @description lookup up marking definition by label
      * @param {string} name
-     * @returns {MarkingDefinition[]}
+     * @returns {Promise<MarkingDefinition>}
      */
     public async findMarkingDefinitionByLabel(label = ''): Promise<MarkingDefinition> {
         if (!label || label.trim().length === 0) {
@@ -66,7 +67,7 @@ export class StixLookupMongoService {
     /**
      * @description lookup up marking definition by label
      * @param {string} name
-     * @returns {Stix}
+     * @returns {Promise<Stix>}
      */
     public async findIdentityByName(name = ''): Promise<Stix> {
         if (!name || name.trim().length === 0) {
@@ -89,7 +90,7 @@ export class StixLookupMongoService {
     /**
      * @description lookup up the unfetter system identity
      * @param {string} name
-     * @returns {Stix}
+     * @returns {Promise<Stix>}
      */
     public async findSystemIdentity(): Promise<Stix> {
         return this.findIdentityByName('Unfetter of NSA');
@@ -98,7 +99,7 @@ export class StixLookupMongoService {
     /**
      * @description lookup rules to translate report urls for a given system
      * @param {string} systemName
-     * @returns {UrlTranslationRule}
+     * @returns {Promise<UrlTranslationRule>}
      */
     public async findUrlAdapterRule(systemName = ''): Promise<UrlTranslationRule> {
         if (!systemName || systemName.trim().length === 0) {
@@ -127,7 +128,7 @@ export class StixLookupMongoService {
     /**
      * @description lookup rules to translate external report data for a given system
      * @param {string} systemName
-     * @returns {DataTranslationRules}
+     * @returns {Promise<DataTranslationRules>}
      */
     public async findDataAdapterRules(systemName = ''): Promise<DataTranslationRules> {
         if (!systemName || systemName.trim().length === 0) {
@@ -150,5 +151,31 @@ export class StixLookupMongoService {
                 return rules;
             })
             .catch((error: any) => console.log(error)));
+    }
+
+    /**
+     * @description lookup rules to translate report urls for a given system
+     * @param {string} systemName
+     * @returns {Promise<HeaderTranslationRules>}
+     */
+    public async findHeaderTranslationRules(systemName = ''): Promise<HeaderTranslationRules> {
+        if (!systemName || systemName.trim().length === 0) {
+            return Promise.reject('');
+        }
+
+        const collection = await MongoConnectionService.getCollection(CollectionType.CONFIG);
+
+        const filter = {
+            'configKey': 'adapter.rules.header',
+            'configValue.systemName': systemName,
+        };
+
+        return Promise.resolve(
+            collection.find(filter).toArray()
+                .then((doc: any) => {
+                    console.log('header translation rules', doc);
+                    return doc;
+                })
+                .catch((error: any) => console.log(error)));
     }
 }
