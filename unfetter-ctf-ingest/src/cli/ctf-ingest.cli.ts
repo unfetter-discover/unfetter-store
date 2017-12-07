@@ -19,6 +19,8 @@ Yarg.usage('Usage: $0 -h localhost -f [csvFile]')
     .alias('pr', 'protocol')
     .describe('pr', 'protocol for the API')
     .default('pr', process.env.API_PROTOCOL || 'https')
+    .alias('o', 'outfile')
+    .describe('o', 'file name to output vs saving to the db')
     .alias('f', 'file')
     .describe('f', 'file name of the csv file to ingest')
     .demandOption(['f']);
@@ -30,8 +32,9 @@ if (argv) {
     Environment.apiPort = argv['port'];
     Environment.context = argv['context'];
     const fileName = argv['file'];
+    const outFileName = argv['outfile'] || undefined;
     const ctfIngest = new CtfIngestService();
-    ctfIngest.ingestCsv(fileName).then(() => {
+    ctfIngest.ingestCsv(fileName, outFileName).then(() => {
         console.log('closing connection');
         MongoConnectionService.closeConnection();
     }).catch((err) => {
