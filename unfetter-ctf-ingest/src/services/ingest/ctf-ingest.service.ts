@@ -82,7 +82,12 @@ export class CtfIngestService {
         const translatedHeaders = await this.headerTranslationAdapter.translateHeaders(systemName, headers);
         const hasSaneHeaders = await this.ensureExpectedHeaders(translatedHeaders);
         if (!hasSaneHeaders) {
-            return Promise.reject([]);
+            const targetKeys = Object.keys(new Ctf());
+            const msg =
+                'headers do not look correct, expected at least some of the following camel or noncamel case variants'
+                + '\n'
+                + `${targetKeys.join(',')}`;
+            return Promise.reject(msg);
         }
 
         let data = csv.split(lineDelim);
@@ -115,14 +120,7 @@ export class CtfIngestService {
 
         const targetKeys = Object.keys(new Ctf());
         const valid = await this.validationService.verifyCorrectHeaders(targetKeys, headers);
-        if (valid === false) {
-            const msg =
-                'headers do not look correct, expected at least some of the following camel or noncamel case variants\n'
-                + `${targetKeys.join(',')}`;
-            throw msg;
-        }
-
-        return valid;
+        return Promise.resolve(valid);
     }
 
     /**

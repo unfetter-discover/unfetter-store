@@ -18,7 +18,10 @@ const upload = (req, res) => {
             // console.log(jsonArr);
             res.json(jsonArr);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => { 
+            console.log('error', err);
+            res.json(err);
+        });
 }
 
 module.exports = {
