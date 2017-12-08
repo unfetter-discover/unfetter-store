@@ -1,5 +1,3 @@
-// const fs = request('fs');
-
 const fetch = require('node-fetch');
 
 const CTF_PARSE_HOST = process.env.CTF_PARSE_HOST || 'http://localhost';
@@ -33,23 +31,21 @@ const upload = (req, res) => {
     const body = JSON.stringify({ data: contents });
     const headers = { 'content-type': 'application/json', 'accept': 'application/json' };
     const url = `${CTF_PARSE_HOST}:${CTF_PARSE_PORT}${CTF_PARSE_PATH}`;
-    // console.log(url);
-    // console.log(body);
     fetch(url, {
         headers,
         method: 'POST',
         body
     }).then((response) => {
-        // console.log('response', response);
-        // console.log('response', response.json());
+        console.log('response', response);
         response.json().then((json) => {
-            // console.log('upload response', json);
+            console.log('upload response', json);
             res.json(json);
         });
     }).catch((ex) => {
+        console.log(ex);
         err.error.detail = ex;
-        return res.status(500).json(err);
-    })
+        res.status(500).json(err);
+    });
 
 };
 

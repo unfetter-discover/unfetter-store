@@ -10,20 +10,22 @@ const upload = (req, res) => {
     const csv = body.data || '';
     // console.log(csv.split('\n')[0]);
     const ctfIngest = new CtfIngestService.CtfIngestService();
-    ctfIngest.csvToStix(csv)
+    return ctfIngest.csvToStix(csv)
         .then((stixies) => {
             // console.log(`stixies ${stixies}`);
             const stixToJson = new StixToJsonSchemaAdapter.StixToJsonSchemaAdapter();
             const jsonArr = stixToJson.convertStixToJsonSchema(stixies);
             // console.log(jsonArr);
-            res.json(jsonArr);
+            res.status(200).json(jsonArr);
+            res.end();
         })
-        .catch((err) => { 
+        .catch((err) => {
             console.log('error', err);
-            res.json(err);
+            res.status(200).json([{ 'data': { 'error': err } }]);
+            return res.end();
         });
 }
 
 module.exports = {
-  upload
- };
+    upload
+};
