@@ -31,20 +31,30 @@ const upload = (req, res) => {
     const body = JSON.stringify({ data: contents });
     const headers = { 'content-type': 'application/json', 'accept': 'application/json' };
     const url = `${CTF_PARSE_HOST}:${CTF_PARSE_PORT}${CTF_PARSE_PATH}`;
+    const timeout = 1000 * 60 * 2; // millis
     fetch(url, {
         headers,
         method: 'POST',
-        body
+        body,
+        timeout
     }).then((response) => {
-        console.log('response', response);
-        response.json().then((json) => {
-            console.log('upload response', json);
-            res.json(json);
-        });
-    }).catch((ex) => {
-        console.log(ex);
-        err.error.detail = ex;
-        res.status(500).json(err);
+        return response.json();
+    })
+    .then((json) => {
+        console.log('upload json response', json);
+        if (typeof json === 'Array' && json.length > 0) {
+            const el = json[0];
+            if (el.data && el.data.error) {
+                // error response
+                err.detail = el.data.error;
+                return res.status(500).json(err);
+            }
+        }
+        return res.json(json);
+    })
+    .catch((ex) => {
+        err.detail = ex;
+        return res.status(500).json(err);
     });
 
 };
