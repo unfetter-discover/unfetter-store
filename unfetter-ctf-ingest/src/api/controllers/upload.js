@@ -12,7 +12,7 @@ const upload = (req, res) => {
     const ctfIngest = new CtfIngestService.CtfIngestService();
     return ctfIngest.csvToStix(csv)
         .then((stixies) => {
-            // console.log(`stixies ${stixies}`);
+            console.log(`stixies ${stixies}`);
             const stixToJson = new StixToJsonSchemaAdapter.StixToJsonSchemaAdapter();
             const jsonArr = stixToJson.convertStixToJsonSchema(stixies);
             // console.log(jsonArr);

@@ -82,6 +82,7 @@ export class CtfIngestService {
         const translatedHeaders = await this.headerTranslationAdapter.translateHeaders(systemName, headers);
         const hasSaneHeaders = await this.ensureExpectedHeaders(translatedHeaders);
         if (!hasSaneHeaders) {
+            console.log('bad headers, rejecting promise');
             const targetKeys = Object.keys(new Ctf());
             const msg =
                 'headers do not look correct, expected at least some of the following camel or noncamel case variants'
