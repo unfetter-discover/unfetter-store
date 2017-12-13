@@ -87,7 +87,7 @@ io.on('connect', (client: any) => {
     }    
 });
 
-server.listen(3000, () => {
+server.listen(3333, () => {
     console.log('Server is listening');
 });
 
