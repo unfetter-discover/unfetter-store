@@ -1,0 +1,4 @@
+config/private-config.js
+config/private-config.json
+node_modules/
+dist/
