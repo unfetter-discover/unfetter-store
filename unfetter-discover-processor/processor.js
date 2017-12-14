@@ -4,7 +4,7 @@
 const MAX_NUM_CONNECT_ATTEMPTS = 10;
 // The amount of time between each connection attempt in ms
 const CONNECTION_RETRY_TIME = 5000;
-const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/ATTACK/mitre-attack.json';
+const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
 
 /* ~~~ Vendor Libraries ~~~ */
 
