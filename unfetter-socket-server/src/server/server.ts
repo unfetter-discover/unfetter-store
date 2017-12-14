@@ -12,17 +12,17 @@ import { WSMessageTypes } from '../models/messages';
 
 mongoInit();
 
-const server = https.createServer({
+const server: any = https.createServer({
     key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
     cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
 }, app);
 
 const io = socketIo(server, {
     path: '/socket'
+    // secure: true
 });
 
-io.use((client: any, next) => {
-
+io.use((client: any, next: any) => {
     let errorMsg = '';
 
     if (client.handshake.query && client.handshake.query.token) {

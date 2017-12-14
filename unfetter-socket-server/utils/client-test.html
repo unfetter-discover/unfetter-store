@@ -10,9 +10,9 @@
 <body>
     <p>hi</p>
     <script>
-    var exampleSocket = io("https://localhost:3000", {
+    var exampleSocket = io("https://localhost", {
         secure: true,
-        path: '/socket',
+        path: '/socketserver/socket',
         query: 'hihihi'
     });
     exampleSocket.on('message', (msg) => {
