@@ -33,7 +33,8 @@ router.post('/notification/user', (req: Request, res: Response) => {
             console.log(errors);
             return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to save notification in notification store', errors));
         } else {
-            const appNotification = new CreateAppNotification(WSMessageTypes.NOTIFICATION, notification, notificationDoc._id);
+            notification._id = notificationDoc._id;
+            const appNotification = new CreateAppNotification(WSMessageTypes.NOTIFICATION, notification);
             const userSessions = findConnectionsByUserId(userId);
 
             if (userSessions && userSessions.length) {

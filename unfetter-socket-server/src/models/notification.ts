@@ -5,14 +5,12 @@ export interface AppNotification {
     heading: string,
     body: string,
     submitted: Date,
-    mongoId: string,
+    _id: string,
     link?: string
 }
 
 export class CreateAppNotification extends WSMessage {
-    public mongoId: string;
-    constructor(messageType: WSMessageTypes, messageContent: AppNotification, mongoId: string) { 
+    constructor(messageType: WSMessageTypes, messageContent: AppNotification) { 
         super(messageType, messageContent);
-        this.mongoId = mongoId;
     }
 }
