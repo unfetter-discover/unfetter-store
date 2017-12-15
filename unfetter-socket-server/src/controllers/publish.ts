@@ -7,6 +7,7 @@ import { WSMessageTypes } from '../models/messages';
 import { Connection } from '../models/connection';
 import { CreateJsonApiError, CreateJsonApiSuccess } from '../models/jsonapi';
 import { isDefinedJsonApi } from '../controllers/shared/isdefined';
+import notificationStoreModel from '../models/mongoose/notification-store';
 
 let router: any = Router();
 
@@ -32,7 +33,27 @@ router.post('/notification/user', (req: Request, res: Response) => {
             return res.json(new CreateJsonApiSuccess({'success': true}));
         } else {
             console.log('Unable to find session for', userId);
-            return res.status(404).json(new CreateJsonApiError('404', req.url, 'Unable to find user socket'));
+
+            const notificationDoc = new notificationStoreModel({
+                userId,
+                messageType: WSMessageTypes.NOTIFICATION,
+                messageContent: notification
+            });       
+            
+            const errors = notificationDoc.validateSync();
+            if (errors) {
+                console.log(errors);
+                return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to find user socket, unable to save notification in notification store', errors));
+            } else {
+                notificationDoc.save((err: any) => {
+                    if (err) {
+                        return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to find user socket, unable to save notification in notification store', errors));
+                    } else {
+                        return res.json(new CreateJsonApiSuccess({'message': 'Unable to find user socket, but successfully saved in notification store'}));
+                    }
+                });
+            }
+
         }            
     } else {
         console.log('Malformed request to', req.url);

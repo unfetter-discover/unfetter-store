@@ -6,7 +6,7 @@ import * as socketIo from 'socket.io';
 import app from './app';
 import { mongoInit } from './mongoInit';
 import { jwtVerify } from '../middleware/jwtVerify';
-import { userModel } from '../models/user';
+import { userModel } from '../models/mongoose/user';
 import { connections } from '../models/connections';
 import { WSMessageTypes } from '../models/messages';
 
@@ -19,7 +19,6 @@ const server: any = https.createServer({
 
 const io = socketIo(server, {
     path: '/socket'
-    // secure: true
 });
 
 io.use((client: any, next: any) => {
