@@ -1,6 +1,6 @@
-import * as mongoose from 'mongoose';
+import { Schema, Model, model } from 'mongoose';
 
-const notificationStoreSchema = new mongoose.Schema({
+const notificationStoreSchema = new Schema({
     userId: {
         type: String,
         required: true
@@ -12,8 +12,12 @@ const notificationStoreSchema = new mongoose.Schema({
     messageContent: {
         type: Object,
         require: true
+    },
+    read: {
+        type: Boolean,
+        default: false
     }
 });
 
-const notificationStoreModel: mongoose.Model<any> = mongoose.model<any>('notificationStore', notificationStoreSchema, 'notificationStore');
+const notificationStoreModel: Model<any> = model<any>('notificationStore', notificationStoreSchema, 'notificationStore');
 export default notificationStoreModel;

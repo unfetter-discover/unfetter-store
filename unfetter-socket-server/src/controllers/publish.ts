@@ -20,41 +20,37 @@ interface UserNotification {
 router.post('/notification/user', (req: Request, res: Response) => {
     if (isDefinedJsonApi(req, ['userId'], ['notification'])) {
         const { userId, notification }: UserNotification = req.body.data.attributes;
-        notification.submitted = notification.submitted || new Date();
+        notification.submitted = notification.submitted || new Date();        
 
-        const appNotification = new CreateAppNotification(WSMessageTypes.NOTIFICATION, notification);
-        const userSessions = findConnectionsByUserId(userId);
-
-        if (userSessions && userSessions.length) {
-            // In case the same user has multiple session objects
-            userSessions.forEach((connection: Connection) => {
-                connection.client.send(appNotification);
-            });
-            return res.json(new CreateJsonApiSuccess({'success': true}));
+        const notificationDoc = new notificationStoreModel({
+            userId,
+            messageType: WSMessageTypes.NOTIFICATION,
+            messageContent: notification
+        });       
+        
+        const errors = notificationDoc.validateSync();
+        if (errors) {
+            console.log(errors);
+            return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to save notification in notification store', errors));
         } else {
-            console.log('Unable to find session for', userId);
+            const appNotification = new CreateAppNotification(WSMessageTypes.NOTIFICATION, notification, notificationDoc._id);
+            const userSessions = findConnectionsByUserId(userId);
 
-            const notificationDoc = new notificationStoreModel({
-                userId,
-                messageType: WSMessageTypes.NOTIFICATION,
-                messageContent: notification
-            });       
-            
-            const errors = notificationDoc.validateSync();
-            if (errors) {
-                console.log(errors);
-                return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to find user socket, unable to save notification in notification store', errors));
-            } else {
-                notificationDoc.save((err: any) => {
-                    if (err) {
-                        return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to find user socket, unable to save notification in notification store', errors));
-                    } else {
-                        return res.json(new CreateJsonApiSuccess({'message': 'Unable to find user socket, but successfully saved in notification store'}));
-                    }
+            if (userSessions && userSessions.length) {
+                // In case the same user has multiple session objects
+                userSessions.forEach((connection: Connection) => {
+                    connection.client.send(appNotification);
                 });
-            }
-
-        }            
+            } 
+            notificationDoc.save((err: any) => {
+                if (err) {
+                    return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to save notification in notification store', errors));
+                } else {
+                    return res.json(new CreateJsonApiSuccess({'message': 'Successfully saved in notification store'}));
+                }
+            });
+        }
+              
     } else {
         console.log('Malformed request to', req.url);
         return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
