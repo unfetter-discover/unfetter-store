@@ -81,6 +81,10 @@ io.on('connect', (client: any) => {
             console.log('Number of connections on disconnect: ', connections.length);
         });
 
+        clientConnection.client.on('message', (message: any) => {
+            console.log('~~&&&&~~', message);
+        });
+
     } else {
         console.log('User not found in connections array');
     }    
