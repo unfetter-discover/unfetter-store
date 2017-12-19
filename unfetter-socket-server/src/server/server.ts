@@ -9,6 +9,7 @@ import { jwtVerify } from '../middleware/jwtVerify';
 import { userModel } from '../models/mongoose/user';
 import { connections } from '../models/connections';
 import { WSMessageTypes } from '../models/messages';
+import notificationStoreModel from '../models/mongoose/notification-store'
 
 mongoInit();
 
@@ -63,7 +64,7 @@ io.use((client: any, next: any) => {
     }
 });
 
-io.on('connect', (client: any) => {
+io.on('connection', (client: any) => {
     console.log('Number of connections on connect: ', connections.length);
     const clientConnection = connections.find((conn) => conn.client === client);
 
@@ -81,8 +82,32 @@ io.on('connect', (client: any) => {
             console.log('Number of connections on disconnect: ', connections.length);
         });
 
-        clientConnection.client.on('message', (message: any) => {
-            console.log('~~&&&&~~', message);
+        clientConnection.client.on('message', (data: any) => {
+            console.log(data);
+            switch (data.messageType) {
+                case 'READ_NOTIFICATION':
+                    console.log('Reading notification');
+                    notificationStoreModel.findByIdAndUpdate(data.messageContent, { $set: { read: true } }, (err, result) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log('Notification read');
+                        }
+                    });
+                    break;
+                case 'DELETE_NOTIFICATION':
+                    console.log('Deleting notification');
+                    notificationStoreModel.findByIdAndRemove(data.messageContent, (err, result) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log('Notification deleted');
+                        }
+                    });
+                    break;
+                default:
+                    console.log('No action for message:\n', data);
+            }
         });
 
     } else {
