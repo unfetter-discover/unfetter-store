@@ -10,6 +10,7 @@ import { userModel } from '../models/mongoose/user';
 import { connections } from '../models/connections';
 import { WSMessageTypes } from '../models/messages';
 import notificationStoreModel from '../models/mongoose/notification-store'
+import { NotificationRecieveTypes } from '../models/notifiction-recieve-types.enum';
 
 mongoInit();
 
@@ -83,9 +84,10 @@ io.on('connection', (client: any) => {
         });
 
         clientConnection.client.on('message', (data: any) => {
+            const userId = clientConnection.user._id;
             console.log(data);
             switch (data.messageType) {
-                case 'READ_NOTIFICATION':
+                case NotificationRecieveTypes.READ_NOTIFICATION:
                     console.log('Reading notification');
                     notificationStoreModel.findByIdAndUpdate(data.messageContent, { $set: { read: true } }, (err, result) => {
                         if (err) {
@@ -95,7 +97,7 @@ io.on('connection', (client: any) => {
                         }
                     });
                     break;
-                case 'DELETE_NOTIFICATION':
+                case NotificationRecieveTypes.DELETE_NOTIFICATION:
                     console.log('Deleting notification');
                     notificationStoreModel.findByIdAndRemove(data.messageContent, (err, result) => {
                         if (err) {
@@ -105,6 +107,27 @@ io.on('connection', (client: any) => {
                         }
                     });
                     break;
+                case NotificationRecieveTypes.READ_ALL_NOTIFICATIONS:
+                    console.log('Reading all notification');
+                    notificationStoreModel.update({ userId }, { $set: { read: true } }, { multi: true }, (err, result) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log(result);
+                            console.log('All notifications read');
+                        }
+                    });
+                    break;
+                case NotificationRecieveTypes.DELETE_ALL_NOTIFICATIONS:
+                    console.log('Deleting all notification');
+                    notificationStoreModel.remove({ userId }, (err) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            console.log('All notifications deleted');
+                        }
+                    });
+                    break;                    
                 default:
                     console.log('No action for message:\n', data);
             }
