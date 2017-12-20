@@ -69,6 +69,7 @@ if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
     }
   });
 
+  app.use('/notification-store', require('./api/express-controllers/notifications'));
   app.use('/organizations', require('./api/express-controllers/organizations'));
   app.use('/web-analytics', require('./api/express-controllers/web-analytics'));
 }
