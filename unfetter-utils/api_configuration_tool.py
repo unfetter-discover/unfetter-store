@@ -18,6 +18,9 @@ if __name__ == '__main__':
 
     inp_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                             '../unfetter-discover-api/api/config/private-config.json')
+    
+    socket_server_config = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                            '../unfetter-socket-server/config/private-config.json')
 
     file_exists = False
 
@@ -55,7 +58,7 @@ if __name__ == '__main__':
     if not file_exists or session_secret != '':
         private_config['sessionSecret'] = session_secret
 
-    jwt_secret = getpass.getpass('Please enter a unique password that the Unfetter-Discover-API will use to encrypt JSON Web Tokens: (hidden)')
+    jwt_secret = getpass.getpass('Please enter a unique password that the Unfetter-Discover-API and Unfetter-Socket-Server will use to encrypt JSON Web Tokens: (hidden)')
     if not file_exists or jwt_secret != '':
         private_config['jwtSecret'] = jwt_secret
 
@@ -68,6 +71,9 @@ if __name__ == '__main__':
             out_file = open(inp_file, 'w')
             json.dump(private_config, out_file)
             print 'Configuration successfully written to ' + inp_file
+            socket_out_file = open (socket_server_config, 'w')
+            json.dump(private_config, socket_out_file)
+            print 'Configuration successfully written to ' + socket_server_config
         except:
             print 'Unable to write configuration to file'
 
