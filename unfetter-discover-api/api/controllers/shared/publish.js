@@ -26,7 +26,7 @@ class CreateNotification {
     }
 }
 
-module.exports = (userId, notificationType, heading, notificationBody, url = 'user') => {
+const notifyUser = (userId, notificationType, heading, notificationBody, url = 'user') => {
     const body = JSON.stringify(new CreateNotification(userId, notificationType, heading, notificationBody));
     fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/${url}`, {
         method: 'POST',
@@ -40,5 +40,27 @@ module.exports = (userId, notificationType, heading, notificationBody, url = 'us
         console.log('Publish API recieved notification for', userId);
     })
     .catch((err) => console.log('Error!', err));
+};
+
+const updateSocialForAll = (notificationType, notificationBody, url = 'all') => {
+    // TODO restrict update if more strict UAC is added
+    const body = JSON.stringify(new CreateNotification(null, notificationType, null, notificationBody));
+    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/social/${url}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body
+    })
+    .then((res) => {
+        console.log('Publish API recieved notification for social update');
+    })
+    .catch((err) => console.log('Error!', err));
+};
+
+module.exports = {
+    notifyUser,
+    updateSocialForAll
 };
                                         

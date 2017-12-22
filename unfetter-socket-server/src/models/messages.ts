@@ -1,7 +1,8 @@
 export const enum WSMessageTypes {
     NOTIFICATION = 'NOTIFICATION',
     STIX = 'STIX',
-    SYSTEM = 'SYSTEM'
+    SYSTEM = 'SYSTEM',
+    SOCIAL = 'SOCIAL'
 }
 
 export interface WSMessage {

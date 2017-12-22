@@ -3,7 +3,7 @@ const router = express.Router();
 
 const userModel = require('../models/user');
 const stixSchemaless = require('../models/schemaless');
-const publishNotification = require('../controllers/shared/publish-notificiation');
+const publish = require('../controllers/shared/publish');
 
 router.get('/pending-approval', (req, res) => {
 
@@ -108,7 +108,7 @@ router.post('/process-approval/:userId', (req, res) => {
                                             console.log('Unable to find organizaiton for ', matchingOrg.id);
                                         } else {
                                             const orgObj = orgResult.toObject();
-                                            publishNotification(userId, 'ORGANIZATION', 'Approved to Organization', `You were approved to join ${orgObj.stix.name}`);
+                                            publish.notifyUser(userId, 'ORGANIZATION', 'Approved to Organization', `You were approved to join ${orgObj.stix.name}`);
                                         }
                                     });       
                                 }
