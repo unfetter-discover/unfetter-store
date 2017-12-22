@@ -242,6 +242,11 @@ module.exports = class BaseController {
                     }
                 }
 
+                // Add Unfetter userId as creator if present
+                if (req.user && req.user._id) {
+                    obj.creator = req.user._id;
+                }
+
                 const newDocument = new model(obj);
 
                 const error = newDocument.validateSync();

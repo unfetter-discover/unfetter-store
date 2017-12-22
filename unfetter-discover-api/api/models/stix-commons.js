@@ -63,7 +63,8 @@ stixCommons['mongoRoot'] = {
     _id: String,
     organization: String,
     extendedProperties: Object,
-    metaProperties: Object
+    metaProperties: Object,
+    creator: String
 };
 
 // TODO delete if not used

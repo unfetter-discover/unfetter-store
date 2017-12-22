@@ -4,6 +4,7 @@ const parser = require('../helpers/url_parser');
 
 const apiRoot = 'https://localhost/api';
 const model = modelFactory.getModel('schemaless');
+const publishNotification = require('../controllers/shared/publish-notificiation');
 
 const transform = function transformFun(obj, urlRoot) {
     obj = { ...obj.toObject().stix, ...obj.toObject().metaProperties, ...obj.toObject };
@@ -116,6 +117,12 @@ const addComment = (req, res) => {
                 if (resultUpdate) {
                     const requestedUrl = apiRoot + req.originalUrl;
                     const obj = newDocument.toObject();
+
+                    // Notifify user if its another user leaving a comment
+                    if (req.user && req.user._id && obj.creator && req.user._id !== obj.creator) {
+                        publishNotification(obj.creator, 'COMMENT', `${user.userName} commented on your analytic`, comment.slice(0, 100));
+                    }
+
                     return res.status(200).json({
                         links: { self: requestedUrl, },
                         data: { attributes: { ...obj.stix, ...obj.extendedProperties, metaProperties: obj.metaProperties } }
