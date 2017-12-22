@@ -12,7 +12,6 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 const fetch = require('node-fetch');
 const url = require('url');
-
 const argv = require('yargs')
 
     .alias('h', 'host')
