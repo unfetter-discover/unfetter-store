@@ -40,6 +40,7 @@ router.post('/notification/user', (req: Request, res: Response) => {
             if (userSessions && userSessions.length) {
                 // In case the same user has multiple session objects
                 userSessions.forEach((connection: Connection) => {
+                    console.log('Sending message to: ', userId);
                     connection.client.send(appNotification);
                 });
             } 

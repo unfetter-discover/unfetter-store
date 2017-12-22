@@ -1,9 +1,9 @@
-const fetch = require('node-fetch');
 const express = require('express');
 const router = express.Router();
 
 const userModel = require('../models/user');
 const stixSchemaless = require('../models/schemaless');
+const publishNotification = require('../controllers/shared/publish-notificiation');
 
 router.get('/pending-approval', (req, res) => {
 
@@ -108,30 +108,7 @@ router.post('/process-approval/:userId', (req, res) => {
                                             console.log('Unable to find organizaiton for ', matchingOrg.id);
                                         } else {
                                             const orgObj = orgResult.toObject();
-                                            const body = JSON.stringify({
-                                                "data": {
-                                                    "attributes": {
-                                                        "userId": userId,
-                                                        "notification": {
-                                                            "type": "ORGANIZATION",
-                                                            "heading": "Approved to Organization",
-                                                            "body": `You were approved to join ${orgObj.stix.name}`
-                                                        }
-                                                    }
-                                                }
-                                            });
-                                            fetch('https://socketserver:3333/publish/notification/user', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'Accept': 'application/json'
-                                                },
-                                                body
-                                            })
-                                            .then((res) => {
-                                                console.log('Publish API recieved notification for', userId);
-                                            })
-                                            .catch((err) => console.log('Error!', err));
+                                            publishNotification(userId, 'ORGANIZATION', 'Approved to Organization', `You were approved to join ${orgObj.stix.name}`);
                                         }
                                     });       
                                 }
