@@ -11,6 +11,7 @@ const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/enter
 const fs = require('fs');
 const mongoose = require('mongoose');
 const fetch = require('node-fetch');
+const url = require('url');
 const argv = require('yargs')
 
     .alias('h', 'host')
@@ -77,8 +78,21 @@ function filesToJson(filePaths) {
 }
 
 function getMitreData() {
+    let instanceOptions = {};
+
+    if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
+        console.log('Attempting to configure proxy');
+        const HttpsProxyAgent = require('https-proxy-agent');
+        let proxy = url.parse(process.env.HTTPS_PROXY_URL);
+        // Workaround for UNABLE_TO_GET_ISSUER_CERT_LOCALLY fetch error due to proxy + self-signed cert
+        proxy.rejectUnauthorized = false;
+        instanceOptions.agent = new HttpsProxyAgent(proxy);
+    } else {
+        console.log('Not using a proxy');
+    }
+
     return new Promise((resolve, reject) => {
-        fetch(MITRE_STIX_URL)
+        fetch(MITRE_STIX_URL, instanceOptions)
             .then(fetchRes => fetchRes.json())
             .then(fetchRes => {
                 let stixToUpload = fetchRes.objects
