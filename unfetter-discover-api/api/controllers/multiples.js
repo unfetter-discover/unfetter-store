@@ -120,11 +120,11 @@ const addComment = (req, res) => {
 
                     // Notifify user if its another user leaving a comment
                     if (req.user && req.user._id && obj.creator && req.user._id !== obj.creator) {
-                        publish.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on your analytic`, comment.slice(0, 100));
+                        publish.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100));
                     }
 
                     // Update comment for all, if stricter UAC is added, confirm comment is for Unfetter open before update all
-                    publish.updateSocialForAll('COMMENT_BODY', commentObj);
+                    publish.updateSocialForAll('COMMENT', commentObj, resultObj._id);
 
                     return res.status(200).json({
                         links: { self: requestedUrl, },

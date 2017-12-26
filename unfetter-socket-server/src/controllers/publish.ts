@@ -61,7 +61,9 @@ router.post('/notification/user', (req: Request, res: Response) => {
 
 // Social for all users, eg comment, like etc
 router.post('/social/all', (req: Request, res: Response) => {
-    if (isDefinedJsonApi(req, ['userId'], ['notification'])) {
+    console.log('HI!!!~~~~');
+    if (isDefinedJsonApi(req, ['notification'])) {
+        console.log('~~~~', JSON.stringify(req.body, null, 2));
         const { userId, notification }: UserNotification = req.body.data.attributes;
 
         const appNotification = new CreateAppNotification(WSMessageTypes.SOCIAL, notification);
@@ -70,6 +72,7 @@ router.post('/social/all', (req: Request, res: Response) => {
             connection.client.send(appNotification);
         });
 
+        return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved social-all notification' }));
     } else {
         console.log('Malformed request to', req.url);
         return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
