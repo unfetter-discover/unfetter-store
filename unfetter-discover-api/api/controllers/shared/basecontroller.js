@@ -4,6 +4,7 @@ const stix = require('../../helpers/stix');
 const jsonApiConverter = require('../../helpers/json_api_converter');
 const parser = require('../../helpers/url_parser');
 const modelFactory = require('./modelFactory');
+const publish = require('./publish');
 
 const apiRoot = 'https://localhost/api';
 
@@ -190,6 +191,7 @@ module.exports = class BaseController {
         const type = this.type;
         const model = this.model;
         const relationshipModel = modelFactory.getModel('relationship');
+        const identityModel = modelFactory.getModel('identity');
 
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
@@ -305,6 +307,19 @@ module.exports = class BaseController {
                         console.log(err);
                         return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                     }
+
+                    // Notify org members
+                    if (req.user && req.user._id && obj.stix.created_by_ref) {
+                        identityModel.findById(obj.stix.created_by_ref, (identityErr, identityResult) => {
+                            if (identityErr || !identityResult) {
+                                console.log('Unable to find identity, cannot publish to organization');
+                            } else {
+                                const identityObj = identityResult.toObject();
+                                publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
+                            }
+                        })
+                    }
+
                     const requestedUrl = apiRoot + req.originalUrl;
                     const resObj = result.toObject();
                     let returnObj = { ...resObj.stix };

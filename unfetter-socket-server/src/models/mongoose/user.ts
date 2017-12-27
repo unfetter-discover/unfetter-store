@@ -1,3 +1,4 @@
-import * as mongoose from 'mongoose';
+import { Schema, Model, model } from 'mongoose';
 
-export const userModel = mongoose.model('user', new mongoose.Schema({ }, { strict: false }), 'user');
+const userModel: Model<any> = model<any>('user', new Schema({ }, { strict: false }), 'user');
+export default userModel;
