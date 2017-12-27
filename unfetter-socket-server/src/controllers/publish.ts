@@ -59,6 +59,26 @@ router.post('/notification/user', (req: Request, res: Response) => {
     }
 });
 
+// Social for all users, eg comment, like etc
+router.post('/social/all', (req: Request, res: Response) => {
+    console.log('HI!!!~~~~');
+    if (isDefinedJsonApi(req, ['notification'])) {
+        console.log('~~~~', JSON.stringify(req.body, null, 2));
+        const { userId, notification }: UserNotification = req.body.data.attributes;
+
+        const appNotification = new CreateAppNotification(WSMessageTypes.SOCIAL, notification);
+
+        connections.forEach((connection: Connection) => {
+            connection.client.send(appNotification);
+        });
+
+        return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved social-all notification' }));
+    } else {
+        console.log('Malformed request to', req.url);
+        return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
+    }
+});
+
 // Notification for all users in an organization
 // router.post('/notification/organization', (req: Request, res: Response) => {
 // });

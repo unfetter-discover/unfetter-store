@@ -4,7 +4,7 @@ const parser = require('../helpers/url_parser');
 
 const apiRoot = 'https://localhost/api';
 const model = modelFactory.getModel('schemaless');
-const publishNotification = require('../controllers/shared/publish-notificiation');
+const publish = require('../controllers/shared/publish');
 
 const transform = function transformFun(obj, urlRoot) {
     obj = { ...obj.toObject().stix, ...obj.toObject().metaProperties, ...obj.toObject };
@@ -120,8 +120,11 @@ const addComment = (req, res) => {
 
                     // Notifify user if its another user leaving a comment
                     if (req.user && req.user._id && obj.creator && req.user._id !== obj.creator) {
-                        publishNotification(obj.creator, 'COMMENT', `${user.userName} commented on your analytic`, comment.slice(0, 100));
+                        publish.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100));
                     }
+
+                    // Update comment for all, if stricter UAC is added, confirm comment is for Unfetter open before update all
+                    publish.updateSocialForAll('COMMENT', commentObj, resultObj._id);
 
                     return res.status(200).json({
                         links: { self: requestedUrl, },
