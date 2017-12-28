@@ -23,6 +23,7 @@ Yarg.usage('Usage: $0 -h localhost -f [csvFile]')
     .describe('o', 'file name to output vs saving to the db')
     .alias('f', 'file')
     .describe('f', 'file name of the csv file to ingest')
+    .default('o', process.env.REPORTS_FILE || 'reports.stix.json')
     .demandOption(['f']);
 
 const argv = Yarg.argv;

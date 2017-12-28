@@ -23,8 +23,8 @@ export class CsvParseService<Out> {
         const parseResults = this.csvToJson(csv);
         if (parseResults.data) {
             const arr = parseResults.data
-                .map((el) => this.jsonLineToType(el))
-                .filter((el) => typeof el !== 'undefined') as Out[];
+                .map((el: any) => this.jsonLineToType(el))
+                .filter((el: any) => typeof el !== 'undefined') as Out[];
             if (arr && arr.length > 1) {
                 console.log(`parsed ${arr.length} objects`);
                 // console.log(arr[0].toJson());
@@ -40,9 +40,9 @@ export class CsvParseService<Out> {
      *  reads this classess csv file and loads to csv
      * @param {string} csv representing the data
      * @throws {Error} if file does not exist
-     * @returns {PapaParse.ParseResult} results from parse
+     * @returns {Papa.ParseResult} results from parse
      */
-    protected csvToJson(csv = ''): PapaParse.ParseResult {
+    protected csvToJson(csv = ''): Papa.ParseResult {
         const parseResults = Papa.parse(csv, {
             quoteChar: '"',
             delimiter: ',',

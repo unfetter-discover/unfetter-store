@@ -3,7 +3,7 @@ import { Stix } from '../../models/stix';
 import { MongoConnectionService } from '../mongo-connection.service';
 import { AttackPatternIngestService } from './attack-pattern-ingest.service';
 
-describe('Ctf ingest service', () => {
+describe('ctf ingest service', () => {
 
     let service: AttackPatternIngestService;
     let adapter: AttackPatternIngestToStixAdapter;

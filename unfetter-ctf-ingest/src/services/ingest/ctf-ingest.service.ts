@@ -5,6 +5,7 @@ import { CtfToStixAdapter } from '../../adapters/ctf-to-stix.adapter';
 import { HeaderTranslationAdapter } from '../../adapters/header-translation.adapter';
 import { Ctf } from '../../models/ctf';
 import { Stix } from '../../models/stix';
+import { StixBundle } from '../../models/stix-bundle';
 import { MongoConnectionService } from '../../services/mongo-connection.service';
 import { UnfetterPosterMongoService } from '../../services/unfetter-poster-mongo.service';
 import { CollectionType } from '../collection-type.enum';
@@ -62,8 +63,9 @@ export class CtfIngestService {
             return Promise.resolve(unfetterPoster.uploadStix(stixies));
         } else {
             console.log('saving to file ', outFile);
-            const json = JSON.stringify(stixies, undefined, '\t');
-            fs.writeFileSync(outFile, json);
+            const bundle = new StixBundle();
+            bundle.objects = stixies;
+            fs.writeFileSync(outFile, bundle.toJson());
         }
     }
 
