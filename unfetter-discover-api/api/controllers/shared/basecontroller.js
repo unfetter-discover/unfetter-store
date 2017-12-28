@@ -315,7 +315,11 @@ module.exports = class BaseController {
                                 console.log('Unable to find identity, cannot publish to organization');
                             } else {
                                 const identityObj = identityResult.toObject();
-                                publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
+                                if(obj.stix.type === 'indicator') {
+                                    publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`, `/indicator-sharing/single/${newDocument._id}`);
+                                } else {
+                                    publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
+                                }
                             }
                         })
                     }
