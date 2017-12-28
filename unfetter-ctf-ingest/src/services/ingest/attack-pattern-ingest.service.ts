@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import { AttackPatternIngestToStixAdapter } from '../../adapters/attack-pattern-ingest-to-stix.adapter';
 import { AttackPatternIngest } from '../../models/attack-pattern-ingest';
 import { Stix } from '../../models/stix';
+import { StixBundle } from '../../models/stix-bundle';
 import { MongoConnectionService } from '../../services/mongo-connection.service';
 import { UnfetterPosterMongoService } from '../../services/unfetter-poster-mongo.service';
 import { CollectionType } from '../collection-type.enum';
@@ -50,8 +51,9 @@ export class AttackPatternIngestService {
             return Promise.resolve(unfetterPoster.uploadStix(stixies));
         } else {
             console.log('saving to file ', outFile);
-            const json = JSON.stringify(stixies, undefined, '\t');
-            fs.writeFileSync(outFile, json);
+            const bundle = new StixBundle();
+            bundle.objects = stixies;
+            fs.writeFileSync(outFile, bundle.toJson());
         }
     }
 
@@ -76,7 +78,5 @@ export class AttackPatternIngestService {
         }
         return Promise.resolve(stixies);
     }
-
-
 
 }

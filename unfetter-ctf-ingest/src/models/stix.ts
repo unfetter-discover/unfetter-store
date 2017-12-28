@@ -2,6 +2,9 @@ import { GranularMarking } from './granular-marking';
 import { KillChainPhase } from './kill-chain-phase';
 import { StixLabelEnum } from './stix-label.enum';
 
+/**
+ * @description Stix 2.0 likeness
+ */
 export class Stix {
     public id: string;
     // tslint:disable-next-line:variable-name
@@ -23,8 +26,12 @@ export class Stix {
 
     public stix?: any;
 
-    public toJson(): string {
-        return JSON.stringify(this, undefined, '\t');
+    /**
+     * @description generate json from this object
+     * @return {string}
+     */
+    public toJson(delim = '\t'): string {
+        return JSON.stringify(this, undefined, delim);
     }
 
 }

@@ -21,6 +21,7 @@ Yarg.usage('Usage: $0 -h localhost -f [csvFile]')
     .default('pr', process.env.API_PROTOCOL || 'https')
     .alias('o', 'outfile')
     .describe('o', 'file name to output vs saving to the db')
+    .default('o', process.env.REPORTS_FILE || 'attack-patterns.stix.json')
     .alias('f', 'infile')
     .describe('f', 'file name of the csv file to ingest')
     .demandOption(['f']);
