@@ -119,7 +119,7 @@ const addComment = (req, res) => {
                     const obj = newDocument.toObject();
 
                     // Notifify user if its another user leaving a comment
-                    if (req.user && req.user._id && obj.creator && req.user._id !== obj.creator) {
+                    if (req.user && req.user._id && obj.creator && req.user._id.toString() !== obj.creator.toString()) {
                         if (newDocument.stix.type === 'indicator') {
                             publish.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
                         } else {
