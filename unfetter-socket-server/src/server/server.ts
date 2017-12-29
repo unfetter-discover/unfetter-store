@@ -6,13 +6,15 @@ import * as socketIo from 'socket.io';
 import app from './app';
 import { mongoInit } from './mongoInit';
 import { jwtVerify } from '../middleware/jwtVerify';
-import { userModel } from '../models/mongoose/user';
+import userModel from '../models/mongoose/user';
 import { connections } from '../models/connections';
 import { WSMessageTypes } from '../models/messages';
 import notificationStoreModel from '../models/mongoose/notification-store'
 import { NotificationRecieveTypes } from '../models/notifiction-recieve-types.enum';
 
 mongoInit();
+
+const UNFETTER_OPEN_ID: string = 'identity--e240b257-5c42-402e-a0e8-7b81ecc1c09a';
 
 const server: any = https.createServer({
     key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
@@ -77,6 +79,16 @@ io.on('connection', (client: any) => {
             messageType: WSMessageTypes.SYSTEM,
             messageContent: 'Web socket connection successful'
         });
+
+        // Join organization rooms
+        // clientConnection.user.organizations
+        //     .filter((org: { id: string }) => org.id !== UNFETTER_OPEN_ID)
+        //     .filter((org: { approved: boolean }) => !!org.approved)
+        //     .forEach((org: { id: string }) => {
+        //         console.log(clientConnection.user._id, 'joined', org.id);
+        //         clientConnection.client.join(org.id);
+        //     });
+
         clientConnection.client.on('disconnect', () => {
             connections.splice(connections.indexOf(clientConnection), 1);
             console.log('Client disconnected');

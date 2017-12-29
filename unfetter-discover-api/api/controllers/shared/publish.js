@@ -9,27 +9,29 @@ const NOTIFICATION_TYPES = [
 ];
 
 class CreateNotification {
-    constructor(userId, notificationType, heading, body, stixId) {
+    constructor(userId, orgId, notificationType, heading, body, stixId, link) {
         if (!NOTIFICATION_TYPES.includes(notificationType)) {
             console.log('WARNING, the following notification type is not supported: ', notificationType);
         }
         this.data = {
             attributes: {
                 userId,
+                orgId,
                 notification: {
                     type: notificationType,
                     heading,
                     body,
-                    stixId
+                    stixId,
+                    link
                 }
             }
         };
     }
 }
 
-const notifyUser = (userId, notificationType, heading, notificationBody, url = 'user') => {
-    const body = JSON.stringify(new CreateNotification(userId, notificationType, heading, notificationBody, null));
-    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/${url}`, {
+const notifyUser = (userId, notificationType, heading, notificationBody, link = null) => {
+    const body = JSON.stringify(new CreateNotification(userId, null, notificationType, heading, notificationBody, null, link));
+    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/user`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -43,10 +45,26 @@ const notifyUser = (userId, notificationType, heading, notificationBody, url = '
     .catch((err) => console.log('Error!', err));
 };
 
-const updateSocialForAll = (notificationType, notificationBody, stixId, url = 'all') => {
+const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, link = null) => {
+    const body = JSON.stringify(new CreateNotification(userId, orgId, notificationType, heading, notificationBody, null, link));
+    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/organization`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body
+    })
+    .then((res) => {
+        console.log('Publish API recieved organization notification for', orgId);
+    })
+    .catch((err) => console.log('Error!', err));
+};
+
+const updateSocialForAll = (notificationType, notificationBody, stixId) => {
     // TODO restrict update if more strict UAC is added
-    const body = JSON.stringify(new CreateNotification(null, notificationType, null, notificationBody, stixId));
-    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/social/${url}`, {
+    const body = JSON.stringify(new CreateNotification(null, null, notificationType, null, notificationBody, stixId, null));
+    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/social/all`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -62,6 +80,7 @@ const updateSocialForAll = (notificationType, notificationBody, stixId, url = 'a
 
 module.exports = {
     notifyUser,
+    notifyOrg,
     updateSocialForAll
 };
                                         

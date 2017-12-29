@@ -6,6 +6,7 @@ export interface AppNotification {
     body: string,
     submitted: Date,
     _id: string,
+    stixId?: string,
     link?: string
 }
 

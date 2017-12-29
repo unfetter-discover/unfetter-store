@@ -8,6 +8,7 @@ import { Connection } from '../models/connection';
 import { CreateJsonApiError, CreateJsonApiSuccess } from '../models/jsonapi';
 import { isDefinedJsonApi } from '../controllers/shared/isdefined';
 import notificationStoreModel from '../models/mongoose/notification-store';
+import userModel from '../models/mongoose/user';
 
 let router: any = Router();
 
@@ -61,9 +62,7 @@ router.post('/notification/user', (req: Request, res: Response) => {
 
 // Social for all users, eg comment, like etc
 router.post('/social/all', (req: Request, res: Response) => {
-    console.log('HI!!!~~~~');
     if (isDefinedJsonApi(req, ['notification'])) {
-        console.log('~~~~', JSON.stringify(req.body, null, 2));
         const { userId, notification }: UserNotification = req.body.data.attributes;
 
         const appNotification = new CreateAppNotification(WSMessageTypes.SOCIAL, notification);
@@ -79,9 +78,82 @@ router.post('/social/all', (req: Request, res: Response) => {
     }
 });
 
+interface OrgNotification extends UserNotification {
+    orgId: any;
+}
+
 // Notification for all users in an organization
-// router.post('/notification/organization', (req: Request, res: Response) => {
-// });
+router.post('/notification/organization', (req: Request, res: Response) => {
+    if (isDefinedJsonApi(req, ['orgId'], ['notification'], ['userId'])) {
+        const { orgId, userId, notification }: OrgNotification = req.body.data.attributes;
+        notification.submitted = notification.submitted || new Date();
+
+        // TODO don't include elements by user
+        const orgMembersQuery = {
+            'organizations': {
+                $elemMatch: {
+                    'id': orgId,
+                    'approved': true,
+                    'subscribed': true
+                }
+            },
+            '_id': {
+                $ne: Object(userId)
+            }
+        };
+
+        userModel.find(orgMembersQuery, (err, userResults) => {
+            if (err || !(userResults && userResults.length))  {
+                return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to find users belonging to the organization'));
+            } else {
+                const userIds = userResults
+                    .map((user) => user.toObject())
+                    .map((user: any) => user._id);
+
+                const promises: any[] = [];
+                
+                userIds.forEach((userIdInner) => {
+                    const notificationDoc = new notificationStoreModel({
+                        userId: userIdInner,
+                        messageType: WSMessageTypes.NOTIFICATION,
+                        messageContent: notification
+                    });
+
+                    const errors = notificationDoc.validateSync();
+                    if (errors) {
+                        console.log(errors);
+                        return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to save notification in notification store', errors));
+                    } else {
+                        notification._id = notificationDoc._id;
+                        const appNotification = new CreateAppNotification(WSMessageTypes.NOTIFICATION, notification);
+                        const userSessions = findConnectionsByUserId(userIdInner);
+
+                        if (userSessions && userSessions.length) {
+                            // In case the same user has multiple session objects
+                            userSessions.forEach((connection: Connection) => {
+                                console.log('Sending message to: ', userIdInner);
+                                connection.client.send(appNotification);
+                            });
+                        }
+                        promises.push(notificationDoc.save());
+                    }
+                });
+
+                Promise.all(promises)
+                    .then((promiseResults: any) => {
+                        return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully saved organization notifications  in notification store' }));
+                    })
+                    .catch((promiseErr) => {
+                        return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to save organization notifications in notification store', promiseErr));
+                    });
+            }
+        });
+        
+    } else {
+        console.log('Malformed request to', req.url);
+        return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
+    }
+});
 
 // Notification for organization leaders
 // Note - Send to all admins and all org leaders of X org
