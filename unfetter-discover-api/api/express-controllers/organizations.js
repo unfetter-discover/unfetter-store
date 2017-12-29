@@ -113,4 +113,55 @@ router.get('/request-membership/:userId/:orgId', (req, res) => {
     }
 });
 
+// TODO make subscriptions route
+
+router.get('/subscription/:userId/:orgId/:subscribe', (req, res) => {
+
+    const { userId, orgId, subscribe }= req.params;
+
+    console.log('~~~~~', userId, orgId, subscribe);
+
+    if (userId === undefined || orgId === undefined || subscribe === undefined) {
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'Malformed request' }] });
+    } else {
+        userModel.findById(userId, (err, result) => {
+            if (err || !result) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            } else {
+                const user = result.toObject();
+                const matchingOrg = user.organizations.find((org) => org.id === orgId);
+
+                if (!matchingOrg) {
+                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                } else {
+                    matchingOrg.subscribed = subscribe;
+
+                    const newDocument = new userModel(user);
+                    const error = newDocument.validateSync();
+                    if (error) {
+                        console.log(error);
+                        const errors = [];
+                        error.errors.forEach((field) => {
+                            errors.push(field.message);
+                        });
+                        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                    } else {
+                        userModel.findByIdAndUpdate(user._id, newDocument, (errInner, resultInner) => {
+                            if (errInner || !resultInner) {
+                                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                            } else {
+                                return res.json({
+                                    "data": {
+                                        "attributes": newDocument.toObject()
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+});
+
 module.exports = router;

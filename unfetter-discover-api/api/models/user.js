@@ -21,6 +21,10 @@ const UserSchema = mongoose.Schema({
             approved: {
                 type: Boolean,
                 default: false
+            },
+            subscribed: {
+                type: Boolean,
+                default: true
             }
         }]
     },

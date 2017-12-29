@@ -93,7 +93,8 @@ router.post('/notification/organization', (req: Request, res: Response) => {
             'organizations': {
                 $elemMatch: {
                     'id': orgId,
-                    'approved': true
+                    'approved': true,
+                    'subscribed': true
                 }
             },
             '_id': {
