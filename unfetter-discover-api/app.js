@@ -36,6 +36,10 @@ app.use(bodyParser.urlencoded({
 app.get('/test', (req, res) => {
   res.json({'a':1});
 });
+
+// TODO move to UAC area
+app.use('/pattern-handler', require('./api/express-controllers/pattern-handler'));
+
 // Use auth middleware when runmode is UAC, or as a safeguard when RUN_MODE isn't specified
 if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
   // Set passport strategy
