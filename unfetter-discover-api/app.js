@@ -33,12 +33,6 @@ app.use(bodyParser.urlencoded({
   extended: true,
   limit: '5mb'
 }));
-app.get('/test', (req, res) => {
-  res.json({'a':1});
-});
-
-// TODO move to UAC area
-app.use('/pattern-handler', require('./api/express-controllers/pattern-handler'));
 
 // Use auth middleware when runmode is UAC, or as a safeguard when RUN_MODE isn't specified
 if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
@@ -76,6 +70,7 @@ if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
   app.use('/notification-store', require('./api/express-controllers/notifications'));
   app.use('/organizations', require('./api/express-controllers/organizations'));
   app.use('/web-analytics', require('./api/express-controllers/web-analytics'));
+  app.use('/pattern-handler', require('./api/express-controllers/pattern-handler'));
 }
 
 // ~~~ Swagger ~~~
