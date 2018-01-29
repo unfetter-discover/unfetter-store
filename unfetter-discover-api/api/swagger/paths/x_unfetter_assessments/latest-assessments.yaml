@@ -1,0 +1,18 @@
+x-swagger-router-controller: x_unfetter_assessments
+get:
+  tags:
+  - STIX-Unfetter Assessment
+  - Dashboard-Unfetter Assessment
+  description: Find all instances of assessments, sorted by last modified
+  operationId: latestAssessments
+  produces: 
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object     
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"

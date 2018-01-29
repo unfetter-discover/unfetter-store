@@ -105,6 +105,10 @@
   $ref: ./x_unfetter_assessments/assessment-object-risk.yaml
 /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}:
   $ref: ./x_unfetter_assessments/assessment-object-answer-question.yaml
+/x-unfetter-assessments/latest/{creatorId}:
+  $ref: ./x_unfetter_assessments/latest-assessments-by-creator.yaml
+/x-unfetter-assessments/latest:
+  $ref: ./x_unfetter_assessments/latest-assessments.yaml
 
 /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}:
   $ref: ./x_unfetter_assessments/assessment-object-answer.yaml
