@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 
 const controller = new BaseController('x-unfetter-assessment');
 const returnProps = ['indicators', 'sensors', 'courseOfActions'];
-const ASSESSED_OBJECT_TYPES = ['indicator', 'x-unfetter-sensor', 'course-of-action', ];
+const ASSESSED_OBJECT_TYPES = ['indicator', 'x-unfetter-sensor', 'course-of-action',];
 const apiRoot = 'https://localhost/api';
 const models = {};
 
@@ -196,11 +196,11 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
   return Promise.all(getPromises(assessment))
     .then((results) => {
       assessment = assessment.toObject().stix;
-      const indicators = results[0].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
+      const indicators = results[0].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties }));
       const indicatorRisks = [];
-      const sensors = results[1].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
+      const sensors = results[1].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties }));
       const sensorRisks = [];
-      const courseOfActions = results[2].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties}));
+      const courseOfActions = results[2].map(doc => ({ ...doc.toObject().stix, ...doc.toObject().metaProperties }));
       const coaRisks = [];
       const returnObject = {};
       returnObject.indicators = [];
@@ -288,187 +288,187 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
   const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
   let attackPatternAggregations = [{
-      $match: {
-        _id: id
-      } // place id here
-    },
-    {
-      $unwind: '$stix.assessment_objects'
-    },
-    {
-      $lookup: {
-        from: 'stix',
-        localField: 'stix.assessment_objects.stix.id',
-        foreignField: 'stix.source_ref',
-        as: 'relationships'
+    $match: {
+      _id: id
+    } // place id here
+  },
+  {
+    $unwind: '$stix.assessment_objects'
+  },
+  {
+    $lookup: {
+      from: 'stix',
+      localField: 'stix.assessment_objects.stix.id',
+      foreignField: 'stix.source_ref',
+      as: 'relationships'
+    }
+  },
+  {
+    $unwind: '$relationships'
+  },
+  {
+    $match: {
+      'relationships.stix.target_ref': {
+        $regex: /^attack-pattern.*/
       }
-    },
-    {
-      $unwind: '$relationships'
-    },
-    {
-      $match: {
-        'relationships.stix.target_ref': {
-          $regex: /^attack-pattern.*/
+    }
+  },
+  {
+    $lookup: {
+      from: 'stix',
+      localField: 'relationships.stix.target_ref',
+      foreignField: 'stix.id',
+      as: 'attackPatterns'
+    }
+  },
+  {
+    $unwind: '$attackPatterns'
+  },
+  {
+    $match: {
+      'attackPatterns.stix.type': 'attack-pattern'
+    }
+  },
+  {
+    $unwind: '$attackPatterns.stix.kill_chain_phases'
+  },
+  {
+    $group: {
+      _id: '$attackPatterns.stix.kill_chain_phases.phase_name',
+      attackPatterns: {
+        $addToSet: {
+          attackPatternName: '$attackPatterns.stix.name',
+          attackPatternId: '$attackPatterns._id',
         }
-      }
-    },
-    {
-      $lookup: {
-        from: 'stix',
-        localField: 'relationships.stix.target_ref',
-        foreignField: 'stix.id',
-        as: 'attackPatterns'
-      }
-    },
-    {
-      $unwind: '$attackPatterns'
-    },
-    {
-      $match: {
-        'attackPatterns.stix.type': 'attack-pattern'
-      }
-    },
-    {
-      $unwind: '$attackPatterns.stix.kill_chain_phases'
-    },
-    {
-      $group: {
-        _id: '$attackPatterns.stix.kill_chain_phases.phase_name',
-        attackPatterns: {
-          $addToSet: {
-            attackPatternName: '$attackPatterns.stix.name',
-            attackPatternId: '$attackPatterns._id',
-          }
-        },
-        assessedObjects: {
-          $addToSet: {
-            stix: '$stix.assessment_objects.stix',
-            questions: '$stix.assessment_objects.questions',
-            risk: '$stix.assessment_objects.risk',
-          }
-        },
-        // TODO remove this avgRisk is wrong
-        // avgRisk: {
-        //   $avg: '$stix.assessment_objects.risk'
-        // },
-      }
-    },
-    {
-      $sort: {
-        _id: 1
-      }
-    },
+      },
+      assessedObjects: {
+        $addToSet: {
+          stix: '$stix.assessment_objects.stix',
+          questions: '$stix.assessment_objects.questions',
+          risk: '$stix.assessment_objects.risk',
+        }
+      },
+      // TODO remove this avgRisk is wrong
+      // avgRisk: {
+      //   $avg: '$stix.assessment_objects.risk'
+      // },
+    }
+  },
+  {
+    $sort: {
+      _id: 1
+    }
+  },
   ];
 
   let assessedByAttackPattern = [{
-      $match: {
-        _id: id
-      } // place id here
-    },
-    {
-      $unwind: '$stix.assessment_objects'
-    },
-    {
-      $lookup: {
-        from: 'stix',
-        localField: 'stix.assessment_objects.stix.id',
-        foreignField: 'stix.source_ref',
-        as: 'relationships'
+    $match: {
+      _id: id
+    } // place id here
+  },
+  {
+    $unwind: '$stix.assessment_objects'
+  },
+  {
+    $lookup: {
+      from: 'stix',
+      localField: 'stix.assessment_objects.stix.id',
+      foreignField: 'stix.source_ref',
+      as: 'relationships'
+    }
+  },
+  {
+    $unwind: '$relationships'
+  },
+  {
+    $match: {
+      'relationships.stix.target_ref': {
+        $regex: /^attack-pattern.*/
       }
-    },
-    {
-      $unwind: '$relationships'
-    },
-    {
-      $match: {
-        'relationships.stix.target_ref': {
-          $regex: /^attack-pattern.*/
+    }
+  },
+  {
+    $lookup: {
+      from: 'stix',
+      localField: 'relationships.stix.target_ref',
+      foreignField: 'stix.id',
+      as: 'attackPatterns'
+    }
+  },
+  {
+    $unwind: '$attackPatterns'
+  },
+  {
+    $match: {
+      'attackPatterns.stix.type': 'attack-pattern'
+    }
+  },
+  {
+    $unwind: '$stix.assessment_objects.questions'
+  },
+  {
+    $group: {
+      _id: '$attackPatterns._id',
+      assessedObjects: {
+        $addToSet: {
+          'assId': '$stix.assessment_objects.stix.id',
+          'questions': '$stix.assessment_objects.questions',
+          'risk': '$stix.assessment_objects.risk',
         }
-      }
-    },
-    {
-      $lookup: {
-        from: 'stix',
-        localField: 'relationships.stix.target_ref',
-        foreignField: 'stix.id',
-        as: 'attackPatterns'
-      }
-    },
-    {
-      $unwind: '$attackPatterns'
-    },
-    {
-      $match: {
-        'attackPatterns.stix.type': 'attack-pattern'
-      }
-    },
-    {
-      $unwind: '$stix.assessment_objects.questions'
-    },
-    {
-      $group: {
-        _id: '$attackPatterns._id',
-        assessedObjects: {
-          $addToSet: {
-            'assId': '$stix.assessment_objects.stix.id',
-            'questions': '$stix.assessment_objects.questions',
-            'risk': '$stix.assessment_objects.risk',
-          }
-        },
-        risk: {
-          $avg: '$stix.assessment_objects.questions.risk'
-        },
-      }
-    },
+      },
+      risk: {
+        $avg: '$stix.assessment_objects.questions.risk'
+      },
+    }
+  },
   ];
 
   let attackPatternsByKillChain = [{
-      $match: {
-        "stix.type": "attack-pattern",
-        $nor: [{
-            "stix.kill_chain_phases": {
-              $exists: false
-            }
-          },
-          {
-            "stix.kill_chain_phases": {
-              $size: 0
-            }
-          },
-        ]
-      }
-    },
-    {
-      $addFields: {
-        "kill_chain_phases_copy": "$stix.kill_chain_phases",
-      }
-    },
-    {
-      $unwind: "$stix.kill_chain_phases"
-    },
-    {
-      $group: {
-        _id: "$stix.kill_chain_phases.phase_name",
-        "attackPatterns": {
-          $addToSet: {
-            name: "$stix.name",
-            x_unfetter_sophistication_level: "$extendedProperties.x_unfetter_sophistication_level",
-            description: "$stix.description",
-            kill_chain_phases: "$kill_chain_phases_copy",
-            external_references: "$stix.external_references",
-            id: "$stix.id",
-          },
+    $match: {
+      "stix.type": "attack-pattern",
+      $nor: [{
+        "stix.kill_chain_phases": {
+          $exists: false
+        }
+      },
+      {
+        "stix.kill_chain_phases": {
+          $size: 0
+        }
+      },
+      ]
+    }
+  },
+  {
+    $addFields: {
+      "kill_chain_phases_copy": "$stix.kill_chain_phases",
+    }
+  },
+  {
+    $unwind: "$stix.kill_chain_phases"
+  },
+  {
+    $group: {
+      _id: "$stix.kill_chain_phases.phase_name",
+      "attackPatterns": {
+        $addToSet: {
+          name: "$stix.name",
+          x_unfetter_sophistication_level: "$extendedProperties.x_unfetter_sophistication_level",
+          description: "$stix.description",
+          kill_chain_phases: "$kill_chain_phases_copy",
+          external_references: "$stix.external_references",
+          id: "$stix.id",
         },
-      }
-    },
+      },
+    }
+  },
   ];
 
   Promise.all([
-      aggregationModel.aggregate(attackPatternAggregations),
-      aggregationModel.aggregate(assessedByAttackPattern),
-      aggregationModel.aggregate(attackPatternsByKillChain),
-    ])
+    aggregationModel.aggregate(attackPatternAggregations),
+    aggregationModel.aggregate(assessedByAttackPattern),
+    aggregationModel.aggregate(attackPatternsByKillChain),
+  ])
     .then(results => {
       if (results) {
         const requestedUrl = apiRoot + req.originalUrl;
@@ -513,130 +513,128 @@ const summaryAggregations = (req, res) => {
   const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
   let attackPatternsByAssessedObject = [{
-      $match: {
-        'stix.id': id
+    $match: {
+      'stix.id': id
+    }
+  },
+  {
+    $unwind: '$stix.assessment_objects'
+  },
+  {
+    $lookup: {
+      from: 'stix',
+      localField: 'stix.assessment_objects.stix.id',
+      foreignField: 'stix.source_ref',
+      as: 'relationships'
+    }
+  },
+  {
+    $unwind: '$relationships'
+  },
+  {
+    $match: {
+      'relationships.stix.target_ref': {
+        $regex: /^attack-pattern.*/
       }
-    },
-    {
-      $unwind: '$stix.assessment_objects'
-    },
-    {
-      $lookup: {
-        from: 'stix',
-        localField: 'stix.assessment_objects.stix.id',
-        foreignField: 'stix.source_ref',
-        as: 'relationships'
+    }
+  },
+  {
+    $lookup: {
+      from: 'stix',
+      localField: 'relationships.stix.target_ref',
+      foreignField: 'stix.id',
+      as: 'attackPatterns'
+    }
+  },
+  {
+    $unwind: '$attackPatterns'
+  },
+  {
+    $match: {
+      'attackPatterns.extendedProperties.x_unfetter_sophistication_level': {
+        $ne: null
       }
-    },
-    {
-      $unwind: '$relationships'
-    },
-    {
-      $match: {
-        'relationships.stix.target_ref': {
-          $regex: /^attack-pattern.*/
+    }
+  },
+  {
+    $group: {
+      _id: '$stix.assessment_objects.stix.id',
+      'attackPatterns': {
+        $addToSet: {
+          'attackPatternId': '$attackPatterns.stix.id',
+          'x_unfetter_sophistication_level': '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
+          'kill_chain_phases': '$attackPatterns.stix.kill_chain_phases'
         }
-      }
-    },
-    {
-      $lookup: {
-        from: 'stix',
-        localField: 'relationships.stix.target_ref',
-        foreignField: 'stix.id',
-        as: 'attackPatterns'
-      }
-    },
-    {
-      $unwind: '$attackPatterns'
-    },
-    {
-      $match: {
-        'attackPatterns.extendedProperties.x_unfetter_sophistication_level': {
-          $ne: null
-        }
-      }
-    },
-    {
-      $group: {
-        _id: '$stix.assessment_objects.stix.id',
-        'attackPatterns': {
-          $addToSet: {
-            'attackPatternId': '$attackPatterns.stix.id',
-            'x_unfetter_sophistication_level': '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
-            'kill_chain_phases': '$attackPatterns.stix.kill_chain_phases'
-          }
-        },
-      }
-    },
+      },
+    }
+  },
   ];
 
   Promise.all([
     aggregationModel.aggregate(attackPatternsByAssessedObject),
-    models['attack-pattern'].find({'extendedProperties.x_unfetter_sophistication_level': {'$ne': null}}),
+    models['attack-pattern'].find({ 'extendedProperties.x_unfetter_sophistication_level': { '$ne': null } }),
   ])
-  .then(results => {
-    if (results) {
-      const requestedUrl = apiRoot + req.originalUrl;
-      const returnObj = {};
-      let tempAttackPatternsByAssessedObject = results[0];
-      let allAttackPattenrns = results[1];
-      let sophisticationSetMap = {};
+    .then(results => {
+      if (results) {
+        const requestedUrl = apiRoot + req.originalUrl;
+        const returnObj = {};
+        let tempAttackPatternsByAssessedObject = results[0];
+        let allAttackPattenrns = results[1];
+        let sophisticationSetMap = {};
 
-      // Push assessed attack patterns to a set by sophisication level
-      tempAttackPatternsByAssessedObject.forEach(tempAttackPatternByAssessedObject => {
-        tempAttackPatternByAssessedObject.attackPatterns.forEach(ap => {
-          if (sophisticationSetMap[ap.x_unfetter_sophistication_level] === undefined) {
-            sophisticationSetMap[ap.x_unfetter_sophistication_level] = new Set();
-          }
-          sophisticationSetMap[ap.x_unfetter_sophistication_level].add(ap.attackPatternId);
+        // Push assessed attack patterns to a set by sophisication level
+        tempAttackPatternsByAssessedObject.forEach(tempAttackPatternByAssessedObject => {
+          tempAttackPatternByAssessedObject.attackPatterns.forEach(ap => {
+            if (sophisticationSetMap[ap.x_unfetter_sophistication_level] === undefined) {
+              sophisticationSetMap[ap.x_unfetter_sophistication_level] = new Set();
+            }
+            sophisticationSetMap[ap.x_unfetter_sophistication_level].add(ap.attackPatternId);
+          });
         });
-      });
 
-      let sophisticationTallyMap = {};
-      // Tally up set sizes to get count by sophisication level
-      for (let level in sophisticationSetMap) {
-        sophisticationTallyMap[level] = sophisticationSetMap[level].size;
+        let sophisticationTallyMap = {};
+        // Tally up set sizes to get count by sophisication level
+        for (let level in sophisticationSetMap) {
+          sophisticationTallyMap[level] = sophisticationSetMap[level].size;
+        }
+
+        let allAttackPatternTallyMap = {};
+        // Map all attack pattern to a total tally
+        allAttackPattenrns.forEach(ap => {
+          if (allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] === undefined) {
+            allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] = 0;
+          }
+          ++allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']];
+        });
+
+        returnObj.attackPatternsByAssessedObject = tempAttackPatternsByAssessedObject;
+        returnObj.assessedAttackPatternCountBySophisicationLevel = sophisticationTallyMap;
+        returnObj.totalAttackPatternCountBySophisicationLevel = allAttackPatternTallyMap;
+
+        return res.status(200).json({
+          links: {
+            self: requestedUrl,
+          },
+          data: returnObj
+        });
       }
 
-      let allAttackPatternTallyMap = {};
-      // Map all attack pattern to a total tally
-      allAttackPattenrns.forEach(ap => {
-        if (allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] === undefined) {
-          allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']] = 0;
-        }
-        ++allAttackPatternTallyMap[ap['extendedProperties']['x_unfetter_sophistication_level']];
+      return res.status(404).json({
+        message: `No item found with id ${id}`
       });
-
-      returnObj.attackPatternsByAssessedObject = tempAttackPatternsByAssessedObject;
-      returnObj.assessedAttackPatternCountBySophisicationLevel = sophisticationTallyMap;
-      returnObj.totalAttackPatternCountBySophisicationLevel = allAttackPatternTallyMap;
-
-      return res.status(200).json({
-        links: {
-          self: requestedUrl,
-        },
-        data: returnObj
-      });
-    }
-
-    return res.status(404).json({
-      message: `No item found with id ${id}`
-    });
-  })
-  .catch(err =>
-    res.status(500).json({
-      errors: [{
-        status: 500,
-        source: '',
-        title: 'Error',
-        code: '',
-        detail: 'An unknown error has occurred.'
-      }]
     })
-  );
+    .catch(err =>
+      res.status(500).json({
+        errors: [{
+          status: 500,
+          source: '',
+          title: 'Error',
+          code: '',
+          detail: 'An unknown error has occurred.'
+        }]
+      })
+    );
 };
-
-
 
 // Get the total Risk of a single Assessed Object of a certain Assessed Object
 const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
@@ -710,79 +708,79 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
       }]
     });
   }
-  
+
   //  The ObjectId is the assessed Object id.  Indicator, sensor or mitigations, more likely
   const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
   //  The answer is a value of the index of the answer to select for each question.  We assume
   //  we are changing all the values back to the same answer.
-  
+
   const answer = req.swagger.params.data.value.data.attributes.answer ? req.swagger.params.data.value.data.attributes.answer : 0;
   const questionId = req.swagger.params.question ? req.swagger.params.question.value : "";
-  
+
   // answer should be an integer to represent an index value of the array of question options.
   if ((answer >= 0)) {
     const assessment = result[0];
     // The array of assessed objects
     let assessed_object = assessment.stix.assessment_objects.find(o => o.stix.id == objectId);
-    
+
     // go through and change the answer to each of these questions.
     let risk = 0;
 
     lodash.forEach(assessed_object.questions, (question, index) => {
 
-      if ((answer <= question.options.length) && ((questionId=="") || (questionId == index))) {
+      if ((answer <= question.options.length) && ((questionId == "") || (questionId == index))) {
         question.selected_value = question.options[answer];
         risk += question.selected_value.risk;
         question.risk = question.selected_value.risk;
       }
     });
-    assessed_object.risk = risk/assessed_object.questions.length;
-    
+    assessed_object.risk = risk / assessed_object.questions.length;
+
 
     // Update the Mongoose model
     try {
-      const model = modelFactory.getModel(assessment.stix.type);  
+      const model = modelFactory.getModel(assessment.stix.type);
       const newDocument = new model(assessment);
       const error = newDocument.validateSync();
       if (error) {
         const errors = [];
         lodash.forEach(error.errors, (field) => {
-            errors.push(field.message);
+          errors.push(field.message);
         });
         return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
       }
       model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
 
         if (errUpdate) {
-            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+          return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
         }
 
         if (resultUpdate) {
-            const requestedUrl = apiRoot + req.originalUrl;
-            const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
-            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+          const requestedUrl = apiRoot + req.originalUrl;
+          const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
+          return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
         }
 
         return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
       });
     }
     catch (err) {
-      console.log("error "+err);
+      console.log("error " + err);
       return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
     }
 
 
 
-   // console.log(JSON.stringify(assessment, null, 4));
-   // const returnObject = assessed_object.questions[0].selected_value;
-   // const requestedUrl = apiRoot + req.originalUrl;
-   // res.header('Content-Type', 'application/json');
-   // res.json({
-   //   data: returnObject,
-   //   links: {
-   //     self: requestedUrl,
-   //   },
-    
+    // console.log(JSON.stringify(assessment, null, 4));
+    // const returnObject = assessed_object.questions[0].selected_value;
+    // const requestedUrl = apiRoot + req.originalUrl;
+    // res.header('Content-Type', 'application/json');
+    // res.json({
+    //   data: returnObject,
+    //   links: {
+    //     self: requestedUrl,
+    //   },
+
   } else {
 
     return res.status(404).json({
@@ -796,7 +794,140 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
     });
   }
 });
-    
+
+/**
+ * @description fetch assessments for given creator id, sort base on last modified
+ */
+const latestAssessmentsByCreatorId = function killChain(req, res) {
+  const id = req.swagger.params.creatorId ? req.swagger.params.creatorId.value : '';
+
+  // aggregate pipeline
+  //  match on given user and assessment type
+  //  group the assessments into its parent rollup id (an assessment can be a combination of 3 types)
+  //  unwind the potential 3 assessments per rollup into individual entries
+  //  sort on last modified
+  const latestAssessmentsByCreatorId = [
+    {
+      $match: {
+        'creator': id,
+        'stix.type': 'x-unfetter-assessment'
+      }
+    },
+    {
+      $group: {
+        '_id': '$metaProperties.rollupId',
+        'rollupId': { $first: '$metaProperties.rollupId' },
+        'id': { $push: '$stix.id' },
+        'name': { $first: '$stix.name' },
+        'modified': { $max: '$stix.modified' },
+        'create_by_ref': { $first: '$creator' }
+      }
+    },
+    {
+      $unwind: '$id'
+    },
+    {
+      $sort: {
+        'modified': -1
+      }
+    }
+  ];
+
+  Promise.resolve(aggregationModel.aggregate(latestAssessmentsByCreatorId))
+    .then((results) => {
+      if (results) {
+        const requestedUrl = apiRoot + req.originalUrl;
+        return res.status(200).json({
+          links: {
+            self: requestedUrl,
+          },
+          data: results
+        });
+      }
+
+      return res.status(404).json({
+        message: `No assessments found for creator ${id}`
+      });
+    })
+    .catch(err =>
+      res.status(500).json({
+        errors: [{
+          status: 500,
+          source: '',
+          title: 'Error',
+          code: '',
+          detail: 'An unknown error has occurred.'
+        }]
+      })
+    );
+};
+
+/**
+ * @description fetch assessments for given creator id, sort base on last modified
+ */
+const latestAssessments = function killChain(req, res) {
+  const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+
+  // aggregate pipeline
+  //  match on assessment type
+  //  group the assessments into its parent rollup id (an assessment can be a combination of 3 types)
+  //  unwind the potential 3 assessments per rollup into individual entries
+  //  sort on last modified
+  const latestAssessments = [
+    {
+      $match: {
+        'stix.type': 'x-unfetter-assessment'
+      }
+    },
+    {
+      $group: {
+        '_id': '$metaProperties.rollupId',
+        'rollupId': { $first: '$metaProperties.rollupId' },
+        'id': { $push: '$stix.id' },
+        'name': { $first: '$stix.name' },
+        'modified': { $max: '$stix.modified' },
+        'create_by_ref': { $first: '$creator' }
+      }
+    },
+    {
+      $unwind: '$id'
+    },
+    {
+      $sort: {
+        'modified': -1
+      }
+    }
+  ];
+
+  Promise.resolve(aggregationModel.aggregate(latestAssessments))
+    .then((results) => {
+      if (results) {
+        const requestedUrl = apiRoot + req.originalUrl;
+        return res.status(200).json({
+          links: {
+            self: requestedUrl,
+          },
+          data: results
+        });
+      }
+
+      return res.status(404).json({
+        message: `No assessments found!`
+      });
+    })
+    .catch(err =>
+      res.status(500).json({
+        errors: [{
+          status: 500,
+          source: '',
+          title: 'Error',
+          code: '',
+          detail: 'An unknown error has occurred.'
+        }]
+      })
+    );
+};
+
 module.exports = {
   get: controller.get(),
   getById: controller.getById(),
@@ -811,4 +942,6 @@ module.exports = {
   getRiskByAssessedObject,
   getAnswerByAssessedObject,
   updateAnswerByAssessedObject,
+  latestAssessmentsByCreatorId,
+  latestAssessments,
 };
