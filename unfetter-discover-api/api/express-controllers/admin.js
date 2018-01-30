@@ -1,4 +1,12 @@
+process.env.PATTERN_HANDLER_DOMAIN = process.env.PATTERN_HANDLER_DOMAIN || 'unfetter-pattern-handler';
+process.env.PATTERN_HANDLER_PORT = process.env.PATTERN_HANDLER_PORT || 5000;
+process.env.SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || 'socketserver';
+process.env.SOCKET_SERVER_PORT = process.env.SOCKET_SERVER_PORT || 3333;
+const CTF_PARSE_HOST = process.env.CTF_PARSE_HOST || 'http://localhost';
+const CTF_PARSE_PORT = process.env.CTF_PARSE_PORT || 10010;
+
 const express = require('express');
+const fetch = require('node-fetch');
 const router = express.Router();
 
 const userModel = require('../models/user');
@@ -290,6 +298,57 @@ router.get('/site-visits-graph/:days', (req, res) => {
         }
     });
 
+});
+
+router.get('/heartbeat', (req, res) => {
+    const statuses = [
+        {
+            service: 'unfetter-discover-api',
+            status: 'RUNNING'
+        },
+        {
+            service: 'cti-stix-store-respository',
+            status: global.conn.readyState === 1 ? 'RUNNING': 'DOWN'
+        }
+    ];
+
+    const services = [
+        {
+            service: 'unfetter-pattern-handler',
+            url: `http://${process.env.PATTERN_HANDLER_DOMAIN}:${process.env.PATTERN_HANDLER_PORT}/heartbeat`
+        },
+        {
+            service: 'unfetter-socket-server',
+            url: `https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/heartbeat`
+        },
+        {
+            service: 'unfetter-ctf-ingest',
+            url: `${CTF_PARSE_HOST}:${CTF_PARSE_PORT}/heartbeat`
+        }
+    ];
+
+    const fetchArr = services.map((service) => {
+        return new Promise((resolve, reject) => {
+            fetch(service.url)
+                .then((res) => res.json())
+                .then((data) => resolve({ service: service.service, status: data.status }))
+                .catch((err) => resolve({ service: service.service, status: 'DOWN' }))
+        });
+    });
+
+    Promise.all(fetchArr)
+        .then((results) => {
+            res.json({
+                data: {
+                    attributes: {
+                        statuses: statuses.concat(results)
+                    }
+                }
+            });
+        })
+        .catch((err) => {
+            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+        });       
 });
 
 module.exports = router;

@@ -8,6 +8,10 @@ var config = {
   appRoot: __dirname // required config
 };
 
+app.get('/heartbeat', (req, res) => {
+  res.json({ success: true, service: 'unfetter-ctf-ingest', status: 'RUNNING' });
+});
+
 SwaggerExpress.create(config, function(err, swaggerExpress) {
   if (err) { throw err; }
 

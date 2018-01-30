@@ -12,8 +12,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/publish', publishController);
 
-app.get('/', (req: express.Request, res: express.Response) => {
-    res.json({'message': 'Successful reached base route'});
+app.get('/heartbeat', (req: express.Request, res: express.Response) => {
+    res.json({ success: true, service: 'unfetter-socket-server', status: 'RUNNING' });
 });
 
 // catch 404 and forward to error handler
