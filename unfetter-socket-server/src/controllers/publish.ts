@@ -155,14 +155,25 @@ router.post('/notification/organization', (req: Request, res: Response) => {
     }
 });
 
+// Notification for admins
+router.post('/notification/admin', (req: Request, res: Response) => {
+    if (isDefinedJsonApi(req, ['notification'])) {
+        const notification: AppNotification = req.body.data.attributes.notification;
+
+        const appNotification = new CreateAppNotification(WSMessageTypes.NOTIFICATION, notification);
+
+        io.to('admin').send(appNotification);
+
+        return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved admin notification' }));
+    } else {
+        console.log('Malformed request to', req.url);
+        return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
+    }
+});
+
 // Notification for organization leaders
 // Note - Send to all admins and all org leaders of X org
 // router.post('/notification/orgleaders', (req: Request, res: Response) => {
-// });
-
-// Notification for admins
-// Note - Use rooms or namespaces for this?
-// router.post('/notification/admin', (req: Request, res: Response) => {
 // });
 
 export = router;

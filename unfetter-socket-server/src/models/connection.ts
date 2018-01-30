@@ -1,6 +1,6 @@
 export interface Connection {
     user: any;
-    token: any;
-    client: any;
-    connected: any;
+    token: string;
+    client: SocketIO.Socket;
+    connected: boolean;
 }
