@@ -13,6 +13,7 @@ import { connections } from '../models/connections';
 import { WSMessageTypes } from '../models/messages';
 import notificationStoreModel from '../models/mongoose/notification-store'
 import { NotificationRecieveTypes } from '../models/notifiction-recieve-types.enum';
+import { UserRoles } from '../models/user-roles.enum';
 
 mongoInit();
 
@@ -82,7 +83,7 @@ io.on('connection', (client: SocketIO.Socket) => {
             messageContent: 'Web socket connection successful'
         });
 
-        if (clientConnection.user.role === 'ADMIN') {
+        if (clientConnection.user.role === UserRoles.ADMIN) {
             clientConnection.client.join('admin');
         }
 
@@ -95,11 +96,11 @@ io.on('connection', (client: SocketIO.Socket) => {
         //         clientConnection.client.join(org.id);
         //     });
 
-        clientConnection.client.on('disconnect', () => {
-            connections.splice(connections.indexOf(clientConnection), 1);
-            console.log('Client disconnected');
-            console.log('Number of connections on disconnect: ', connections.length);
-        });
+        // clientConnection.client.on('disconnect', () => {
+        //     connections.splice(connections.indexOf(clientConnection), 1);
+        //     console.log('Client disconnected');
+        //     console.log('Number of connections on disconnect: ', connections.length);
+        // });
 
         clientConnection.client.on('message', (data: any) => {
             const userId = clientConnection.user._id;
