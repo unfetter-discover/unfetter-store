@@ -31,7 +31,6 @@ passportConfig.jwtStandard = (req, res, next) => {
 };
 
 passportConfig.jwtAdmin = (req, res, next) => {
-    console.log('in admin mw');
     const user = req.user;
     // Verify they have admin role
     if (!user || user.role !== 'ADMIN') {
