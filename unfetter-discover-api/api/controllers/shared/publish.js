@@ -61,6 +61,22 @@ const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, l
     .catch((err) => console.log('Error!', err));
 };
 
+const notifyAdmin = (notificationType, heading, notificationBody, link = null) => {
+    const body = JSON.stringify(new CreateNotification(null, null, notificationType, heading, notificationBody, null, link));
+    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/admin`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body
+    })
+    .then((res) => {
+        console.log('Publish API recieved admin notification');
+    })
+    .catch((err) => console.log('Error!', err));
+};
+
 const updateSocialForAll = (notificationType, notificationBody, stixId) => {
     // TODO restrict update if more strict UAC is added
     const body = JSON.stringify(new CreateNotification(null, null, notificationType, null, notificationBody, stixId, null));
@@ -81,6 +97,7 @@ const updateSocialForAll = (notificationType, notificationBody, stixId) => {
 module.exports = {
     notifyUser,
     notifyOrg,
+    notifyAdmin,
     updateSocialForAll
 };
                                         

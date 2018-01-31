@@ -160,6 +160,7 @@ router.post('/notification/organization', (req: Request, res: Response) => {
 router.post('/notification/admin', (req: Request, res: Response) => {
     if (isDefinedJsonApi(req, ['notification'])) {
         const notification: AppNotification = req.body.data.attributes.notification;
+        notification.submitted = notification.submitted || new Date();
 
         const appNotification = new CreateAppNotification(WSMessageTypes.NOTIFICATION, notification);
 
