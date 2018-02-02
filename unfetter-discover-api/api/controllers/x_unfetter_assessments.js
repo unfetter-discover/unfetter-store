@@ -798,7 +798,7 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
 /**
  * @description fetch assessments for given creator id, sort base on last modified
  */
-const latestAssessmentsByCreatorId = function killChain(req, res) {
+const latestAssessmentsByCreatorId = (req, res) => {
   const id = req.swagger.params.creatorId ? req.swagger.params.creatorId.value : '';
 
   // aggregate pipeline
@@ -865,7 +865,7 @@ const latestAssessmentsByCreatorId = function killChain(req, res) {
 /**
  * @description fetch assessments for given creator id, sort base on last modified
  */
-const latestAssessments = function killChain(req, res) {
+const latestAssessments = (req, res) => {
   const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
   // aggregate pipeline

@@ -1,0 +1,29 @@
+x-swagger-router-controller: latest
+get:
+  tags:
+  - STIX-Unfetter
+  - Ids sort by modified
+  description: Find all Ids of stix type given sorted by last modified
+  operationId: getLatestByTypeAndCreatorId
+  parameters:
+  - name: type
+    in: path
+    description: stix type
+    type: string
+    required: true
+  - name: id
+    in: path
+    description: stix type
+    type: string
+    required: true
+  produces: 
+  - application/vnd.api+json
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object     
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"

@@ -138,3 +138,12 @@
   $ref: ./config/config.yaml
 /config/{id}:
   $ref: ./config/config_by_id.yaml
+
+/latest/threat-reports:
+  $ref: ./latest/latest-threat-report.yaml
+/latest/threat-reports/creator/{id}:
+  $ref: ./latest/latest-threat-report-by-id.yaml
+/latest/type/{type}:
+  $ref: ./latest/latest-by-type.yaml
+/latest/type/{type}/creator/{id}:
+  $ref: ./latest/latest-by-type-and-id.yaml
