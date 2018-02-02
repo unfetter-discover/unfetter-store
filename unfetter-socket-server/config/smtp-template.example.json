@@ -1,0 +1,12 @@
+{
+    "host": "(my.smtp.host)",
+    "port": 465,
+    "secure": true,
+    "auth": {
+        "user": "(username)",
+        "pass": "(pass)"
+    },
+    "tls": {
+        "rejectUnauthorized": false
+    }
+}

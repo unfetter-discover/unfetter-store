@@ -20,9 +20,12 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
+    "handlebars": "^4.0.11",
     "jsonwebtoken": "^8.1.0",
     "mongoose": "^4.13.7",
-    "socket.io": "^2.0.4"
+    "nodemailer": "^4.4.2",
+    "socket.io": "^2.0.4",
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.8",
@@ -31,7 +34,10 @@
     "@types/jsonwebtoken": "^7.2.4",
     "@types/mongoose": "^4.7.29",
     "@types/node": "^8.0.58",
+    "@types/nodemailer": "^4.3.2",
+    "@types/nodemailer-smtp-transport": "^2.7.4",
     "@types/socket.io": "^1.4.31",
+    "@types/yargs": "^10.0.1",
     "concurrently": "^3.4.0",
     "jasmine": "^2.8.0",
     "jasmine-spec-reporter": "^4.2.1",
