@@ -1,5 +1,7 @@
 config/private-config.js
 config/private-config.json
+config/private-config.email.js
+config/private-config.email.json
 node_modules/
 dist/
 coverage/
