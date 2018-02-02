@@ -1,3 +1,5 @@
+const port = process.env.PORT || '3333';
+
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
@@ -11,21 +13,22 @@ import { connections } from '../models/connections';
 import { WSMessageTypes } from '../models/messages';
 import notificationStoreModel from '../models/mongoose/notification-store'
 import { NotificationRecieveTypes } from '../models/notifiction-recieve-types.enum';
+import { UserRoles } from '../models/user-roles.enum';
 
 mongoInit();
 
 const UNFETTER_OPEN_ID: string = 'identity--e240b257-5c42-402e-a0e8-7b81ecc1c09a';
 
-const server: any = https.createServer({
+const server: https.Server = https.createServer({
     key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
     cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
 }, app);
 
-const io = socketIo(server, {
+const io: SocketIO.Server = socketIo(server, {
     path: '/socket'
 });
 
-io.use((client: any, next: any) => {
+io.use((client: SocketIO.Socket, next: any) => {
     let errorMsg = '';
 
     if (client.handshake.query && client.handshake.query.token) {
@@ -67,7 +70,7 @@ io.use((client: any, next: any) => {
     }
 });
 
-io.on('connection', (client: any) => {
+io.on('connection', (client: SocketIO.Socket) => {
     console.log('Number of connections on connect: ', connections.length);
     const clientConnection = connections.find((conn) => conn.client === client);
 
@@ -80,6 +83,10 @@ io.on('connection', (client: any) => {
             messageContent: 'Web socket connection successful'
         });
 
+        if (clientConnection.user.role === UserRoles.ADMIN) {
+            clientConnection.client.join('admin');
+        }
+
         // Join organization rooms
         // clientConnection.user.organizations
         //     .filter((org: { id: string }) => org.id !== UNFETTER_OPEN_ID)
@@ -89,11 +96,11 @@ io.on('connection', (client: any) => {
         //         clientConnection.client.join(org.id);
         //     });
 
-        clientConnection.client.on('disconnect', () => {
-            connections.splice(connections.indexOf(clientConnection), 1);
-            console.log('Client disconnected');
-            console.log('Number of connections on disconnect: ', connections.length);
-        });
+        // clientConnection.client.on('disconnect', () => {
+        //     connections.splice(connections.indexOf(clientConnection), 1);
+        //     console.log('Client disconnected');
+        //     console.log('Number of connections on disconnect: ', connections.length);
+        // });
 
         clientConnection.client.on('message', (data: any) => {
             const userId = clientConnection.user._id;
@@ -150,8 +157,55 @@ io.on('connection', (client: any) => {
     }    
 });
 
-server.listen(3333, () => {
-    console.log('Server is listening');
-});
+// ~~~ Admin Namespace ~~~
+
+// const adminNamespace: SocketIO.Namespace = io.of('/admin');
+// adminNamespace.use((client: SocketIO.Socket, next: any) => {
+//     next();
+// });
+// adminNamespace.on('connection', (socket: SocketIO.Socket) => {
+//     adminNamespace.send({
+//         messageType: WSMessageTypes.SYSTEM,
+//         messageContent: 'Test message, this should be deleted from the code!'
+//     });
+// });
+
+// ~~~ Start Server ~~~
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+function onError(error: any) {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+
+    const bind = typeof port === 'string' ?
+        'Pipe ' + port :
+        'Port ' + port;
+
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+}
+
+function onListening() {
+    const addr = server.address();
+    const bind = typeof addr === 'string' ?
+        'pipe ' + addr :
+        'port ' + addr.port;
+    console.log('Listening on ' + bind);
+}
 
 export default io;

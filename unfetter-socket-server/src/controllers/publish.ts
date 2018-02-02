@@ -9,6 +9,7 @@ import { CreateJsonApiError, CreateJsonApiSuccess } from '../models/jsonapi';
 import { isDefinedJsonApi } from '../controllers/shared/isdefined';
 import notificationStoreModel from '../models/mongoose/notification-store';
 import userModel from '../models/mongoose/user';
+import { UserRoles } from '../models/user-roles.enum';
 
 let router: any = Router();
 
@@ -155,14 +156,65 @@ router.post('/notification/organization', (req: Request, res: Response) => {
     }
 });
 
+// Notification for admins
+router.post('/notification/admin', (req: Request, res: Response) => {
+    if (isDefinedJsonApi(req, ['notification'])) {
+        const notification: AppNotification = req.body.data.attributes.notification;
+        notification.submitted = notification.submitted || new Date();
+
+        const appNotification = new CreateAppNotification(WSMessageTypes.NOTIFICATION, notification);
+
+        userModel.find({ role: UserRoles.ADMIN}, (err, findAdminResults) => {
+            if (err || !(findAdminResults || findAdminResults.length)) {
+                return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to find admins'));
+            } else {
+                const docsToInsert = findAdminResults
+                    .map((adminUser: any) => adminUser.toObject())
+                    .map((adminUser: any) => adminUser._id.toString())
+                    .map((userId: string) => {
+                        return {
+                            userId,
+                            ...appNotification
+                        };
+                    });
+                notificationStoreModel.insertMany(docsToInsert, (insertError, notificationResults) => {
+                    if (insertError) {
+                        return res.status(500).json(new CreateJsonApiError('500', req.url, 'Unable to save notifications'));
+                    } else {
+                        const notificationResObjs = notificationResults.map((notificationRes) => notificationRes.toObject());
+                        notificationResObjs.forEach((notificationResObj) => {
+                            const userId = notificationResObj.userId;
+                            const userSessions = findConnectionsByUserId(userId);
+    
+                            if (userSessions && userSessions.length) {
+                                // In case the same user has multiple session objects
+                                userSessions.forEach((connection: Connection) => {
+                                    console.log('Sending message to: ', userId);
+                                    connection.client.send({ 
+                                        ...notificationResObj, 
+                                        messageContent: { 
+                                            ...notificationResObj.messageContent,
+                                            _id: notificationResObj._id
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                        return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved admin notification' }));
+                    }
+                });                
+            }
+        });
+
+    } else {
+        console.log('Malformed request to', req.url);
+        return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
+    }
+});
+
 // Notification for organization leaders
 // Note - Send to all admins and all org leaders of X org
 // router.post('/notification/orgleaders', (req: Request, res: Response) => {
-// });
-
-// Notification for admins
-// Note - Use rooms or namespaces for this?
-// router.post('/notification/admin', (req: Request, res: Response) => {
 // });
 
 export = router;

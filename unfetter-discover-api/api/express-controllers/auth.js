@@ -7,6 +7,7 @@ const GithubStrategy = require('passport-github').Strategy;
 const config = require('../config/config');
 const userModel = require('../models/user');
 const generateId = require('../helpers/stix').id;
+const publish = require('../controllers/shared/publish');
 
 const githubStrategy = new GithubStrategy({
     clientID: config.github.clientID,
@@ -68,6 +69,7 @@ router.get('/github-callback', passport.authenticate('github', { failureRedirect
                 if (githubUser._json.avatar_url) {
                     user.github.avatar_url = githubUser._json.avatar_url;
                 }
+                user.approved = false;
 
                 const newDocument = new userModel(user);
                 const error = newDocument.validateSync();
@@ -184,6 +186,7 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
                         if(errInner || !resultInner) {
                             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                         } else {
+                            publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users');
                             return res.json({
                                 "data": {
                                     "attributes": newDocument.toObject()

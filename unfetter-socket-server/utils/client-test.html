@@ -8,15 +8,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 </head>
 <body>
-    <p>hi</p>
+    <h1>Socket Test</h1>
+    <hr>
+    <div id="output"></div>
     <script>
-    var exampleSocket = io("https://localhost:3333", {
+    var output = document.getElementById('output');
+    var exampleSocket = io("https://localhost:13333", {
         secure: true,
         path: '/socket',
-        query: 'token=Bearer%20eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1YTE4NWM0ZGViZjlhNzAwYTQzZmE2NmEiLCJfX3YiOjAsImVtYWlsIjoiYUBhLmNvbSIsInVzZXJOYW1lIjoiajk4Nzk4NyIsImxhc3ROYW1lIjoiYSIsImZpcnN0TmFtZSI6ImEiLCJjcmVhdGVkIjoiMjAxNy0xMS0yNFQxNzo1MjoxMy4wMzJaIiwiaWRlbnRpdHkiOnsibmFtZSI6ImEiLCJpZCI6ImlkZW50aXR5LS1iNTZkYzBhNS03M2ZiLTQwMzAtYmZlMi0xNjAzNGQxOGVjMjIiLCJ0eXBlIjoiaWRlbnRpdHkiLCJzZWN0b3JzIjpbXSwiaWRlbnRpdHlfY2xhc3MiOiJpbmRpdmlkdWFsIn0sImdpdGh1YiI6eyJ1c2VyTmFtZSI6Imo5ODc5ODciLCJhdmF0YXJfdXJsIjoiaHR0cHM6Ly9hdmF0YXJzMi5naXRodWJ1c2VyY29udGVudC5jb20vdS8zMDIzNjExMD92PTQiLCJpZCI6IjMwMjM2MTEwIn0sInJvbGUiOiJBRE1JTiIsImxvY2tlZCI6ZmFsc2UsImFwcHJvdmVkIjp0cnVlLCJyZWdpc3RlcmVkIjp0cnVlLCJvcmdhbml6YXRpb25zIjpbeyJpZCI6ImlkZW50aXR5LS1lMjQwYjI1Ny01YzQyLTQwMmUtYTBlOC03YjgxZWNjMWMwOWEiLCJhcHByb3ZlZCI6dHJ1ZSwicm9sZSI6IlNUQU5EQVJEX1VTRVIifV0sImlhdCI6MTUxMzI3NTM2MSwiZXhwIjoxNTEzODgwMTYxfQ.JvrvlTpl-vJ9quZEjWoZi1ESJq4VHpGrcDskVA9_rFo&EIO=3'
+        query: 'token=add token here'
     });
     exampleSocket.on('message', (msg) => {
         console.log(msg, 'from server');
+        output.innerHTML = JSON.stringify(msg, null, 2);
     });
     exampleSocket.emit('message', 'hi! from client');
     </script>
