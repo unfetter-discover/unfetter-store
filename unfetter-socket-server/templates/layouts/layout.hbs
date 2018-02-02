@@ -6,12 +6,45 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Unfetter</title>
     <style>
-        
+    #uf-body {
+        font-family: Verdana, Geneva, sans-serif;
+        padding: 15px;
+        background: #eee;
+        color: rgba(0,0,0,0.87);
+    }
+    #uf-top-heading {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 40px;
+        font-weight: lighter;
+        color: #303f9f;
+    }
+    .uf-container {
+        margin: 0 auto;
+        max-width: 800px;
+        background: #fafafa;
+        padding: 25px;
+        border-radius: 20px;
+    }
+    #uf-footer {
+        max-width: 800px;
+        padding: 25px;
+    }
     </style>
 </head>
-<body>
+<body id="uf-body">
+    <p id="uf-top-heading">Unfetter</p>
     <div class="uf-container">
         {{>body}}
     </div>
+    <footer id="uf-footer">
+        <div class="uf-flex">
+            <div class="uf-flex1 text-center"></div>
+            <div class="uf-flex1 text-center"></div>
+        </div>
+        <p>
+            <span>Unfetter is an Information Assurance mission at the National Security Agency (nsa.gov)</span>
+        </p>
+    </footer>
 </body>
 </html>
