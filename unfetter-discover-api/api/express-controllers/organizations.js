@@ -119,8 +119,6 @@ router.get('/subscription/:userId/:orgId/:subscribe', (req, res) => {
 
     const { userId, orgId, subscribe }= req.params;
 
-    console.log('~~~~~', userId, orgId, subscribe);
-
     if (userId === undefined || orgId === undefined || subscribe === undefined) {
         return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'Malformed request' }] });
     } else {

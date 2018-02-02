@@ -10,6 +10,10 @@ import { isDefinedJsonApi } from '../controllers/shared/isdefined';
 import notificationStoreModel from '../models/mongoose/notification-store';
 import userModel from '../models/mongoose/user';
 import { UserRoles } from '../models/user-roles.enum';
+import { renderUserRegistered } from './shared/render-template';
+import { sendMailAlert } from './shared/email-alert';
+
+const SEND_EMAIL_ALERTS = process.env.SEND_EMAIL_ALERTS || false;
 
 let router: any = Router();
 
@@ -200,6 +204,23 @@ router.post('/notification/admin', (req: Request, res: Response) => {
                                 });
                             }
                         });
+
+                        // TODO move to generate function
+                        if (SEND_EMAIL_ALERTS && isDefinedJsonApi(req, ['emailData', 'template'], ['emailData', 'subject'], ['emailData', 'body'])) {
+                            const emailData = req.body.data.attributes.emailData;
+                            const adminEmails = findAdminResults
+                                .map((adminUser: any) => adminUser.toObject())
+                                .map((adminUser: any) => adminUser.email);
+                            switch (emailData.template) {
+                                case 'USER_REGISTERED':
+                                    const emailHtml = renderUserRegistered(emailData.body);
+                                    sendMailAlert(adminEmails, emailData.subject, emailHtml);
+                                    break;
+                                default:
+                                    console.log('WARNING: unable to process email template: ', emailData.template);
+                            }
+                        }
+
                         return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved admin notification' }));
                     }
                 });                

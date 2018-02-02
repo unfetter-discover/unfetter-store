@@ -5,46 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Unfetter</title>
-    <style>
-    #uf-body {
-        font-family: Verdana, Geneva, sans-serif;
-        padding: 15px;
-        background: #eee;
-        color: rgba(0,0,0,0.87);
-    }
-    #uf-top-heading {
-        margin-top: 20px;
-        text-align: center;
-        font-size: 40px;
-        font-weight: lighter;
-        color: #303f9f;
-    }
-    .uf-container {
-        margin: 0 auto;
-        max-width: 800px;
-        background: #fafafa;
-        padding: 25px;
-        border-radius: 20px;
-    }
-    #uf-footer {
-        max-width: 800px;
-        padding: 25px;
-    }
-    </style>
+    {{>styles}}
 </head>
 <body id="uf-body">
     <p id="uf-top-heading">Unfetter</p>
+    <p id="uf-top-subtitle">Discover and analyze gaps in your security posture.</p>
     <div class="uf-container">
+        <p>Greetings from Unfetter,</p>
         {{>body}}
+        <hr>
+        <p>
+            From: The Unfetter team
+        </p>
     </div>
     <footer id="uf-footer">
-        <div class="uf-flex">
-            <div class="uf-flex1 text-center"></div>
-            <div class="uf-flex1 text-center"></div>
-        </div>
-        <p>
-            <span>Unfetter is an Information Assurance mission at the National Security Agency (nsa.gov)</span>
-        </p>
+        <p class="text-center">To learn more about unfetter, visit <a href="{{ ufHomepage }}">unfetter.io</a></p>
+        <p class="text-center">Unfetter is an Information Assurance mission at the National Security Agency (nsa.gov)</p>
     </footer>
 </body>
 </html>

@@ -9,7 +9,7 @@ const NOTIFICATION_TYPES = [
 ];
 
 class CreateNotification {
-    constructor(userId, orgId, notificationType, heading, body, stixId, link) {
+    constructor(userId, orgId, notificationType, heading, body, stixId, link, emailData) {
         if (!NOTIFICATION_TYPES.includes(notificationType)) {
             console.log('WARNING, the following notification type is not supported: ', notificationType);
         }
@@ -23,14 +23,15 @@ class CreateNotification {
                     body,
                     stixId,
                     link
-                }
+                },
+                emailData
             }
         };
     }
 }
 
-const notifyUser = (userId, notificationType, heading, notificationBody, link = null) => {
-    const body = JSON.stringify(new CreateNotification(userId, null, notificationType, heading, notificationBody, null, link));
+const notifyUser = (userId, notificationType, heading, notificationBody, link = null, emailData = null) => {
+    const body = JSON.stringify(new CreateNotification(userId, null, notificationType, heading, notificationBody, null, link, emailData));
     fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/user`, {
         method: 'POST',
         headers: {
@@ -45,8 +46,8 @@ const notifyUser = (userId, notificationType, heading, notificationBody, link = 
     .catch((err) => console.log('Error!', err));
 };
 
-const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, link = null) => {
-    const body = JSON.stringify(new CreateNotification(userId, orgId, notificationType, heading, notificationBody, null, link));
+const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, link = null, emailData = null) => {
+    const body = JSON.stringify(new CreateNotification(userId, orgId, notificationType, heading, notificationBody, null, link, emailData));
     fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/organization`, {
         method: 'POST',
         headers: {
@@ -61,8 +62,8 @@ const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, l
     .catch((err) => console.log('Error!', err));
 };
 
-const notifyAdmin = (notificationType, heading, notificationBody, link = null) => {
-    const body = JSON.stringify(new CreateNotification(null, null, notificationType, heading, notificationBody, null, link));
+const notifyAdmin = (notificationType, heading, notificationBody, link = null, emailData = null, ) => {
+    const body = JSON.stringify(new CreateNotification(null, null, notificationType, heading, notificationBody, null, link, emailData));
     fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/admin`, {
         method: 'POST',
         headers: {
@@ -79,7 +80,7 @@ const notifyAdmin = (notificationType, heading, notificationBody, link = null) =
 
 const updateSocialForAll = (notificationType, notificationBody, stixId) => {
     // TODO restrict update if more strict UAC is added
-    const body = JSON.stringify(new CreateNotification(null, null, notificationType, null, notificationBody, stixId, null));
+    const body = JSON.stringify(new CreateNotification(null, null, notificationType, null, notificationBody, stixId, null, null));
     fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/social/all`, {
         method: 'POST',
         headers: {

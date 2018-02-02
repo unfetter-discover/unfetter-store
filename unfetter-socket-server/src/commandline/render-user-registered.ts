@@ -10,8 +10,10 @@ const data: UserRegisteredData = {
     email: 'test@test.com'
 };
 
+const outfile = join(__dirname, 'user-registered-test.html');
+
 const rendered = renderUserRegistered(data);
 
-const path = join(__dirname, 'user-registered-test.html');
+writeFileSync(outfile, rendered, 'utf8');
 
-writeFileSync(path, rendered, 'utf8');
+console.log(`Template successfully rendered and saved to ${outfile}.`);
