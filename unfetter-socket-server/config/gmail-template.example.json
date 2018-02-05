@@ -1,0 +1,10 @@
+{
+    "service": "gmail",
+    "auth": {
+        "type": "OAuth2",
+        "user": "(user)@gmail.com",
+        "clientId": "(clientId).apps.googleusercontent.com",
+        "clientSecret": "(clientSecret)",
+        "refreshToken": "(refreshToken)"
+    }
+}

@@ -9,6 +9,8 @@ const userModel = require('../models/user');
 const generateId = require('../helpers/stix').id;
 const publish = require('../controllers/shared/publish');
 
+const SEND_EMAIL_ALERTS = process.env.SEND_EMAIL_ALERTS || false;
+
 const githubStrategy = new GithubStrategy({
     clientID: config.github.clientID,
     clientSecret: config.github.clientSecret,
@@ -186,7 +188,20 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
                         if(errInner || !resultInner) {
                             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                         } else {
-                            publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users');
+                            if (SEND_EMAIL_ALERTS) {
+                                const emailData = {
+                                    template: 'USER_REGISTERED',
+                                    subject: `${user.firstName} ${user.lastName} registered to unfetter`,
+                                    body: {
+                                        firstName: user.firstName,
+                                        lastName: user.lastName,
+                                        email: user.email
+                                    }
+                                };
+                                publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users', emailData);
+                            } else {
+                                publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users');
+                            }
                             return res.json({
                                 "data": {
                                     "attributes": newDocument.toObject()

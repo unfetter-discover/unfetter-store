@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Unfetter</title>
+    {{>styles}}
+</head>
+<body id="uf-body">
+    <p id="uf-top-heading">Unfetter</p>
+    <p id="uf-top-subtitle">Discover and analyze gaps in your security posture.</p>
+    <div class="uf-container">
+        <p>Greetings from Unfetter,</p>
+        {{>body}}
+        <hr>
+        <p>
+            From: The Unfetter team
+        </p>
+    </div>
+    <footer id="uf-footer">
+        <p class="text-center">To learn more about unfetter, visit <a href="{{ ufHomepage }}">unfetter.io</a></p>
+        <p class="text-center">Unfetter is an Information Assurance mission at the National Security Agency (nsa.gov)</p>
+    </footer>
+</body>
+</html>
