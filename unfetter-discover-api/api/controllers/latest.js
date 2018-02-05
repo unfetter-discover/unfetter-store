@@ -5,18 +5,12 @@ const callPromise = (query, req, res) => {
     const aggregationModel = modelFactory();
     Promise.resolve(aggregationModel.aggregate(query))
         .then((results) => {
-            if (results) {
-                const requestedUrl = req.originalUrl;
-                return res.status(200).json({
-                    links: {
-                        self: requestedUrl,
-                    },
-                    data: results
-                });
-            }
-
-            return res.status(404).json({
-                message: `No stix objects found for type ${type} and creator ${id}`
+            const requestedUrl = req.originalUrl;
+            return res.status(200).json({
+                links: {
+                    self: requestedUrl,
+                },
+                data: results
             });
         })
         .catch(err =>
@@ -117,8 +111,8 @@ const getLatestByType = (req, res) => {
   * @description fetch stix of given type for given creator id, sort base on last modified
   */
 const getLatestThreatReportByCreatorId = (req, res) => {
-    res.header('Content-Type', 'application/vnd.api+json');
     const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+    res.header('Content-Type', 'application/vnd.api+json');
 
     // aggregate pipeline
     const latestByCreatorWithRollup = [
