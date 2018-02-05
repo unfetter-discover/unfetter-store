@@ -877,7 +877,6 @@ const latestAssessments = (req, res) => {
 };
 
 const latestAssessmentPromise = (query, req, res) => {
-  const aggregationModel = modelFactory();
   Promise.resolve(aggregationModel.aggregate(query))
       .then((results) => {
           const requestedUrl = req.originalUrl;
