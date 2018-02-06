@@ -1,0 +1,13 @@
+@import '../modules/variables';
+
+html {
+    background: $app-background-color !important;
+}
+
+* {
+    color: $dark-text-default;
+}
+
+h1 {
+    color: $primary-color;
+}
