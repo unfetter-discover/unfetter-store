@@ -1,7 +1,6 @@
 x-swagger-router-controller: attack_patterns
 get:
   tags:
-  
   - STIX-Attack Pattern
   description: Find a model instance by {{id}} from the data source.
   operationId: getById

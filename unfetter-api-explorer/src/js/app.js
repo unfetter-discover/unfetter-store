@@ -20,7 +20,7 @@ const mainEl = 'main';
             window['SwaggerUIStandalonePreset'] = window['swagger-ui-standalone-preset']
             
             const ui = SwaggerUIBundle({
-                url: '/assets/swagger.json',
+                url: '/explorer/assets/swagger.json',
                 dom_id: `#${mainEl}`,
                 deepLinking: true,
                 presets: [

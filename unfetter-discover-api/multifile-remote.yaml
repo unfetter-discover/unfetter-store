@@ -1,8 +1,8 @@
 swagger: "2.0"
-host: localhost:3200
+host: localhost
 basePath: /api
 schemes:
-  - http
+  - https
 info:
   $ref: ./api/swagger/info/index.yaml
 consumes:
