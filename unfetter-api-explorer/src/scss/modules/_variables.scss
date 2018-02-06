@@ -20,3 +20,7 @@ $accent-alt-color: get-color($teal, 300);
 $accent-alt-color-dark: get-color($teal, 600);
 $warn-color: get-color($deep-orange);
 $neutral-color: get-color($blue-grey);
+
+@function rgba-to-rgb($rgba, $background: #fff) {
+    @return mix(rgb(red($rgba), green($rgba), blue($rgba)), $background, alpha($rgba) * 100%);
+}
