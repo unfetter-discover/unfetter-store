@@ -24,20 +24,15 @@ module.exports = {
             {
                 test: /\.scss$/,
                 use: ['style-loader', 'css-loader', 'sass-loader']
-            },
-            {
-                test: /\.(jpe?g|png|woff|woff2|eot|ttf|svg)(\?[a-z0-9=.]+)?$/,
-                loader: 'url-loader',
-                options: {
-                    limit: 50000,
-                    name: './fonts/[name].[ext]'
-                }
             }
         ]
     },
     plugins: [
         new CopyWebpackPlugin([
-            { from: 'src/assets', to: 'assets' }
+            { 
+                from: 'src/assets', 
+                to: 'assets' 
+            }
         ])
     ]
 };

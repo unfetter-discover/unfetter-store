@@ -1,4 +1,5 @@
 @import 'partials/layout';
+@import 'partials/swagger-ui-overrides';
 
 @font-face {
     font-family: 'Roboto';
@@ -36,5 +37,5 @@
 }
 
 body {
-    font-family: 'Roboto';
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
 }
