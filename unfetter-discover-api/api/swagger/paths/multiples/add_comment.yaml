@@ -1,7 +1,7 @@
 x-swagger-router-controller: multiples
 patch:
   tags:
-  - STIX
+  
   - STIX-Multiples
   description: Ability to add comment to an existing STIX object
   operationId: addComment

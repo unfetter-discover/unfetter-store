@@ -1,9 +1,9 @@
 {
   "swagger": "2.0",
-  "host": "localhost",
+  "host": "localhost:3200",
   "basePath": "/api",
   "schemes": [
-    "https"
+    "http"
   ],
   "info": {
     "version": "0.0.2",
@@ -27,7 +27,6 @@
       "x-swagger-router-controller": "attack_patterns",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Attack Pattern"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -101,7 +100,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Attack Pattern"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -143,7 +141,6 @@
       "x-swagger-router-controller": "attack_patterns",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Attack Pattern"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -195,7 +192,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Attack Pattern"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -247,7 +243,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Attack Pattern"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -290,7 +285,6 @@
       "x-swagger-router-controller": "campaigns",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Campaign"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -364,7 +358,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Campaign"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -406,7 +399,6 @@
       "x-swagger-router-controller": "campaigns",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Campaign"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -458,7 +450,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Campaign"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -510,7 +501,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Campaign"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -553,7 +543,6 @@
       "x-swagger-router-controller": "course_of_actions",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Course of Action"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -627,7 +616,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Course of Action"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -669,7 +657,6 @@
       "x-swagger-router-controller": "course_of_actions",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Course of Action"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -721,7 +708,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Course of Action"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -773,7 +759,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Course of Action"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -816,7 +801,6 @@
       "x-swagger-router-controller": "identities",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Identity"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -890,7 +874,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Identity"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -932,7 +915,6 @@
       "x-swagger-router-controller": "identities",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Identity"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -984,7 +966,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Identity"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -1048,7 +1029,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Identity"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -1091,7 +1071,6 @@
       "x-swagger-router-controller": "indicators",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Indicators"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -1165,7 +1144,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Indicators"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -1207,7 +1185,6 @@
       "x-swagger-router-controller": "indicators",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Indicators"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -1265,7 +1242,6 @@
       "x-swagger-router-controller": "indicators",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Indicators"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -1317,7 +1293,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Indicators"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -1369,7 +1344,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Indicators"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -1412,7 +1386,6 @@
       "x-swagger-router-controller": "intrusion_sets",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Intrusion Set"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -1486,7 +1459,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Intrusion Set"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -1528,7 +1500,6 @@
       "x-swagger-router-controller": "intrusion_sets",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Intrusion Set"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -1580,7 +1551,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Intrusion Set"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -1632,7 +1602,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Intrusion Set"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -1675,7 +1644,6 @@
       "x-swagger-router-controller": "malwares",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Malware"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -1749,7 +1717,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Malware"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -1791,7 +1758,6 @@
       "x-swagger-router-controller": "malwares",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Malware"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -1843,7 +1809,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Malware"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -1895,7 +1860,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Malware"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -1938,7 +1902,6 @@
       "x-swagger-router-controller": "marking_definitions",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Marking Definition"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -2012,7 +1975,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Marking Definition"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -2054,7 +2016,6 @@
       "x-swagger-router-controller": "marking_definitions",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Marking Definition"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -2106,7 +2067,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Marking Definition"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -2158,7 +2118,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Marking Definition"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -2201,7 +2160,6 @@
       "x-swagger-router-controller": "observed_data",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Observed Data"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -2275,7 +2233,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Observed Data"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -2317,7 +2274,6 @@
       "x-swagger-router-controller": "observed_data",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Observed Data"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -2369,7 +2325,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Observed Data"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -2421,7 +2376,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Observed Data"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -2464,7 +2418,6 @@
       "x-swagger-router-controller": "relationships",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Relationship"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -2538,7 +2491,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Relationship"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -2580,7 +2532,6 @@
       "x-swagger-router-controller": "relationships",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Relationship"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -2632,7 +2583,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Relationship"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -2684,7 +2634,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Relationship"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -2727,7 +2676,6 @@
       "x-swagger-router-controller": "reports",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Report"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -2801,7 +2749,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Report"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -2843,7 +2790,6 @@
       "x-swagger-router-controller": "reports",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Report"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -2895,7 +2841,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Report"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -2947,7 +2892,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Report"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -2990,7 +2934,6 @@
       "x-swagger-router-controller": "sightings",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Sighting"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -3064,7 +3007,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Sighting"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -3106,7 +3048,6 @@
       "x-swagger-router-controller": "sightings",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Sighting"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -3158,7 +3099,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Sighting"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -3210,7 +3150,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Sighting"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -3253,7 +3192,6 @@
       "x-swagger-router-controller": "threat_actors",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Threat Actor"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -3327,7 +3265,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Threat Actor"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -3369,7 +3306,6 @@
       "x-swagger-router-controller": "threat_actors",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Threat Actor"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -3421,7 +3357,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Threat Actor"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -3473,7 +3408,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Threat Actor"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -3516,7 +3450,6 @@
       "x-swagger-router-controller": "tools",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Tools"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -3590,7 +3523,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Tools"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -3632,7 +3564,6 @@
       "x-swagger-router-controller": "tools",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Tools"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -3684,7 +3615,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Tools"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -3736,7 +3666,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Tools"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",
@@ -3779,7 +3708,6 @@
       "x-swagger-router-controller": "multiples",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Multiple"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -3856,7 +3784,6 @@
       "x-swagger-router-controller": "multiples",
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Multiples"
         ],
         "description": "Ability to add comment to an existing STIX object",
@@ -3911,7 +3838,6 @@
       "x-swagger-router-controller": "multiples",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Multiples"
         ],
         "description": "Ability to add a like to an existing STIX object",
@@ -3957,7 +3883,6 @@
       "x-swagger-router-controller": "multiples",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Multiples"
         ],
         "description": "Ability to remove a like from an existing STIX object",
@@ -4003,7 +3928,6 @@
       "x-swagger-router-controller": "multiples",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Multiples"
         ],
         "description": "Ability to add an interaction to an existing STIX object",
@@ -4049,7 +3973,6 @@
       "x-swagger-router-controller": "multiples",
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Multiples"
         ],
         "description": "Ability to add label to an existing STIX object",
@@ -4900,7 +4823,6 @@
       "x-swagger-router-controller": "x_unfetter_sensors",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Unfetter Sensor"
         ],
         "description": "Find all instances of the model matched by filter from the data source.",
@@ -4974,7 +4896,6 @@
       },
       "post": {
         "tags": [
-          "STIX",
           "STIX-Unfetter Sensor"
         ],
         "description": "Create a new instance of the model and persist it into the data source.",
@@ -5016,7 +4937,6 @@
       "x-swagger-router-controller": "x_unfetter_sensors",
       "get": {
         "tags": [
-          "STIX",
           "STIX-Unfetter Sensor"
         ],
         "description": "Find a model instance by {{id}} from the data source.",
@@ -5068,7 +4988,6 @@
       },
       "patch": {
         "tags": [
-          "STIX",
           "STIX-Unfetter Sensor"
         ],
         "description": "Patch attributes for a model instance and persist it into the data source.",
@@ -5120,7 +5039,6 @@
       },
       "delete": {
         "tags": [
-          "STIX",
           "STIX-Unfetter Sensor"
         ],
         "description": "Delete a model instance by {{id}} from the data source.",

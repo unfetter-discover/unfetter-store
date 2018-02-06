@@ -1,7 +1,7 @@
 x-swagger-router-controller: multiples
 get:
   tags:
-  - STIX
+  
   - STIX-Multiples
   description: Ability to add a like to an existing STIX object
   operationId: addLike

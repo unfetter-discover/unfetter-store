@@ -1,7 +1,7 @@
 x-swagger-router-controller: campaigns
 get:
   tags:
-  - STIX
+  
   - STIX-Campaign
   description: Find all instances of the model matched by filter from the data source.
   operationId: get
@@ -52,7 +52,7 @@ get:
         $ref: "#/definitions/ErrorJsonApi"
 post:
   tags:
-  - STIX
+  
   - STIX-Campaign
   description: Create a new instance of the model and persist it into the data source.
   operationId: add

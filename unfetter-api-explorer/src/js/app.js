@@ -14,9 +14,13 @@ const mainEl = 'main';
         if (urlParams.has('token')) {
 
             const token = urlParams.get('token');
+            // TODO verify token
 
+            window['SwaggerUIBundle'] = window['swagger-ui-bundle']
+            window['SwaggerUIStandalonePreset'] = window['swagger-ui-standalone-preset']
+            
             const ui = SwaggerUIBundle({
-                url: "/dist/assets/swagger.json",
+                url: '/assets/swagger.json',
                 dom_id: `#${mainEl}`,
                 deepLinking: true,
                 presets: [
@@ -26,9 +30,10 @@ const mainEl = 'main';
                 plugins: [
                     SwaggerUIBundle.plugins.DownloadUrl
                 ],
-                layout: "StandaloneLayout",
-                requestInterceptor: function () {
-                    console.log('In interceptor');
+                layout: 'StandaloneLayout',
+                requestInterceptor: (req) => {
+                    req.headers.authorization = token;
+                    return req;
                 }
             });
             window.ui = ui;

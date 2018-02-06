@@ -34,5 +34,21 @@ module.exports = {
                 to: 'assets' 
             }
         ])
-    ]
+    ],
+    devServer: {
+        port: 3200,
+        publicPath: "/",
+        stats: {
+            colors: true
+        },
+        proxy: {
+            "/api": {
+                "target": "https://localhost",
+                "secure": false,
+                "logLevel": "debug",
+                "ignorePath": false,
+                "changeOrigin": true
+            }
+        }
+    }
 };
