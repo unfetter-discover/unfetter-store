@@ -1,0 +1,34 @@
+@function rgba-to-rgb($rgba, $background: #fff) {
+    @return mix(rgb(red($rgba), green($rgba), blue($rgba)), $background, alpha($rgba) * 100%);
+}
+
+@mixin card-base() {
+    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, .2),
+    0 2px 2px 0 rgba(0, 0, 0, .14),
+    0 1px 5px 0 rgba(0, 0, 0, .12);
+    background-color: #fff;
+    transition: box-shadow 0.2s ease-in-out;
+
+    &:hover {
+        box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2),
+        0px 5px 8px 0px rgba(0, 0, 0, 0.14),
+        0px 1px 14px 0px rgba(0, 0, 0, 0.12)
+    }
+
+    h4 {
+        font-size: 22px !important;
+        font-family: 'Roboto', Arial, Helvetica, sans-serif !important;
+        font-weight: 300;
+        margin-bottom: 16px;
+    }
+}
+
+@mixin arrow() {
+    position: absolute;
+    display: block;
+    width: 20px;
+    height: 20px;
+    content: "";
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'/%3E%3C/svg%3E") 50% no-repeat;
+    background-size: 100%;
+}

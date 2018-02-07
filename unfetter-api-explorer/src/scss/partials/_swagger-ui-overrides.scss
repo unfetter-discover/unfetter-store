@@ -1,3 +1,6 @@
+@import '../modules/variables';
+@import '../modules/mixins';
+
 .swagger-ui {
     font-family: 'Roboto', Arial, Helvetica, sans-serif !important;
 
@@ -5,5 +8,48 @@
     .information-container,
     .scheme-container {
         display: none;
+    }
+
+    .opblock-tag-section {
+        @include card-base;
+        margin-bottom: 15px;
+        padding-right: 10px;
+        padding-left: 10px;
+        &.is-open {
+            .opblock-tag a span::after {
+                transform: rotate(90deg);
+            }
+        }
+    }
+    .opblock-tag {        
+        border-bottom: none !important;
+        margin-bottom: 0 !important;
+        &:hover {
+            background: inherit !important;
+        }
+        a {
+            span {
+                display: inline-block;
+                position: relative;
+                &::after {
+                    transition: transform 0.1s ease-in-out;
+                    top: 3px;
+                    right: -25px;
+                    @include arrow;
+                }
+            }
+        }
+    }
+
+    .models {
+        @include card-base;
+        border: none !important;
+        border-radius: 0 !important;
+        h4 {
+            border-bottom: none !important;
+            span {
+                padding-left: 18px;
+            }
+        }
     }
 }
