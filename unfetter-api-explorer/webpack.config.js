@@ -40,7 +40,7 @@ module.exports = {
         ])
     ],
     devServer: {
-        port: 3201,
+        port: 3200,
         publicPath: "/",
         stats: {
             colors: true
