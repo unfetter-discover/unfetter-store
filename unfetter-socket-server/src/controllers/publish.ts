@@ -66,6 +66,16 @@ router.post('/notification/user', (req: Request, res: Response) => {
     }
 });
 
+// Email alert only, to user
+router.post('/email/user', (req: Request, res: Response) => {
+    if (SEND_EMAIL_ALERTS && isDefinedJsonApi(req, ['userEmail'])) {
+        routeEmail(req, [req.body.data.attributes.userEmail]);
+        return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved email-user data' }));
+    } else {
+        return res.status(501).json(new CreateJsonApiError('501', req.url, 'SEND_EMAIL_ALERTS is turned off'));
+    }
+});
+
 // Social for all users, eg comment, like etc
 router.post('/social/all', (req: Request, res: Response) => {
     if (isDefinedJsonApi(req, ['notification'])) {
@@ -207,18 +217,9 @@ router.post('/notification/admin', (req: Request, res: Response) => {
                         });
                         
                         if (SEND_EMAIL_ALERTS) {
-                            // const emailData = req.body.data.attributes.emailData;
                             const adminEmails = findAdminResults
                                 .map((adminUser: any) => adminUser.toObject())
                                 .map((adminUser: any) => adminUser.email);
-                            // switch (emailData.template) {
-                            //     case 'USER_REGISTERED':
-                            //         const emailHtml = renderUserRegistered(emailData.body);
-                            //         sendMailAlert(adminEmails, emailData.subject, emailHtml);
-                            //         break;
-                            //     default:
-                            //         console.log('WARNING: unable to process email template: ', emailData.template);
-                            // }
                             routeEmail(req, adminEmails);
                         }
 
