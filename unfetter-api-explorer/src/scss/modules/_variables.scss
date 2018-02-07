@@ -1,0 +1,26 @@
+@import 'mat-colors';
+
+$dark-text-default: rgba(0, 0, 0, 0.87);
+$dark-text-dimmed: rgba(1, 1, 1, .54);
+$light-text-default: #ffffff;
+$light-text-slightly-dimmed: rgba(255, 255, 255, .87);
+$light-text-dimmed: rgba(255, 255, 255, .54);
+$app-background-color: #fafafa;
+
+$primary-color: get-color($indigo, 700);
+$primary-text-default: $dark-text-default;
+$primary-text-contrast-color: $light-text-default;
+$primary-color-light: get-color($indigo, 400);
+$primary-color-lighter: get-color($indigo, 200);
+$primary-color-lightest: get-color($indigo, 50);
+$primary-color-dark: get-color($indigo, 900);
+$accent-color: get-color($cyan, 'A400');
+$accent-text: $dark-text-default;
+$accent-alt-color: get-color($teal, 300);
+$accent-alt-color-dark: get-color($teal, 600);
+$warn-color: get-color($deep-orange);
+$neutral-color: get-color($blue-grey);
+
+@function rgba-to-rgb($rgba, $background: #fff) {
+    @return mix(rgb(red($rgba), green($rgba), blue($rgba)), $background, alpha($rgba) * 100%);
+}

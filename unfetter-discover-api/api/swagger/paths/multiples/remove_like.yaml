@@ -1,7 +1,7 @@
 x-swagger-router-controller: multiples
 get:
   tags:
-  - STIX
+  
   - STIX-Multiples
   description: Ability to remove a like from an existing STIX object
   operationId: removeLike

@@ -49,6 +49,7 @@ export const sendMailAlert = SEND_EMAIL_ALERTS ? (emailAddresses: string[], emai
             }, (err, res) => {
                 if (err) {
                     console.log(`Unable to send email ${emailSubject} to ${emailAddress}`);
+                    console.log(err);
                 } else {
                     console.log(`Successfully sent email alert to ${emailAddress}`);
                 }

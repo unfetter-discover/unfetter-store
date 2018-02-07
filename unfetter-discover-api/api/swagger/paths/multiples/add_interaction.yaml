@@ -1,7 +1,7 @@
 x-swagger-router-controller: multiples
 get:
   tags:
-  - STIX
+  
   - STIX-Multiples
   description: Ability to add an interaction to an existing STIX object
   operationId: addInteraction

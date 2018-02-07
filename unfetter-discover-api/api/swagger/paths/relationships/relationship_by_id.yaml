@@ -1,7 +1,7 @@
 x-swagger-router-controller: relationships
 get:
   tags:
-  - STIX
+  
   - STIX-Relationship
   description: Find a model instance by {{id}} from the data source.
   operationId: getById
@@ -36,7 +36,7 @@ get:
         $ref: "#/definitions/DetailedErrorResponse"
 patch:
   tags:
-  - STIX
+  
   - STIX-Relationship
   description: Patch attributes for a model instance and persist it into the data source.
   operationId: update
@@ -71,7 +71,7 @@ patch:
         $ref: "#/definitions/ErrorJsonApi"
 delete:
   tags:
-  - STIX
+  
   - STIX-Relationship
   description: Delete a model instance by {{id}} from the data source.
   operationId: deleteById

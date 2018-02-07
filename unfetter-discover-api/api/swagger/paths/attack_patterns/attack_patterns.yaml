@@ -1,7 +1,7 @@
 x-swagger-router-controller: attack_patterns
 get:
   tags:
-  - STIX
+  
   - STIX-Attack Pattern
   description: Find all instances of the model matched by filter from the data source.
   operationId: get
@@ -52,7 +52,7 @@ get:
         $ref: "#/definitions/ErrorJsonApi"
 post:
   tags:
-  - STIX
+  
   - STIX-Attack Pattern
   description: Create a new instance of the model and persist it into the data source.
   operationId: add
