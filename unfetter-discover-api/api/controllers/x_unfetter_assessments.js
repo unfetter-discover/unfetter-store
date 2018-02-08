@@ -798,7 +798,7 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
 /**
  * @description fetch assessments for given creator id, sort base on last modified
  */
-const latestAssessmentsByCreatorId = function killChain(req, res) {
+const latestAssessmentsByCreatorId = (req, res) => {
   const id = req.swagger.params.creatorId ? req.swagger.params.creatorId.value : '';
 
   // aggregate pipeline
@@ -833,39 +833,13 @@ const latestAssessmentsByCreatorId = function killChain(req, res) {
     }
   ];
 
-  Promise.resolve(aggregationModel.aggregate(latestAssessmentsByCreatorId))
-    .then((results) => {
-      if (results) {
-        const requestedUrl = apiRoot + req.originalUrl;
-        return res.status(200).json({
-          links: {
-            self: requestedUrl,
-          },
-          data: results
-        });
-      }
-
-      return res.status(404).json({
-        message: `No assessments found for creator ${id}`
-      });
-    })
-    .catch(err =>
-      res.status(500).json({
-        errors: [{
-          status: 500,
-          source: '',
-          title: 'Error',
-          code: '',
-          detail: 'An unknown error has occurred.'
-        }]
-      })
-    );
+  latestAssessmentPromise(latestAssessmentsByCreatorId, req, res);
 };
 
 /**
- * @description fetch assessments for given creator id, sort base on last modified
+ * @description fetch assessments across the system, sort base on last modified
  */
-const latestAssessments = function killChain(req, res) {
+const latestAssessments = (req, res) => {
   const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
   // aggregate pipeline
@@ -899,34 +873,32 @@ const latestAssessments = function killChain(req, res) {
     }
   ];
 
-  Promise.resolve(aggregationModel.aggregate(latestAssessments))
-    .then((results) => {
-      if (results) {
-        const requestedUrl = apiRoot + req.originalUrl;
-        return res.status(200).json({
-          links: {
-            self: requestedUrl,
-          },
-          data: results
-        });
-      }
-
-      return res.status(404).json({
-        message: `No assessments found!`
-      });
-    })
-    .catch(err =>
-      res.status(500).json({
-        errors: [{
-          status: 500,
-          source: '',
-          title: 'Error',
-          code: '',
-          detail: 'An unknown error has occurred.'
-        }]
-      })
-    );
+  latestAssessmentPromise(latestAssessments, req, res);
 };
+
+const latestAssessmentPromise = (query, req, res) => {
+  Promise.resolve(aggregationModel.aggregate(query))
+      .then((results) => {
+          const requestedUrl = req.originalUrl;
+          return res.status(200).json({
+              links: {
+                  self: requestedUrl,
+              },
+              data: results
+          });
+      })
+      .catch(err =>
+          res.status(500).json({
+              errors: [{
+                  status: 500,
+                  source: '',
+                  title: 'Error',
+                  code: '',
+                  detail: 'An unknown error has occurred.'
+              }]
+          })
+      );
+}
 
 module.exports = {
   get: controller.get(),
