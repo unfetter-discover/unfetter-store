@@ -28,7 +28,6 @@ router.post('/translate-all', (req, res) => {
     const pattern = req.body && req.body.data && req.body.data.pattern ? JSON.stringify(req.body.data) : null;
 
     if(pattern) {
-        console.log(pattern);
         postToPatternHandler(req, res, pattern, 'translate-all');
     } else {
         return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
@@ -39,7 +38,6 @@ router.post('/get-objects', (req, res) => {
     const pattern = req.body && req.body.data && req.body.data.pattern ? JSON.stringify(req.body.data) : null;
 
     if (pattern) {
-        console.log(pattern);
         postToPatternHandler(req, res, pattern, 'get-objects');
     } else {
         return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
