@@ -4,7 +4,7 @@ export class Ctf {
     public sourceType = '';
     public alaStage = '';
     public afaObjective = '';
-    public afaAction= '';
+    public afaAction = '';
     public description = '';
     public actionParagraph = '';
     public actionClassification = '';
