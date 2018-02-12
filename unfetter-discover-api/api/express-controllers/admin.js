@@ -4,11 +4,13 @@ process.env.SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || 'socketserver';
 process.env.SOCKET_SERVER_PORT = process.env.SOCKET_SERVER_PORT || 3333;
 const CTF_PARSE_HOST = process.env.CTF_PARSE_HOST || 'http://localhost';
 const CTF_PARSE_PORT = process.env.CTF_PARSE_PORT || 10010;
+const SEND_EMAIL_ALERTS = process.env.SEND_EMAIL_ALERTS || false;
 
 const express = require('express');
 const fetch = require('node-fetch');
 const router = express.Router();
 
+const emailAlert = require('../controllers/shared/email-alert');
 const userModel = require('../models/user');
 const webAnalyticsModel = require('../models/web-analytics');
 
@@ -121,6 +123,12 @@ router.post('/process-user-approval', (req, res) => {
                         if (errInner || !resultInner) {
                             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                         } else {
+
+                            // Alert user when approved
+                            if (SEND_EMAIL_ALERTS && user.approved) {                           
+                                emailAlert.emailUser(user._id, user.email, 'REGISTRATION_APPROVAL', `You were approved to user Unfetter`, {});
+                            }
+
                             return res.json({
                                 "data": {
                                     "attributes": newDocument.toObject()

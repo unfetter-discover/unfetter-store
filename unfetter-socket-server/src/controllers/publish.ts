@@ -12,6 +12,7 @@ import userModel from '../models/mongoose/user';
 import { UserRoles } from '../models/user-roles.enum';
 import { renderUserRegistered } from './shared/render-template';
 import { sendMailAlert } from './shared/email-alert';
+import { routeEmail } from './shared/route-email';
 
 const SEND_EMAIL_ALERTS = process.env.SEND_EMAIL_ALERTS || false;
 
@@ -62,6 +63,16 @@ router.post('/notification/user', (req: Request, res: Response) => {
     } else {
         console.log('Malformed request to', req.url);
         return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
+    }
+});
+
+// Email alert only, to user
+router.post('/email/user', (req: Request, res: Response) => {
+    if (SEND_EMAIL_ALERTS && isDefinedJsonApi(req, ['userEmail'])) {
+        routeEmail(req, [req.body.data.attributes.userEmail]);
+        return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved email-user data' }));
+    } else {
+        return res.status(501).json(new CreateJsonApiError('501', req.url, 'SEND_EMAIL_ALERTS is turned off'));
     }
 });
 
@@ -204,21 +215,12 @@ router.post('/notification/admin', (req: Request, res: Response) => {
                                 });
                             }
                         });
-
-                        // TODO move to generate function
-                        if (SEND_EMAIL_ALERTS && isDefinedJsonApi(req, ['emailData', 'template'], ['emailData', 'subject'], ['emailData', 'body'])) {
-                            const emailData = req.body.data.attributes.emailData;
+                        
+                        if (SEND_EMAIL_ALERTS) {
                             const adminEmails = findAdminResults
                                 .map((adminUser: any) => adminUser.toObject())
                                 .map((adminUser: any) => adminUser.email);
-                            switch (emailData.template) {
-                                case 'USER_REGISTERED':
-                                    const emailHtml = renderUserRegistered(emailData.body);
-                                    sendMailAlert(adminEmails, emailData.subject, emailHtml);
-                                    break;
-                                default:
-                                    console.log('WARNING: unable to process email template: ', emailData.template);
-                            }
+                            routeEmail(req, adminEmails);
                         }
 
                         return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved admin notification' }));
