@@ -36,24 +36,30 @@ io.use((client: SocketIO.Socket, next: any) => {
         const token = client.handshake.query.token;
         jwtVerify(token)
             .then((user) => {
-                userModel.findById(user._id, (err, mongoUser: any) => {
-                    if (err) {
-                        errorMsg = 'Unable to retrieve user';
-                        console.log(errorMsg);
-                        next(new Error(errorMsg));
-                        client.disconnect();
-                    } else {
-                        const userObj = mongoUser.toObject()
-                        connections.push({
-                            user: userObj,
-                            token,
-                            client,
-                            connected: false
-                        });
-                        console.log(userObj.userName, 'successfully attempted websocket connection');
-                        next();
-                    }
-                });
+                if (!user || !user._id) {
+                    errorMsg = 'Can not retrieve user ID from token';
+                    console.log(errorMsg);
+                    next(new Error(errorMsg));
+                } else {
+                    userModel.findById(user._id, (err, mongoUser: any) => {
+                        if (err) {
+                            errorMsg = 'Unable to retrieve user';
+                            console.log(errorMsg);
+                            next(new Error(errorMsg));
+                            client.disconnect();
+                        } else {
+                            const userObj = mongoUser.toObject()
+                            connections.push({
+                                user: userObj,
+                                token,
+                                client,
+                                connected: false
+                            });
+                            console.log(userObj.userName, 'successfully attempted websocket connection');
+                            next();
+                        }
+                    });
+                }
             })
             .catch((err) => {
                 errorMsg = 'Malformed or invalid token sent';
