@@ -1,0 +1,32 @@
+# Use Ubuntu 'trusty' distribution
+sudo: required
+
+services:
+  - docker
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.18.0
+
+before_script:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - docker-compose -f docker-compose.test.yml up --build -d
+
+  
+
+script:
+  - docker exec -it unfetter-discover-api npm run lint
+  - docker exec -it unfetter-discover-api npm run test
+  - docker exec -it unfetter-socket-server npm run lint
+  - docker exec -it unfetter-socket-server npm run test
+  - docker exec -it unfetter-discover-processor npm run lint
+  - docker exec -it unfetter-discover-processor npm run lint
+  - docker exec -it unfetter-ctf-ingest npm run test
+  - docker exec -it unfetter-ctf-ingest npm run lint
+
+
+after_script:
+  - docker-compose -f docker-compose.test.yml down
+...
