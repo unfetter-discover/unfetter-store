@@ -42,13 +42,13 @@ io.use((client: SocketIO.Socket, next: any) => {
                     next(new Error(errorMsg));
                 } else {
                     userModel.findById(user._id, (err, mongoUser: any) => {
-                        if (err) {
+                        if (err || !mongoUser) {
                             errorMsg = 'Unable to retrieve user';
                             console.log(errorMsg);
                             next(new Error(errorMsg));
                             client.disconnect();
                         } else {
-                            const userObj = mongoUser.toObject()
+                            const userObj = mongoUser.toObject();
                             connections.push({
                                 user: userObj,
                                 token,
