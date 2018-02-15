@@ -1,6 +1,6 @@
 {
   "name": "unfetter-api-explorer",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Unfetter API Explorer: Swagger documentation for Unfetter Discover API",
   "scripts": {
     "build": "npm run compile:swagger && webpack ",
