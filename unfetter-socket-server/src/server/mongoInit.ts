@@ -1,6 +1,8 @@
 process.env.MONGO_REPOSITORY = process.env.MONGO_REPOSITORY || 'localhost';
 process.env.MONGO_PORT = process.env.MONGO_PORT || '27018';
 process.env.MONGO_DBNAME = process.env.MONGO_DBNAME || 'stix';
+process.env.MONGO_USER = process.env.MONGO_USER || '';
+process.env.MONGO_PASSWORD = process.env.MONGO_PASSWORD || '';
 
 // The maximum amount of tries mongo will attempt to get processor Status
 const MAX_GET_PROCESSOR_STATUS_ATTEMPTS = process.env.MAX_GET_PROCESSOR_STATUS_ATTEMPTS || 10;
@@ -10,26 +12,16 @@ const PROCESSOR_STATUS_ID = process.env.PROCESSOR_STATUS_ID || 'f09ad23d-c9f7-40
 
 import * as mongoose from 'mongoose';
 
-import configModel from '../models/mongoose/config';
-import stixModel from '../models/mongoose/stix';
-import utilityModel from '../models/mongoose/utility';
-
-const getProcessorStatus = (): Promise<any> => new Promise((resolve, reject) => {
-    let retryAttempts = 0;
-    const getProcessInterval = setInterval(() => {
-        retryAttempts++;
-        console.log('Attempting to get processor status, try# ', retryAttempts);
-        if (retryAttempts >= MAX_GET_PROCESSOR_STATUS_ATTEMPTS) {
-            clearInterval(getProcessInterval);
-            reject('Maximum number of attempts to get processor status exceeded');
-        } else {
-            utilityModel.findById(PROCESSOR_STATUS_ID, (err, res) => {
-                if (!err && res) {
-                    const processorStatus = res.toObject();
-                    if (processorStatus.utilityValue === 'COMPLETE') {
-                        clearInterval(getProcessInterval);
-                        resolve(true);
-                    }
+export function mongoInit() {
+    if (global.conn === undefined) {
+        const authString = process.env.MONGO_USER && process.env.MONGO_PASSWORD ? `${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@` : '';
+        mongoose.connect(`mongodb://${encodeURI(authString)}${process.env.MONGO_REPOSITORY}:${process.env.MONGO_PORT}/${process.env.MONGO_DBNAME}`, {
+            server: {
+                poolSize: 5,
+                reconnectTries: 100,
+                socketOptions: {
+                    keepAlive: 300000,
+                    connectTimeoutMS: 30000
                 }
             });
         }
