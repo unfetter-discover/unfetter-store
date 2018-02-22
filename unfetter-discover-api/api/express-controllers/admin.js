@@ -19,8 +19,15 @@ router.get('/users-pending-approval', (req, res) => {
         if(err) {
             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
         } else {
-            const users = result.map(res => res.toObject());
-            return res.json({ data: { attributes: users } });
+            const users = result
+                .map(res => res.toObject())
+                .map(user => {
+                    return {
+                        id: user._id,
+                        attributes: user
+                    };
+                });
+            return res.json({ data: users });
         }
     });
 });
