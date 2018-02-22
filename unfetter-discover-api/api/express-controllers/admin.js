@@ -32,6 +32,25 @@ router.get('/users-pending-approval', (req, res) => {
     });
 });
 
+router.get('/current-users', (req, res) => {
+    userModel.find({ approved: true }, (err, result) => {
+        if (err || !result || !result.length) {
+            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+        } else {
+            const users = result
+                .map(res => res.toObject())
+                .map(user => {
+                    return {
+                        id: user._id,
+                        attributes: user
+                    };
+                });
+
+            return res.json({ data: users });
+        }
+    });
+});
+
 router.get('/organization-leader-applicants', (req, res) => {
     const query = [
         {
@@ -104,9 +123,9 @@ router.post('/process-organization-applicant/:userId', (req, res) => {
     }
 });
 
-router.post('/process-user-approval', (req, res) => {
+router.post('/change-user-status', (req, res) => {
     let requestData = req.body.data && req.body.data.attributes ? req.body.data.attributes : {};
-    if (requestData._id === undefined || requestData.approved === undefined || requestData.locked === undefined) {
+    if (requestData._id === undefined || !(requestData.role !== undefined || (requestData.approved !== undefined && requestData.locked !== undefined))) {
         return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'Malformed request' }] });
     } else {
         userModel.findById(requestData._id, (err, result) => {
@@ -114,8 +133,15 @@ router.post('/process-user-approval', (req, res) => {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             } else {
                 const user = result.toObject();
-                user.approved = requestData.approved;
-                user.locked = requestData.locked;
+                if (requestData.approved !== undefined) {
+                    user.approved = requestData.approved;
+                }
+                if (requestData.locked !== undefined) {
+                    user.locked = requestData.locked;
+                }
+                if (requestData.role !== undefined) {
+                    user.role = requestData.role;
+                }
                 const newDocument = new userModel(user);
                 const error = newDocument.validateSync();
                 if (error) {
