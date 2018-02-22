@@ -16,32 +16,19 @@ const userModel = require('../models/user');
 const webAnalyticsModel = require('../models/web-analytics');
 
 router.get('/users-pending-approval', (req, res) => {
-    userModel.find({ registered: true, approved: false, locked: false }, (err, result) => {
-        if (err) {
-            return res.status(500).json({
-                errors: [{
-                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
-                }]
-            });
-        }
-        const users = result
-            .map(response => response.toObject())
-            .map(user => ({
-                id: user._id,
-                attributes: user
-            }));
-        return res.json({ data: users });
-    });
-});
-
-router.get('/current-users', (req, res) => {
-    userModel.find({ approved: true }, (err, result) => {
-        if (err || !result || !result.length) {
-            return res.status(500).json({
-                errors: [{
-                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
-                }]
-            });
+    userModel.find({ registered: true, approved: false, locked: false}, (err, result) => {
+        if(err) {
+            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+        } else {
+            const users = result
+                .map(res => res.toObject())
+                .map(user => {
+                    return {
+                        id: user._id,
+                        attributes: user
+                    };
+                });
+            return res.json({ data: users });
         }
         const users = result
             .map(response => response.toObject())
