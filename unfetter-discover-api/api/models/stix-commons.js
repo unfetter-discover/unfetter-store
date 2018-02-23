@@ -101,7 +101,11 @@ stixCommons['makeSchema'] = childSchema => {
             ...childSchema
         }
     }; 
-    return mongoose.Schema(schema);
+    const schemaObj = new mongoose.Schema(schema);
+    schemaObj.index({ 'stix.name': 1 });
+    schemaObj.index({ 'stix.type': 1 });
+    schemaObj.index({ 'stix.kill_chain_phases.phase_name': 1 });
+    return schemaObj;
 };
 
 module.exports = stixCommons;
