@@ -80,6 +80,25 @@ router.get('/current-users', (req, res) => {
     });
 });
 
+router.get('/current-users', (req, res) => {
+    userModel.find({ approved: true }, (err, result) => {
+        if (err || !result || !result.length) {
+            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+        } else {
+            const users = result
+                .map(res => res.toObject())
+                .map(user => {
+                    return {
+                        id: user._id,
+                        attributes: user
+                    };
+                });
+
+            return res.json({ data: users });
+        }
+    });
+});
+
 router.get('/organization-leader-applicants', (req, res) => {
     const query = [
         {
