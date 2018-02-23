@@ -1,8 +1,6 @@
 process.env.MONGO_REPOSITORY = process.env.MONGO_REPOSITORY || 'localhost';
 process.env.MONGO_PORT = process.env.MONGO_PORT || 27018;
 process.env.MONGO_DBNAME = process.env.MONGO_DBNAME || 'stix';
-process.env.MONGO_USER = process.env.MONGO_USER || '';
-process.env.MONGO_PASSWORD = process.env.MONGO_PASSWORD || '';
 
 const modelFactory = require('../controllers/shared/modelFactory');
 const mongoose = require('mongoose');
@@ -24,9 +22,7 @@ mongoose.Promise = global.Promise;
 
 module.exports = () => {
     if (global.conn === undefined) {
-        const authString = process.env.MONGO_USER && process.env.MONGO_PASSWORD ? `${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@` : '';
-        console.log('$$$$$', `mongodb://${encodeURI(authString)}${process.env.MONGO_REPOSITORY}:${process.env.MONGO_PORT}/stix`);
-        mongoose.connect(`mongodb://${encodeURI(authString)}${process.env.MONGO_REPOSITORY}:${process.env.MONGO_PORT}/stix`, {
+        mongoose.connect(`mongodb://${process.env.MONGO_REPOSITORY}:${process.env.MONGO_PORT}/stix`, {
             server: {
                 poolSize: 12,
                 reconnectTries: 100,

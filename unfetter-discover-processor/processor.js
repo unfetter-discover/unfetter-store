@@ -11,9 +11,6 @@ const MITRE_STIX_URLS = {
 };
 const PROCESSOR_STATUS_ID = process.env.PROCESSOR_STATUS_ID || 'f09ad23d-c9f7-40a3-8afa-d9560e6df95b';
 
-process.env.MONGO_USER = process.env.MONGO_USER || '';
-process.env.MONGO_PASSWORD = process.env.MONGO_PASSWORD || '';
-
 /* ~~~ Vendor Libraries ~~~ */
 
 const fs = require('fs');
@@ -327,6 +324,5 @@ mongoose.connection.on('error', err => {
 });
 let conIntervel = setInterval(() => {
     connAttempts++;
-    const authString = process.env.MONGO_USER && process.env.MONGO_PASSWORD ? `${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@` : '';
-    conn = mongoose.connect(`mongodb://${encodeURI(authString)}${argv['host']}:${argv['port']}/${argv['database']}`);
+    conn = mongoose.connect(`mongodb://${argv['host']}:${argv['port']}/${argv['database']}`);
 }, CONNECTION_RETRY_TIME);

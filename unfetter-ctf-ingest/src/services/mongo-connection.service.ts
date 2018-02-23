@@ -79,6 +79,6 @@ export class MongoConnectionService {
     protected static readonly monogCollectionName = process.env.MONGO_COLLECTION_NAME || 'stix';
     protected static readonly mongoConfigCollectionName = process.env.MONGO_CONFIG_COLLECTION_NAME || 'config';
     // tslint:disable-next-line:max-line-length
-    protected static readonly mongoUrl = `mongodb://${process.env.MONGO_USER != null && process.env.MONGO_PASSWORD != null ? `${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@` : ''}${MongoConnectionService.mongoRepo}:${MongoConnectionService.mongoPort}/${MongoConnectionService.mongoDbName}`;
+    protected static readonly mongoUrl = `mongodb://${MongoConnectionService.mongoRepo}:${MongoConnectionService.mongoPort}/${MongoConnectionService.mongoDbName}`;
     protected static readonly waitTime = 600;
 }

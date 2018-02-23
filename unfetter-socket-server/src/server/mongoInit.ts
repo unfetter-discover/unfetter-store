@@ -1,8 +1,6 @@
 process.env.MONGO_REPOSITORY = process.env.MONGO_REPOSITORY || 'localhost';
 process.env.MONGO_PORT = process.env.MONGO_PORT || '27018';
 process.env.MONGO_DBNAME = process.env.MONGO_DBNAME || 'stix';
-process.env.MONGO_USER = process.env.MONGO_USER || '';
-process.env.MONGO_PASSWORD = process.env.MONGO_PASSWORD || '';
 
 // The maximum amount of tries mongo will attempt to get processor Status
 const MAX_GET_PROCESSOR_STATUS_ATTEMPTS = process.env.MAX_GET_PROCESSOR_STATUS_ATTEMPTS || 10;
@@ -14,8 +12,7 @@ import * as mongoose from 'mongoose';
 
 export function mongoInit() {
     if (global.conn === undefined) {
-        const authString = process.env.MONGO_USER && process.env.MONGO_PASSWORD ? `${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@` : '';
-        mongoose.connect(`mongodb://${encodeURI(authString)}${process.env.MONGO_REPOSITORY}:${process.env.MONGO_PORT}/${process.env.MONGO_DBNAME}`, {
+        mongoose.connect(`mongodb://${process.env.MONGO_REPOSITORY}:${process.env.MONGO_PORT}/${process.env.MONGO_DBNAME}`, {
             server: {
                 poolSize: 5,
                 reconnectTries: 100,
