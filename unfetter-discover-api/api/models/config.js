@@ -1,3 +1,7 @@
 const mongoose = require('mongoose');
 
-module.exports = mongoose.model('Config', mongoose.Schema({ _id: String }, { strict: false }), 'config');
+const configSchema = new mongoose.Schema({ _id: String }, { strict: false });
+
+configSchema.index({ 'configKey': 1 });
+
+module.exports = mongoose.model('Config', configSchema, 'config');
