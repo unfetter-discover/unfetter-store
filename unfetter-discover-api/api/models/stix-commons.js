@@ -104,17 +104,11 @@ stixCommons.makeSchema = childSchema => {
             ...stixCommons.baseStix,
             ...childSchema
         }
-    };
+    }; 
     const schemaObj = new mongoose.Schema(schema);
-    schemaObj.index({ 'stix.name': 'text' });
     schemaObj.index({ 'stix.name': 1 });
     schemaObj.index({ 'stix.type': 1 });
     schemaObj.index({ 'stix.kill_chain_phases.phase_name': 1 });
-    schemaObj.index({ 'stix.created_by_ref': 1 });
-    schemaObj.index({ 'stix.target_ref': 1 });
-    schemaObj.index({ 'stix.target_ref': 'text' });
-    schemaObj.index({ 'stix.source_ref': 1 });
-    schemaObj.index({ 'stix.source_ref': 'text' });
     return schemaObj;
 };
 

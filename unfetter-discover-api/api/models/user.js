@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 
+const BaseSchema = require('./stix-base');
+const stixCommons = require('./stix-commons');
+
 const UserSchema = new mongoose.Schema({
     firstName: {
         type: String
@@ -119,8 +122,29 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-UserSchema.index({ userName: 1 });
-UserSchema.index({ role: 1 });
+UserSchema.index({ 'userName': 1 });
+UserSchema.index({ 'role': 1 });
+
+const User = module.exports = mongoose.model('User', UserSchema, 'user');
+
+// module.exports.getUserById = function (id, callback) {
+//     User.findById(id, callback);
+// }
+
+// module.exports.getUserByUsername = function (username, callback) {
+//     const query = { username: username }
+//     User.findOne(query, callback);
+// }
+
+// module.exports.addUser = function (newUser, callback) {
+//     bcrypt.genSalt(10, (err, salt) => {
+//         bcrypt.hash(newUser.password, salt, (err, hash) => {
+//             if (err) throw err;
+//             newUser.password = hash;
+//             newUser.save(callback);
+//         });
+//     });
+// }
 
 module.exports = mongoose.model('User', UserSchema, 'user');
 // const User = module.exports;
