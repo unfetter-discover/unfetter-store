@@ -6,9 +6,6 @@ const MAX_NUM_CONNECT_ATTEMPTS = 10;
 const CONNECTION_RETRY_TIME = 5000;
 const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
 
-process.env.MONGO_USER = process.env.MONGO_USER || '';
-process.env.MONGO_PASSWORD = process.env.MONGO_PASSWORD || '';
-
 /* ~~~ Vendor Libraries ~~~ */
 
 const fs = require('fs');
@@ -237,6 +234,5 @@ mongoose.connection.on('error', function (err) {
 });
 let conIntervel = setInterval(() => {
     connAttempts++;
-    const authString = process.env.MONGO_USER && process.env.MONGO_PASSWORD ? `${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@` : '';
-    conn = mongoose.connect(`mongodb://${encodeURI(authString)}${argv['host']}:${argv['port']}/${argv['database']}`);
+    conn = mongoose.connect(`mongodb://${argv['host']}:${argv['port']}/${argv['database']}`);
 }, CONNECTION_RETRY_TIME);
