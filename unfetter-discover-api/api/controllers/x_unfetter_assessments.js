@@ -141,13 +141,25 @@ const assessedObjects = controller.getByIdCb((err, result, req, res, id) => {
 });
 
 // Takes a set of Kill Chain phase names, and groups the STIX objects.
-function groupByKillChain(distinctKillChainPhaseNames, objects) {
+function groupByKillChain(distinctKillChainPhaseNames, objects, isIndicator) {
   const killChainPhases = [];
   lodash.forEach(distinctKillChainPhaseNames, (phaseName) => {
     const aps = lodash.filter(objects, (object) => {
       // If "phase" is found in any of object.kill_chain_phases....
-      const found = lodash.some(object.groupings, (phase) => {
-        const phaseMatch = phase.groupingValue === phaseName;
+      let collection = null;
+      if (isIndicator) {
+        collection = object.kill_chain_phases;
+      } else {
+        collection = object.groupings;
+      }
+      const found = lodash.some(collection, (phase) => {
+        let name = '';
+        if (isIndicator) {
+          name = phase.phase_name;
+        } else {
+          name = phase.groupingValue;
+        }
+        const phaseMatch = name === phaseName;
         return phaseMatch;
       });
       return found;
@@ -161,9 +173,15 @@ function groupByKillChain(distinctKillChainPhaseNames, objects) {
 }
 
 // Will group the objects by the kill chain phase name, and will group the risk for each group.
-function calculateRiskPerKillChain(workingObjects) {
-  const killChains = lodash.sortBy(lodash.uniqBy(lodash.flatMap(lodash.flatMapDeep(workingObjects, 'groupings'), 'groupingValue')));
-  const groupedObjects = groupByKillChain(killChains, workingObjects);
+function calculateRiskPerKillChain(workingObjects, isIndicator) {
+  let collectionName = 'groupings';
+  let phaseName = 'groupingValue';
+  if (isIndicator) {
+    collectionName = 'kill_chain_phases';
+    phaseName = 'phase_name';
+  }
+  const killChains = lodash.sortBy(lodash.uniqBy(lodash.flatMap(lodash.flatMapDeep(workingObjects, collectionName), phaseName)));
+  const groupedObjects = groupByKillChain(killChains, workingObjects, isIndicator);
   const returnObjects = [];
   lodash.forEach(groupedObjects, (killChainGroup) => {
     const returnObject = calculateRiskByQuestion(killChainGroup.objects);
@@ -234,14 +252,14 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
         sensorRisks.push(stixObject);
       });
       if (indicators.length > 0) {
-        returnObject.indicators = calculateRiskPerKillChain(indicatorRisks);
+        returnObject.indicators = calculateRiskPerKillChain(indicatorRisks, true);
       }
       if (sensors.length > 0) {
-        returnObject.sensors = calculateRiskPerKillChain(sensorRisks);
+        returnObject.sensors = calculateRiskPerKillChain(sensorRisks, false);
       }
 
       if (courseOfActions.length > 0) {
-        returnObject.courseOfActions = calculateRiskPerKillChain(coaRisks);
+        returnObject.courseOfActions = calculateRiskPerKillChain(coaRisks, false);
       }
       const requestedUrl = apiRoot + req.originalUrl;
       res.header('Content-Type', 'application/json');
@@ -878,26 +896,26 @@ const latestAssessments = (req, res) => {
 
 const latestAssessmentPromise = (query, req, res) => {
   Promise.resolve(aggregationModel.aggregate(query))
-      .then((results) => {
-          const requestedUrl = req.originalUrl;
-          return res.status(200).json({
-              links: {
-                  self: requestedUrl,
-              },
-              data: results
-          });
+    .then((results) => {
+      const requestedUrl = req.originalUrl;
+      return res.status(200).json({
+        links: {
+          self: requestedUrl,
+        },
+        data: results
+      });
+    })
+    .catch(err =>
+      res.status(500).json({
+        errors: [{
+          status: 500,
+          source: '',
+          title: 'Error',
+          code: '',
+          detail: 'An unknown error has occurred.'
+        }]
       })
-      .catch(err =>
-          res.status(500).json({
-              errors: [{
-                  status: 500,
-                  source: '',
-                  title: 'Error',
-                  code: '',
-                  detail: 'An unknown error has occurred.'
-              }]
-          })
-      );
+    );
 }
 
 module.exports = {
