@@ -10,7 +10,7 @@ get:
   parameters:
     - name: filter
       in: query
-      description: 'Ex: {"stix.name":"Unfetter Open"}'
+      description: 'Ex: {"stix.name":"John Smith"}'
       required: false
       type: string
     - name: sort

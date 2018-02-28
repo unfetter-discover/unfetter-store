@@ -10,7 +10,7 @@ get:
   parameters:
     - name: filter
       in: query
-      description: 'Ex: {"stix.name":"POISON IVY:Assessing Damage and Extracting Intelligence"}'
+      description: 'Ex: {"stix.name":"The Black Vine Cyberespionage Group"}'
       required: false
       type: string
     - name: sort

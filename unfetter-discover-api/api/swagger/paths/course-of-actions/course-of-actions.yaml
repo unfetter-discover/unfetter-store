@@ -10,7 +10,7 @@ get:
   parameters:
     - name: filter
       in: query
-      description: 'Ex: {"stix.name":"CSC 3.7"}'
+      description: 'Ex: {"stix.name":"Add TCP port 80 Filter Rule"}'
       required: false
       type: string
     - name: sort

@@ -9,7 +9,7 @@ get:
   parameters:
     - name: filter
       in: query
-      description: 'Ex: {"stix.name":"Mitigations Assessment Demonstration"}'
+      description: 'Ex: {"stix.name":"AppInit DLLs"}'
       required: false
       type: string
     - name: sort
