@@ -10,12 +10,12 @@ get:
   parameters:
     - name: filter
       in: query
-      description: 'Ex: { "relationship_type": "indicates" }'
+      description: 'Ex: {"stix.relationship_type":"indicates"}'
       required: false
       type: string
     - name: sort
       in: query
-      description: 'Ex: { "relationship_type": "1" } or { "relationship_type": "-1"}'
+      description: 'Ex: {"stix.relationship_type":"1"} or {"stix.relationship_type":"-1"}'
       required: false
       type: string
     - name: limit
@@ -38,7 +38,7 @@ get:
       description: boolean to include extended meta properties
     - name: project
       in: query
-      description: 'Ex: { "name": 1 } or { "name": 0}'
+      description: 'Ex: {"stix.created_by_ref":1} or {"stix.created_by_ref":0}'
       required: false
       type: string
   responses:
