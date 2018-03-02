@@ -1,3 +1,5 @@
+global.JWT_DURATION_SECONDS = 10
+
 process.env.RUN_MODE = process.env.RUN_MODE || 'DEMO';
 const mongoinit = require('./mongoinit.js');
 const serverinit = require('./serverinit.js');

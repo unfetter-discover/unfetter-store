@@ -10,6 +10,7 @@ const generateId = require('../helpers/stix').id;
 const publish = require('../controllers/shared/publish');
 
 const SEND_EMAIL_ALERTS = process.env.SEND_EMAIL_ALERTS || false;
+global.JWT_DURATION_SECONDS = global.JWT_DURATION_SECONDS || 900;
 
 const githubStrategy = new GithubStrategy({
     clientID: config.github.clientID,
@@ -90,7 +91,7 @@ router.get('/github-callback', passport.authenticate('github', { failureRedirect
                         } else {
                             console.log(`First github login attempt by github id# ${githubUser.id}`);
                             const token = jwt.sign(result.toObject(), config.jwtSecret, {
-                                expiresIn: 604800 // 1 week
+                                expiresIn: global.JWT_DURATION_SECONDS
                             });
                             res.header('Authorization', token);
                             res.redirect(`${config.unfetterUiCallbackURL}/${encodeURIComponent(token)}/${registered}/github`);
@@ -104,7 +105,7 @@ router.get('/github-callback', passport.authenticate('github', { failureRedirect
                 registered = user.registered;
 
                 const token = jwt.sign(user, config.jwtSecret, {
-                    expiresIn: 604800 // 1 week
+                    expiresIn: global.JWT_DURATION_SECONDS
                 });
                 console.log(token);
                 console.log(`Returning github user:\n${JSON.stringify(user, null, 2)}`);
