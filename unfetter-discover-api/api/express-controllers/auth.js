@@ -230,4 +230,103 @@ router.get('/profile/:id', passport.authenticate('jwt', { session: false }), (re
     });
 });
 
+router.post('/finalize-registration', passport.authenticate('jwt', { session: false }), (req, res) => {
+    let user = req.body.data.attributes;
+    if (user) {
+        userModel.findById(user._id, (err, result) => {
+            if (err || !result) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            } else {
+                user.registered = true;
+                user.identity.id = generateId('identity');
+
+                if (!user.organizations) {
+                    user.organizations = [];
+                }
+
+                // Unfetter open
+                user.organizations.push({
+                    id: 'identity--e240b257-5c42-402e-a0e8-7b81ecc1c09a',
+                    approved: true,
+                    role: 'STANDARD_USER'
+                });
+
+                const newDocument = new userModel(user);
+                const error = newDocument.validateSync();
+                if (error) {
+                    console.log(error);
+                    const errors = [];
+                    error.errors.forEach((field) => {
+                        errors.push(field.message);
+                    });
+                    return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                } else {
+                    userModel.findByIdAndUpdate(user._id, newDocument, (errInner, resultInner) => {
+                        if (errInner || !resultInner) {
+                            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        } else {
+                            if (SEND_EMAIL_ALERTS) {
+                                const emailData = {
+                                    template: 'USER_REGISTERED',
+                                    subject: `${user.firstName} ${user.lastName} registered to unfetter`,
+                                    body: {
+                                        firstName: user.firstName,
+                                        lastName: user.lastName,
+                                        email: user.email
+                                    }
+                                };
+                                publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users', emailData);
+                            } else {
+                                publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users');
+                            }
+                            return res.json({
+                                "data": {
+                                    "attributes": newDocument.toObject()
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+    } else {
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'Malformed request' }] });
+    }
+});
+
+router.get('/refreshtoken', passport.authenticate('jwt', { session: false }), (req, res) => {
+    let token = req.headers.authorization;
+    if (!token) {
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: '' }] });
+    } else {
+
+        let tokenHash;
+        if (token.match(/^Bearer\ /) !== null) {
+            tokenHash = token.split('Bearer ')[1].trim()
+        } else {
+            tokenHash = token;
+        }
+
+        jwt.verify(tokenHash, config.jwtSecret, (err, decoded) => {
+            if (err) {
+                console.log(`Error in /auth/user-from-token:\n${JSON.stringify(err, null, 2)}`);
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            } else {
+                userModel.findById(decoded._id, (err, user) => {
+                    if (err | !user) {
+                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                    } else {
+                        user = user.toObject();
+
+                        const newToken = jwt.sign(user, config.jwtSecret, {
+                            expiresIn: global.JWT_DURATION_SECONDS
+                        });
+                        res.json({ data: { attributes: { token: `Bearer ${newToken}` } } })
+                    }
+                });
+            }
+        });
+    }
+});
+
 module.exports = router;
