@@ -178,7 +178,7 @@ module.exports = class BaseController {
             // get the most recent one since there could be many with the same id
             // stix most recent is defined as the most recently modified one
             model
-                .find({ _id: id })
+                .find(this.applySecurityFilter({ _id: id }, req))
                 .sort({ modified: '-1' })
                 .limit(1)
                 .exec((err, result) => {
@@ -453,5 +453,26 @@ module.exports = class BaseController {
         });
     }
 
- 
+    applySecurityFilter(query, request) {
+        if (!query || !process.env.RUN_MODE === 'UAC') {
+            return query;
+        }
+
+        console.log(request);
+        const currentUserCreatorId = '';
+        const currentUserOrgIds = [];
+        const unfetterOpenUserId = global.unfetter.openIdentity._id || '';
+
+        const securityFilter = {
+            $or: [
+                { 'creator': currentUserCreatorId },
+                { 'access': { $exists: true, $in: currentUserOrgIds } },
+                { 'stix.created_by_ref': unfetterOpenUserId },
+            ]
+        };
+        const filteredQuery = Object.assign({ }, ...query, ...securityFilter);
+        return filteredQuery;
+    }
+
+
 }
