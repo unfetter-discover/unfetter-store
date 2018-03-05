@@ -9,8 +9,7 @@ const onListening = (server, resolveCallBack) => {
     const addr = server.address();
     const bind = typeof addr === 'string' ?
         `pipe ${addr}` : `port ${addr.port}`;
-    console.log(`Listening on ${bind}`);
-    resolveCallBack(global.unfetter.httpServer);
+    resolveCallBack(`Server listening on ${bind}`);
 };
 
 const onError = (error, rejectCallBack) => {
@@ -50,5 +49,4 @@ module.exports = () => new Promise((resolve, reject) => {
         server.on('listening', () => onListening(server, resolve));
         global.unfetter.httpServer = server;
     }
-    resolve(global.unfetter.httpServer);
 });
