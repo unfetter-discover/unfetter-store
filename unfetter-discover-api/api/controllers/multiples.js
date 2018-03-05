@@ -330,7 +330,7 @@ const addLabel = (req, res) => {
             }
 
             resultObj.stix.labels.push(newLabel);
-
+            resultObj.stix.modified = new Date();
             const newDocument = new model(resultObj);
             const error = newDocument.validateSync();
             if (error) {
