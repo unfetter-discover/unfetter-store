@@ -100,14 +100,20 @@ router.get('/github-callback', passport.authenticate('github', {
                     error.errors.forEach(field => {
                         errors.push(field.message);
                     });
-                    return res.status(400).json({
-                        errors: [{
-                            status: 400,
-                            source: '',
-                            title: 'Error',
-                            code: '',
-                            detail: errors
-                        }]
+                    return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                } else {
+                    userModel.create(newDocument, (err, result) => {
+                        if(err) {
+                            console.log(err);
+                            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        } else {
+                            console.log(`First github login attempt by github id# ${githubUser.id}`);
+                            const token = jwt.sign(result.toObject(), config.jwtSecret, {
+                                expiresIn: global.unfetter.JWT_DURATION_SECONDS
+                            });
+                            res.header('Authorization', token);
+                            res.redirect(`${config.unfetterUiCallbackURL}/${encodeURIComponent(token)}/${registered}/github`);
+                        }
                     });
                 }
                 userModel.create(newDocument, (createError, createResult) => {
@@ -534,86 +540,100 @@ router.get('/refreshtoken', passport.authenticate('jwt', {
     });
 });
 
-router.get('/public-config', (req, res) => {
-    configModel.find({
-        configGroups: 'public'
-    }, (err, results) => {
-        if (err || !results) {
-            return res.status(500).json({
-                errors: [{
-                    status: 500,
-                    source: '',
-                    title: 'Error',
-                    code: '',
-                    detail: 'An unknown error has occurred.'
-                }]
-            });
-        }
-        const requestedUrl = apiRoot + req.originalUrl;
-        const convertedResults = results
-            .map(result => result.toObject())
-            .map(result => {
-                const retVal = {};
-                retVal.links = {};
-                retVal.links.self = `${requestedUrl}/${result._id}`;
-                retVal.attributes = result;
-                retVal.attributes.id = result._id;
-                return retVal;
-            });
-        return res.status(200).json({
-            links: {
-                self: requestedUrl
-            },
-            data: convertedResults
-        });
-    });
-});
-
-router.get('/username-available/:userName', passport.authenticate('jwt', {
-    session: false
-}), (req, res) => {
-    const userName = req.params.userName;
-    if (!userName || userName === '') {
-        res.status(400).json({
-            errors: [{
-                status: 400,
-                source: '',
-                title: 'Error',
-                code: '',
-                detail: 'Unable to process userName'
-            }]
-        });
-    } else {
-        userModel.count({ userName }, (err, count) => {
-            if (err) {
-                res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+router.post('/finalize-registration', passport.authenticate('jwt', { session: false }), (req, res) => {
+    let user = req.body.data.attributes;
+    if (user) {
+        userModel.findById(user._id, (err, result) => {
+            if (err || !result) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             } else {
-                res.json({ data: { attributes: { available: (count === 0) } } });
+                user.registered = true;
+                user.identity.id = generateId('identity');
+
+                if (!user.organizations) {
+                    user.organizations = [];
+                }
+
+                // Unfetter open
+                user.organizations.push({
+                    id: 'identity--e240b257-5c42-402e-a0e8-7b81ecc1c09a',
+                    approved: true,
+                    role: 'STANDARD_USER'
+                });
+
+                const newDocument = new userModel(user);
+                const error = newDocument.validateSync();
+                if (error) {
+                    console.log(error);
+                    const errors = [];
+                    error.errors.forEach((field) => {
+                        errors.push(field.message);
+                    });
+                    return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                } else {
+                    userModel.findByIdAndUpdate(user._id, newDocument, (errInner, resultInner) => {
+                        if (errInner || !resultInner) {
+                            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        } else {
+                            if (SEND_EMAIL_ALERTS) {
+                                const emailData = {
+                                    template: 'USER_REGISTERED',
+                                    subject: `${user.firstName} ${user.lastName} registered to unfetter`,
+                                    body: {
+                                        firstName: user.firstName,
+                                        lastName: user.lastName,
+                                        email: user.email
+                                    }
+                                };
+                                publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users', emailData);
+                            } else {
+                                publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users');
+                            }
+                            return res.json({
+                                "data": {
+                                    "attributes": newDocument.toObject()
+                                }
+                            });
+                        }
+                    });
+                }
             }
         });
+    } else {
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'Malformed request' }] });
     }
 });
 
-router.get('/email-available/:email', passport.authenticate('jwt', {
-    session: false
-}), (req, res) => {
-    const email = req.params.email;
-    if (!email || email === '') {
-        res.status(400).json({
-            errors: [{
-                status: 400,
-                source: '',
-                title: 'Error',
-                code: '',
-                detail: 'Unable to process email'
-            }]
-        });
+router.get('/refreshtoken', passport.authenticate('jwt', { session: false }), (req, res) => {
+    let token = req.headers.authorization;
+    if (!token) {
+        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: '' }] });
     } else {
-        userModel.count({ email }, (err, count) => {
+
+        let tokenHash;
+        if (token.match(/^Bearer\ /) !== null) {
+            tokenHash = token.split('Bearer ')[1].trim()
+        } else {
+            tokenHash = token;
+        }
+
+        jwt.verify(tokenHash, config.jwtSecret, (err, decoded) => {
             if (err) {
-                res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                console.log(`Error in /auth/user-from-token:\n${JSON.stringify(err, null, 2)}`);
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             } else {
-                res.json({ data: { attributes: { available: (count === 0) } } });
+                userModel.findById(decoded._id, (err, user) => {
+                    if (err | !user) {
+                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                    } else {
+                        user = user.toObject();
+
+                        const newToken = jwt.sign(user, config.jwtSecret, {
+                            expiresIn: global.unfetter.JWT_DURATION_SECONDS
+                        });
+                        res.json({ data: { attributes: { token: `Bearer ${newToken}` } } })
+                    }
+                });
             }
         });
     }
