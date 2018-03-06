@@ -56,14 +56,16 @@ function calculateRiskByQuestion(assessments) {
 
 function getPromises(assessment) {
   const assessedObjectIDs = {};
-  assessment.stix.assessment_objects
-    .map(assessmentObj => assessmentObj.stix)
-    .forEach((assessmentObj) => {
-      if (assessedObjectIDs[assessmentObj.type] === undefined) {
-        assessedObjectIDs[assessmentObj.type] = [];
-      }
-      assessedObjectIDs[assessmentObj.type].push(assessmentObj.id);
-    });
+  if (assessment && assessment.stix) {
+    assessment.stix.assessment_objects
+      .map(assessmentObj => assessmentObj.stix)
+      .forEach((assessmentObj) => {
+        if (assessedObjectIDs[assessmentObj.type] === undefined) {
+          assessedObjectIDs[assessmentObj.type] = [];
+        }
+        assessedObjectIDs[assessmentObj.type].push(assessmentObj.id);
+      });
+  }
 
   // Generate promises using the ASSESSED_OBJECT_TYPES enum so Promise.all methods get the return in the order expected
   // Don't bother running a mongo query for empty objects
@@ -207,18 +209,32 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
 
   return Promise.all(getPromises(assessment))
     .then((results) => {
-      assessment = assessment.toObject().stix;
-      const indicators = results[0].map(doc => ({ ...doc.toObject().stix,
-        ...doc.toObject().metaProperties
-      }));
+      if (!assessment) {
+        assessment = { };
+      } else {
+        assessment = assessment.toObject().stix;
+      }
+
+      const indicators = results[0]
+        .filter((doc) => doc !== undefined)
+        .map((doc) => ({
+          ...doc.toObject().stix,
+          ...doc.toObject().metaProperties
+        }));
       const indicatorRisks = [];
-      const sensors = results[1].map(doc => ({ ...doc.toObject().stix,
-        ...doc.toObject().metaProperties
-      }));
+      const sensors = results[1]
+        .filter((doc) => doc !== undefined)
+        .map((doc) => ({
+          ...doc.toObject().stix,
+          ...doc.toObject().metaProperties
+        }));
       const sensorRisks = [];
-      const courseOfActions = results[2].map(doc => ({ ...doc.toObject().stix,
-        ...doc.toObject().metaProperties
-      }));
+      const courseOfActions = results[2]
+        .filter((doc) => doc !== undefined)
+        .map((doc) => ({
+          ...doc.toObject().stix,
+          ...doc.toObject().metaProperties
+        }));
       const coaRisks = [];
       const returnObject = {};
       returnObject.indicators = [];
@@ -772,35 +788,35 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
       Model.findOneAndUpdate({
         _id: id
       }, newDocument, {
-        new: true
-      }, (errUpdate, resultUpdate) => {
-        if (errUpdate) {
-          return res.status(500).json({
-            errors: [{
-              status: 500,
-              source: '',
-              title: 'Error',
-              code: '',
-              detail: 'An unknown error has occurred.'
-            }]
-          });
-        }
+          new: true
+        }, (errUpdate, resultUpdate) => {
+          if (errUpdate) {
+            return res.status(500).json({
+              errors: [{
+                status: 500,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'An unknown error has occurred.'
+              }]
+            });
+          }
 
-        if (resultUpdate) {
-          const requestedUrl = apiRoot + req.originalUrl;
-          const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
-          return res.status(200).json({
-            links: {
-              self: requestedUrl,
-            },
-            data: convertedResult
-          });
-        }
+          if (resultUpdate) {
+            const requestedUrl = apiRoot + req.originalUrl;
+            const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
+            return res.status(200).json({
+              links: {
+                self: requestedUrl,
+              },
+              data: convertedResult
+            });
+          }
 
-        return res.status(404).json({
-          message: `Unable to update the item.  No item found with id ${id}`
+          return res.status(404).json({
+            message: `Unable to update the item.  No item found with id ${id}`
+          });
         });
-      });
     } catch (err) {
       console.log(`error ${err}`);
       return res.status(500).json({
@@ -861,9 +877,10 @@ const latestAssessmentsByCreatorId = (req, res) => {
   //  group the assessments into its parent rollup id (an assessment can be a combination of 3 types)
   //  unwind the potential 3 assessments per rollup into individual entries
   //  sort on last modified
+
   const latestAssessmentsByCreatorId = [{
     $match: {
-      creator: id,
+      'stix.created_by_ref': id,
       'stix.type': 'x-unfetter-assessment'
     }
   },
@@ -882,8 +899,8 @@ const latestAssessmentsByCreatorId = (req, res) => {
       modified: {
         $max: '$stix.modified'
       },
-      create_by_ref: {
-        $first: '$creator'
+      created_by_ref: {
+        $first: '$stix.created_by_ref'
       }
     }
   },
@@ -931,7 +948,7 @@ const latestAssessments = (req, res) => {
       modified: {
         $max: '$stix.modified'
       },
-      create_by_ref: {
+      created_by_ref: {
         $first: '$creator'
       }
     }
