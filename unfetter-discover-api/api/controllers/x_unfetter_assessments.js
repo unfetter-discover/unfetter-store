@@ -210,7 +210,7 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
   return Promise.all(getPromises(assessment))
     .then((results) => {
       if (!assessment) {
-        assessment = { };
+        assessment = {};
       } else {
         assessment = assessment.toObject().stix;
       }
@@ -842,6 +842,32 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
   }
 });
 
+/**
+ * @description
+ *  if demo mode, the user can query all the open identity data
+ *  if uac and the user is not admin, then return the users orgs
+ * @param {*} user - optional 
+ * @param {*} orgs array of ids representing the organizations this user can view, based on user and RUN_MODE
+ */
+const generateGroupIdsForUser = (user) => {
+  if (process.env.RUN_MODE === 'DEMO') {
+    return [global.unfetter.openIdentity._id];
+  }
+  // If using UAC, confirm user can post to that group
+  if (process.env.RUN_MODE === 'UAC' && user && user.role !== 'ADMIN') {
+    const userOrgIds = user.organizations
+      .filter((org) => org.approved)
+      .map((org) => org.id);
+    return userOrgIds;
+  }
+}
+
+/**
+ * @description execute the given query as a mongo aggregate pipeline, write to the given response object
+ * @param {object} query - mongo aggregate object pipeline object 
+ * @param {Request} req 
+ * @param {Response} res 
+ */
 const latestAssessmentPromise = (query, req, res) => {
   Promise.resolve(aggregationModel.aggregate(query))
     .then((results) => {
@@ -877,10 +903,9 @@ const latestAssessmentsByCreatorId = (req, res) => {
   //  group the assessments into its parent rollup id (an assessment can be a combination of 3 types)
   //  unwind the potential 3 assessments per rollup into individual entries
   //  sort on last modified
-
   const latestAssessmentsByCreatorId = [{
     $match: {
-      'stix.created_by_ref': id,
+      'creator': id,
       'stix.type': 'x-unfetter-assessment'
     }
   },
@@ -898,6 +923,9 @@ const latestAssessmentsByCreatorId = (req, res) => {
       },
       modified: {
         $max: '$stix.modified'
+      },
+      creator: {
+        $first: 'creator'
       },
       created_by_ref: {
         $first: '$stix.created_by_ref'
@@ -918,52 +946,62 @@ const latestAssessmentsByCreatorId = (req, res) => {
 };
 
 /**
- * @description fetch assessments across the system, sort base on last modified
+ * @description fetch assessments whereby the created_by_ref is in the current users organizations
+ *  , sort base on last modified
  */
 const latestAssessments = (req, res) => {
-  const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-
-  // aggregate pipeline
-  //  match on assessment type
-  //  group the assessments into its parent rollup id (an assessment can be a combination of 3 types)
-  //  unwind the potential 3 assessments per rollup into individual entries
-  //  sort on last modified
-  const latestAssessments = [{
+  const orgIds = generateGroupIdsForUser(req.user);
+  const matchStage = {
     $match: {
       'stix.type': 'x-unfetter-assessment'
     }
-  },
-  {
-    $group: {
-      _id: '$metaProperties.rollupId',
-      rollupId: {
-        $first: '$metaProperties.rollupId'
-      },
-      id: {
-        $push: '$stix.id'
-      },
-      name: {
-        $first: '$stix.name'
-      },
-      modified: {
-        $max: '$stix.modified'
-      },
-      created_by_ref: {
-        $first: '$creator'
+  };
+
+  // if not admin, add the security filter
+  if (req.user && req.user.role !== 'ADMIN') {
+    matchStage['$match']['stix.created_by_ref'] = { '$in': orgIds };
+  }
+  // aggregate pipeline
+  //  match on given user orgnizations and assessment type
+  //  group the assessments into its parent rollup id (an assessment can be a combination of 3 types)
+  //  unwind the potential 3 assessments per rollup into individual entries
+  //  sort on last modified
+  const latestAssessmentsByCreatedByRefs = [
+    matchStage,
+    {
+      $group: {
+        _id: '$metaProperties.rollupId',
+        rollupId: {
+          $first: '$metaProperties.rollupId'
+        },
+        id: {
+          $push: '$stix.id'
+        },
+        name: {
+          $first: '$stix.name'
+        },
+        modified: {
+          $max: '$stix.modified'
+        },
+        creator: {
+          $first: 'creator'
+        },
+        created_by_ref: {
+          $first: '$stix.created_by_ref'
+        }
+      }
+    },
+    {
+      $unwind: '$id'
+    },
+    {
+      $sort: {
+        modified: -1
       }
     }
-  },
-  {
-    $unwind: '$id'
-  },
-  {
-    $sort: {
-      modified: -1
-    }
-  }
   ];
 
-  latestAssessmentPromise(latestAssessments, req, res);
+  latestAssessmentPromise(latestAssessmentsByCreatedByRefs, req, res);
 };
 
 module.exports = {
