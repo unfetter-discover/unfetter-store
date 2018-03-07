@@ -368,7 +368,7 @@ router.get('/heartbeat', (req, res) => {
         },
         {
             service: 'cti-stix-store-respository',
-            status: global.conn.readyState === 1 ? 'RUNNING': 'DOWN'
+            status: global.unfetter.conn.readyState === 1 ? 'RUNNING': 'DOWN'
         }
     ];
 
