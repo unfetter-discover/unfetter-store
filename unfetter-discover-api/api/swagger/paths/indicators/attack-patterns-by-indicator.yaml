@@ -7,7 +7,7 @@ get:
   operationId: attackPatternsByIndicator
   produces: 
   - application/vnd.api+json
-  parameters:
+  
   responses:
     "200":
       description: Success
