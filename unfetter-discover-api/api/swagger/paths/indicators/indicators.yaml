@@ -10,7 +10,7 @@ get:
   parameters:
     - name: filter
       in: query
-      description: 'Ex: {"stix.name":"Poison Ivy Malware"}'
+      description: 'Ex: {"stix.name":"Powershell Execution"}'
       required: false
       type: string
     - name: sort
