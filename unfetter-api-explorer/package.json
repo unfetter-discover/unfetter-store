@@ -28,6 +28,7 @@
     "webpack-dev-server": "^2.11.1"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "swagger-ui-dist": "^3.9.3"
   }
 }
