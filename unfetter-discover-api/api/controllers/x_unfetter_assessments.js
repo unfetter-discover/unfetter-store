@@ -5,8 +5,11 @@ const stix = require('../helpers/stix');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const BaseController = require('./shared/basecontroller');
 const mongoose = require('mongoose');
+const SecurityHelper = require('../helpers/security_helper');
+const DataHelper = require('../helpers/extended_data_helper');
 
-const XUnfetterAssessment = modelFactory.getModel('x-unfetter-assessment');
+const XUnfetterAssessmentType = 'x-unfetter-assessment';
+const XUnfetterAssessment = modelFactory.getModel(XUnfetterAssessmentType);
 const controller = new BaseController('x-unfetter-assessment');
 const returnProps = ['indicators', 'sensors', 'courseOfActions'];
 const ASSESSED_OBJECT_TYPES = ['indicator', 'x-unfetter-sensor', 'course-of-action'];
@@ -1004,9 +1007,45 @@ const latestAssessments = (req, res) => {
   latestAssessmentPromise(latestAssessmentsByCreatedByRefs, req, res);
 };
 
+const getById = (req, res) => {
+  return getByIdCb((err, result, req, res, id) => {
+    if (err) {
+      return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+    }
+
+    if (result && result.length === 1) {
+      const requestedUrl = apiRoot + req.originalUrl;
+      const data = DataHelper.getEnhancedData(result, req.swagger.params);
+      const convertedResult = jsonApiConverter.convertJsonToJsonApi(data[0], XUnfetterAssessmentType, requestedUrl);
+      return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+    }
+
+    return res.status(404).json({ message: `No item found with id ${id}` });
+  });
+}
+
+const getByIdCb = (callback) => {
+  const model = XUnfetterAssessment;
+  return (req, res) => {
+    res.header('Content-Type', 'application/vnd.api+json');
+
+    const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+
+    // get the most recent one since there could be many with the same id
+    // stix most recent is defined as the most recently modified one
+    model
+      .find(SecurityHelper.applySecurityFilter({ _id: id }, req.user))
+      .sort({ modified: '-1' })
+      .limit(1)
+      .exec((err, result) => {
+        callback(err, result, req, res, id);
+      });
+  }
+}
+
 module.exports = {
   get: controller.get(),
-  getById: controller.getById(),
+  getById: getById(),
   add: controller.add(),
   update: controller.update(),
   deleteById: controller.deleteById(),
