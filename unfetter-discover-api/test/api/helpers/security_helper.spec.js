@@ -3,7 +3,6 @@ const should = require('should');
 
 process.env.RUN_MODE = 'TEST';
 
-
 describe('security helper tests', () => {
     const STANDARD_USER_ROLE = 'STANDARD_USER';
     const ADMIN_ROLE = 'ADMIN';
@@ -16,6 +15,13 @@ describe('security helper tests', () => {
             approved: true,
         };
     }
+
+    beforeEach(() => {
+        global = global || {};
+        global.unfetter = global.unfetter || {};
+        global.unfetter.openIdentity = global.unfetter.openIdentity || {};
+        global.unfetter.openIdentity._id = 'my-unfetter-open-id';
+    })
 
     describe('isAdmin', () => {
         beforeEach('', () => {

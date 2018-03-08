@@ -220,6 +220,7 @@ describe('x-unfetter-assessments specific routes', () => {
                     should.not.exist(err);
                     should.equal(false, res.error, 'Error found');
                     should.exist(res.body.data, 'No "data" found');
+                    console.log(res.body);
                     should.equal(res.body.data.length, 3, 'Wrong number of assessed objects were returned.  Expected 3, received '+res.body.data.length);
                     done();
             });
