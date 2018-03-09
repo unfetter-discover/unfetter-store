@@ -35,12 +35,14 @@ const isAdmin = (user) => {
  */
 const applySecurityFilter = (query, user) => {
     if (!query || process.env.RUN_MODE !== 'UAC' || !user) {
+        console.log(`skipping filter for query=${query}, RUN_MODE=${process.env.RUN_MODE}, user=${user}`)
         return query;
     }
 
     const hasAdmin = isAdmin(user);
     // if admin, do not apply security filter
     if (hasAdmin === true) {
+        console.log(`skipping filter for admin ${user.id}`);
         return query;
     }
 
