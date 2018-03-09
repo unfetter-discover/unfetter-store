@@ -111,8 +111,7 @@ describe('security helper tests', () => {
             should.equal(typeof filtered, 'object');
             should.equal(filtered._id, '123');
             should.equal(filtered['stix.type'], 'attack-pattern');
-            const orPart = filtered.$or;
-            const filterPart = orPart[orPart.length - 1]['stix.created_by_ref'];
+            const filterPart = filtered['stix.created_by_ref'];
             should.exist(filterPart);
             should.exist(filterPart['$exists']);
             const orgIds = filterPart['$in'];
@@ -131,8 +130,7 @@ describe('security helper tests', () => {
             should.equal(typeof filtered, 'object');
             should.equal(filtered._id, '123');
             should.equal(filtered['stix.type'], 'attack-pattern');
-            const orPart = filtered.$or;
-            const filterPart = orPart[orPart.length - 1]['stix.created_by_ref'];
+            const filterPart = filtered['stix.created_by_ref'];
             should.exist(filterPart);
             should.exist(filterPart['$exists']);
             const orgIds = filterPart['$in'];

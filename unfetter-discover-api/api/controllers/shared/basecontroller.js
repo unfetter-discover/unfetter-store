@@ -1,3 +1,5 @@
+
+const mongoose = require('mongoose');
 const lodash = require('lodash');
 const stix = require('../../helpers/stix');
 const jsonApiConverter = require('../../helpers/json_api_converter');
@@ -5,7 +7,6 @@ const parser = require('../../helpers/url_parser');
 const modelFactory = require('./modelFactory');
 const publish = require('./publish');
 const DataHelper = require('../../helpers/extended_data_helper');
-const SecurityHelper = require('../../helpers/security_helper');
 
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 
@@ -49,7 +50,11 @@ module.exports = class BaseController {
     }
 
     get() {
-        return this.getCb((err, convertedResult, requestedUrl, req, res) => res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult }));
+        const type = this.type;
+        const model = this.model;
+        return this.getCb((err, convertedResult, requestedUrl, req, res) => {
+            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+        });
     }
 
     getCb(callback) {
@@ -95,6 +100,7 @@ module.exports = class BaseController {
 
     getById() {
         const type = this.type;
+        const model = this.model;
         return this.getByIdCb((err, result, req, res, id) => {
             if (err) {
                 return res.status(500).json({
@@ -458,25 +464,4 @@ module.exports = class BaseController {
         });
     }
 
-    /**
-     * @description apply filter for only give model types, user and node environment conditions
-     * @see SecurityHelper#applySecurityFilter
-     * @param {*} query
-     * @param {*} type
-     * @param {*} user
-     */
-    applySecurityFilterWhenNeeded(query, type, user, read = true) {
-        if (!type || !query) {
-            return query;
-        }
-        return SecurityHelper.applySecurityFilter(query, user, read);
-
-        // const filterTypes = new Set(['x-unfetter-assessment', 'indicator', 'report']);
-        // if (filterTypes.has(type)) {
-        //     console.log(`applying filter on type ${type}`);
-        //     return SecurityHelper.applySecurityFilter(query, user, read);
-        // }
-        // console.log(`skipping filter for type, ${type}`);
-        // return query;
-    }
-};
+}
