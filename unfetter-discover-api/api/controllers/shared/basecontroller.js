@@ -7,6 +7,7 @@ const parser = require('../../helpers/url_parser');
 const modelFactory = require('./modelFactory');
 const publish = require('./publish');
 const DataHelper = require('../../helpers/extended_data_helper');
+const SecurityHelper = require('../../helpers/security_helper');
 
 const apiRoot = 'https://localhost/api';
 
@@ -61,8 +62,9 @@ module.exports = class BaseController {
                 return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: query.error }] });
             }
 
+            const matcherQuery = this.applySecurityFilterWhenNeeded(Object.assign({ 'stix.type': type }, query.filter), type, req.user);
             model
-                .find(Object.assign({ 'stix.type': type }, query.filter))
+                .find(matcherQuery)
                 .sort(query.sort)
                 .limit(query.limit)
                 .skip(query.skip)
@@ -106,13 +108,12 @@ module.exports = class BaseController {
         const model = this.model;
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
-
             const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-
             // get the most recent one since there could be many with the same id
             // stix most recent is defined as the most recently modified one
+            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
             model
-                .find({ _id: id })
+                .find(query)
                 .sort({ modified: '-1' })
                 .limit(1)
                 .exec((err, result) => {
@@ -291,7 +292,9 @@ module.exports = class BaseController {
             // get the old item
             if (req.swagger.params.id.value !== undefined && req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-                model.findById({ _id: id }, (err, result) => {
+
+                const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+                model.findById(query, (err, result) => {
                     if (err) {
                         return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                     }
@@ -331,8 +334,9 @@ module.exports = class BaseController {
                         return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
                     }
 
+                    const findOneAndUpdateQuery = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
                     // guard pass complete
-                    model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+                    model.findOneAndUpdate(findOneAndUpdateQuery, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                         if (errUpdate) {
                             return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
                         }
@@ -373,7 +377,8 @@ module.exports = class BaseController {
             // per mongo documentation
             // Mongoose queries are not promises. However, they do have a .then() function for yield and async/await.
             // If you need a fully- fledged promise, use the .exec() function.
-            promises.push(model.remove({ _id: id }).exec());
+            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+            promises.push(model.remove(query).exec());
             promises.push(relationshipModel.remove({ $or: [{ 'stix.source_ref': id }, { 'stix.target_ref': id }] }).exec());
             Promise.all(promises).then((response) => {
                 if (response && response.length > 0 && response[0].result && response[0].result.n === 1) {
@@ -386,5 +391,29 @@ module.exports = class BaseController {
             });
         });
     }
+
+    /**
+     * @description apply filter for only give model types, user and node environment conditions
+     * @see SecurityHelper#applySecurityFilter
+     * @param {*} query 
+     * @param {*} type
+     * @param {*} user
+     */
+    applySecurityFilterWhenNeeded(query, type, user) {
+        if (!type || !query) {
+            return query;
+        }
+
+        const assessmentType = 'x-unfetter-assessment';
+        const filterTypes = new Set([assessmentType]);
+        if (filterTypes.has(type)) {
+            console.log(`applying filter on type ${type}`);
+            return SecurityHelper.applySecurityFilter(query, user);
+        } else {
+            console.log(`skipping filter for type, ${type}`);
+            return query;
+        }
+    }
+
 
 }
