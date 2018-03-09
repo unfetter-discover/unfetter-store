@@ -7,6 +7,7 @@ const parser = require('../../helpers/url_parser');
 const modelFactory = require('./modelFactory');
 const publish = require('./publish');
 const DataHelper = require('../../helpers/extended_data_helper');
+const SecurityHelper = require('../../helpers/security_helper');
 
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 
@@ -71,7 +72,6 @@ module.exports = class BaseController {
                     }]
                 });
             }
-
 
             const matcherQuery = this.applySecurityFilterWhenNeeded(Object.assign({ 'stix.type': type }, query.filter), type, req.user);
             model
@@ -339,7 +339,7 @@ module.exports = class BaseController {
             if (req.swagger.params.id.value !== undefined && req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
-                const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
+                const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
                 model.findById(query, (err, result) => {
                     if (err) {
                         return res.status(500).json({
@@ -394,7 +394,7 @@ module.exports = class BaseController {
                         });
                     }
 
-                    const findOneAndUpdateQuery = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
+                    const findOneAndUpdateQuery = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
                     // guard pass complete
                     model.findOneAndUpdate(findOneAndUpdateQuery, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                         if (errUpdate) {
@@ -445,7 +445,7 @@ module.exports = class BaseController {
             // per mongo documentation
             // Mongoose queries are not promises. However, they do have a .then() function for yield and async/await.
             // If you need a fully- fledged promise, use the .exec() function.
-            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
+            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
             promises.push(model.remove(query).exec());
             promises.push(relationshipModel.remove({ $or: [{ 'stix.source_ref': id }, { 'stix.target_ref': id }] }).exec());
             Promise.all(promises).then(response => {
@@ -463,5 +463,29 @@ module.exports = class BaseController {
             });
         });
     }
+
+    /**
+     * @description apply filter for only give model types, user and node environment conditions
+     * @see SecurityHelper#applySecurityFilter
+     * @param {*} query 
+     * @param {*} type
+     * @param {*} user
+     */
+    applySecurityFilterWhenNeeded(query, type, user) {
+        if (!type || !query) {
+            return query;
+        }
+
+        const assessmentType = 'x-unfetter-assessment';
+        const filterTypes = new Set([assessmentType]);
+        if (filterTypes.has(type)) {
+            console.log(`applying filter on type ${type}`);
+            return SecurityHelper.applySecurityFilter(query, user);
+        } else {
+            console.log(`skipping filter for type, ${type}`);
+            return query;
+        }
+    }
+
 
 }
