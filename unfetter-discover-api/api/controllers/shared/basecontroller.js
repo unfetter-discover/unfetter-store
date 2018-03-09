@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 const lodash = require('lodash');
 const stix = require('../../helpers/stix');
@@ -5,6 +6,7 @@ const jsonApiConverter = require('../../helpers/json_api_converter');
 const parser = require('../../helpers/url_parser');
 const modelFactory = require('./modelFactory');
 const publish = require('./publish');
+const DataHelper = require('../../helpers/extended_data_helper');
 
 const apiRoot = 'https://localhost/api';
 
@@ -12,67 +14,6 @@ module.exports = class BaseController {
     constructor(type) {
         this.type = type;
         this.model = modelFactory.getModel(type);
-    }
-
-    getEnhancedData(result, swaggerParams) {
-        let data;
-        // No params present
-        if (swaggerParams.extendedproperties === undefined && swaggerParams.metaproperties === undefined) {
-            return result
-                .map(res => res.toObject())
-                .map(res => res.stix);
-        }
-
-        // no extended or meta properties
-        if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
-            data = result
-                .map(res => res.toObject())
-                .map(res => res.stix);
-
-            // both extended and meta properties
-        } else if ((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
-            data = result
-                .map(res => res.toObject())
-                .map(res => {
-                    let temp = res.stix;
-                    if (res.extendedProperties !== undefined) {
-                        temp = { ...temp, ...res.extendedProperties };
-                    }
-                    if (res.metaProperties !== undefined) {
-                        temp = { ...temp, metaProperties: res.metaProperties };
-                    }
-                    return temp;
-                });
-
-            // Exteded properties only
-        } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
-            data = result
-                .map(res => res.toObject())
-                .map(res => {
-                    if (res.extendedProperties !== undefined) {
-                        return { ...res.stix, ...res.extendedProperties };
-                    } else {
-                        return res.stix;
-                    }
-                });
-
-            // Meta properties only
-        } else if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
-            data = result
-                .map(res => res.toObject())
-                .map(res => {
-                    if (res.metaProperties !== undefined) {
-                        return { ...res.stix, metaProperties: res.metaProperties };
-                    } else {
-                        return res.stix;
-                    }
-                });
-
-            // Delete this if this function works!
-        } else {
-            console.log('DOOOOM!!!! This block should never be reached.');
-        }
-        return data;
     }
 
     aggregate() {
@@ -104,7 +45,6 @@ module.exports = class BaseController {
     get() {
         const type = this.type;
         const model = this.model;
-        const getEnhancedData = this.getEnhancedData;
         return this.getCb((err, convertedResult, requestedUrl, req, res) => {
             return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
         });
@@ -113,7 +53,6 @@ module.exports = class BaseController {
     getCb(callback) {
         const type = this.type;
         const model = this.model;
-        const getEnhancedData = this.getEnhancedData;
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -135,9 +74,7 @@ module.exports = class BaseController {
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
-
-                    let data = getEnhancedData(result, req.swagger.params);
-
+                    const data = DataHelper.getEnhancedData(result, req.swagger.params);
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi(data, type, requestedUrl);
                     // return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                     callback(err, convertedResult, requestedUrl, req, res);
@@ -148,7 +85,6 @@ module.exports = class BaseController {
     getById() {
         const type = this.type;
         const model = this.model;
-        const getEnhancedData = this.getEnhancedData;
         return this.getByIdCb((err, result, req, res, id) => {
             if (err) {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
@@ -156,9 +92,7 @@ module.exports = class BaseController {
 
             if (result && result.length === 1) {
                 const requestedUrl = apiRoot + req.originalUrl;
-
-                let data = getEnhancedData(result, req.swagger.params);
-
+                const data = DataHelper.getEnhancedData(result, req.swagger.params);
                 const convertedResult = jsonApiConverter.convertJsonToJsonApi(data[0], type, requestedUrl);
                 return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
             }
@@ -453,5 +387,4 @@ module.exports = class BaseController {
         });
     }
 
- 
 }
