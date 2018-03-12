@@ -36,14 +36,14 @@ const notifyUser = (userId, notificationType, heading, notificationBody, link = 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
         },
         body
     })
-    .then((res) => {
-        console.log('Publish API recieved user notification for', userId);
-    })
-    .catch((err) => console.log('Error!', err));
+        .then((res) => {
+            console.log('Publish API recieved user notification for', userId);
+        })
+        .catch((err) => console.log('Error!', err));
 };
 
 const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, link = null, emailData = null) => {
@@ -52,14 +52,14 @@ const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, l
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
         },
         body
     })
-    .then((res) => {
-        console.log('Publish API recieved organization notification for', orgId);
-    })
-    .catch((err) => console.log('Error!', err));
+        .then((res) => {
+            console.log('Publish API recieved organization notification for', orgId);
+        })
+        .catch((err) => console.log('Error!', err));
 };
 
 const notifyAdmin = (notificationType, heading, notificationBody, link = null, emailData = null, ) => {
@@ -68,14 +68,14 @@ const notifyAdmin = (notificationType, heading, notificationBody, link = null, e
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
         },
         body
     })
-    .then((res) => {
-        console.log('Publish API recieved admin notification');
-    })
-    .catch((err) => console.log('Error!', err));
+        .then((res) => {
+            console.log('Publish API recieved admin notification');
+        })
+        .catch((err) => console.log('Error!', err));
 };
 
 const updateSocialForAll = (notificationType, notificationBody, stixId) => {
@@ -85,14 +85,14 @@ const updateSocialForAll = (notificationType, notificationBody, stixId) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
         },
         body
     })
-    .then((res) => {
-        console.log('Publish API recieved notification for social update');
-    })
-    .catch((err) => console.log('Error!', err));
+        .then((res) => {
+            console.log('Publish API recieved notification for social update');
+        })
+        .catch((err) => console.log('Error!', err));
 };
 
 module.exports = {
@@ -101,4 +101,3 @@ module.exports = {
     notifyAdmin,
     updateSocialForAll
 };
-                                        
