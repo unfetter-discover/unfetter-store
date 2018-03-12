@@ -34,6 +34,6 @@ const StixSchema = {
     }
 };
 
-const IntrusionSet = mongoose.model('IntrusionSet', stixCommons['makeSchema'](StixSchema), 'stix');
+const IntrusionSet = mongoose.model('IntrusionSet', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = IntrusionSet;

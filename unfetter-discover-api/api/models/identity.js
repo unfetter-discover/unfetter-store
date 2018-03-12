@@ -24,6 +24,6 @@ const StixSchema = {
     }
 };
 
-const Identity = mongoose.model('Identity', stixCommons['makeSchema'](StixSchema), 'stix');
+const Identity = mongoose.model('Identity', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = Identity;

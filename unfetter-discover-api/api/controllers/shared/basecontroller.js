@@ -19,21 +19,21 @@ module.exports = class BaseController {
         // No params present
         if (swaggerParams.extendedproperties === undefined && swaggerParams.metaproperties === undefined) {
             return result
-                .map(res => res.toObject())
-                .map(res => res.stix);
+                .map((res) => res.toObject())
+                .map((res) => res.stix);
         }
 
         // no extended or meta properties
         if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
             data = result
-                .map(res => res.toObject())
-                .map(res => res.stix);
+                .map((res) => res.toObject())
+                .map((res) => res.stix);
 
             // both extended and meta properties
         } else if ((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
             data = result
-                .map(res => res.toObject())
-                .map(res => {
+                .map((res) => res.toObject())
+                .map((res) => {
                     let temp = res.stix;
                     if (res.extendedProperties !== undefined) {
                         temp = { ...temp, ...res.extendedProperties };
@@ -47,25 +47,23 @@ module.exports = class BaseController {
             // Exteded properties only
         } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
             data = result
-                .map(res => res.toObject())
-                .map(res => {
+                .map((res) => res.toObject())
+                .map((res) => {
                     if (res.extendedProperties !== undefined) {
                         return { ...res.stix, ...res.extendedProperties };
-                    } else {
-                        return res.stix;
                     }
+                    return res.stix;
                 });
 
             // Meta properties only
         } else if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
             data = result
-                .map(res => res.toObject())
-                .map(res => {
+                .map((res) => res.toObject())
+                .map((res) => {
                     if (res.metaProperties !== undefined) {
                         return { ...res.stix, metaProperties: res.metaProperties };
-                    } else {
-                        return res.stix;
                     }
+                    return res.stix;
                 });
 
             // Delete this if this function works!
@@ -83,43 +81,56 @@ module.exports = class BaseController {
 
             const query = parser.dbQueryParams(req);
             if (query.error) {
-                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: query.error }] });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: query.error
+                    }]
+                });
             }
 
             model
                 .aggregate(query.aggregations)
                 .exec((err, result) => {
-
                     if (err) {
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            }]
+                        });
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi(result, type, requestedUrl);
                     return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                 });
-        }
+        };
     }
 
     get() {
         const type = this.type;
         const model = this.model;
         const getEnhancedData = this.getEnhancedData;
-        return this.getCb((err, convertedResult, requestedUrl, req, res) => {
-            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
-        });
+        return this.getCb((err, convertedResult, requestedUrl, req, res) => res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult }));
     }
 
     getCb(callback) {
         const type = this.type;
         const model = this.model;
         const getEnhancedData = this.getEnhancedData;
+
+        console.log(`&&&&&&&&&&& Calling get for ${type} on model ${model}`);
+        console.log('&&&&&&&&&&& EnhancedData:', getEnhancedData);
+
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
             const query = parser.dbQueryParams(req);
             if (query.error) {
-                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: query.error }] });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: query.error
+                    }]
+                });
             }
 
             model
@@ -129,20 +140,28 @@ module.exports = class BaseController {
                 .skip(query.skip)
                 .select(query.project)
                 .exec((err, result) => {
-
                     if (err) {
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            }]
+                        });
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
 
-                    let data = getEnhancedData(result, req.swagger.params);
+                    const data = getEnhancedData(result, req.swagger.params);
+
+                    console.log(`&&&&&&&&&&& Data is in!  RequestedUrl is ${requestedUrl}`, data);
 
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi(data, type, requestedUrl);
+
+                    console.log('&&&&&&&&&&& Converted result is:', convertedResult);
+
                     // return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                     callback(err, convertedResult, requestedUrl, req, res);
                 });
-        }
+        };
     }
 
     getById() {
@@ -151,13 +170,17 @@ module.exports = class BaseController {
         const getEnhancedData = this.getEnhancedData;
         return this.getByIdCb((err, result, req, res, id) => {
             if (err) {
-                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                return res.status(500).json({
+                    errors: [{
+                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                    }]
+                });
             }
 
             if (result && result.length === 1) {
                 const requestedUrl = apiRoot + req.originalUrl;
 
-                let data = getEnhancedData(result, req.swagger.params);
+                const data = getEnhancedData(result, req.swagger.params);
 
                 const convertedResult = jsonApiConverter.convertJsonToJsonApi(data[0], type, requestedUrl);
                 return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
@@ -184,7 +207,7 @@ module.exports = class BaseController {
                 .exec((err, result) => {
                     callback(err, result, req, res, id);
                 });
-        }
+        };
     }
 
     add() {
@@ -210,8 +233,8 @@ module.exports = class BaseController {
                 obj.stix.id = stix.id(obj.stix.type);
 
                 // Process extended properties
-                let extendedProperties = {};
-                for (let prop of Object.keys(data.attributes)) {
+                const extendedProperties = {};
+                for (const prop of Object.keys(data.attributes)) {
                     if (prop.match(/^x_/) !== null) {
                         extendedProperties[prop] = data.attributes[prop];
                         delete obj.stix[prop];
@@ -226,7 +249,7 @@ module.exports = class BaseController {
                         relatedIds = obj.stix.metaProperties.relationships;
                         delete obj.stix.metaProperties.relationships;
                     }
-                    let tempMeta = obj.stix.metaProperties;
+                    const tempMeta = obj.stix.metaProperties;
                     delete obj.stix.metaProperties;
                     obj.metaProperties = tempMeta;
                 }
@@ -240,7 +263,11 @@ module.exports = class BaseController {
 
                     if (!userOrgIds.includes(obj.stix.created_by_ref)) {
                         console.log(req.user.userName, 'attempted to add a STIX message to a organization he/she does not belong to');
-                        return res.status(500).json({ errors: [{ status: 401, source: '', title: 'Error', code: '', detail: 'User is not allowed to create a STIX for this organization.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 401, source: '', title: 'Error', code: '', detail: 'User is not allowed to create a STIX for this organization.'
+                            }]
+                        });
                     }
                 }
 
@@ -257,27 +284,31 @@ module.exports = class BaseController {
                     lodash.forEach(error.errors, (field) => {
                         errors.push(field.message);
                     });
-                    return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                    return res.status(400).json({
+                        errors: [{
+                            status: 400, source: '', title: 'Error', code: '', detail: errors
+                        }]
+                    });
                 }
 
                 newDocument._id = newDocument.stix.id;
 
                 if (relatedIds) {
-                    for (let relatedId of relatedIds) {
+                    for (const relatedId of relatedIds) {
                         const relId = stix.id('relationship');
                         let relType = '';
                         // TODO make this better
                         switch (type) {
-                            case 'indicator':
-                                relType = 'indicates';
-                                break;
+                        case 'indicator':
+                            relType = 'indicates';
+                            break;
                         }
                         const tempRelationship = {
-                            'stix': {
-                                'id': relId,
-                                'source_ref': newDocument.stix.id,
-                                'target_ref': relatedId,
-                                'relationship_type': relType
+                            stix: {
+                                id: relId,
+                                source_ref: newDocument.stix.id,
+                                target_ref: relatedId,
+                                relationship_type: relType
                             }
                         };
 
@@ -305,7 +336,11 @@ module.exports = class BaseController {
                 model.create(newDocument, (err, result) => {
                     if (err) {
                         console.log(err);
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            }]
+                        });
                     }
 
                     // Notify org members
@@ -321,7 +356,7 @@ module.exports = class BaseController {
                                     publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
                                 }
                             }
-                        })
+                        });
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
@@ -329,7 +364,7 @@ module.exports = class BaseController {
                     let returnObj = { ...resObj.stix };
 
                     if (resObj.extendedProperties) {
-                        returnObj = { ...returnObj, ...resObj.extendedProperties }
+                        returnObj = { ...returnObj, ...resObj.extendedProperties };
                     }
 
                     if (resObj.metaProperties) {
@@ -343,7 +378,11 @@ module.exports = class BaseController {
                     return res.status(201).json({ links: { self: requestedUrl, }, data: convertedResult });
                 });
             } else {
-                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: 'malformed request'
+                    }]
+                });
             }
         };
     }
@@ -359,7 +398,11 @@ module.exports = class BaseController {
                 const id = req.swagger.params.id ? req.swagger.params.id.value : '';
                 model.findById({ _id: id }, (err, result) => {
                     if (err) {
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            }]
+                        });
                     }
 
                     // set the new values
@@ -394,17 +437,25 @@ module.exports = class BaseController {
                         lodash.forEach(error.errors, (field) => {
                             errors.push(field.message);
                         });
-                        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                        return res.status(400).json({
+                            errors: [{
+                                status: 400, source: '', title: 'Error', code: '', detail: errors
+                            }]
+                        });
                     }
 
                     // guard pass complete
                     model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                         if (errUpdate) {
-                            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                            return res.status(500).json({
+                                errors: [{
+                                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                                }]
+                            });
                         }
 
                         if (resultUpdate) {
-                            let resObj = resultUpdate.toObject();
+                            const resObj = resultUpdate.toObject();
                             const requestedUrl = apiRoot + req.originalUrl;
                             const convertedResult = jsonApiConverter.convertJsonToJsonApi(resObj.extendedProperties !== undefined ? { ...resObj.stix, ...resObj.extendedProperties } : resObj.stix, type, requestedUrl);
                             return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
@@ -414,7 +465,11 @@ module.exports = class BaseController {
                     });
                 });
             } else {
-                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: 'malformed request'
+                    }]
+                });
             }
         };
     }
@@ -448,10 +503,12 @@ module.exports = class BaseController {
 
                 return res.status(404).json({ message: `Unable to delete the item.  No item found with id ${id}` });
             }).catch((err) => {
-                res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                res.status(500).json({
+                    errors: [{
+                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                    }]
+                });
             });
         });
     }
-
- 
-}
+};

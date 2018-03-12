@@ -15,7 +15,7 @@ mongoose.Promise = global.Promise;
 /**
  * @description populate global lookup values
  */
-const lookupGlobalValues = () => new Promise((resolve, reject) =>{
+const lookupGlobalValues = () => new Promise((resolve, reject) => {
     console.log('looking up global values...');
 
     const promises = [];
@@ -37,7 +37,7 @@ const lookupGlobalValues = () => new Promise((resolve, reject) =>{
 
             const configObjs = configurations.map((configuration) => configuration.toObject());
             const jwtDurationSeconds = configObjs.find((configObj) => configObj.configKey === 'jwtDurationSeconds');
-            
+
             if (jwtDurationSeconds !== undefined) {
                 console.log('jwtDurationSeconds set to saved configuration');
                 global.unfetter.JWT_DURATION_SECONDS = jwtDurationSeconds.configValue;
@@ -48,7 +48,7 @@ const lookupGlobalValues = () => new Promise((resolve, reject) =>{
 
             resolve('Identities recieved');
         })
-        .catch((err) => reject('Unable to get identities and/or configurations: ', err))    
+        .catch((err) => reject('Unable to get identities and/or configurations: ', err));
 });
 
 module.exports = () => new Promise((resolve, reject) => {

@@ -28,6 +28,6 @@ const ExtendedSchema = {
     }
 };
 
-const Campaign = mongoose.model('Campaign', stixCommons['makeSchema'](ExtendedSchema), 'stix');
+const Campaign = mongoose.model('Campaign', stixCommons.makeSchema(ExtendedSchema), 'stix');
 
 module.exports = Campaign;

@@ -19,6 +19,6 @@ const StixSchema = {
     }
 };
 
-const CourseOfAction = mongoose.model('CourseOfAction', stixCommons['makeSchema'](StixSchema), 'stix');
+const CourseOfAction = mongoose.model('CourseOfAction', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = CourseOfAction;

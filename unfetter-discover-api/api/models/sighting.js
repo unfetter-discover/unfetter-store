@@ -28,6 +28,6 @@ const StixSchema = {
     },
 };
 
-const Sighting = mongoose.model('Sighting', stixCommons['makeSchema'](StixSchema), 'stix');
+const Sighting = mongoose.model('Sighting', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = Sighting;

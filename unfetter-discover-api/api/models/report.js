@@ -15,16 +15,16 @@ const StixSchema = {
         type: String,
         required: [true, 'label(s) are required'],
         enum: [
-            "threat-report",
-            "attack-pattern",
-            "campaign",
-            "identity",
-            "indicator",
-            "malware",
-            "observed-data",
-            "threat-actor",
-            "tool",
-            "vulnerability"
+            'threat-report',
+            'attack-pattern',
+            'campaign',
+            'identity',
+            'indicator',
+            'malware',
+            'observed-data',
+            'threat-actor',
+            'tool',
+            'vulnerability'
         ]
     }],
     published: {
@@ -43,6 +43,6 @@ const StixSchema = {
     },
 };
 
-const report = mongoose.model('Report', stixCommons['makeSchema'](StixSchema), 'stix');
+const report = mongoose.model('Report', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = report;

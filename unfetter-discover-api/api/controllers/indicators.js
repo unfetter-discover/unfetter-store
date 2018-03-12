@@ -6,14 +6,14 @@ const controller = new BaseController('indicator');
 
 const get = controller.getCb((err, convertedResult, requestedUrl, req, res) => {
     if (req.swagger.params.metaproperties !== undefined && req.swagger.params.metaproperties.value !== undefined && req.swagger.params.metaproperties.value === true) {
-        convertedResult.data = convertedResult.map(res => {
-            let temp = res;
+        convertedResult.data = convertedResult.map((res) => {
+            const temp = res;
             if (!temp.attributes.metaProperties) {
                 temp.attributes.metaProperties = {};
             }
             if (res.attributes !== undefined && res.attributes.kill_chain_phases !== undefined) {
                 temp.attributes.metaProperties.groupings = res.attributes.kill_chain_phases.map((kill_chain_phase) => {
-                    let grouping = {};
+                    const grouping = {};
                     grouping.groupingValue = kill_chain_phase.phase_name;
                     grouping.groupingName = kill_chain_phase.kill_chain_name;
                     return grouping;
@@ -31,8 +31,7 @@ const get = controller.getCb((err, convertedResult, requestedUrl, req, res) => {
 });
 
 const attackPatternsByIndicator = (req, res) => {
-
-    let aggregationQuery = [
+    const aggregationQuery = [
         {
             $match: {
                 'stix.type': 'indicator'
@@ -48,7 +47,7 @@ const attackPatternsByIndicator = (req, res) => {
         },
         {
             $match: {
-                'relationships': { $not: { $size: 0 } },
+                relationships: { $not: { $size: 0 } },
                 'relationships.stix.target_ref': { $regex: /^attack-pattern--/ }
             }
         },
@@ -69,13 +68,13 @@ const attackPatternsByIndicator = (req, res) => {
         {
             $group: {
                 _id: '$_id',
-                'attackPatterns': {
+                attackPatterns: {
                     $addToSet: {
-                        'id': '$attackPatterns._id',
-                        'name': '$attackPatterns.stix.name',
-                        'kill_chain_phases': '$attackPatterns.stix.kill_chain_phases',
-                        'x_unfetter_sophistication_level': '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
-                        'x_mitre_platforms': '$attackPatterns.extendedProperties.x_mitre_platforms'
+                        id: '$attackPatterns._id',
+                        name: '$attackPatterns.stix.name',
+                        kill_chain_phases: '$attackPatterns.stix.kill_chain_phases',
+                        x_unfetter_sophistication_level: '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
+                        x_mitre_platforms: '$attackPatterns.extendedProperties.x_mitre_platforms'
                     }
                 }
             }
@@ -84,10 +83,13 @@ const attackPatternsByIndicator = (req, res) => {
 
     aggregationModel.aggregate(aggregationQuery, (err, results) => {
         if (err) {
-            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
-        } else {
-            return res.json({"data":{"attributes": results }});
+            return res.status(500).json({
+                errors: [{
+                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                }]
+            });
         }
+        return res.json({ data: { attributes: results } });
     });
 };
 
