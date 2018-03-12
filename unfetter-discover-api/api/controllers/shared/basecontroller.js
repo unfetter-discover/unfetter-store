@@ -493,7 +493,7 @@ module.exports = class BaseController {
             }).catch((err) => {
                 res.status(500).json({
                     errors: [{
-                        status: 500, source: '', title: 'Error', code: '', detail: err
+                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             });

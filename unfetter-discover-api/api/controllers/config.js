@@ -117,7 +117,7 @@ module.exports = {
         res.header('Content-Type', 'application/vnd.api+json');
 
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-        Model.findOneAndRemove({ _id: id }, (err, result) => {
+        model.findOneAndRemove({ _id: id }, (err, result) => {
             if (err) {
                 console.log(err);
                 return res.status(500).json({
