@@ -956,7 +956,8 @@ const latestAssessmentsByCreatorId = (req, res) => {
   const latestAssessmentsByCreatorId = [{
     $match: {
       'creator': id,
-      'stix.type': 'x-unfetter-assessment'
+      'stix.type': 'x-unfetter-assessment',
+      'metaProperties.rollupId': { $exists: 1 }
     }
   },
   {
@@ -975,7 +976,7 @@ const latestAssessmentsByCreatorId = (req, res) => {
         $max: '$stix.modified'
       },
       creator: {
-        $first: 'creator'
+        $first: '$creator'
       },
       created_by_ref: {
         $first: '$stix.created_by_ref'
@@ -1003,7 +1004,8 @@ const latestAssessments = (req, res) => {
   const orgIds = generateGroupIdsForUser(req.user);
   const matchStage = {
     $match: {
-      'stix.type': 'x-unfetter-assessment'
+      'stix.type': 'x-unfetter-assessment',
+      'metaProperties.rollupId': { $exists: 1 }
     }
   };
 
@@ -1034,7 +1036,7 @@ const latestAssessments = (req, res) => {
           $max: '$stix.modified'
         },
         creator: {
-          $first: 'creator'
+          $first: '$creator'
         },
         created_by_ref: {
           $first: '$stix.created_by_ref'
