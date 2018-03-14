@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const AttackPattern = require('../models/attack-pattern');
 const CourseOfAction = require('../models/course-of-action');
 const Relationship = require('../models/relationship');

@@ -1,5 +1,5 @@
-const JwtStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
+const { Strategy } = require('passport-jwt');
+const { ExtractJwt } = require('passport-jwt');
 
 const userModel = require('../models/user');
 const config = require('./config');
@@ -10,8 +10,8 @@ passportConfig.setStrategy = (passport) => {
     const opts = {};
     opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
     opts.secretOrKey = config.jwtSecret;
-    passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
-        userModel.findById(jwt_payload._id, (err, user) => {
+    passport.use(new Strategy(opts, (jwtPayload, done) => {
+        userModel.findById(jwtPayload._id, (err, user) => {
             if (err) {
                 return done(err, false);
             }
@@ -30,7 +30,7 @@ passportConfig.jwtStandard = (req, res, next) => {
 };
 
 passportConfig.jwtAdmin = (req, res, next) => {
-    const user = req.user;
+    const { user } = req;
     // Verify they have admin role
     if (!user || user.role !== 'ADMIN') {
         return res.status(403).json({
@@ -43,7 +43,7 @@ passportConfig.jwtAdmin = (req, res, next) => {
 };
 
 passportConfig.jwtOrganizations = (req, res, next) => {
-    const user = req.user;
+    const { user } = req;
     // Verify they have admin or org leader role
     if (!user || (user.role !== 'ADMIN' && user.role !== 'ORG_LEADER')) {
         return res.status(403).json({

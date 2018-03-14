@@ -42,7 +42,7 @@ const upload = (req, res) => {
     }).then((response) => response.json())
         .then((json) => {
             console.log('upload json response', json);
-            if (typeof json === 'Array' && json.length > 0) {
+            if (Array.isArray(json) && json.length > 0) {
                 const el = json[0];
                 if (el.data && el.data.error) {
                 // error response

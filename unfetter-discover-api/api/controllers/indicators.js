@@ -5,17 +5,18 @@ const aggregationModel = modelFactory.getAggregationModel('stix');
 const controller = new BaseController('indicator');
 
 const get = controller.getCb((err, convertedResult, requestedUrl, req, res) => {
-    if (req.swagger.params.metaproperties !== undefined && req.swagger.params.metaproperties.value !== undefined && req.swagger.params.metaproperties.value === true) {
-        convertedResult.data = convertedResult.map((res) => {
+    var convResData = convertedResult.data;
+        if (req.swagger.params.metaproperties !== undefined && req.swagger.params.metaproperties.value !== undefined && req.swagger.params.metaproperties.value === true) {
+        convResData = convertedResult.map((res) => {
             const temp = res;
             if (!temp.attributes.metaProperties) {
                 temp.attributes.metaProperties = {};
             }
             if (res.attributes !== undefined && res.attributes.kill_chain_phases !== undefined) {
-                temp.attributes.metaProperties.groupings = res.attributes.kill_chain_phases.map((kill_chain_phase) => {
+                temp.attributes.metaProperties.groupings = res.attributes.kill_chain_phases.map((killChainPhase) => {
                     const grouping = {};
-                    grouping.groupingValue = kill_chain_phase.phase_name;
-                    grouping.groupingName = kill_chain_phase.kill_chain_name;
+                    grouping.groupingValue = killChainPhase.phase_name;
+                    grouping.groupingName = killChainPhase.kill_chain_name;
                     return grouping;
                 });
             }
