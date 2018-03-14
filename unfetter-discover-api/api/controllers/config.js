@@ -4,7 +4,7 @@ const parser = require('../helpers/url_parser');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const uuid = require('uuid');
 
-const model = modelFactory.getModel('config');
+const Model = modelFactory.getModel('config');
 const controller = new BaseController('config');
 const apiRoot = 'https://localhost/api';
 
@@ -21,7 +21,7 @@ module.exports = {
             });
         }
 
-        model
+        Model
             .find(Object.assign({}, query.filter))
             .sort(query.sort)
             .limit(query.limit)
@@ -54,13 +54,13 @@ module.exports = {
         res.header('Content-Type', 'application/vnd.api+json');
         let obj = {};
         if (req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
-            const data = req.swagger.params.data.value.data;
+            const { data } = req.swagger.params.data.value;
             // TODO need to put this in a get/try in case these values don't exist
             obj = data.attributes;
             if (obj._id === undefined) {
                 obj._id = uuid.v4();
             }
-            const newDocument = new model(obj);
+            const newDocument = new Model(obj);
 
             const error = newDocument.validateSync();
             if (error) {
@@ -75,7 +75,7 @@ module.exports = {
                 });
             }
 
-            model.create(newDocument, (err, result) => {
+            Model.create(newDocument, (err, result) => {
                 if (err) {
                     console.log(err);
                     return res.status(500).json({
@@ -117,7 +117,7 @@ module.exports = {
         res.header('Content-Type', 'application/vnd.api+json');
 
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-        model.findOneAndRemove({ _id: id }, (err, result) => {
+        Model.findOneAndRemove({ _id: id }, (err, result) => {
             if (err) {
                 console.log(err);
                 return res.status(500).json({
@@ -137,7 +137,7 @@ module.exports = {
         // get the old item
         if (req.swagger.params.id.value !== undefined && req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
             const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-            model.findById({ _id: id }, (err, result) => {
+            Model.findById({ _id: id }, (err, result) => {
                 if (err) {
                     return res.status(500).json({
                         errors: [{
@@ -164,7 +164,7 @@ module.exports = {
 
                 // then validate
                 // guard
-                const newDocument = new model(resultObj);
+                const newDocument = new Model(resultObj);
                 const error = newDocument.validateSync();
                 if (error) {
                     const errors = [];
@@ -179,7 +179,7 @@ module.exports = {
                 }
 
                 // guard pass complete
-                model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+                Model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                     if (errUpdate) {
                         return res.status(500).json({
                             errors: [{

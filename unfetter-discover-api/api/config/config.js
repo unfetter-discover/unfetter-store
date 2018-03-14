@@ -1,6 +1,9 @@
+const fs = require('fs');
+const path = require('path');
+
 if (process.env.RUN_MODE === 'UAC') {
-    const fs = require('fs');
-    const path = require('path');
+//    const fs = require('fs');
+//    const path = require('path');
 
     const privateConfigLocation = path.join(__dirname, 'private-config.json');
     let privateConfig;
