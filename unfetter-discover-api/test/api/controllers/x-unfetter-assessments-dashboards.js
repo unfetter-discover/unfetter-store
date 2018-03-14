@@ -9,152 +9,152 @@ const controllers = [{
     endpoint: 'x-unfetter-assessments',
     type: 'x-unfetter-assessment',
     attributes: {
-        id: 'x-unfetter-assessment--120d3765-75bd-4db5-987b-3ec5afc8f9fc',
-        name: 'Assessment Testing',
-        description: 'Tests an assessment.',
-        version: '2.0',
-        labels: [
-            'lorem'
+        "id": "x-unfetter-assessment--120d3765-75bd-4db5-987b-3ec5afc8f9fc",
+        "name": "Assessment Testing",
+        "description": "Tests an assessment.",
+        "version": "2.0",
+        "labels": [
+            "lorem"
         ],
-        external_references: [{
-            source_name: 'capec',
-            description: 'phishing',
-            url: 'https://capec.mitre.org/data/definitions/98.html',
-            external_id: 'CAPEC-98'
+        "external_references": [{
+            "source_name": "capec",
+            "description": "phishing",
+            "url": "https://capec.mitre.org/data/definitions/98.html",
+            "external_id": "CAPEC-98"
         }],
-        granular_markings: [{
-            marking_ref: 'marking-definition--f88d31f6-486f-44da-b317-01333bde0b82',
-            selectors: [
-                'labels.[1]'
+        "granular_markings": [{
+            "marking_ref": "marking-definition--f88d31f6-486f-44da-b317-01333bde0b82",
+            "selectors": [
+                "labels.[1]"
             ]
         }],
-        kill_chain_phases: [
+        "kill_chain_phases": [
             {
-                kill_chain_name: 'lorem',
-                phase_name: 'ipsum'
+                "kill_chain_name": "lorem",
+                "phase_name": "ipsum"
             }
         ],
-        assessment_objects: [
+        "assessment_objects": [
             {
-                risk: 0.25,
-                stix: {
-                    id: 'indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4',
-                    type: 'indicator',
-                    description: 'indicator description',
-                    name: 'indicator name'
+                "risk": 0.25,
+                "stix": {
+                    "id": "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4",
+                    "type": "indicator",
+                    "description": "indicator description",
+                    "name": "indicator name"
                 },
-                questions: [
+                "questions": [
                     {
-                        selected_value: {
-                            risk: 0.25,
-                            name: '0.25 test'
+                        "selected_value": {
+                            "risk": 0.25,
+                            "name": "0.25 test"
                         },
-                        options: [
+                        "options": [
                             {
-                                risk: 1.0,
-                                name: '1 test'
+                                "risk": 1.0,
+                                "name": "1 test"
                             },
                             {
-                                risk: 0.75,
-                                name: '0.75 test'
+                                "risk": 0.75,
+                                "name": "0.75 test"
                             },
                             {
-                                risk: 0.5,
-                                name: '0.50 test'
+                                "risk": 0.5,
+                                "name": "0.50 test"
                             },
                             {
-                                risk: 0.25,
-                                name: '0.25 test'
+                                "risk": 0.25,
+                                "name": "0.25 test"
                             },
                             {
-                                risk: 0.0,
-                                name: '0 test'
+                                "risk": 0.0,
+                                "name": "0 test"
                             }
                         ],
-                        risk: 0.25,
-                        name: '0.5 test'
+                        "risk": 0.25,
+                        "name": "0.5 test"
                     }
                 ]
             },
             {
-                risk: 0.25,
-                stix: {
-                    id: 'indicator--0fb3bf0b-f3a4-4c75-bc34-492a7433f33b',
-                    type: 'indicator',
-                    description: 'indicator description',
-                    name: 'indicator name'
+                "risk": 0.25,
+                "stix": {
+                    "id": "indicator--0fb3bf0b-f3a4-4c75-bc34-492a7433f33b",
+                    "type": "indicator",
+                    "description": "indicator description",
+                    "name": "indicator name"
                 },
-                questions: [
+                "questions": [
                     {
-                        selected_value: {
-                            risk: 0.25,
-                            name: '0.25 test'
+                        "selected_value": {
+                            "risk": 0.25,
+                            "name": "0.25 test"
                         },
-                        options: [
+                        "options": [
                             {
-                                risk: 1.0,
-                                title: '1 test'
+                                "risk": 1.0,
+                                "title": "1 test"
                             },
                             {
-                                risk: 0.75,
-                                title: '0.75 test'
+                                "risk": 0.75,
+                                "title": "0.75 test"
                             },
                             {
-                                risk: 0.5,
-                                title: '0.50 test'
+                                "risk": 0.5,
+                                "title": "0.50 test"
                             },
                             {
-                                risk: 0.25,
-                                title: '0.25 test'
+                                "risk": 0.25,
+                                "title": "0.25 test"
                             },
                             {
-                                risk: 0.0,
-                                title: '0 test'
+                                "risk": 0.0,
+                                "title": "0 test"
                             }
                         ],
-                        risk: 0.25,
-                        name: '0.5 test'
+                        "risk": 0.25,
+                        "name": "0.5 test"
                     }
                 ]
             },
             {
-                risk: 0.25,
-                stix: {
-                    id: 'course-of-action--045c6f31-d329-40b0-b819-660d77b6cd58',
-                    type: 'course-of-action',
-                    description: 'course of action',
-                    name: 'course of action name'
+                "risk": 0.25,
+                "stix": {
+                    "id": "course-of-action--045c6f31-d329-40b0-b819-660d77b6cd58",
+                    "type": "course-of-action",
+                    "description": "course of action",
+                    "name": "course of action name"
                 },
-                questions: [
+                "questions": [
                     {
-                        selected_value: {
-                            risk: 0.25,
-                            name: '0.25 test'
+                        "selected_value": {
+                            "risk": 0.25,
+                            "name": "0.25 test"
                         },
-                        options: [
+                        "options": [
                             {
-                                risk: 1.0,
-                                name: '1 test'
+                                "risk": 1.0,
+                                "name": "1 test"
                             },
                             {
-                                risk: 0.75,
-                                name: '0.75 test'
+                                "risk": 0.75,
+                                "name": "0.75 test"
                             },
                             {
-                                risk: 0.5,
-                                name: '0.50 test'
+                                "risk": 0.5,
+                                "name": "0.50 test"
                             },
                             {
-                                risk: 0.25,
-                                name: '0.25 test'
+                                "risk": 0.25,
+                                "name": "0.25 test"
                             },
                             {
-                                risk: 0.0,
-                                name: '0 test'
+                                "risk": 0.0,
+                                "name": "0 test"
                             }
                         ],
-                        risk: 0.25,
-                        name: '0.5 test'
+                        "risk": 0.25,
+                        "name": "0.5 test"
                     }
                 ]
             }
@@ -165,12 +165,13 @@ const controllers = [{
 // TODO add linked indicactors, sensors, and coas to more accuretly test aggregations
 
 describe('x-unfetter-assessments specific routes', () => {
-    const controller = controllers[0];
+
+    let controller = controllers[0];
     // Only ensure that the assessment for the following testsis created
     // The test for the shared rotues are done in the controllers test
     describe(`POST /${controller.type}`, () => {
         it(`should create an ${controller.type}`, (done) => {
-            const stixObj = {};
+            let stixObj = {};
             stixObj.type = controller.type;
             stixObj.attributes = controller.attributes;
             if (controller.id) {
@@ -178,7 +179,7 @@ describe('x-unfetter-assessments specific routes', () => {
             }
             request(server)
                 .post(`/${controller.endpoint}`)
-                .send({ data: stixObj })
+                .send({data:stixObj})
                 .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
                 // TODO determine appropiate status code(s) to check for
                 // .expect(201)
@@ -219,54 +220,54 @@ describe('x-unfetter-assessments specific routes', () => {
                     should.not.exist(err);
                     should.equal(false, res.error, 'Error found');
                     should.exist(res.body.data, 'No "data" found');
-                    should.equal(res.body.data.length, 3, `Wrong number of assessed objects were returned.  Expected 3, received ${res.body.data.length}`);
+                    should.equal(res.body.data.length, 3, 'Wrong number of assessed objects were returned.  Expected 3, received '+res.body.data.length);
                     done();
-                });
+            });
         });
     });
 
     describe('GET /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}', () => {
         it('Returns the Answer of a particular question of an object.', (done) => {
-            const objectId = 'indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4';
-
-            request(server)
-                .get(`/${controller.endpoint}/${controller.testId}/assessed-object-answer/${objectId}/0`)
-                .set('Accept', 'application/json')
-                .expect('Content-Type', /json/)
-                .expect(200)
-                .end((err, res) => {
-                    should.not.exist(err);
-                    should.equal(false, res.error, 'Error found');
-                    should.exist(res.body.data, 'No "data" found');
-                    should.exist(res.body.data.risk, 'No "risk" found');
-                    should.exist(res.body.data.name, 'No "name" found');
-                    done();
-                });
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+            
+        request(server)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-answer/${objectId}/0`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.exist(res.body.data.risk, 'No "risk" found');
+                should.exist(res.body.data.name, 'No "name" found');
+                done();
+            });
         });
     });
 
     describe('GET /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}', () => {
         it('Returns the Risk of an object.', (done) => {
-            const objectId = 'indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4';
-
-            request(server)
-                .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
-                .set('Accept', 'application/json')
-                .expect('Content-Type', /json/)
-                .expect(200)
-                .end((err, res) => {
-                    should.not.exist(err);
-                    should.equal(false, res.error, 'Error found');
-                    should.exist(res.body.data, 'No "data" found');
-                    should.equal(res.body.data, 0.25, `Risk should be 0.25 rather than ${res.body.data}`);
-                    done();
-                });
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+            
+        request(server)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.equal(res.body.data, 0.25, 'Risk should be 0.25 rather than '+res.body.data);
+                done();
+            });
         });
     });
 
     // update
-    describe('PATCH /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}', () => {
-        const objectId = 'indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4';
+    describe(`PATCH /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}`, () => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
         it(`should update a ${controller.endpoint}`, (done) => {
             request(server)
                 .patch(`/${controller.endpoint}/${controller.testId}/assessed-object-answer/${objectId}`)
@@ -290,26 +291,26 @@ describe('x-unfetter-assessments specific routes', () => {
     // Testing that the previous update worked
     describe('GET /x-unfetter-assessments/{id}/assessed-object-risk/{objectId}', () => {
         it('Returns the Risk of an object.', (done) => {
-            const objectId = 'indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4';
-            request(server)
-                .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
-                .set('Accept', 'application/json')
-                .expect('Content-Type', /json/)
-                .expect(200)
-                .end((err, res) => {
-                    should.not.exist(err);
-                    should.equal(false, res.error, 'Error found');
-                    should.exist(res.body.data, 'No "data" found');
-                    should.equal(res.body.data, 0.75, `Risk should have been updated to 0.75 in the previous test rather than ${res.body.data}`);
-                    done();
-                });
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+        request(server)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.equal(res.body.data, 0.75, 'Risk should have been updated to 0.75 in the previous test rather than '+res.body.data);
+                done();
+            });
         });
     });
 
     // update
-    describe('PATCH /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}', () => {
-        const objectId = 'indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4';
-        const questionIndex = 0;
+    describe(`PATCH /x-unfetter-assessments/{id}/assessed-object-answer/{objectId}/{question}`, () => {
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+        let questionIndex = 0;
         it(`should update a ${controller.endpoint}`, (done) => {
             request(server)
                 .patch(`/${controller.endpoint}/${controller.testId}/assessed-object-answer/${objectId}/${questionIndex}`)
@@ -333,19 +334,19 @@ describe('x-unfetter-assessments specific routes', () => {
 
     describe('GET /x-unfetter-assessments/{id}/assessed-object-risk/{objectId}', () => {
         it('Returns the Risk of an object.', (done) => {
-            const objectId = 'indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4';
-            request(server)
-                .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
-                .set('Accept', 'application/json')
-                .expect('Content-Type', /json/)
-                .expect(200)
-                .end((err, res) => {
-                    should.not.exist(err);
-                    should.equal(false, res.error, 'Error found');
-                    should.exist(res.body.data, 'No "data" found');
-                    should.equal(res.body.data, 0.5, `Risk should have been updated to .5 in the previous test ${res.body.data}`);
-                    done();
-                });
+        let objectId = "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4";
+        request(server)
+            .get(`/${controller.endpoint}/${controller.testId}/assessed-object-risk/${objectId}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.equal(res.body.data, .5, 'Risk should have been updated to .5 in the previous test '+res.body.data);
+                done();
+            });
         });
     });
 
@@ -400,8 +401,8 @@ describe('x-unfetter-assessments specific routes', () => {
 
     // Only ensure that the assessment for the following tests is deleted
     // The test for the shared rotues are done in the controllers test
-    describe('DELETE /x-unfetter-assessments/{id}', () => {
-        it('should delete a x-unfetter-assessment', (done) => {
+    describe(`DELETE /x-unfetter-assessments/{id}`, () => {
+        it(`should delete a x-unfetter-assessment`, (done) => {
             request(server)
                 .delete(`/${controller.endpoint}/${controller.testId}`)
                 .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
@@ -414,4 +415,5 @@ describe('x-unfetter-assessments specific routes', () => {
                 });
         });
     });
+
 });
