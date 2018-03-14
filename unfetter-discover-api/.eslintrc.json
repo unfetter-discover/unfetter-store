@@ -12,6 +12,9 @@
     "max-len": 0,
     "no-restricted-syntax": 0,
     "no-var": 0,
+    "no-shadow": 0,
+    "new-cap": 0,
+    "camelcase": 0,
     "indent": [
       "warn",
       4
