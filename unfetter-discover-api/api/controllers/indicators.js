@@ -12,10 +12,10 @@ const get = controller.getCb((err, convertedResult, requestedUrl, req, res) => {
                 temp.attributes.metaProperties = {};
             }
             if (res.attributes !== undefined && res.attributes.kill_chain_phases !== undefined) {
-                temp.attributes.metaProperties.groupings = res.attributes.kill_chain_phases.map((kill_chain_phase) => {
+                temp.attributes.metaProperties.groupings = res.attributes.kill_chain_phases.map((killChainPhase) => {
                     const grouping = {};
-                    grouping.groupingValue = kill_chain_phase.phase_name;
-                    grouping.groupingName = kill_chain_phase.kill_chain_name;
+                    grouping.groupingValue = killChainPhase.phase_name;
+                    grouping.groupingName = killChainPhase.kill_chain_name;
                     return grouping;
                 });
             }

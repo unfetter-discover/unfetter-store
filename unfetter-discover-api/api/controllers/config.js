@@ -54,7 +54,7 @@ module.exports = {
         res.header('Content-Type', 'application/vnd.api+json');
         let obj = {};
         if (req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
-            const data = req.swagger.params.data.value.data;
+            const { data } = req.swagger.params.data.value;
             // TODO need to put this in a get/try in case these values don't exist
             obj = data.attributes;
             if (obj._id === undefined) {
@@ -117,7 +117,7 @@ module.exports = {
         res.header('Content-Type', 'application/vnd.api+json');
 
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-        model.findOneAndRemove({ _id: id }, (err, result) => {
+        Model.findOneAndRemove({ _id: id }, (err, result) => {
             if (err) {
                 console.log(err);
                 return res.status(500).json({

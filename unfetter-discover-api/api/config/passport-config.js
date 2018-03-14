@@ -30,7 +30,7 @@ passportConfig.jwtStandard = (req, res, next) => {
 };
 
 passportConfig.jwtAdmin = (req, res, next) => {
-    const user = req.user;
+    const { user } = req;
     // Verify they have admin role
     if (!user || user.role !== 'ADMIN') {
         return res.status(403).json({
@@ -43,7 +43,7 @@ passportConfig.jwtAdmin = (req, res, next) => {
 };
 
 passportConfig.jwtOrganizations = (req, res, next) => {
-    const user = req.user;
+    const { user } = req;
     // Verify they have admin or org leader role
     if (!user || (user.role !== 'ADMIN' && user.role !== 'ORG_LEADER')) {
         return res.status(403).json({
