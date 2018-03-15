@@ -26,7 +26,9 @@
         "object": false
       }
     ],
-    "no-shadow": ["warn", { "builtinGlobals": false, "hoist": "functions", "allow": [] }]
+    "no-shadow": ["warn", { "builtinGlobals": false, "hoist": "functions", "allow": [] }],
+    "no-void": 0,
+    "import/no-unresolved": "off"
   },
   "env": {
     "jasmine": true
