@@ -1,5 +1,4 @@
 
-const mongoose = require('mongoose');
 const lodash = require('lodash');
 const stix = require('../../helpers/stix');
 const jsonApiConverter = require('../../helpers/json_api_converter');
@@ -51,11 +50,7 @@ module.exports = class BaseController {
     }
 
     get() {
-        const type = this.type;
-        const model = this.model;
-        return this.getCb((err, convertedResult, requestedUrl, req, res) => {
-            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
-        });
+        return this.getCb((err, convertedResult, requestedUrl, req, res) => res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult }));
     }
 
     getCb(callback) {
@@ -92,7 +87,6 @@ module.exports = class BaseController {
                     const requestedUrl = apiRoot + req.originalUrl;
                     const data = DataHelper.getEnhancedData(result, req.swagger.params);
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi(data, type, requestedUrl);
-
                     // return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                     callback(err, convertedResult, requestedUrl, req, res);
                 });
@@ -101,7 +95,6 @@ module.exports = class BaseController {
 
     getById() {
         const type = this.type;
-        const model = this.model;
         return this.getByIdCb((err, result, req, res, id) => {
             if (err) {
                 return res.status(500).json({
@@ -123,6 +116,7 @@ module.exports = class BaseController {
     }
 
     getByIdCb(callback) {
+        const type = this.type;
         const model = this.model;
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
@@ -142,7 +136,7 @@ module.exports = class BaseController {
 
     add() {
         const type = this.type;
-        const Model = this.model;
+        const model = this.model;
         const relationshipModel = modelFactory.getModel('relationship');
         const identityModel = modelFactory.getModel('identity');
 
@@ -206,7 +200,7 @@ module.exports = class BaseController {
                     obj.creator = req.user._id;
                 }
 
-                const newDocument = new Model(obj);
+                const newDocument = new model(obj);
 
                 const error = newDocument.validateSync();
                 if (error) {
@@ -233,7 +227,6 @@ module.exports = class BaseController {
                             relType = 'indicates';
                             break;
                         default:
-                            break;
                         }
                         const tempRelationship = {
                             stix: {
@@ -265,7 +258,7 @@ module.exports = class BaseController {
                     });
                 }
 
-                Model.create(newDocument, (err, result) => {
+                model.create(newDocument, (err, result) => {
                     if (err) {
                         console.log(err);
                         return res.status(500).json({
@@ -321,7 +314,7 @@ module.exports = class BaseController {
 
     update() {
         const type = this.type;
-        const Model = this.model;
+        const model = this.model;
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -364,7 +357,7 @@ module.exports = class BaseController {
                     // then validate
                     // guard
                     resultObj.stix.modified = new Date();
-                    const newDocument = new Model(resultObj);
+                    const newDocument = new model(resultObj);
                     const error = newDocument.validateSync();
                     if (error) {
                         const errors = [];
@@ -420,6 +413,7 @@ module.exports = class BaseController {
     }
 
     deleteById() {
+        const type = this.type;
         const model = this.model;
         const relationshipModel = modelFactory.getModel('relationship');
 
@@ -440,7 +434,7 @@ module.exports = class BaseController {
             }).catch((err) => {
                 res.status(500).json({
                     errors: [{
-                        status: 500, source: '', title: 'Error', code: '', detail: err
+                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             });
@@ -450,7 +444,7 @@ module.exports = class BaseController {
     /**
      * @description apply filter for only give model types, user and node environment conditions
      * @see SecurityHelper#applySecurityFilter
-     * @param {*} query 
+     * @param {*} query
      * @param {*} type
      * @param {*} user
      */
@@ -464,11 +458,8 @@ module.exports = class BaseController {
         if (filterTypes.has(type)) {
             console.log(`applying filter on type ${type}`);
             return SecurityHelper.applySecurityFilter(query, user);
-        } else {
-            console.log(`skipping filter for type, ${type}`);
-            return query;
         }
+        console.log(`skipping filter for type, ${type}`);
+        return query;
     }
-
-
-}
+};
