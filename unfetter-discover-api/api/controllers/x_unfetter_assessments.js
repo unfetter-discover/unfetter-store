@@ -479,7 +479,8 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
             if (results) {
                 const requestedUrl = apiRoot + req.originalUrl;
                 const returnObj = {};
-                [returnObj.phases] = results;
+                const [first, second, third] = results;
+                returnObj.phases = first; // returnObj.phases = results[0];
 
                 // TODO remove this, this is incorrect
                 // returnObj.totalRisk = results[0]
@@ -487,7 +488,8 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
                 //   .reduce((prev, cur) => cur += prev, 0)
                 //   / results[0].length;
 
-                [, returnObj.assessedByAttackPattern, returnObj.attackPatternsByKillChain] = results;
+                returnObj.assessedByAttackPattern = second; // returnObj.assessedByAttackPattern = results[1];
+                returnObj.attackPatternsByKillChain = third; // returnObj.attackPatternsByKillChain = results[2];
 
                 return res.status(200).json({
                     links: {
@@ -613,7 +615,7 @@ const summaryAggregations = (req, res) => {
                     if (allAttackPatternTallyMap[ap.extendedProperties.x_unfetter_sophistication_level] === undefined) {
                         allAttackPatternTallyMap[ap.extendedProperties.x_unfetter_sophistication_level] = 0;
                     }
-                    ++allAttackPatternTallyMap[ap.extendedProperties.x_unfetter_sophistication_level];
+                    allAttackPatternTallyMap[ap.extendedProperties.x_unfetter_sophistication_level] += 1;
                 });
 
                 returnObj.attackPatternsByAssessedObject = tempAttackPatternsByAssessedObject;
