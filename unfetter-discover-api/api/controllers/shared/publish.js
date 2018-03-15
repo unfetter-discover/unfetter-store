@@ -62,7 +62,7 @@ const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, l
         .catch((err) => console.log('Error!', err));
 };
 
-const notifyAdmin = (notificationType, heading, notificationBody, link = null, emailData = null, ) => {
+const notifyAdmin = (notificationType, heading, notificationBody, link = null, emailData = null) => {
     const body = JSON.stringify(new CreateNotification(null, null, notificationType, heading, notificationBody, null, link, emailData));
     fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/admin`, {
         method: 'POST',

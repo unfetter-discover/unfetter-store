@@ -44,7 +44,7 @@ module.exports = class BaseController {
                     return temp;
                 });
 
-            // Exteded properties only
+            // Extended properties only
         } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
             data = result
                 .map((res) => res.toObject())
