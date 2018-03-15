@@ -24,11 +24,11 @@ const server: https.Server = https.createServer({
     cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
 }, app);
 
-const io: SocketIO.Server = socketIo(server, {
+const io: any = socketIo(server, {
     path: '/socket'
 });
 
-io.use((client: SocketIO.Socket, next: any) => {
+io.use((client: any, next: any) => {
     let errorMsg = '';
 
     if (client.handshake.query && client.handshake.query.token) {
@@ -76,7 +76,7 @@ io.use((client: SocketIO.Socket, next: any) => {
     }
 });
 
-io.on('connection', (client: SocketIO.Socket) => {
+io.on('connection', (client: any) => {
     console.log('Number of connections on connect: ', connections.length);
     const clientConnection = connections.find((conn) => conn.client === client);
 
@@ -165,11 +165,11 @@ io.on('connection', (client: SocketIO.Socket) => {
 
 // ~~~ Admin Namespace ~~~
 
-// const adminNamespace: SocketIO.Namespace = io.of('/admin');
-// adminNamespace.use((client: SocketIO.Socket, next: any) => {
+// const adminNamespace: any = io.of('/admin');
+// adminNamespace.use((client: any, next: any) => {
 //     next();
 // });
-// adminNamespace.on('connection', (socket: SocketIO.Socket) => {
+// adminNamespace.on('connection', (socket: any) => {
 //     adminNamespace.send({
 //         messageType: WSMessageTypes.SYSTEM,
 //         messageContent: 'Test message, this should be deleted from the code!'

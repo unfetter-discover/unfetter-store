@@ -10,12 +10,12 @@ get:
   parameters:
     - name: filter
       in: query
-      description: 'Ex: { "name": "John Smith" }'
+      description: 'Ex: {"stix.name":"Unfetter Open"}'
       required: false
       type: string
     - name: sort
       in: query
-      description: 'Ex: { "name": "1" } or { "name": "-1"}'
+      description: 'Ex: {"stix.name":"1"} or {"stix.name":"-1"}'
       required: false
       type: string
     - name: limit
@@ -38,7 +38,7 @@ get:
       description: boolean to include extended meta properties
     - name: project
       in: query
-      description: 'Ex: { "name": 1 } or { "name": 0}'
+      description: 'Ex: {"stix.created_by_ref":1} or {"stix.created_by_ref":0}'
       required: false
       type: string
   responses:

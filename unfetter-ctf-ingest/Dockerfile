@@ -1,4 +1,4 @@
-FROM node:9.2-alpine
+FROM node:9.5-alpine
 
 LABEL maintainer "unfetter"
 LABEL Description="Node program that loads ctf data into unfetter"

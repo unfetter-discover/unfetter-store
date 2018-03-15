@@ -1,2 +1,4 @@
 node_modules
 npm-debug.log
+config/private-config.json
+config/private-config.email.json

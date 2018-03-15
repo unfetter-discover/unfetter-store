@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
-const UserSchema = mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     firstName: {
         type: String
     },
@@ -98,6 +98,9 @@ const UserSchema = mongoose.Schema({
         required: [true, 'created is required']
     }
 });
+
+UserSchema.index({ 'userName': 1 });
+UserSchema.index({ 'role': 1 });
 
 const User = module.exports = mongoose.model('User', UserSchema, 'user');
 
