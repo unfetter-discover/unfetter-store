@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const lodash = require('lodash');
 const stix = require('../../helpers/stix');
 const jsonApiConverter = require('../../helpers/json_api_converter');
@@ -24,13 +23,13 @@ module.exports = class BaseController {
         }
 
         // no extended or meta properties
-        if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+        if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && ((swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined) || swaggerParams.metaproperties.value === false)) {
             data = result
                 .map((res) => res.toObject())
                 .map((res) => res.stix);
 
             // both extended and meta properties
-        } else if ((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
+        } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
             data = result
                 .map((res) => res.toObject())
                 .map((res) => {
@@ -45,7 +44,7 @@ module.exports = class BaseController {
                 });
 
             // Exteded properties only
-        } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+        } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && ((swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined) || swaggerParams.metaproperties.value === false)) {
             data = result
                 .map((res) => res.toObject())
                 .map((res) => {
@@ -107,9 +106,6 @@ module.exports = class BaseController {
     }
 
     get() {
-        const type = this.type;
-        const model = this.model;
-        const getEnhancedData = this.getEnhancedData;
         return this.getCb((err, convertedResult, requestedUrl, req, res) => res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult }));
     }
 
@@ -117,9 +113,6 @@ module.exports = class BaseController {
         const type = this.type;
         const model = this.model;
         const getEnhancedData = this.getEnhancedData;
-
-        console.log(`&&&&&&&&&&& Calling get for ${type} on model ${model}`);
-        console.log('&&&&&&&&&&& EnhancedData:', getEnhancedData);
 
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
@@ -152,11 +145,7 @@ module.exports = class BaseController {
 
                     const data = getEnhancedData(result, req.swagger.params);
 
-                    console.log(`&&&&&&&&&&& Data is in!  RequestedUrl is ${requestedUrl}`, data);
-
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi(data, type, requestedUrl);
-
-                    console.log('&&&&&&&&&&& Converted result is:', convertedResult);
 
                     // return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                     callback(err, convertedResult, requestedUrl, req, res);
@@ -166,7 +155,6 @@ module.exports = class BaseController {
 
     getById() {
         const type = this.type;
-        const model = this.model;
         const getEnhancedData = this.getEnhancedData;
         return this.getByIdCb((err, result, req, res, id) => {
             if (err) {
@@ -191,7 +179,6 @@ module.exports = class BaseController {
     }
 
     getByIdCb(callback) {
-        const type = this.type;
         const model = this.model;
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
@@ -212,7 +199,7 @@ module.exports = class BaseController {
 
     add() {
         const type = this.type;
-        const model = this.model;
+        const Model = this.model;
         const relationshipModel = modelFactory.getModel('relationship');
         const identityModel = modelFactory.getModel('identity');
 
@@ -276,7 +263,7 @@ module.exports = class BaseController {
                     obj.creator = req.user._id;
                 }
 
-                const newDocument = new model(obj);
+                const newDocument = new Model(obj);
 
                 const error = newDocument.validateSync();
                 if (error) {
@@ -301,6 +288,8 @@ module.exports = class BaseController {
                         switch (type) {
                         case 'indicator':
                             relType = 'indicates';
+                            break;
+                        default:
                             break;
                         }
                         const tempRelationship = {
@@ -333,7 +322,7 @@ module.exports = class BaseController {
                     });
                 }
 
-                model.create(newDocument, (err, result) => {
+                Model.create(newDocument, (err, result) => {
                     if (err) {
                         console.log(err);
                         return res.status(500).json({
@@ -389,14 +378,14 @@ module.exports = class BaseController {
 
     update() {
         const type = this.type;
-        const model = this.model;
+        const Model = this.model;
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
             // get the old item
             if (req.swagger.params.id.value !== undefined && req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-                model.findById({ _id: id }, (err, result) => {
+                Model.findById({ _id: id }, (err, result) => {
                     if (err) {
                         return res.status(500).json({
                             errors: [{
@@ -430,7 +419,7 @@ module.exports = class BaseController {
                     // then validate
                     // guard
                     resultObj.stix.modified = new Date();
-                    const newDocument = new model(resultObj);
+                    const newDocument = new Model(resultObj);
                     const error = newDocument.validateSync();
                     if (error) {
                         const errors = [];
@@ -445,7 +434,7 @@ module.exports = class BaseController {
                     }
 
                     // guard pass complete
-                    model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+                    Model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                         if (errUpdate) {
                             return res.status(500).json({
                                 errors: [{
@@ -485,7 +474,6 @@ module.exports = class BaseController {
     }
 
     deleteById() {
-        const type = this.type;
         const model = this.model;
         const relationshipModel = modelFactory.getModel('relationship');
 
@@ -505,7 +493,7 @@ module.exports = class BaseController {
             }).catch((err) => {
                 res.status(500).json({
                     errors: [{
-                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        status: 500, source: '', title: 'Error', code: '', detail: err
                     }]
                 });
             });

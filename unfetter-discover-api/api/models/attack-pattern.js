@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const StixSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const AttackPatternSchema = {

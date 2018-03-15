@@ -1,19 +1,18 @@
-const BaseController = require('./shared/basecontroller');
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
 
 const apiRoot = 'https://localhost/api';
-const model = modelFactory.getModel('schemaless');
+const Model = modelFactory.getModel('schemaless');
 const publish = require('../controllers/shared/publish');
 
 const transform = function transformFun(obj, urlRoot) {
-    obj = { ...obj.toObject().stix, ...obj.toObject().metaProperties, ...obj.toObject };
+    var transObj = { ...obj.toObject().stix, ...obj.toObject().metaProperties, ...obj.toObject };
     const apiObj = {
-        type: obj.type,
-        id: obj.id,
-        attributes: obj,
+        type: transObj.type,
+        id: transObj.id,
+        attributes: transObj,
         links: {
-            self: `${urlRoot}/${obj._id}`
+            self: `${urlRoot}/${transObj._id}`
         }
     };
     // delete apiObj.attributes._id;
@@ -33,7 +32,7 @@ const get = (req, res) => {
         });
     }
 
-    model
+    Model
         .find(query.filter)
         .sort(query.sort)
         .limit(query.limit)
@@ -76,7 +75,7 @@ const addComment = (req, res) => {
             user = req.user;
         }
 
-        model.findById({ _id: id }, (err, result) => {
+        Model.findById({ _id: id }, (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
@@ -108,7 +107,7 @@ const addComment = (req, res) => {
 
             resultObj.metaProperties.comments.push(commentObj);
 
-            const newDocument = new model(resultObj);
+            const newDocument = new Model(resultObj);
             const error = newDocument.validateSync();
             if (error) {
                 const errors = [];
@@ -123,7 +122,7 @@ const addComment = (req, res) => {
             }
 
             // guard pass complete
-            model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+            Model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                 if (errUpdate) {
                     return res.status(500).json({
                         errors: [{
@@ -185,7 +184,7 @@ const addLike = (req, res) => {
             user = req.user;
         }
 
-        model.findById({ _id: id }, (err, result) => {
+        Model.findById({ _id: id }, (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
@@ -221,7 +220,7 @@ const addLike = (req, res) => {
                 submitted: new Date()
             });
 
-            const newDocument = new model(resultObj);
+            const newDocument = new Model(resultObj);
             const error = newDocument.validateSync();
             if (error) {
                 const errors = [];
@@ -236,7 +235,7 @@ const addLike = (req, res) => {
             }
 
             // guard pass complete
-            model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+            Model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                 if (errUpdate) {
                     return res.status(500).json({
                         errors: [{
@@ -284,7 +283,7 @@ const removeLike = (req, res) => {
             user = req.user;
         }
 
-        model.findById({ _id: id }, (err, result) => {
+        Model.findById({ _id: id }, (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
@@ -314,7 +313,7 @@ const removeLike = (req, res) => {
 
             resultObj.metaProperties.likes = resultObj.metaProperties.likes.filter((like) => like.user.id.toString() !== user._id.toString());
 
-            const newDocument = new model(resultObj);
+            const newDocument = new Model(resultObj);
             const error = newDocument.validateSync();
             if (error) {
                 const errors = [];
@@ -329,7 +328,7 @@ const removeLike = (req, res) => {
             }
 
             // guard pass complete
-            model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+            Model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                 if (errUpdate) {
                     return res.status(500).json({
                         errors: [{
@@ -370,7 +369,7 @@ const addLabel = (req, res) => {
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
         const newLabel = req.swagger.params.data.value.data.attributes.label;
 
-        model.findById({ _id: id }, (err, result) => {
+        Model.findById({ _id: id }, (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
@@ -395,7 +394,7 @@ const addLabel = (req, res) => {
 
             resultObj.stix.labels.push(newLabel);
             resultObj.stix.modified = new Date();
-            const newDocument = new model(resultObj);
+            const newDocument = new Model(resultObj);
             const error = newDocument.validateSync();
             if (error) {
                 const errors = [];
@@ -410,7 +409,7 @@ const addLabel = (req, res) => {
             }
 
             // guard pass complete
-            model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+            Model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                 if (errUpdate) {
                     return res.status(500).json({
                         errors: [{
@@ -448,7 +447,7 @@ const addInteraction = (req, res) => {
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
         const user = req.user;
 
-        model.findById({ _id: id }, (err, result) => {
+        Model.findById({ _id: id }, (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
@@ -484,7 +483,7 @@ const addInteraction = (req, res) => {
                 submitted: new Date()
             });
 
-            const newDocument = new model(resultObj);
+            const newDocument = new Model(resultObj);
             const error = newDocument.validateSync();
             if (error) {
                 const errors = [];
@@ -499,7 +498,7 @@ const addInteraction = (req, res) => {
             }
 
             // guard pass complete
-            model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+            Model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                 if (errUpdate) {
                     return res.status(500).json({
                         errors: [{

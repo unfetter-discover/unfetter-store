@@ -27,7 +27,7 @@ const intrusionSetView = function intrusionSetViewFunc(req, res) {
     // resolve all the promises
     Promise.all(promises).then((response) => {
         const matchedIntrusionSets = response[0].map((result) => result.toObject().stix);
-        const distinctKillChainPhaseNames = response[1];
+        const [, distinctKillChainPhaseNames] = response;
         const allAttackPatterns = response[2].map((result) => result.toObject().stix);
         const allCoursesOfAction = response[3].map((result) => result.toObject().stix);
         const allUsesAndMitigatesRelationships = response[4].map((result) => result.toObject().stix);

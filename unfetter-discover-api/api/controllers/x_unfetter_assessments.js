@@ -1,12 +1,8 @@
 const modelFactory = require('./shared/modelFactory');
 const lodash = require('lodash');
-const parser = require('../helpers/url_parser');
-const stix = require('../helpers/stix');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const BaseController = require('./shared/basecontroller');
-const mongoose = require('mongoose');
 
-const XUnfetterAssessment = modelFactory.getModel('x-unfetter-assessment');
 const controller = new BaseController('x-unfetter-assessment');
 const returnProps = ['indicators', 'sensors', 'courseOfActions'];
 const ASSESSED_OBJECT_TYPES = ['indicator', 'x-unfetter-sensor', 'course-of-action'];
@@ -85,7 +81,7 @@ function getPromises(assessment) {
 }
 
 const assessedObjects = controller.getByIdCb((err, result, req, res, id) => {
-    const assessment = result[0];
+    const [assessment] = result;
 
     if (err) {
         return res.status(500).json({
@@ -191,7 +187,7 @@ function calculateRiskPerKillChain(workingObjects, isIndicator) {
 // The data is not json-api
 
 const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
-    let assessment = result[0];
+    let [assessment] = result;
 
     if (err) {
         return res.status(500).json({
@@ -483,7 +479,7 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
             if (results) {
                 const requestedUrl = apiRoot + req.originalUrl;
                 const returnObj = {};
-                returnObj.phases = results[0];
+                [returnObj.phases] = results;
 
                 // TODO remove this, this is incorrect
                 // returnObj.totalRisk = results[0]
@@ -491,8 +487,7 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
                 //   .reduce((prev, cur) => cur += prev, 0)
                 //   / results[0].length;
 
-                returnObj.assessedByAttackPattern = results[1];
-                returnObj.attackPatternsByKillChain = results[2];
+                [, returnObj.assessedByAttackPattern, returnObj.attackPatternsByKillChain] = results;
 
                 return res.status(200).json({
                     links: {
@@ -591,8 +586,7 @@ const summaryAggregations = (req, res) => {
             if (results) {
                 const requestedUrl = apiRoot + req.originalUrl;
                 const returnObj = {};
-                const tempAttackPatternsByAssessedObject = results[0];
-                const allAttackPattenrns = results[1];
+                const [tempAttackPatternsByAssessedObject, allAttackPatterns] = results;
                 const sophisticationSetMap = {};
 
                 // Push assessed attack patterns to a set by sophisication level
@@ -615,7 +609,7 @@ const summaryAggregations = (req, res) => {
 
                 const allAttackPatternTallyMap = {};
                 // Map all attack pattern to a total tally
-                allAttackPattenrns.forEach((ap) => {
+                allAttackPatterns.forEach((ap) => {
                     if (allAttackPatternTallyMap[ap.extendedProperties.x_unfetter_sophistication_level] === undefined) {
                         allAttackPatternTallyMap[ap.extendedProperties.x_unfetter_sophistication_level] = 0;
                     }
@@ -664,7 +658,7 @@ const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id)
         });
     }
     const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
-    const assessedObject = result[0].stix.assessment_objects.find((o) => o.stix.id == objectId);
+    const assessedObject = result[0].stix.assessment_objects.find((o) => o.stix.id === objectId);
     const returnObject = assessedObject.risk;
     const requestedUrl = apiRoot + req.originalUrl;
     res.header('Content-Type', 'application/json');
@@ -691,7 +685,7 @@ const getAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, i
     }
     const questionNumber = req.swagger.params.question ? req.swagger.params.question.value : 0;
     const objectId = req.swagger.params.objectId ? req.swagger.params.objectId.value : '';
-    const assessedObject = result[0].stix.assessment_objects.find((o) => o.stix.id == objectId);
+    const assessedObject = result[0].stix.assessment_objects.find((o) => o.stix.id === objectId);
     const returnObject = assessedObject.questions[questionNumber].selected_value;
     const requestedUrl = apiRoot + req.originalUrl;
     res.header('Content-Type', 'application/json');
@@ -733,15 +727,15 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
 
     // answer should be an integer to represent an index value of the array of question options.
     if ((answer >= 0)) {
-        const assessment = result[0];
+        const [assessment] = result;
         // The array of assessed objects
-        const assessedObject = assessment.stix.assessment_objects.find((o) => o.stix.id == objectId);
+        const assessedObject = assessment.stix.assessment_objects.find((o) => o.stix.id === objectId);
 
         // go through and change the answer to each of these questions.
         let risk = 0;
 
         lodash.forEach(assessedObject.questions, (question, index) => {
-            if ((answer <= question.options.length) && ((questionId == '') || (questionId == index))) {
+            if ((answer <= question.options.length) && ((questionId == '') || (questionId === index))) {
                 question.selected_value = question.options[answer];
                 risk += question.selected_value.risk;
                 question.risk = question.selected_value.risk;
@@ -904,8 +898,6 @@ const latestAssessmentsByCreatorId = (req, res) => {
  * @description fetch assessments across the system, sort base on last modified
  */
 const latestAssessments = (req, res) => {
-    const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-
     // aggregate pipeline
     //  match on assessment type
     //  group the assessments into its parent rollup id (an assessment can be a combination of 3 types)

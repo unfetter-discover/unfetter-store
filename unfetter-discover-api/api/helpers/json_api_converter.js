@@ -1,6 +1,7 @@
 const lodash = require('lodash');
 
 const transform = function transformFun(obj, type, urlRoot) {
+    var transObj = obj;
     if (!(obj instanceof Object)) {
         obj = obj.toObject();
     }

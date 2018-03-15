@@ -46,7 +46,7 @@ const translateData = (req, res) => {
 /**
  * @description sample generic formatted report
  */
-translateDataSample = (req, res) => {
+const translateDataSample = (req, res) => {
     const json = {
         systemName: 'sample-report-system',
         payload: {
