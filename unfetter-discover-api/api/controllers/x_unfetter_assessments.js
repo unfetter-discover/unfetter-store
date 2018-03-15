@@ -875,11 +875,33 @@ const latestAssessmentPromise = (query, req, res) => {
   Promise.resolve(aggregationModel.aggregate(query))
     .then((results) => {
       const requestedUrl = req.originalUrl;
+      const mappedResults = results
+        .map((r) => {
+          const retVal = { ...r };
+          retVal.id = r.stix.id;
+          // NOTE this is a temporary fix for naming in rollupId
+          // TODO remove this when a better fix is in place
+          if (r.stix.type) {
+            switch (r.stix.type) {
+              case 'course-of-action':
+                retVal.name = `${r.name} - Mitigations`
+                break;
+              case 'indicator':
+                retVal.name = `${r.name} - Indicators`
+                break;
+              case 'x-unfetter-sensor':
+                retVal.name = `${r.name} - Sensors`
+                break;
+            }
+          }
+          return retVal;
+        });
+
       return res.status(200).json({
         links: {
           self: requestedUrl,
         },
-        data: results
+        data: mappedResults
       });
     })
     .catch(err =>
@@ -914,6 +936,19 @@ const latestAssessmentsByCreatorId = (req, res) => {
     }
   },
   {
+    $project: {
+      'stix.assessment_objects': {
+          '$arrayElemAt': ['$stix.assessment_objects', 0]
+      },
+      'metaProperties.rollupId': 1,
+      'stix.id': 1,
+      'stix.name': 1,
+      'stix.modified': 1,
+      'stix.created_by_ref': 1,
+      creator: 1
+    }
+  },
+  {
     $group: {
       _id: '$metaProperties.rollupId',
       rollupId: {
@@ -933,11 +968,17 @@ const latestAssessmentsByCreatorId = (req, res) => {
       },
       created_by_ref: {
         $first: '$stix.created_by_ref'
+      },
+      stix: {
+        '$addToSet': {
+          type: '$stix.assessment_objects.stix.type',
+          id: '$stix.id'
+        }
       }
-    }
+    }    
   },
   {
-    $unwind: '$id'
+    $unwind: '$stix'
   },
   {
     $sort: {
@@ -974,6 +1015,19 @@ const latestAssessments = (req, res) => {
   const latestAssessmentsByCreatedByRefs = [
     matchStage,
     {
+        $project: {
+            'stix.assessment_objects': {
+                '$arrayElemAt': ['$stix.assessment_objects', 0]
+            },
+            'metaProperties.rollupId': 1,
+            'stix.id': 1,
+            'stix.name': 1,
+            'stix.modified': 1,
+            'stix.created_by_ref': 1,
+            creator: 1
+        }
+    },
+    {
       $group: {
         _id: '$metaProperties.rollupId',
         rollupId: {
@@ -993,11 +1047,17 @@ const latestAssessments = (req, res) => {
         },
         created_by_ref: {
           $first: '$stix.created_by_ref'
+        },
+        stix: {
+                '$addToSet': {
+                    type: '$stix.assessment_objects.stix.type',
+                    id: '$stix.id'
+                }
+            }
         }
-      }
     },
     {
-      $unwind: '$id'
+        $unwind: '$stix'
     },
     {
       $sort: {
