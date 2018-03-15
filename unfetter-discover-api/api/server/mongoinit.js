@@ -20,7 +20,7 @@ const lookupGlobalValues = () => new Promise((resolve, reject) => {
 
     const promises = [];
 
-    promises.push(identityPromise = identityModel
+    promises.push(identityModel
         .findOne({ 'stix.type': 'identity', 'stix.name': 'Unfetter Open' }).exec());
 
     promises.push(configModel.find({}).exec());
@@ -48,7 +48,7 @@ const lookupGlobalValues = () => new Promise((resolve, reject) => {
 
             resolve('Identities recieved');
         })
-        .catch((err) => reject('Unable to get identities and/or configurations: ', err));
+        .catch((err) => reject(new Error('Unable to get identities and/or configurations: '.concat(err))));
 });
 
 module.exports = () => new Promise((resolve, reject) => {
@@ -69,7 +69,7 @@ module.exports = () => new Promise((resolve, reject) => {
         const db = global.unfetter.conn;
         db.on('error', () => {
             console.error(console, 'connection error:');
-            reject('error connecting to monogo');
+            reject(new Error('error connecting to monogo'));
         });
         db.on('connected', () => {
             console.log('connected to mongodb');
