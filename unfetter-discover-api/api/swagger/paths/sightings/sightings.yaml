@@ -10,7 +10,7 @@ get:
   parameters:
     - name: filter
       in: query
-      description: 'Ex: {"stix.count":"1"}'
+      description: 'Ex: {"stix.count":"50"}'
       required: false
       type: string
     - name: sort
