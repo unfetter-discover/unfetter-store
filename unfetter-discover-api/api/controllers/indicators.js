@@ -5,9 +5,8 @@ const aggregationModel = modelFactory.getAggregationModel('stix');
 const controller = new BaseController('indicator');
 
 const get = controller.getCb((err, convertedResult, requestedUrl, req, res) => {
-    var convResData = convertedResult.data;
     if (req.swagger.params.metaproperties !== undefined && req.swagger.params.metaproperties.value !== undefined && req.swagger.params.metaproperties.value === true) {
-        convResData = convertedResult.map((res) => {
+        convertedResult.map((res) => {
             const temp = res;
             if (!temp.attributes.metaProperties) {
                 temp.attributes.metaProperties = {};

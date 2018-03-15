@@ -32,7 +32,7 @@ const emailUser = (userId, userEmail, template, subject, emailBody) => {
         body
     })
         .then((res) => {
-            console.log('Publish API recieved user notification for', userId);
+            console.log('Publish API received user notification for', userId);
         })
         .catch((err) => console.log('Error!', err));
 };

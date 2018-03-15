@@ -136,7 +136,7 @@ router.get('/user-from-token', (req, res) => {
     }
 
     let tokenHash;
-    if (token.match(/^Bearer\ /) !== null) {
+    if (token.match(/^Bearer /) !== null) {
         tokenHash = token.split('Bearer ')[1].trim();
     } else {
         tokenHash = token;
@@ -356,7 +356,7 @@ router.get('/refreshtoken', passport.authenticate('jwt', { session: false }), (r
     }
 
     let tokenHash;
-    if (token.match(/^Bearer\ /) !== null) {
+    if (token.match(/^Bearer /) !== null) {
         tokenHash = token.split('Bearer ')[1].trim();
     } else {
         tokenHash = token;

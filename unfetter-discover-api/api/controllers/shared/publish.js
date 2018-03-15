@@ -41,7 +41,7 @@ const notifyUser = (userId, notificationType, heading, notificationBody, link = 
         body
     })
         .then((res) => {
-            console.log('Publish API recieved user notification for', userId);
+            console.log('Publish API received user notification for', userId);
         })
         .catch((err) => console.log('Error!', err));
 };
@@ -57,7 +57,7 @@ const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, l
         body
     })
         .then((res) => {
-            console.log('Publish API recieved organization notification for', orgId);
+            console.log('Publish API received organization notification for', orgId);
         })
         .catch((err) => console.log('Error!', err));
 };
@@ -73,7 +73,7 @@ const notifyAdmin = (notificationType, heading, notificationBody, link = null, e
         body
     })
         .then((res) => {
-            console.log('Publish API recieved admin notification');
+            console.log('Publish API received admin notification');
         })
         .catch((err) => console.log('Error!', err));
 };
@@ -90,7 +90,7 @@ const updateSocialForAll = (notificationType, notificationBody, stixId) => {
         body
     })
         .then((res) => {
-            console.log('Publish API recieved notification for social update');
+            console.log('Publish API received notification for social update');
         })
         .catch((err) => console.log('Error!', err));
 };

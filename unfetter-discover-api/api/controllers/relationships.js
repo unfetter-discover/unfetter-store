@@ -1,11 +1,6 @@
-const mongoose = require('mongoose');
-const lodash = require('lodash');
-
 const relationshipModel = require('../models/relationship');
 const stixSchemaless = require('../models/schemaless');
 const BaseController = require('./shared/basecontroller');
-
-const apiRoot = 'https://localhost/api';
 
 const controller = new BaseController('relationship');
 
