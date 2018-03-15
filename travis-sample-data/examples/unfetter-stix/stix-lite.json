@@ -1,0 +1,37 @@
+{
+    "type": "bundle",
+    "id": "stix-archive-bundle",
+    "spec_version": "2.0",
+    "objects": [
+        {
+            "id": "indicator--020dae65-75bd-4db5-9e7b-3e45afc8f9f4",
+            "type": "indicator",
+            "description": "indicator description",
+            "name": "indicator name",
+            "created_by_ref": "identity--4ac44385-691d-411a-bda8-027c61d68e99",
+            "created": "2016-09-01T00:00:00.000Z",
+            "modified": "2016-09-01T00:00:00.000Z",
+            "version": "0"
+        },
+        {
+            "id": "indicator--0fb3bf0b-f3a4-4c75-bc34-492a7433f33b",
+            "type": "indicator",
+            "description": "indicator2 description",
+            "name": "indicator2 name",
+            "created_by_ref": "identity--4ac44385-691d-411a-bda8-027c61d68e99",
+            "created": "2016-09-01T00:00:00.000Z",
+            "modified": "2016-09-01T00:00:00.000Z",
+            "version": "0"
+        },
+        {
+            "id": "course-of-action--045c6f31-d329-40b0-b819-660d77b6cd58",
+            "type": "mitigates",
+            "description": "coa description",
+            "name": "coa name",
+            "created_by_ref": "identity--4ac44385-691d-411a-bda8-027c61d68e99",
+            "created": "2016-09-01T00:00:00.000Z",
+            "modified": "2016-09-01T00:00:00.000Z",
+            "version": "0"
+        }
+    ]
+}

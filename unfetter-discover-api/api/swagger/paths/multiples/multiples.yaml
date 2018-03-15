@@ -2,7 +2,7 @@ x-swagger-router-controller: multiples
 get:
   tags:
   
-  - STIX-Multiple
+  - STIX-Multiples
   description: Find all instances of the model matched by filter from the data source.
   operationId: get
   produces: 

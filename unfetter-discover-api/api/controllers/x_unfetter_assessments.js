@@ -5,8 +5,11 @@ const stix = require('../helpers/stix');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const BaseController = require('./shared/basecontroller');
 const mongoose = require('mongoose');
+const SecurityHelper = require('../helpers/security_helper');
+const DataHelper = require('../helpers/extended_data_helper');
 
-const XUnfetterAssessment = modelFactory.getModel('x-unfetter-assessment');
+const XUnfetterAssessmentType = 'x-unfetter-assessment';
+const XUnfetterAssessment = modelFactory.getModel(XUnfetterAssessmentType);
 const controller = new BaseController('x-unfetter-assessment');
 const returnProps = ['indicators', 'sensors', 'courseOfActions'];
 const ASSESSED_OBJECT_TYPES = ['indicator', 'x-unfetter-sensor', 'course-of-action'];
@@ -56,14 +59,16 @@ function calculateRiskByQuestion(assessments) {
 
 function getPromises(assessment) {
   const assessedObjectIDs = {};
-  assessment.stix.assessment_objects
-    .map(assessmentObj => assessmentObj.stix)
-    .forEach((assessmentObj) => {
-      if (assessedObjectIDs[assessmentObj.type] === undefined) {
-        assessedObjectIDs[assessmentObj.type] = [];
-      }
-      assessedObjectIDs[assessmentObj.type].push(assessmentObj.id);
-    });
+  if (assessment && assessment.stix) {
+    assessment.stix.assessment_objects
+      .map(assessmentObj => assessmentObj.stix)
+      .forEach((assessmentObj) => {
+        if (assessedObjectIDs[assessmentObj.type] === undefined) {
+          assessedObjectIDs[assessmentObj.type] = [];
+        }
+        assessedObjectIDs[assessmentObj.type].push(assessmentObj.id);
+      });
+  }
 
   // Generate promises using the ASSESSED_OBJECT_TYPES enum so Promise.all methods get the return in the order expected
   // Don't bother running a mongo query for empty objects
@@ -207,18 +212,32 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
 
   return Promise.all(getPromises(assessment))
     .then((results) => {
-      assessment = assessment.toObject().stix;
-      const indicators = results[0].map(doc => ({ ...doc.toObject().stix,
-        ...doc.toObject().metaProperties
-      }));
+      if (!assessment) {
+        assessment = {};
+      } else {
+        assessment = assessment.toObject().stix;
+      }
+
+      const indicators = results[0]
+        .filter((doc) => doc !== undefined)
+        .map((doc) => ({
+          ...doc.toObject().stix,
+          ...doc.toObject().metaProperties
+        }));
       const indicatorRisks = [];
-      const sensors = results[1].map(doc => ({ ...doc.toObject().stix,
-        ...doc.toObject().metaProperties
-      }));
+      const sensors = results[1]
+        .filter((doc) => doc !== undefined)
+        .map((doc) => ({
+          ...doc.toObject().stix,
+          ...doc.toObject().metaProperties
+        }));
       const sensorRisks = [];
-      const courseOfActions = results[2].map(doc => ({ ...doc.toObject().stix,
-        ...doc.toObject().metaProperties
-      }));
+      const courseOfActions = results[2]
+        .filter((doc) => doc !== undefined)
+        .map((doc) => ({
+          ...doc.toObject().stix,
+          ...doc.toObject().metaProperties
+        }));
       const coaRisks = [];
       const returnObject = {};
       returnObject.indicators = [];
@@ -772,35 +791,35 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
       Model.findOneAndUpdate({
         _id: id
       }, newDocument, {
-        new: true
-      }, (errUpdate, resultUpdate) => {
-        if (errUpdate) {
-          return res.status(500).json({
-            errors: [{
-              status: 500,
-              source: '',
-              title: 'Error',
-              code: '',
-              detail: 'An unknown error has occurred.'
-            }]
-          });
-        }
+          new: true
+        }, (errUpdate, resultUpdate) => {
+          if (errUpdate) {
+            return res.status(500).json({
+              errors: [{
+                status: 500,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'An unknown error has occurred.'
+              }]
+            });
+          }
 
-        if (resultUpdate) {
-          const requestedUrl = apiRoot + req.originalUrl;
-          const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
-          return res.status(200).json({
-            links: {
-              self: requestedUrl,
-            },
-            data: convertedResult
-          });
-        }
+          if (resultUpdate) {
+            const requestedUrl = apiRoot + req.originalUrl;
+            const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
+            return res.status(200).json({
+              links: {
+                self: requestedUrl,
+              },
+              data: convertedResult
+            });
+          }
 
-        return res.status(404).json({
-          message: `Unable to update the item.  No item found with id ${id}`
+          return res.status(404).json({
+            message: `Unable to update the item.  No item found with id ${id}`
+          });
         });
-      });
     } catch (err) {
       console.log(`error ${err}`);
       return res.status(500).json({
@@ -826,15 +845,63 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
   }
 });
 
+/**
+ * @description
+ *  if demo mode, the user can query all the open identity data
+ *  if uac and the user is not admin, then return the users orgs
+ * @param {*} user - optional 
+ * @param {*} orgs array of ids representing the organizations this user can view, based on user and RUN_MODE
+ */
+const generateGroupIdsForUser = (user) => {
+  if (process.env.RUN_MODE === 'DEMO') {
+    return [global.unfetter.openIdentity._id];
+  }
+  // If using UAC, confirm user can post to that group
+  if (process.env.RUN_MODE === 'UAC' && user && user.role !== 'ADMIN') {
+    const userOrgIds = user.organizations
+      .filter((org) => org.approved)
+      .map((org) => org.id);
+    return userOrgIds;
+  }
+}
+
+/**
+ * @description execute the given query as a mongo aggregate pipeline, write to the given response object
+ * @param {object} query - mongo aggregate object pipeline object 
+ * @param {Request} req 
+ * @param {Response} res 
+ */
 const latestAssessmentPromise = (query, req, res) => {
   Promise.resolve(aggregationModel.aggregate(query))
     .then((results) => {
       const requestedUrl = req.originalUrl;
+      const mappedResults = results
+        .map((r) => {
+          const retVal = { ...r };
+          retVal.id = r.stix.id;
+          // NOTE this is a temporary fix for naming in rollupId
+          // TODO remove this when a better fix is in place
+          if (r.stix.type) {
+            switch (r.stix.type) {
+              case 'course-of-action':
+                retVal.name = `${r.name} - Mitigations`
+                break;
+              case 'indicator':
+                retVal.name = `${r.name} - Indicators`
+                break;
+              case 'x-unfetter-sensor':
+                retVal.name = `${r.name} - Sensors`
+                break;
+            }
+          }
+          return retVal;
+        });
+
       return res.status(200).json({
         links: {
           self: requestedUrl,
         },
-        data: results
+        data: mappedResults
       });
     })
     .catch(err =>
@@ -863,8 +930,22 @@ const latestAssessmentsByCreatorId = (req, res) => {
   //  sort on last modified
   const latestAssessmentsByCreatorId = [{
     $match: {
-      creator: id,
-      'stix.type': 'x-unfetter-assessment'
+      'creator': id,
+      'stix.type': 'x-unfetter-assessment',
+      'metaProperties.rollupId': { $exists: 1 }
+    }
+  },
+  {
+    $project: {
+      'stix.assessment_objects': {
+          '$arrayElemAt': ['$stix.assessment_objects', 0]
+      },
+      'metaProperties.rollupId': 1,
+      'stix.id': 1,
+      'stix.name': 1,
+      'stix.modified': 1,
+      'stix.created_by_ref': 1,
+      creator: 1
     }
   },
   {
@@ -882,13 +963,22 @@ const latestAssessmentsByCreatorId = (req, res) => {
       modified: {
         $max: '$stix.modified'
       },
-      create_by_ref: {
+      creator: {
         $first: '$creator'
+      },
+      created_by_ref: {
+        $first: '$stix.created_by_ref'
+      },
+      stix: {
+        '$addToSet': {
+          type: '$stix.assessment_objects.stix.type',
+          id: '$stix.id'
+        }
       }
-    }
+    }    
   },
   {
-    $unwind: '$id'
+    $unwind: '$stix'
   },
   {
     $sort: {
@@ -901,52 +991,82 @@ const latestAssessmentsByCreatorId = (req, res) => {
 };
 
 /**
- * @description fetch assessments across the system, sort base on last modified
+ * @description fetch assessments whereby the created_by_ref is in the current users organizations
+ *  , sort base on last modified
  */
 const latestAssessments = (req, res) => {
-  const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+  const orgIds = generateGroupIdsForUser(req.user);
+  const matchStage = {
+    $match: {
+      'stix.type': 'x-unfetter-assessment',
+      'metaProperties.rollupId': { $exists: 1 }
+    }
+  };
 
+  // if not admin, add the security filter
+  if (req.user && req.user.role !== 'ADMIN') {
+    matchStage['$match']['stix.created_by_ref'] = { '$in': orgIds };
+  }
   // aggregate pipeline
-  //  match on assessment type
+  //  match on given user orgnizations and assessment type
   //  group the assessments into its parent rollup id (an assessment can be a combination of 3 types)
   //  unwind the potential 3 assessments per rollup into individual entries
   //  sort on last modified
-  const latestAssessments = [{
-    $match: {
-      'stix.type': 'x-unfetter-assessment'
-    }
-  },
-  {
-    $group: {
-      _id: '$metaProperties.rollupId',
-      rollupId: {
-        $first: '$metaProperties.rollupId'
-      },
-      id: {
-        $push: '$stix.id'
-      },
-      name: {
-        $first: '$stix.name'
-      },
-      modified: {
-        $max: '$stix.modified'
-      },
-      create_by_ref: {
-        $first: '$creator'
+  const latestAssessmentsByCreatedByRefs = [
+    matchStage,
+    {
+        $project: {
+            'stix.assessment_objects': {
+                '$arrayElemAt': ['$stix.assessment_objects', 0]
+            },
+            'metaProperties.rollupId': 1,
+            'stix.id': 1,
+            'stix.name': 1,
+            'stix.modified': 1,
+            'stix.created_by_ref': 1,
+            creator: 1
+        }
+    },
+    {
+      $group: {
+        _id: '$metaProperties.rollupId',
+        rollupId: {
+          $first: '$metaProperties.rollupId'
+        },
+        id: {
+          $push: '$stix.id'
+        },
+        name: {
+          $first: '$stix.name'
+        },
+        modified: {
+          $max: '$stix.modified'
+        },
+        creator: {
+          $first: '$creator'
+        },
+        created_by_ref: {
+          $first: '$stix.created_by_ref'
+        },
+        stix: {
+                '$addToSet': {
+                    type: '$stix.assessment_objects.stix.type',
+                    id: '$stix.id'
+                }
+            }
+        }
+    },
+    {
+        $unwind: '$stix'
+    },
+    {
+      $sort: {
+        modified: -1
       }
     }
-  },
-  {
-    $unwind: '$id'
-  },
-  {
-    $sort: {
-      modified: -1
-    }
-  }
   ];
 
-  latestAssessmentPromise(latestAssessments, req, res);
+  latestAssessmentPromise(latestAssessmentsByCreatedByRefs, req, res);
 };
 
 module.exports = {
