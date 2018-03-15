@@ -6,7 +6,7 @@ const controller = new BaseController('indicator');
 
 const get = controller.getCb((err, convertedResult, requestedUrl, req, res) => {
     var convResData = convertedResult.data;
-        if (req.swagger.params.metaproperties !== undefined && req.swagger.params.metaproperties.value !== undefined && req.swagger.params.metaproperties.value === true) {
+    if (req.swagger.params.metaproperties !== undefined && req.swagger.params.metaproperties.value !== undefined && req.swagger.params.metaproperties.value === true) {
         convResData = convertedResult.map((res) => {
             const temp = res;
             if (!temp.attributes.metaProperties) {

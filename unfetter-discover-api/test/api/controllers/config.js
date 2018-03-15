@@ -8,22 +8,20 @@ const mongoinit = require('../../../api/server/mongoinit')();
 const controller = {
     endpoint: 'config',
     attributes: {
-        "configKey": "test key",
-        "configValue": "test value",
-        "configGroups": [
-            "testing"
+        configKey: 'test key',
+        configValue: 'test value',
+        configGroups: [
+            'testing'
         ]
     }
 };
 
 describe('config controllers', () => {
-
     describe(controller.type, () => {
         // Create
         describe(`POST /${controller.endpoint}`, () => {
             it(`should create an ${controller.endpoint}`, (done) => {
-
-                let postObj = {};
+                const postObj = {};
                 postObj.attributes = controller.attributes;
 
                 request(server)
@@ -190,6 +188,5 @@ describe('config controllers', () => {
                     });
             });
         });
-
-    }); // End controller test 
+    }); // End controller test
 }); // End stix controllers test
