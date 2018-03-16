@@ -30,7 +30,11 @@
     }, {
       "enforceForRenamedProperties": false
     }],
-    "no-use-before-define": "off"
+    "no-use-before-define": "off",
+    "new-cap":"off",
+    "no-unused-vars":"warn",
+    "no-param-reassign":"warn",
+    "camelcase":"warn"
   },
   "env": {
     "jasmine": true
