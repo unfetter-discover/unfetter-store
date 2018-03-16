@@ -1,5 +1,8 @@
 # STIX routes
 
+/x-unfetter-capabilities:
+  $ref: ./x_unfetter_capabilities/x_unfetter_capabilities.yaml
+
 /attack-patterns:
   $ref: ./attack_patterns/attack_patterns.yaml
 /attack-patterns/{id}:
