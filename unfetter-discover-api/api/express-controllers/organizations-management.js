@@ -132,8 +132,8 @@ router.post('/process-approval/:userId', (req, res) => {
 
             // Publish notification
             if (approved) {
-                stixSchemaless.findById(matchingOrg.id, (findByIdError, orgResult) => {
-                    if (findByIdError || !result) {
+                stixSchemaless.findById(matchingOrg.id, (err, orgResult) => {
+                    if (err || !result) {
                         console.log('Unable to find organizaiton for ', matchingOrg.id);
                     } else {
                         const orgObj = orgResult.toObject();

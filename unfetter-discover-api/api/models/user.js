@@ -1,8 +1,5 @@
 const mongoose = require('mongoose');
 
-const BaseSchema = require('./stix-base');
-const stixCommons = require('./stix-commons');
-
 const UserSchema = new mongoose.Schema({
     firstName: {
         type: String
@@ -122,8 +119,8 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-UserSchema.index({ 'userName': 1 });
-UserSchema.index({ 'role': 1 });
+UserSchema.index({ userName: 1 });
+UserSchema.index({ role: 1 });
 
 const User = module.exports = mongoose.model('User', UserSchema, 'user');
 
@@ -146,5 +143,9 @@ const User = module.exports = mongoose.model('User', UserSchema, 'user');
 //     });
 // }
 
-module.exports = mongoose.model('User', UserSchema, 'user');
-// const User = module.exports;
+// module.exports.comparePassword = function (candidatePassword, hash, callback) {
+//     bcrypt.compare(candidatePassword, hash, (err, isMatch) => {
+//         if (err) throw err;
+//         callback(null, isMatch);
+//     });
+// }

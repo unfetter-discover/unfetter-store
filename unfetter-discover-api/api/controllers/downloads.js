@@ -3,7 +3,7 @@ const SecurityHelper = require('../helpers/security_helper');
 
 const downloadBundle = function downloadBundleFunc(req, res) {
     model
-        .find(SecurityHelper.applySecurityFilter({ stix: { $exists: 1 } }))
+        .find({ stix: { $exists: 1 } })
         .exec((err, results) => {
             if (err) {
                 return res.status(500).json({
@@ -16,17 +16,17 @@ const downloadBundle = function downloadBundleFunc(req, res) {
             let objects;
             if (req.swagger.params.extendedproperties !== undefined && req.swagger.params.extendedproperties.value !== undefined && req.swagger.params.extendedproperties.value === true) {
                 objects = results
-                    .map(response => response.toObject())
-                    .map(response => {
-                        if (response.extendedProperties !== undefined) {
-                            return { ...response.stix, ...response.extendedProperties };
+                    .map(res => res.toObject())
+                    .map(res => {
+                        if (res.extendedProperties !== undefined) {
+                            return { ...res.stix, ...res.extendedProperties };
                         }
-                        return response.stix;
+                        return res.stix;
                     });
             } else {
                 objects = results
-                    .map(response => response.toObject())
-                    .map(response => response.stix);
+                    .map(res => res.toObject())
+                    .map(res => res.stix);
             }
 
             return res.json({

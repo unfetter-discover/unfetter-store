@@ -13,16 +13,16 @@ const controller = new BaseController('indicator');
 const get = controller.getCb((err, convertedResult, requestedUrl, req, res) => {
     const result = convertedResult;
     if (req.swagger.params.metaproperties !== undefined && req.swagger.params.metaproperties.value !== undefined && req.swagger.params.metaproperties.value === true) {
-        result.data = convertedResult.map(response => {
-            const temp = response;
+        convertedResult.data = convertedResult.map(res => {
+            const temp = res;
             if (!temp.attributes.metaProperties) {
                 temp.attributes.metaProperties = {};
             }
-            if (response.attributes !== undefined && response.attributes.kill_chain_phases !== undefined) {
-                temp.attributes.metaProperties.groupings = response.attributes.kill_chain_phases.map(killChainPhase => {
+            if (res.attributes !== undefined && res.attributes.kill_chain_phases !== undefined) {
+                temp.attributes.metaProperties.groupings = res.attributes.kill_chain_phases.map(kill_chain_phase => {
                     const grouping = {};
-                    grouping.groupingValue = killChainPhase.phase_name;
-                    grouping.groupingName = killChainPhase.kill_chain_name;
+                    grouping.groupingValue = kill_chain_phase.phase_name;
+                    grouping.groupingName = kill_chain_phase.kill_chain_name;
                     return grouping;
                 });
             }
@@ -38,28 +38,10 @@ const get = controller.getCb((err, convertedResult, requestedUrl, req, res) => {
 });
 
 const attackPatternsByIndicator = (req, res) => {
-    const aggregationQuery = [{
-        $match: {
-            'stix.type': 'indicator'
-        }
-    },
-    {
-        $lookup: {
-            from: 'stix',
-            localField: 'stix.id',
-            foreignField: 'stix.source_ref',
-            as: 'relationships'
-        }
-    },
-    {
-        $match: {
-            relationships: {
-                $not: {
-                    $size: 0
-                }
-            },
-            'relationships.stix.target_ref': {
-                $regex: /^attack-pattern--/
+    const aggregationQuery = [
+        {
+            $match: {
+                'stix.type': 'indicator'
             }
         }
     },
@@ -89,25 +71,11 @@ const attackPatternsByIndicator = (req, res) => {
                     x_mitre_platforms: '$attackPatterns.extendedProperties.x_mitre_platforms'
                 }
             }
-        }
-    }
-    ];
-
-    aggregationModel.aggregate(aggregationQuery, (err, results) => {
-        if (err) {
-            return res.status(500).json({
-                errors: [{
-                    status: 500,
-                    source: '',
-                    title: 'Error',
-                    code: '',
-                    detail: 'An unknown error has occurred.'
-                }]
-            });
-        }
-        return res.json({
-            data: {
-                attributes: results
+        },
+        {
+            $match: {
+                relationships: { $not: { $size: 0 } },
+                'relationships.stix.target_ref': { $regex: /^attack-pattern--/ }
             }
         });
     });
@@ -152,22 +120,22 @@ const summaryStatistics = (req, res) => {
                 0 // eslint-disable-line indent
                 ]
             }
-        }
-    },
-    {
-        $group: {
-            _id: '$created_by_ref',
-            count: {
-                $sum: 1
-            },
-            views: {
-                $sum: '$views'
-            },
-            likes: {
-                $sum: '$likes'
-            },
-            comments: {
-                $sum: '$comments'
+        },
+        {
+            $unwind: '$attackPatterns'
+        },
+        {
+            $group: {
+                _id: '$_id',
+                attackPatterns: {
+                    $addToSet: {
+                        id: '$attackPatterns._id',
+                        name: '$attackPatterns.stix.name',
+                        kill_chain_phases: '$attackPatterns.stix.kill_chain_phases',
+                        x_unfetter_sophistication_level: '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
+                        x_mitre_platforms: '$attackPatterns.extendedProperties.x_mitre_platforms'
+                    }
+                }
             }
         }
     }
@@ -177,19 +145,11 @@ const summaryStatistics = (req, res) => {
         if (err) {
             return res.status(500).json({
                 errors: [{
-                    status: 500,
-                    source: '',
-                    title: 'Error',
-                    code: '',
-                    detail: 'An unknown error has occurred.'
+                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                 }]
             });
         }
-        return res.json({
-            data: {
-                attributes: results
-            }
-        });
+        return res.json({ data: { attributes: results } });
     });
 };
 
@@ -344,7 +304,5 @@ module.exports = {
     add: controller.add(),
     update: controller.update(),
     deleteById: controller.deleteById(),
-    attackPatternsByIndicator,
-    summaryStatistics,
-    search
+    attackPatternsByIndicator
 };

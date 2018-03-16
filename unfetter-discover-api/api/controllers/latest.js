@@ -1,22 +1,6 @@
 const mongoose = require('mongoose');
-const SecurityHelper = require('../helpers/security_helper');
 
-const schema = mongoose.Schema({}, {
-    strict: false
-});
-
-const writeErrorResp = (res, msg) => {
-    const detail = msg || 'An unknown error has occurred.';
-    return res.status(500).json({
-        error: {
-            status: 500,
-            source: '',
-            title: 'Error',
-            code: '',
-            detail,
-        },
-    });
-};
+const schema = mongoose.Schema({}, { strict: false });
 
 const callPromise = (query, req, res) => {
     const aggregationModel = modelFactory();
@@ -30,9 +14,16 @@ const callPromise = (query, req, res) => {
                 data: results
             });
         })
-        .catch(err => {
-            writeErrorResp(res, err);
-        });
+        .catch(err =>
+            res.status(500).json({
+                errors: [{
+                    status: 500,
+                    source: '',
+                    title: 'Error',
+                    code: '',
+                    detail: 'An unknown error has occurred.'
+                }]
+            }));
 };
 
 /**
@@ -61,25 +52,20 @@ const getLatestByTypeAndCreatorId = (req, res) => {
     //  sort on last modified
     const latestByTypeAndCreator = [
         {
-            $match: query,
+            $match: {
+                creator: id,
+                'stix.type': type
+            }
         },
         {
-            $group: {
-                _id: '$stix.id',
-                id: {
-                    $push: '$stix.id'
-                },
-                name: {
-                    $first: '$stix.name'
-                },
-                type: {
-                    $first: '$stix.type'
-                },
-                modified: {
-                    $max: '$stix.modified'
-                },
-                creator: {
-                    $first: '$creator'
+            $group:
+                {
+                    _id: '$stix.id',
+                    id: { $push: '$stix.id' },
+                    name: { $first: '$stix.name' },
+                    type: { $first: '$stix.type' },
+                    modified: { $max: '$stix.modified' },
+                    create_by_ref: { $first: '$creator' }
                 }
             }
         },
@@ -112,25 +98,17 @@ const getLatestByType = (req, res) => {
     //  sort on last modified
     const latestByType = [
         {
-            $match: query,
+            $match: { 'stix.type': 'report' }
         },
         {
-            $group: {
-                _id: '$stix.id',
-                id: {
-                    $push: '$stix.id'
-                },
-                name: {
-                    $first: '$stix.name'
-                },
-                type: {
-                    $first: '$stix.type'
-                },
-                modified: {
-                    $max: '$stix.modified'
-                },
-                created_by_ref: {
-                    $first: '$stix.created_by_ref'
+            $group:
+                {
+                    _id: '$stix.id',
+                    id: { $push: '$stix.id' },
+                    name: { $first: '$stix.name' },
+                    type: { $first: '$stix.type' },
+                    modified: { $max: '$stix.modified' },
+                    create_by_ref: { $first: '$creator' }
                 }
             }
         },
@@ -138,9 +116,8 @@ const getLatestByType = (req, res) => {
             $unwind: '$id'
         },
         {
-            $sort: {
-                modified: -1
-            }
+            $sort:
+                { modified: -1 }
         }
     ];
     callPromise(latestByType, req, res);
@@ -169,7 +146,10 @@ const getLatestThreatReportsByCreatorId = (req, res) => {
     // aggregate pipeline
     const latestByCreatorWithRollup = [
         {
-            $match: query,
+            $match: {
+                creator: id,
+                'stix.type': 'report'
+            }
         },
         ...threatReportGroupAndUnwind()
     ];
@@ -180,7 +160,7 @@ const getLatestThreatReportsByCreatorId = (req, res) => {
 /**
  * @description fetch ids for given stix type, sort base on last modified
  */
-const getLatestThreatReports = (req, res) => {
+const getLatestThreatReport = (req, res) => {
     res.header('Content-Type', 'application/vnd.api+json');
 
     let query = {
@@ -190,7 +170,7 @@ const getLatestThreatReports = (req, res) => {
     // aggregate pipeline
     const latest = [
         {
-            $match: query,
+            $match: { 'stix.type': 'report' }
         },
         ...threatReportGroupAndUnwind()
     ];
@@ -198,32 +178,22 @@ const getLatestThreatReports = (req, res) => {
     callPromise(latest, req, res);
 };
 
-const threatReportGroupAndUnwind = () =>
+const threatReportAggregateGroupAndUnwind = () =>
     // aggregate pipeline
     // no match
     // group on workproduct ids
     // unwind the arrays
     // sort on last modified
     [{
-        $group: {
-            _id: '$metaProperties.work_products.id',
-            workproductId: {
-                $first: '$metaProperties.work_products.id'
-            },
-            reportIds: {
-                $push: '$stix.id'
-            },
-            name: {
-                $first: '$stix.name'
-            },
-            type: {
-                $first: '$stix.type'
-            },
-            modified: {
-                $max: '$stix.modified'
-            },
-            created_by_ref: {
-                $first: '$stix.created_by_ref'
+        $group:
+            {
+                _id: '$metaProperties.work_products.id',
+                workproductId: { $first: '$metaProperties.work_products.id' },
+                reportIds: { $push: '$stix.id' },
+                name: { $first: '$stix.name' },
+                type: { $first: '$stix.type' },
+                modified: { $max: '$stix.modified' },
+                create_by_ref: { $first: '$creator' }
             }
         }
     },
@@ -239,11 +209,12 @@ const threatReportGroupAndUnwind = () =>
         }
     }];
 
+
 const modelFactory = () => mongoose.model('aggregations', schema, 'stix');
 
 module.exports = {
     getLatestByTypeAndCreatorId,
     getLatestByType,
-    getLatestThreatReports,
-    getLatestThreatReportsByCreatorId,
+    getLatestThreatReport,
+    getLatestThreatReportByCreatorId,
 };

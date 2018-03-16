@@ -25,7 +25,7 @@ router.get('/visit', (req, res) => {
                 }]
             });
         }
-        model.create(newDocument, (err, result) => { // eslint-disable-line no-unused-vars
+        model.create(newDocument, (err, result) => {
             if (err) {
                 return res.status(500).json({
                     errors: [{

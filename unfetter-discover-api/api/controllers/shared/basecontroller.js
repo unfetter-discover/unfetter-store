@@ -1,5 +1,3 @@
-
-const mongoose = require('mongoose');
 const lodash = require('lodash');
 const stix = require('../../helpers/stix');
 const jsonApiConverter = require('../../helpers/json_api_converter');
@@ -51,11 +49,7 @@ module.exports = class BaseController {
     }
 
     get() {
-        const type = this.type;
-        const model = this.model;
-        return this.getCb((err, convertedResult, requestedUrl, req, res) => {
-            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
-        });
+        return this.getCb((err, convertedResult, requestedUrl, req, res) => res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult }));
     }
 
     getCb(callback) {
@@ -100,7 +94,6 @@ module.exports = class BaseController {
 
     getById() {
         const type = this.type;
-        const model = this.model;
         return this.getByIdCb((err, result, req, res, id) => {
             if (err) {
                 return res.status(500).json({
@@ -230,21 +223,17 @@ module.exports = class BaseController {
                         let relType = '';
                         // TODO make this better
                         switch (type) {
-                            case 'indicator':
-                                relType = 'indicates';
-                                break;
-                            case 'x-unfetter-sensor':
-                                relType = 'detects';
-                                break;
-                            default:
+                        case 'indicator':
+                            relType = 'indicates';
+                            break;
+                        default:
                         }
                         const tempRelationship = {
                             stix: {
                                 id: relId,
                                 source_ref: newDocument.stix.id,
                                 target_ref: relatedId,
-                                relationship_type: relType,
-                                created_by_ref: obj.stix.created_by_ref
+                                relationship_type: relType
                             }
                         };
 
@@ -294,11 +283,8 @@ module.exports = class BaseController {
                                         publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
                                     }
                                 }
-                            });
-                        }
-
-                        // Send new STIX id to add
-                        publish.sendStixId(newDocument._id, newDocument.stix.type);
+                            }
+                        });
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
@@ -347,8 +333,6 @@ module.exports = class BaseController {
                                 status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                             }]
                         });
-                    } else if (!result) {
-                        return res.status(404).json({ message: 'Unable to retrieve document' });
                     }
 
                     // set the new values
@@ -454,10 +438,10 @@ module.exports = class BaseController {
                 }
 
                 return res.status(404).json({ message: `Unable to delete the item.  No item found with id ${id}` });
-            }).catch(err => { // eslint-disable-line no-unused-vars
+            }).catch(err => {
                 res.status(500).json({
                     errors: [{
-                        status: 500, source: '', title: 'Error', code: '', detail: `An unknown error has occurred. [${err}]`
+                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             });
@@ -467,7 +451,7 @@ module.exports = class BaseController {
     /**
      * @description apply filter for only give model types, user and node environment conditions
      * @see SecurityHelper#applySecurityFilter
-     * @param {*} query 
+     * @param {*} query
      * @param {*} type
      * @param {*} user
      */
@@ -481,11 +465,8 @@ module.exports = class BaseController {
         if (filterTypes.has(type)) {
             console.log(`applying filter on type ${type}`);
             return SecurityHelper.applySecurityFilter(query, user);
-        } else {
-            console.log(`skipping filter for type, ${type}`);
-            return query;
         }
+        console.log(`skipping filter for type, ${type}`);
+        return query;
     }
-
-
-}
+};

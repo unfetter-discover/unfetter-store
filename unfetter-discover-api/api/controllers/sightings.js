@@ -182,7 +182,5 @@ module.exports = {
     getById: controller.getById(),
     add: controller.add(),
     update: controller.update(),
-    deleteById: controller.deleteById(),
-    sightingGroup,
-    sightingGroupById
+    deleteById: controller.deleteById()
 };

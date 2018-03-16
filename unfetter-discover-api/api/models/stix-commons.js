@@ -35,13 +35,6 @@ stixCommons.external_references = mongoose.Schema({
     external_id: String
 }, { _id: false });
 
-stixCommons.metaProperties = mongoose.Schema({
-    published: {
-        type: Boolean,
-        default: false
-    }
-}, { _id: false, strict: false });
-
 stixCommons.motivations = [
     'accidental',
     'coercion',
@@ -53,6 +46,15 @@ stixCommons.motivations = [
     'personal-satisfaction',
     'revenge',
     'unpredictable'
+];
+
+stixCommons.resource_level = [
+    'individual',
+    'club',
+    'contest',
+    'team',
+    'organization',
+    'government'
 ];
 
 stixCommons.resource_level = [
@@ -104,7 +106,7 @@ stixCommons.makeSchema = childSchema => {
             ...stixCommons.baseStix,
             ...childSchema
         }
-    }; 
+    };
     const schemaObj = new mongoose.Schema(schema);
     schemaObj.index({ 'stix.name': 1 });
     schemaObj.index({ 'stix.type': 1 });

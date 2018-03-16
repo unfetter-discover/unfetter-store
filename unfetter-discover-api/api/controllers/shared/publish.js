@@ -40,7 +40,7 @@ const notifyUser = (userId, notificationType, heading, notificationBody, link = 
         },
         body
     })
-        .then(res => { // eslint-disable-line no-unused-vars
+        .then(res => {
             console.log('Publish API recieved user notification for', userId);
         })
         .catch(err => console.log('Error!', err));
@@ -56,7 +56,7 @@ const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, l
         },
         body
     })
-        .then(res => { // eslint-disable-line no-unused-vars
+        .then(res => {
             console.log('Publish API recieved organization notification for', orgId);
         })
         .catch(err => console.log('Error!', err));
@@ -72,7 +72,7 @@ const notifyAdmin = (notificationType, heading, notificationBody, link = null, e
         },
         body
     })
-        .then(res => { // eslint-disable-line no-unused-vars
+        .then(res => {
             console.log('Publish API recieved admin notification');
         })
         .catch(err => console.log('Error!', err));
@@ -89,24 +89,8 @@ const updateSocialForAll = (notificationType, notificationBody, stixId) => {
         },
         body
     })
-        .then(res => { // eslint-disable-line no-unused-vars
+        .then(res => {
             console.log('Publish API recieved notification for social update');
-        })
-        .catch(err => console.log('Error!', err));
-};
-
-const sendStixId = (stixId, type) => {
-    const body = JSON.stringify(new CreateNotification(null, null, 'STIXID', null, { id: stixId, type }, stixId, null, null));
-    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/stixid/all`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-        },
-        body
-    })
-        .then(res => { // eslint-disable-line no-unused-vars
-            console.log('Publish API recieved notification for stixid update');
         })
         .catch(err => console.log('Error!', err));
 };

@@ -7,13 +7,13 @@ const CTF_PARSE_PATH = process.env.CTF_PARSE_PATH || '/translate/report/url';
 const translateUrl = (req, res) => {
     const err = {
         error:
-        {
-            status: 500,
-            source: '',
-            title: 'Error',
-            code: '',
-            detail: 'An unknown error has occurred.'
-        }
+            {
+                status: 500,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'An unknown error has occurred.'
+            }
     };
     if (!req || !req.swagger || !req.swagger.params) {
         return res.status(500).json(err);
