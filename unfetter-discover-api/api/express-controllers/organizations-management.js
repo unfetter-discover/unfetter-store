@@ -31,8 +31,8 @@ router.get('/pending-approval', (req, res) => {
         ];
     } else {
         const orgsToQuery = user.organizations
-            .filter((org) => org.role === 'ORG_LEADER')
-            .map((org) => org.id);
+            .filter(org => org.role === 'ORG_LEADER')
+            .map(org => org.id);
 
         if (!orgsToQuery) {
             return res.status(401).json({

@@ -3,7 +3,6 @@ process.env.RUN_MODE = 'TEST';
 const should = require('should');
 const request = require('supertest');
 const server = require('../../../app');
-const mongoinit = require('../../../api/server/mongoinit')();
 
 const controllers = [
     {

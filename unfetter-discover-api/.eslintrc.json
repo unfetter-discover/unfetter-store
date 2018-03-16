@@ -18,7 +18,7 @@
     ],
     "arrow-parens": [
       "error",
-      "always"
+      "as-needed"
     ],
     "prefer-destructuring": [
       "error", {
@@ -28,7 +28,8 @@
     ],
     "no-shadow": ["warn", { "builtinGlobals": false, "hoist": "functions", "allow": [] }],
     "no-void": 0,
-    "import/no-unresolved": "off"
+    "import/no-unresolved": "off",
+    "global-require":"off"
   },
   "env": {
     "jasmine": true
