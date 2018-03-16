@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const StixSchema = {
@@ -8,7 +7,7 @@ const StixSchema = {
         type: String,
         required: [true, 'name is required']
     },
-    kill_chain_phases: [stixCommons['kill_chain_phases']],
+    kill_chain_phases: [stixCommons.kill_chain_phases],
     aliases: [String],
     description: String,
     type: {
@@ -18,6 +17,6 @@ const StixSchema = {
     },
 };
 
-const sensor = mongoose.model('XUnfetterSensor', stixCommons['makeSchema'](StixSchema), 'stix');
+const sensor = mongoose.model('XUnfetterSensor', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = sensor;

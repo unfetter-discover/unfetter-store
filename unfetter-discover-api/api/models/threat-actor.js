@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const StixSchema = {
@@ -35,6 +34,6 @@ const StixSchema = {
     },
 };
 
-const ThreatActor = mongoose.model('ThreatActor', stixCommons['makeSchema'](StixSchema), 'stix');
+const ThreatActor = mongoose.model('ThreatActor', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = ThreatActor;

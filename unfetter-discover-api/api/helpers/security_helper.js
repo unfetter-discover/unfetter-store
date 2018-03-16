@@ -1,9 +1,9 @@
 /**
  * @description tests if this is an admin in a valid state
  * @param {*} user
- * @returns true if this user object has the admin role and is not locked, otherwise false 
+ * @returns true if this user object has the admin role and is not locked, otherwise false
  */
-const isAdmin = (user) => {
+const isAdmin = user => {
     if (!user) {
         return false;
     }
@@ -11,13 +11,13 @@ const isAdmin = (user) => {
     const role = user.role;
     const isLocked = user.locked;
     const isApproved = user.approved;
-    const isTruthy = (el) => typeof el === 'boolean' && el === true;
+    const isTruthy = el => typeof el === 'boolean' && el === true;
     if (role === 'ADMIN' && !isTruthy(isLocked) && isTruthy(isApproved)) {
         return true;
     }
 
     return false;
-}
+};
 
 /**
  * @description
@@ -28,14 +28,14 @@ const isAdmin = (user) => {
  *      ie, the user has the ADMIN role in the database and is seen in the request object
  *  current user has created_by_ref org
  *      ie, the object has a created_by_ref, with a group id this current user belongs
- * 
- * @param {*} query a mongo query object 
+ *
+ * @param {*} query a mongo query object
  * @param {*} user user object found for the current user
  * @returns {object} mongo query, with security filter attached
  */
 const applySecurityFilter = (query, user) => {
     if (!query || process.env.RUN_MODE !== 'UAC' || !user) {
-        console.log(`skipping filter for query=${query}, RUN_MODE=${process.env.RUN_MODE}, user=${user}`)
+        console.log(`skipping filter for query=${query}, RUN_MODE=${process.env.RUN_MODE}, user=${user}`);
         return query;
     }
 
@@ -48,16 +48,16 @@ const applySecurityFilter = (query, user) => {
 
     const unfetterOpenUserId = global.unfetter.openIdentity._id || '';
     const orgs = user.organizations || [];
-    const currentUserOrgIds = orgs.map((el) => el.id);
-    const hasOpenId = currentUserOrgIds.findIndex((el) => el === unfetterOpenUserId) > -1;
+    const currentUserOrgIds = orgs.map(el => el.id);
+    const hasOpenId = currentUserOrgIds.findIndex(el => el === unfetterOpenUserId) > -1;
     if (hasOpenId === false) {
         currentUserOrgIds.push(unfetterOpenUserId);
     }
 
     const orgIds = [...currentUserOrgIds]
-        .filter((el) => el !== undefined)
-        .map((el) => el.trim())
-        .filter((el) => el.length > 0)
+        .filter(el => el !== undefined)
+        .map(el => el.trim())
+        .filter(el => el.length > 0)
         .sort((a, b) => {
             if (a === b) {
                 return 0;
@@ -65,14 +65,13 @@ const applySecurityFilter = (query, user) => {
 
             if (a > b) {
                 return -1;
-            } else {
-                return 1;
             }
+            return 1;
         });
 
     const securityFilter = { 'stix.created_by_ref': { $exists: true, $in: orgIds } };
     return { ...query, ...securityFilter };
-}
+};
 
 module.exports = {
     applySecurityFilter,

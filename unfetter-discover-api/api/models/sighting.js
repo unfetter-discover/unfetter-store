@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const StixSchema = {
@@ -28,6 +27,6 @@ const StixSchema = {
     },
 };
 
-const Sighting = mongoose.model('Sighting', stixCommons['makeSchema'](StixSchema), 'stix');
+const Sighting = mongoose.model('Sighting', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = Sighting;
