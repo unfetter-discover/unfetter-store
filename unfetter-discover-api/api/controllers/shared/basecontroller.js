@@ -62,6 +62,7 @@ module.exports = class BaseController {
                 return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: query.error }] });
             }
 
+
             const matcherQuery = this.applySecurityFilterWhenNeeded(Object.assign({ 'stix.type': type }, query.filter), type, req.user);
             model
                 .find(matcherQuery)
@@ -77,6 +78,8 @@ module.exports = class BaseController {
 
                     const requestedUrl = apiRoot + req.originalUrl;
                     const data = DataHelper.getEnhancedData(result, req.swagger.params);
+                    console.log('eeeeeeeee');
+                    console.log(data);
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi(data, type, requestedUrl);
                     // return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                     callback(err, convertedResult, requestedUrl, req, res);
