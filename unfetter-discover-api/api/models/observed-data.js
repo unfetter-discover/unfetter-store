@@ -29,6 +29,6 @@ const StixSchema = {
     }
 };
 
-const ObservedData = mongoose.model('ObservedData', stixCommons['makeSchema'](StixSchema), 'stix');
+const ObservedData = mongoose.model('ObservedData', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = ObservedData;

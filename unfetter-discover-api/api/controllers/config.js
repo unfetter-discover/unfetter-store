@@ -4,7 +4,7 @@ const parser = require('../helpers/url_parser');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const uuid = require('uuid');
 
-const model = modelFactory.getModel('config');
+const Model = modelFactory.getModel('config');
 const controller = new BaseController('config');
 const apiRoot = 'https://localhost/api';
 
@@ -14,26 +14,33 @@ module.exports = {
 
         const query = parser.dbQueryParams(req);
         if (query.error) {
-            return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: query.error }] });
+            return res.status(400).json({
+                errors: [{
+                    status: 400, source: '', title: 'Error', code: '', detail: query.error
+                }]
+            });
         }
 
-        model
+        Model
             .find(Object.assign({}, query.filter))
             .sort(query.sort)
             .limit(query.limit)
             .skip(query.skip)
             .exec((err, result) => {
-
                 if (err) {
-                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        }]
+                    });
                 }
 
 
                 const requestedUrl = apiRoot + req.originalUrl;
                 const convertedResult = result
-                    .map(res => res.toObject())
-                    .map(res => {
-                        let retVal = {};
+                    .map((res) => res.toObject())
+                    .map((res) => {
+                        const retVal = {};
                         retVal.links = {};
                         retVal.links.self = `${requestedUrl}/${res._id}`;
                         retVal.attributes = res;
@@ -50,10 +57,10 @@ module.exports = {
             const data = req.swagger.params.data.value.data;
             // TODO need to put this in a get/try in case these values don't exist
             obj = data.attributes;
-            if(obj._id === undefined) {
+            if (obj._id === undefined) {
                 obj._id = uuid.v4();
             }
-            const newDocument = new model(obj);
+            const newDocument = new Model(obj);
 
             const error = newDocument.validateSync();
             if (error) {
@@ -61,26 +68,41 @@ module.exports = {
                 lodash.forEach(error.errors, (field) => {
                     errors.push(field.message);
                 });
-                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: errors
+                    }]
+                });
             }
 
-            model.create(newDocument, (err, result) => {
+            Model.create(newDocument, (err, result) => {
                 if (err) {
                     console.log(err);
-                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        }]
+                    });
                 }
 
                 const requestedUrl = apiRoot + req.originalUrl;
-                return res.status(201).json({ links: { self: `${requestedUrl}/${result._id}`, }, id: result._id, data: {attributes: result}});
-
+                return res.status(201).json({ links: { self: `${requestedUrl}/${result._id}`, }, id: result._id, data: { attributes: result } });
             });
         } else {
-            return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
+            return res.status(400).json({
+                errors: [{
+                    status: 400, source: '', title: 'Error', code: '', detail: 'malformed request'
+                }]
+            });
         }
     },
     getById: controller.getByIdCb((err, result, req, res, id) => {
         if (err) {
-            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            return res.status(500).json({
+                errors: [{
+                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                }]
+            });
         }
 
         if (result && result.length === 1) {
@@ -95,15 +117,18 @@ module.exports = {
         res.header('Content-Type', 'application/vnd.api+json');
 
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-        model.findOneAndRemove({ _id: id }, (err, result) => {
-            if(err) {
+        Model.findOneAndRemove({ _id: id }, (err, result) => {
+            if (err) {
                 console.log(err);
-                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                return res.status(500).json({
+                    errors: [{
+                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                    }]
+                });
             } else if (!result) {
                 return res.status(404).json({ message: `Unable to delete the item.  No item found with id ${id}` });
-            } else {
-                return res.status(200).json({ data: { type: 'Success', message: `Deleted id ${id}` } });
             }
+            return res.status(200).json({ data: { type: 'Success', message: `Deleted id ${id}` } });
         });
     },
     update: (req, res) => {
@@ -112,11 +137,19 @@ module.exports = {
         // get the old item
         if (req.swagger.params.id.value !== undefined && req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
             const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-            model.findById({ _id: id }, (err, result) => {
+            Model.findById({ _id: id }, (err, result) => {
                 if (err) {
-                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
-                } else if(!result) {
-                    return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'Item not found' }] });
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        }]
+                    });
+                } else if (!result) {
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500, source: '', title: 'Error', code: '', detail: 'Item not found'
+                        }]
+                    });
                 }
 
                 // set the new values
@@ -131,20 +164,28 @@ module.exports = {
 
                 // then validate
                 // guard
-                const newDocument = new model(resultObj);
+                const newDocument = new Model(resultObj);
                 const error = newDocument.validateSync();
                 if (error) {
                     const errors = [];
                     lodash.forEach(error.errors, (field) => {
                         errors.push(field.message);
                     });
-                    return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                    return res.status(400).json({
+                        errors: [{
+                            status: 400, source: '', title: 'Error', code: '', detail: errors
+                        }]
+                    });
                 }
 
                 // guard pass complete
-                model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+                Model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                     if (errUpdate) {
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            }]
+                        });
                     }
 
                     if (resultUpdate) {
@@ -156,7 +197,11 @@ module.exports = {
                 });
             });
         } else {
-            return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
+            return res.status(400).json({
+                errors: [{
+                    status: 400, source: '', title: 'Error', code: '', detail: 'malformed request'
+                }]
+            });
         }
     }
 };

@@ -18,10 +18,23 @@
     ],
     "arrow-parens": [
       "error",
-      "always"
-    ]
+      "as-needed"
+    ],
+    "prefer-destructuring": [
+      "error", {
+        "array": true,
+        "object": false
+      }
+    ],
+    "no-shadow": ["warn", { "builtinGlobals": false, "hoist": "functions", "allow": [] }],
+    "no-void": 0,
+    "import/no-unresolved": "off",
+    "global-require":"off"
   },
   "env": {
     "jasmine": true
+  },
+  "settings": {
+    "import/resolver": "webpack"
   }
 }

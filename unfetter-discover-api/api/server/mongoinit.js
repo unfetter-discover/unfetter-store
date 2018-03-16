@@ -15,12 +15,12 @@ mongoose.Promise = global.Promise;
 /**
  * @description populate global lookup values
  */
-const lookupGlobalValues = () => new Promise((resolve, reject) =>{
+const lookupGlobalValues = () => new Promise((resolve, reject) => {
     console.log('looking up global values...');
 
     const promises = [];
 
-    promises.push(identityPromise = identityModel
+    promises.push(identityModel
         .findOne({ 'stix.type': 'identity', 'stix.name': 'Unfetter Open' }).exec());
 
     promises.push(configModel.find({}).exec());
@@ -37,7 +37,7 @@ const lookupGlobalValues = () => new Promise((resolve, reject) =>{
 
             const configObjs = configurations.map((configuration) => configuration.toObject());
             const jwtDurationSeconds = configObjs.find((configObj) => configObj.configKey === 'jwtDurationSeconds');
-            
+
             if (jwtDurationSeconds !== undefined) {
                 console.log('jwtDurationSeconds set to saved configuration');
                 global.unfetter.JWT_DURATION_SECONDS = jwtDurationSeconds.configValue;
@@ -48,7 +48,7 @@ const lookupGlobalValues = () => new Promise((resolve, reject) =>{
 
             resolve('Identities recieved');
         })
-        .catch((err) => reject('Unable to get identities and/or configurations: ', err))    
+        .catch((err) => reject(new Error('Unable to get identities and/or configurations: '.concat(err))));
 });
 
 module.exports = () => new Promise((resolve, reject) => {
@@ -69,7 +69,7 @@ module.exports = () => new Promise((resolve, reject) => {
         const db = global.unfetter.conn;
         db.on('error', () => {
             console.error(console, 'connection error:');
-            reject('error connecting to monogo');
+            reject(new Error('error connecting to monogo'));
         });
         db.on('connected', () => {
             console.log('connected to mongodb');
