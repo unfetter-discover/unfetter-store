@@ -18,8 +18,19 @@
     ],
     "arrow-parens": [
       "error",
-      "always"
-    ]
+      "as-needed"
+    ],
+    "no-void": 0,
+    "import/no-unresolved": "off",
+    "no-shadow": ["warn", { "builtinGlobals": false, "hoist": "functions", "allow": [] }],
+    "global-require":"off",
+    "prefer-destructuring": [1, {
+      "array": true,
+      "object": false
+    }, {
+      "enforceForRenamedProperties": false
+    }],
+    "no-use-before-define": "off"
   },
   "env": {
     "jasmine": true

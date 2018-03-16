@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const ExtendedSchema = {
@@ -28,6 +27,6 @@ const ExtendedSchema = {
     }
 };
 
-const Campaign = mongoose.model('Campaign', stixCommons['makeSchema'](ExtendedSchema), 'stix');
+const Campaign = mongoose.model('Campaign', stixCommons.makeSchema(ExtendedSchema), 'stix');
 
 module.exports = Campaign;

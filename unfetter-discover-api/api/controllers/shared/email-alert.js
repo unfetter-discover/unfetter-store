@@ -27,15 +27,15 @@ const emailUser = (userId, userEmail, template, subject, emailBody) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
         },
         body
     })
-    .then((res) => {
-        console.log('Publish API recieved user notification for', userId);
-    })
-    .catch((err) => console.log('Error!', err));
-}
+        .then(res => {
+            console.log('Publish API recieved user notification for', userId);
+        })
+        .catch(err => console.log('Error!', err));
+};
 
 module.exports = {
     emailUser

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const stixCommons = {};
 
-stixCommons['kill_chain_phases'] = mongoose.Schema({
+stixCommons.kill_chain_phases = mongoose.Schema({
     kill_chain_name: {
         type: String,
         required: [true, 'kill_chain_name is required']
@@ -13,7 +13,7 @@ stixCommons['kill_chain_phases'] = mongoose.Schema({
     }
 }, { _id: false });
 
-stixCommons['granular_markings'] = mongoose.Schema({
+stixCommons.granular_markings = mongoose.Schema({
     selectors: {
         type: [String],
         required: [true, 'selectors are required']
@@ -24,7 +24,7 @@ stixCommons['granular_markings'] = mongoose.Schema({
     }
 }, { _id: false });
 
-stixCommons['external_references'] = mongoose.Schema({
+stixCommons.external_references = mongoose.Schema({
     source_name: {
         type: String,
         required: [true, 'Source name is required']
@@ -35,31 +35,31 @@ stixCommons['external_references'] = mongoose.Schema({
     external_id: String
 }, { _id: false });
 
-stixCommons['motivations'] = [
-    "accidental",
-    "coercion",
-    "dominance",
-    "ideology",
-    "notoriety",
-    "organizational-gain",
-    "personal-gain",
-    "personal-satisfaction",
-    "revenge",
-    "unpredictable"
+stixCommons.motivations = [
+    'accidental',
+    'coercion',
+    'dominance',
+    'ideology',
+    'notoriety',
+    'organizational-gain',
+    'personal-gain',
+    'personal-satisfaction',
+    'revenge',
+    'unpredictable'
 ];
 
-stixCommons['resource_level'] = [
-    "individual",
-    "club",
-    "contest",
-    "team",
-    "organization",
-    "government"
+stixCommons.resource_level = [
+    'individual',
+    'club',
+    'contest',
+    'team',
+    'organization',
+    'government'
 ];
 
 // Data model redesign
 
-stixCommons['mongoRoot'] = {
+stixCommons.mongoRoot = {
     _id: String,
     organization: String,
     extendedProperties: Object,
@@ -68,11 +68,11 @@ stixCommons['mongoRoot'] = {
 };
 
 // TODO delete if not used
-stixCommons['discriminator'] = {
+stixCommons.discriminator = {
     discriminatorKey: 'type'
 };
 
-stixCommons['baseStix'] = {
+stixCommons.baseStix = {
     id: String,
     created_by_ref: String,
     created: {
@@ -88,19 +88,19 @@ stixCommons['baseStix'] = {
     revoked: Boolean,
     version: String,
     labels: { type: Array, default: void 0 },
-    external_references: { type: [stixCommons['external_references']], default: void 0 },
+    external_references: { type: [stixCommons.external_references], default: void 0 },
     object_marking_refs: { type: Array, default: void 0 },
-    granular_markings: { type: [stixCommons['granular_markings']], default: void 0},
+    granular_markings: { type: [stixCommons.granular_markings], default: void 0 },
 };
 
-stixCommons['makeSchema'] = childSchema => {
-    let schema = { 
-        ...stixCommons['mongoRoot'],
+stixCommons.makeSchema = childSchema => {
+    const schema = {
+        ...stixCommons.mongoRoot,
         stix: {
-            ...stixCommons['baseStix'], 
+            ...stixCommons.baseStix,
             ...childSchema
         }
-    }; 
+    };
     const schemaObj = new mongoose.Schema(schema);
     schemaObj.index({ 'stix.name': 1 });
     schemaObj.index({ 'stix.type': 1 });

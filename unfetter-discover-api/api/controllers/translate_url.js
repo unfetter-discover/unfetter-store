@@ -8,8 +8,11 @@ const translateUrl = (req, res) => {
     const err = {
         error:
             {
-                status: 500, source: '', title: 'Error',
-                code: '', detail: 'An unknown error has occurred.'
+                status: 500,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'An unknown error has occurred.'
             }
     };
     if (!req || !req.swagger || !req.swagger.params) {
@@ -22,23 +25,22 @@ const translateUrl = (req, res) => {
     const valueData = val.data || val;
     // repost to ctf endpoints
     const body = JSON.stringify(valueData);
-    const headers = { 'content-type': 'application/json', 'accept': 'application/json' };
+    const headers = { 'content-type': 'application/json', accept: 'application/json' };
     const url = `${CTF_PARSE_HOST}:${CTF_PARSE_PORT}${CTF_PARSE_PATH}`;
     fetch(url, {
         headers,
         method: 'POST',
         body
-    }).then((response) => {
-        response.json().then((json) => {
+    }).then(response => {
+        response.json().then(json => {
             // console.log('response', json);
             // format back to jsonapi, with data wrapper
             res.json({ data: json });
         });
-    }).catch((ex) => {
+    }).catch(ex => {
         err.error.detail = ex;
         return res.status(500).json(err);
-    })
-
+    });
 };
 
 module.exports = {
