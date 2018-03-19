@@ -1,5 +1,5 @@
 import * as camelcase from 'camelcase';
-import * as Papa from 'papaparse';
+import * as PapaParse from 'papaparse';
 
 /**
  * @description generic csv parse to json
@@ -40,10 +40,10 @@ export class CsvParseService<Out> {
      *  reads this classess csv file and loads to csv
      * @param {string} csv representing the data
      * @throws {Error} if file does not exist
-     * @returns {Papa.ParseResult} results from parse
+     * @returns {PapaParse.ParseResult} results from parse
      */
-    protected csvToJson(csv = ''): Papa.ParseResult {
-        const parseResults = Papa.parse(csv, {
+    protected csvToJson(csv = ''): PapaParse.ParseResult {
+        const parseResults = PapaParse.parse(csv, {
             quoteChar: '"',
             delimiter: ',',
             header: true,

@@ -5,7 +5,6 @@ import { MarkingDefinition } from '../models/marking-definition';
 import { Stix } from '../models/stix';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
 import { AttackPatternIngestToStixAdapter } from './attack-pattern-ingest-to-stix.adapter';
-import { CtfToStixAdapter } from './ctf-to-stix.adapter';
 
 /**
  * convert to stix

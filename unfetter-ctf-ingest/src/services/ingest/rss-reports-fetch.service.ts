@@ -2,10 +2,9 @@ import * as FeedParser from 'feedparser';
 import * as fs from 'fs';
 import * as request from 'request';
 import { RssToStixAdapter } from '../../adapters/rss-to-stix.adapter';
+import { Stix } from '../../models/stix';
 import { StixLookupMongoService } from '../stix-lookup-mongo.service';
 import { StixLookupService } from '../stix-lookup.service';
-import { RssReportsIngestCli } from '../../cli/rss-reports-ingest.cli';
-import { Stix } from '../../models/stix';
 
 /**
  * @description reads rss and generates stix 2.0 like reports

@@ -1,11 +1,11 @@
-import { Ctf } from './ctf';
+import { ReportCtf } from './report-ctf';
 
 describe('ctf model', () => {
 
-    let ctf: Ctf;
+    let ctf: ReportCtf;
 
     beforeEach(() => {
-        ctf = new Ctf();
+        ctf = new ReportCtf();
         ctf.title = 'title';
         ctf.author = 'author';
         ctf.afaAction = 'action';

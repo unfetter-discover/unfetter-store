@@ -1,6 +1,5 @@
 import { AttackPattern } from '../models/attack-pattern';
 import { AttackPatternIngest } from '../models/attack-pattern-ingest';
-import { Ctf } from '../models/ctf';
 import { KillChainPhase } from '../models/kill-chain-phase';
 import { MarkingDefinition } from '../models/marking-definition';
 import { Stix } from '../models/stix';

@@ -1,10 +1,10 @@
-import { Ctf } from '../models/ctf';
+import { ReportCtf } from '../models/report-ctf';
 import { Mock } from './mock';
 
-export class CtfMock extends Mock<Ctf> {
+export class ReportCtfMock extends Mock<ReportCtf> {
 
-    public mockOne(): Ctf {
-        const ctf = new Ctf();
+    public mockOne(): ReportCtf {
+        const ctf = new ReportCtf();
         const number = this.genNumber();
         ctf.title = `title-${number}`;
         ctf.author = `author-${number}`;
@@ -18,7 +18,7 @@ export class CtfMock extends Mock<Ctf> {
         return ctf;
     }
 
-    public mockMany(num = 1): Ctf[] {
+    public mockMany(num = 1): ReportCtf[] {
         const arr = Array(num);
         for (let idx = 0; idx < num; idx++) {
             arr[idx] = this.mockOne();

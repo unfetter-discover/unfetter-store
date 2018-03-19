@@ -1,4 +1,4 @@
-export class Ctf {
+export class ReportCtf {
     public reportId = '';
     public title = '';
     public sourceType = '';

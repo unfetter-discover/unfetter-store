@@ -5,7 +5,7 @@ import * as Yarg from 'yargs';
 import { StixBundle } from '../models/stix-bundle';
 import { RssReportsFetchService } from '../services/ingest/rss-reports-fetch.service';
 
-export class RssReportsIngestCli {
+export class RssReportsToStixCli {
     public genOutFile(rssUrl: string, outFile: string): Promise<StixBundle | void> {
         if (outFile && fs.existsSync(outFile)) {
             console.log(outFile + ' already exists! Please delete and try again');
@@ -41,6 +41,6 @@ if (argv) {
     const rssUrl = argv['input'];
     const outFile = argv['outfile'] || undefined;
     console.log(rssUrl, outFile);
-    const cli = new RssReportsIngestCli();
+    const cli = new RssReportsToStixCli();
     cli.genOutFile(rssUrl, outFile);
 }
