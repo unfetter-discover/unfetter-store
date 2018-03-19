@@ -93,11 +93,92 @@ const attackPatternsByIndicator = (req, res) => {
     });
 };
 
+const summaryStatistics = (req, res) => {
+    const query = [{
+            $match: {
+                'stix.type': 'indicator'
+            }
+        },
+        {
+            $project: {
+                created_by_ref: '$stix.created_by_ref',
+                views: {
+                    $cond: [{
+                            $gt: ['$metaProperties.interactions', null]
+                        },
+                        {
+                            '$size': '$metaProperties.interactions'
+                        },
+                        0
+                    ]
+                },
+                likes: {
+                    $cond: [{
+                            $gt: ['$metaProperties.likes', null]
+                        },
+                        {
+                            '$size': '$metaProperties.likes'
+                        },
+                        0
+                    ]
+                },
+                comments: {
+                    $cond: [{
+                            $gt: ['$metaProperties.comments', null]
+                        },
+                        {
+                            '$size': '$metaProperties.comments'
+                        },
+                        0
+                    ]
+                }
+            }
+        },
+        {
+            $group: {
+                _id: '$created_by_ref',
+                count: {
+                    $sum: 1
+                },
+                views: {
+                    $sum: '$views'
+                },
+                likes: {
+                    $sum: '$likes'
+                },
+                comments: {
+                    $sum: '$comments'
+                }
+            }
+        }
+    ];
+
+    aggregationModel.aggregate(query, (err, results) => {
+        if (err) {
+            return res.status(500).json({
+                errors: [{
+                    status: 500,
+                    source: '',
+                    title: 'Error',
+                    code: '',
+                    detail: 'An unknown error has occurred.'
+                }]
+            });
+        }
+        return res.json({
+            data: {
+                attributes: results
+            }
+        });
+    });
+};
+
 module.exports = {
     get,
     getById: controller.getById(),
     add: controller.add(),
     update: controller.update(),
     deleteById: controller.deleteById(),
-    attackPatternsByIndicator
+    attackPatternsByIndicator,
+    summaryStatistics
 };

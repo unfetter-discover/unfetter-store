@@ -22,10 +22,12 @@
 
 /indicators:
   $ref: ./indicators/indicators.yaml
-/indicators/attack-patterns-by-indicator:
-  $ref: ./indicators/attack-patterns-by-indicator.yaml
 /indicators/{id}:
   $ref: ./indicators/indicator_by_id.yaml
+/indicators/attack-patterns-by-indicator:
+  $ref: ./indicators/attack-patterns-by-indicator.yaml
+/indicators/summary-statistics:
+  $ref: ./indicators/summary-statistics.yaml
 
 /intrusion-sets:
   $ref: ./intrusion_sets/intrusion_sets.yaml
