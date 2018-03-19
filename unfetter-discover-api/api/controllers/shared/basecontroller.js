@@ -134,6 +134,9 @@ module.exports = class BaseController {
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
             const obj = {};
+
+            console.log(`&&&&&&&& Add value data is:  ${req.swagger.params.data.value.data}`);
+
             if (req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const data = req.swagger.params.data.value.data;
                 const relationships = [];

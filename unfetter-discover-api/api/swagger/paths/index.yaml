@@ -2,6 +2,8 @@
 
 /x-unfetter-capabilities:
   $ref: ./x_unfetter_capabilities/x_unfetter_capabilities.yaml
+/x-unfetter-capabilities/{id}:
+  $ref: ./x_unfetter_capabilities/x_unfetter_capability-by-id.yaml
 
 /attack-patterns:
   $ref: ./attack_patterns/attack_patterns.yaml

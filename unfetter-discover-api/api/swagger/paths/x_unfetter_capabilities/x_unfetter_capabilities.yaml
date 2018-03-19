@@ -49,28 +49,28 @@ get:
       description: Error
       schema:
         $ref: "#/definitions/ErrorJsonApi"
-# post:
-#   tags:
-#   - STIX-Unfetter Capability
-#   description: Create a new instance of the model and persist it into the data source.
-#   operationId: add
-#   produces: 
-#   - application/vnd.api+json
-#   consumes:
-#   - application/json
-#   parameters:
-#     - name: data
-#       in: body
-#       description: Model instance data
-#       required: true
-#       schema:
-#         $ref: "#/definitions/XUnfetterSensorCreateUpdate"
-#   responses:
-#     "201":
-#       description: Created
-#       schema:
-#         $ref: "#/definitions/XUnfetterCapabilitiesJsonApi"
-#     default:
-#       description: Error
-#       schema:
-#         $ref: "#/definitions/ErrorJsonApi"
+post:
+  tags:
+  - STIX-Unfetter Capability
+  description: Create a new instance of the model and persist it into the data source.
+  operationId: add
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+    - name: data
+      in: body
+      description: Model instance data
+      required: true
+      schema:
+        $ref: "#/definitions/XUnfetterCapabilityCreateUpdate"
+  responses:
+    "201":
+      description: Created
+      schema:
+        $ref: "#/definitions/XUnfetterCapabilitiesJsonApi"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
