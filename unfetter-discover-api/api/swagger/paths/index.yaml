@@ -35,8 +35,6 @@
   $ref: ./indicators/attack-patterns-by-indicator.yaml
 /indicators/summary-statistics:
   $ref: ./indicators/summary-statistics.yaml
-/indicators/search:
-  $ref: ./indicators/search.yaml
 
 /intrusion-sets:
   $ref: ./intrusion_sets/intrusion_sets.yaml
