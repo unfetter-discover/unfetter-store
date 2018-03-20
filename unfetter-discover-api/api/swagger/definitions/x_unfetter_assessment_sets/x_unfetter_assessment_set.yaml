@@ -1,0 +1,28 @@
+    allOf:
+    - $ref: '#/definitions/StixCommon'
+    - properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: ['x-unfetter-capability']
+            attributes:
+              type: object
+              properties:
+                description:
+                  type: string
+                name:
+                  type: string
+                created_by_ref:
+                  type: number
+                assessment_group_ref:
+                  type: string
+                assessments:
+                  type: array
+                  items:
+                    type: string
+
+
+
+                  
