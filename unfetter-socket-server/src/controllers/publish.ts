@@ -1,6 +1,5 @@
 import { Router, Response, Request, NextFunction } from 'express';
 
-import io from '../server/server';
 import { connections, findConnectionsByUserId } from '../models/connections';
 import { AppNotification, CreateAppNotification } from '../models/notification';
 import { WSMessageTypes } from '../models/messages';
