@@ -345,6 +345,17 @@ XUnfetterSensorsJsonApiSingleItem:
 XUnfetterSensor:
   $ref: ./x_unfetter_sensors/x_unfetter_sensor.yaml  
 
+XUnfetterCapabilityJsonApi:
+  $ref: ./x_unfetter_capabilities/x_unfetter_capability_json_api.yaml
+XUnfetterCapabilitiesJsonApi:
+  $ref: ./x_unfetter_capabilities/x_unfetter_capabilities_json_api.yaml
+XUnfetterCapabilityCreateUpdate:
+  $ref: ./x_unfetter_capabilities/x_unfetter_capability_create_update.yaml
+XUnfetterCapabilityJsonApiSingleItem:
+  $ref: ./x_unfetter_capabilities/x_unfetter_capability_json_api_single_item.yaml
+XUnfetterCapability:
+  $ref: ./x_unfetter_capabilities/x_unfetter_capability.yaml  
+
 # Custom Routes
 
 DashboardsIntrusionSetViewJsonApi:
