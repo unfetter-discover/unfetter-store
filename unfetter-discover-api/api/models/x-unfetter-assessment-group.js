@@ -21,6 +21,6 @@ const StixSchema = {
     assessment_sets: [String]
 };
 
-const assessmentGroup = mongoose.model('XUnfetterAssessmentGroup', stixCommons.makeSchema(StixSchema), 'stix');
+const assessmentGroup = mongoose.model('XUnfetterAssessmentGroup', stixCommons['makeSchema'](StixSchema), 'stix');
 
 module.exports = assessmentGroup;

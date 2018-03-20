@@ -21,6 +21,9 @@ mongooseModel.schemaless = require('../../models/schemaless');
 mongooseModel.config = require('../../models/config');
 mongooseModel.user = require('../../models/user');
 
+// DodCar
+mongooseModel['x-unfetter-capability'] = require('../../models/x-unfetter-capability');
+
 const stixSchema = mongoose.Schema({}, { strict: false });
 
 const stixAggregationModel = mongoose.model('stixAggregations', stixSchema, 'stix');
