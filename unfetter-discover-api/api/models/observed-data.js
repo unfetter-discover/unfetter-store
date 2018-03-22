@@ -3,6 +3,10 @@ const stixCommons = require('./stix-commons');
 
 const StixSchema = {
     id: String,
+    created_by_ref: {
+        type: String,
+        required: [true, 'created_by_ref is required']
+    },
     first_observed: {
         type: Date,
         default: Date.now,

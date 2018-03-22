@@ -74,7 +74,6 @@ stixCommons.discriminator = {
 
 stixCommons.baseStix = {
     id: String,
-    created_by_ref: String,
     created: {
         type: Date,
         default: Date.now,

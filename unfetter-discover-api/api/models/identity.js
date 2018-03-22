@@ -3,6 +3,7 @@ const stixCommons = require('./stix-commons');
 
 const StixSchema = {
     id: String,
+    created_by_ref: String,
     name: {
         type: String,
         required: [true, 'name is required']
