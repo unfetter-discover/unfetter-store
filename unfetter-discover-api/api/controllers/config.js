@@ -6,7 +6,7 @@ const uuid = require('uuid');
 
 const model = modelFactory.getModel('config');
 const controller = new BaseController('config');
-const apiRoot = 'https://localhost/api';
+const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 
 module.exports = {
     get: (req, res) => {

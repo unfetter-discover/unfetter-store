@@ -9,7 +9,7 @@ import { Stix } from '../models/stix';
  *
  * @see http://json-schema.org/ for Json Schema
  * @see https://oasis-open.github.io/cti-documentation/ for STIX 2.0
- * @see https://localhost/api/explorer/ for the Unfetter Swagger API definitions
+ * @see ./api/explorer/ for the Unfetter Swagger API definitions
  */
 export class StixToJsonSchemaAdapter {
 

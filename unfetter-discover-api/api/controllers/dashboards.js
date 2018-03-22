@@ -5,7 +5,7 @@ const IntrusionSet = require('../models/intrusion-set');
 const lodash = require('lodash');
 const randomColor = require('randomcolor');
 
-const apiRoot = 'https://localhost/api';
+const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 
 const intrusionSetView = function intrusionSetViewFunc(req, res) {
     const id = req.swagger.params.intrusionSetIds.value || '';
