@@ -730,6 +730,16 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
                 detail: 'An unknown error has occurred.'
             }]
         });
+    } else if (!result || !result.length) {
+        return res.status(404).json({
+            errors: [{
+                status: 404,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Assessment not found.'
+            }]
+        });
     }
 
     //  The ObjectId is the assessed Object id.  Indicator, sensor or mitigations, more likely
@@ -742,7 +752,7 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
 
     // answer should be an integer to represent an index value of the array of question options.
     if ((answer >= 0)) {
-        const assessment = result[0];
+        const assessment = result[0].toObject();
         // The array of assessed objects
         const assessedObject = assessment.stix.assessment_objects.find(o => o.stix.id === objectId);
 
@@ -750,7 +760,7 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
         let risk = 0;
 
         lodash.forEach(assessedObject.questions, (question, index) => {
-            if ((answer <= question.options.length) && ((questionId === '') || (questionId === index))) {
+            if ((answer <= question.options.length) && ((questionId === '') || (questionId === index.toString()))) {
                 question.selected_value = question.options[answer];
                 risk += question.selected_value.risk;
                 question.risk = question.selected_value.risk;
