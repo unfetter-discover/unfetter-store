@@ -1,7 +1,7 @@
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
 
-const apiRoot = 'https://localhost/api';
+const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const model = modelFactory.getModel('schemaless');
 const publish = require('../controllers/shared/publish');
 

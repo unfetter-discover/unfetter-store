@@ -1,8 +1,8 @@
 export const Constance = {
     links: {
-        uiUrl: process.env.UI_URL || 'https://localhost:9443/#',
+        uiUrl: process.env.UI_URL || 'https://localhost/',
         approveUsers: '/admin/approve-users',
         unfetterHomepage: 'https://iadgov.github.io/unfetter/',
-        unfetterContact: 'mailto:fakeadmin@fakeunfetter.com'
+        unfetterContact: process.env.SERVICE_EMAIL ? `mailto:${process.env.SERVICE_EMAIL}` : 'mailto:fakeadmin@fakeunfetter.com'
     }
 };

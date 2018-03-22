@@ -7,7 +7,7 @@ const publish = require('./publish');
 const DataHelper = require('../../helpers/extended_data_helper');
 const SecurityHelper = require('../../helpers/security_helper');
 
-const apiRoot = 'https://localhost/api';
+const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 
 module.exports = class BaseController {
     constructor(type) {
