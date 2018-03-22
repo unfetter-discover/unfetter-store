@@ -1,9 +1,8 @@
 import * as camelcase from 'camelcase';
 import * as fs from 'fs';
-import * as Papa from 'papaparse';
-import { CtfToStixAdapter } from '../../adapters/ctf-to-stix.adapter';
 import { HeaderTranslationAdapter } from '../../adapters/header-translation.adapter';
-import { Ctf } from '../../models/ctf';
+import { ReportCtfToStixAdapter } from '../../adapters/report-ctf-to-stix.adapter';
+import { ReportCtf } from '../../models/report-ctf';
 import { Stix } from '../../models/stix';
 import { StixBundle } from '../../models/stix-bundle';
 import { MongoConnectionService } from '../../services/mongo-connection.service';
@@ -17,7 +16,7 @@ import { CsvParseService } from './parse-csv-service';
 /**
  * @description reads a well known ctf csv file and converts to stix
  */
-export class CtfIngestService {
+export class ReportCtfIngestService {
 
     protected validationService: HeaderValidationService;
     protected headerTranslationAdapter: HeaderTranslationAdapter;
@@ -70,7 +69,7 @@ export class CtfIngestService {
     }
 
     /**
-     * @description reads a well know ctf csv file and converts it to stix objects
+     * @description reads a well know ReportCtf csv file and converts it to stix objects
      * @param {string} csv representing the data
      */
     public async csvToStix(csv = ''): Promise<Stix[]> {
@@ -85,7 +84,7 @@ export class CtfIngestService {
         const hasSaneHeaders = await this.ensureExpectedHeaders(translatedHeaders);
         if (!hasSaneHeaders) {
             console.log('bad headers, rejecting promise');
-            const targetKeys = Object.keys(new Ctf());
+            const targetKeys = Object.keys(new ReportCtf());
             const msg =
                 'headers do not look correct, expected at least some of the following camel or noncamel case variants'
                 + '\n'
@@ -98,9 +97,9 @@ export class CtfIngestService {
         const translatedData = [translatedHeaders.join(','), ...data];
         const translatedCsv = translatedData.join(lineDelim);
         const collection = await MongoConnectionService.getCollection(CollectionType.DATA);
-        const parseService = new CsvParseService<Ctf>();
+        const parseService = new CsvParseService<ReportCtf>();
         const arr = parseService.parseCsv(translatedCsv);
-        const adapter = new CtfToStixAdapter();
+        const adapter = new ReportCtfToStixAdapter();
         const stixies = await adapter.convertCtfToStix(arr);
 
         if (stixies && stixies.length > 1) {
@@ -121,7 +120,7 @@ export class CtfIngestService {
             return Promise.resolve(false);
         }
 
-        const targetKeys = Object.keys(new Ctf());
+        const targetKeys = Object.keys(new ReportCtf());
         const valid = await this.validationService.verifyCorrectHeaders(targetKeys, headers);
         return Promise.resolve(valid);
     }

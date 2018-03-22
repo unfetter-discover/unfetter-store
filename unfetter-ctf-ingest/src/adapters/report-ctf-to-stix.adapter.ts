@@ -1,7 +1,7 @@
 import { AttackPattern } from '../models/attack-pattern';
-import { Ctf } from '../models/ctf';
 import { KillChainPhase } from '../models/kill-chain-phase';
 import { MarkingDefinition } from '../models/marking-definition';
+import { ReportCtf } from '../models/report-ctf';
 import { Stix } from '../models/stix';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
 import { StixLookupService } from '../services/stix-lookup.service';
@@ -10,7 +10,7 @@ import { StixLookupService } from '../services/stix-lookup.service';
  * @description
  *  Mapping keys from ctf datamodel to stix
  */
-export class CtfToStixAdapter {
+export class ReportCtfToStixAdapter {
 
     protected lookupService: StixLookupService;
     constructor() {
@@ -21,14 +21,14 @@ export class CtfToStixAdapter {
         this.lookupService = service;
     }
 
-    public async convertCtfToStix(ctfArray: Ctf[]): Promise<Stix[]> {
+    public async convertCtfToStix(ctfArray: ReportCtf[]): Promise<Stix[]> {
         const stixies = ctfArray
             .filter((ctf) => ctf && ctf.reportId && ctf.afaObjective && ctf.afaAction)
             .map((ctf) => this.mapCtfToStix(ctf));
         return Promise.all(stixies);
     }
 
-    public async mapCtfToStix(ctf: Ctf): Promise<Stix> {
+    public async mapCtfToStix(ctf: ReportCtf): Promise<Stix> {
         const stix = new Stix();
         stix.type = 'report';
 

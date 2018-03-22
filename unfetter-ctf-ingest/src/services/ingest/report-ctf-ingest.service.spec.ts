@@ -1,14 +1,14 @@
 import { HeaderTranslationAdapter } from '../../adapters/header-translation.adapter';
 import { Stix } from '../../models/stix';
-import { CtfIngestService } from './ctf-ingest.service';
+import { ReportCtfIngestService } from './report-ctf-ingest.service';
 
-describe('Ctf ingest service', () => {
+describe('ReportCtf ingest service', () => {
 
-    let service: CtfIngestService;
+    let service: ReportCtfIngestService;
     let headerAdapter: HeaderTranslationAdapter;
 
     beforeEach(() => {
-        service = new CtfIngestService();
+        service = new ReportCtfIngestService();
         headerAdapter = new HeaderTranslationAdapter();
         spyOn(headerAdapter, 'translateHeaders').and.returnValue('ColA,ColB,ColC'.split(','));
         service.setHeaderTranslationAdapter(headerAdapter);
@@ -38,7 +38,7 @@ describe('Ctf ingest service', () => {
 
     it('should reject bad headers csv to stix', async () => {
         const data = ['ColA,ColB,ColC', 'Data1,Data2,Data3'];
-        const el = await service.csvToStix(data.join('\n')).catch((e) => {
+        const el = await service.csvToStix(data.join('\n')).catch((e: Error) => {
             expect(e).toBeDefined();
         });
     });

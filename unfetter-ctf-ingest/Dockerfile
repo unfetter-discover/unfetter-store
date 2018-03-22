@@ -1,7 +1,7 @@
 FROM node:9.5-alpine
 
 LABEL maintainer "unfetter"
-LABEL Description="Node program that loads ctf data into unfetter"
+LABEL Description="Node program that translates data into a form to be used by Unfetter"
 
 # Create Application Directory
 ENV WORKING_DIRECTORY /usr/share/unfetter-ctf-ingest

@@ -1,23 +1,23 @@
-import { CtfMock } from '../mocks/ctf-mock';
+import { ReportCtfMock } from '../mocks/report-ctf-mock';
 import { AttackPattern } from '../models/attack-pattern';
-import { Ctf } from '../models/ctf';
 import { MarkingDefinition } from '../models/marking-definition';
+import { ReportCtf } from '../models/report-ctf';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
-import { CtfToStixAdapter } from './ctf-to-stix.adapter';
+import { ReportCtfToStixAdapter } from './report-ctf-to-stix.adapter';
 
 /**
  * convert to stix
  * @see https://oasis-open.github.io/cti-documentation/stix/intro
  */
-describe('ctf to stix conversion', () => {
+describe('report ctf to stix conversion', () => {
 
-    let ctfToStixAdapter: CtfToStixAdapter;
+    let ctfToStixAdapter: ReportCtfToStixAdapter;
     let lookupService: StixLookupMongoService;
-    let ctfArr: Ctf[];
+    let ctfArr: ReportCtf[];
 
     beforeEach(() => {
-        ctfToStixAdapter = new CtfToStixAdapter();
-        ctfArr = new CtfMock().mockMany(2);
+        ctfToStixAdapter = new ReportCtfToStixAdapter();
+        ctfArr = new ReportCtfMock().mockMany(2);
         lookupService = new StixLookupMongoService();
 
         spyOn(lookupService, 'findAttackPatternByName')
@@ -33,7 +33,7 @@ describe('ctf to stix conversion', () => {
 
     it('should accept and not parse bad ctf objects', async () => {
         expect(ctfToStixAdapter).toBeDefined();
-        const ctf = [new Ctf(), new Ctf(), ...ctfArr];
+        const ctf = [new ReportCtf(), new ReportCtf(), ...ctfArr];
         const stixArr = await ctfToStixAdapter.convertCtfToStix(ctf);
         expect(stixArr).toBeDefined();
         expect(stixArr.length).toEqual(2);
