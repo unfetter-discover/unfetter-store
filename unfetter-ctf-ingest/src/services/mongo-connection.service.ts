@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { Db, MongoClient, MongoError } from 'mongodb';
 import { CollectionType } from './collection-type.enum';
 
 export class MongoConnectionService {
@@ -9,7 +9,7 @@ export class MongoConnectionService {
      */
     public static async connect(): Promise<any> {
         const mongoConnect = () => {
-            MongoClient.connect(MongoConnectionService.mongoUrl, (err, db) => {
+            MongoClient.connect(MongoConnectionService.mongoUrl, (err: MongoError, db: Db) => {
                 if (err) {
                     console.log(err);
                     return;
@@ -69,7 +69,7 @@ export class MongoConnectionService {
         MongoConnectionService.db.close();
     }
 
-    protected static db: any;
+    protected static db: Db;
     protected static dataCollection: any;
     protected static configCollection: any;
     protected static connecting = false;

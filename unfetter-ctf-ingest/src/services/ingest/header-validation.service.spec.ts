@@ -1,4 +1,4 @@
-import { Ctf } from '../../models/ctf';
+import { ReportCtf } from '../../models/report-ctf';
 import { HeaderValidationService } from './header-validation.service';
 
 describe('Header validation service spec', () => {
@@ -9,7 +9,7 @@ describe('Header validation service spec', () => {
 
     beforeEach(() => {
         service = new HeaderValidationService();
-        targetKeys = Object.keys(new Ctf());
+        targetKeys = Object.keys(new ReportCtf());
         const str =
             'Report Id,Title,Source Type,ALA Stage,AFA Objective,AFA Action,Description,Action Paragraph,'
             + 'Action Classification,Report Classification,Report DTG,'
