@@ -6,7 +6,7 @@ const BaseController = require('./shared/basecontroller');
 const controller = new BaseController('x-unfetter-assessment');
 const returnProps = ['indicators', 'sensors', 'courseOfActions'];
 const ASSESSED_OBJECT_TYPES = ['indicator', 'x-unfetter-sensor', 'course-of-action'];
-const apiRoot = 'https://localhost/api';
+const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const models = {};
 
 ASSESSED_OBJECT_TYPES.forEach(assessedObjectType => {
