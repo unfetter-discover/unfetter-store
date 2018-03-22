@@ -490,6 +490,7 @@ const controllers = [
         type: 'x-unfetter-assessment',
         attributes: {
             "_id": "x-unfetter-assessment--220da765-75bd-4db5-9e7b-3ec5afc8f9fc",
+            "created_by_ref": "identity--a932fcc6-e032-176c-126f-cb970a5a1ade",
             "name": "Assessment Testing",
             "description": "Tests an assessment.",
             "version": "2.0",
