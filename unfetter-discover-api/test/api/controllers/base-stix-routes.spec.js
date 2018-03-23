@@ -394,6 +394,7 @@ const controllers = [
         
         attributes: {
             "id": "sighting--6b0e3956-95f3-4c04-a882-116832996da0",
+            "created_by_ref": "identity--a463ffb3-1bd9-4d94-b02d-74e4f1658283",
             "created": "2016-08-22T14:09:00.123Z",
             "modified": "2016-08-22T14:09:00.123Z",
             "first_seen": "2016-08-22T14:09:00.123456Z",
