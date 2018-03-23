@@ -10,9 +10,9 @@ const controller =
         type: 'x-unfetter-capability',
         attributes: {
             created_by_ref: 'string',
-            name: 'Symantec Antivirus Corporate Edition',
-            description: 'Anti virus software',
-            version: 10.2,
+            name: 'kaspersky antivirus',
+            description: 'Is an antivirus program developed by Kaspersky Lab.',
+            version: 17.0,
             category: 'Antivirus',
             external_references: []
         }
@@ -55,7 +55,7 @@ describe(`GET /${controller.type}`, () => {
                 should.not.exist(err);
                 should.equal(false, res.error, 'Error found');
                 should.exist(res.body.data, 'No "data" found');
-                should.equal(res.body.data.length, 3, 'Wrong number of objects were returned.  Expected XXX, received ' + res.body.data.length);
+                should(res.body.data.length).be.above(0, 'No objects were returned');
                 done();
             });
     });
