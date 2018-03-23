@@ -231,6 +231,9 @@ module.exports = class BaseController {
                         case 'indicator':
                             relType = 'indicates';
                             break;
+                        case 'x-unfetter-sensor':
+                            relType = 'detects';
+                            break;
                         default:
                         }
                         const tempRelationship = {
