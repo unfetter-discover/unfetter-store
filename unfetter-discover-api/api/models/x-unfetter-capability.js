@@ -21,6 +21,6 @@ const StixSchema = {
     category: String
 };
 
-const XUnfetterCapability = mongoose.model('XUnfetterCapability', stixCommons['makeSchema'](StixSchema), 'stix');
+const XUnfetterCapability = mongoose.model('XUnfetterCapability', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = XUnfetterCapability;
