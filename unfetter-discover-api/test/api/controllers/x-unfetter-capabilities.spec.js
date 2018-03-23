@@ -9,18 +9,12 @@ const controller =
         endpoint: 'x-unfetter-capabilities',
         type: 'x-unfetter-capability',
         attributes: {
-            created: '2018-03-20T17:03:18.827Z',
             created_by_ref: 'string',
-            modified: '2018-03-20T17:03:18.827Z',
-            revoked: false,
-            labels: [],
-            external_references: [],
-            object_marking_refs: [],
-            granular_markings: [],
-            description: 'Anti virus software',
             name: 'Symantec Antivirus Corporate Edition',
+            description: 'Anti virus software',
             version: 10.2,
-            category: 'Antivirus'
+            category: 'Antivirus',
+            external_references: []
         }
     };
 
