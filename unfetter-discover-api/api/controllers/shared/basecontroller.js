@@ -144,8 +144,6 @@ module.exports = class BaseController {
             res.header('Content-Type', 'application/vnd.api+json');
             const obj = {};
 
-            console.log(`&&&&&&&& Add value data is:  ${req.swagger.params.data.value.data}`);
-
             if (req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const data = req.swagger.params.data.value.data;
                 const relationships = [];
@@ -239,7 +237,8 @@ module.exports = class BaseController {
                                 id: relId,
                                 source_ref: newDocument.stix.id,
                                 target_ref: relatedId,
-                                relationship_type: relType
+                                relationship_type: relType,
+                                created_by_ref: obj.stix.created_by_ref
                             }
                         };
 
