@@ -71,6 +71,6 @@ const StixSchema = {
     }]
 };
 
-const objectAssessment = mongoose.model('XUnfetterObjectAssessment', stixCommons['makeSchema'](StixSchema), 'stix');
+const objectAssessment = mongoose.model('XUnfetterObjectAssessment', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = objectAssessment;
