@@ -1,6 +1,14 @@
   type: object
   properties:
 
+    name:
+      type: string
+    description:
+      type: string
+    version:
+      type: number
+    category:
+      type: string  
     created_by_ref:
       type: string
       default: "identity-id"
@@ -10,14 +18,6 @@
     modified:
       type: string
       format: date-time
-    name:
-      type: string
-    description:
-      type: string
-    version:
-      type: number
-    category:
-      type: string  
     external_references:
       type: array
       items:

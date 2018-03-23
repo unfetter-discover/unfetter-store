@@ -7,3 +7,5 @@
       example: "x-unfetter-capability"
     attributes:
       $ref: "#/definitions/XUnfetterCapability"
+    links:
+      $ref: "#/definitions/Links"
