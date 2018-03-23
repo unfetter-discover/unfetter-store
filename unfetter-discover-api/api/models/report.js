@@ -3,6 +3,10 @@ const stixCommons = require('./stix-commons');
 
 const StixSchema = {
     id: String,
+    created_by_ref: {
+        type: String,
+        required: [true, 'created_by_ref is required']
+    },
     name: {
         type: String,
         required: [true, 'name is required']
@@ -12,19 +16,7 @@ const StixSchema = {
     },
     labels: [{
         type: String,
-        required: [true, 'label(s) are required'],
-        enum: [
-            'threat-report',
-            'attack-pattern',
-            'campaign',
-            'identity',
-            'indicator',
-            'malware',
-            'observed-data',
-            'threat-actor',
-            'tool',
-            'vulnerability'
-        ]
+        required: [true, 'label(s) are required']
     }],
     published: {
         type: Date,
