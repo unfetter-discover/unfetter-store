@@ -43,6 +43,24 @@ describe(`POST /${controller.type}`, () => {
     });
 });
 
+// Get all
+describe(`GET /${controller.type}`, () => {
+    it('Returns arrays of objects assessed.', done => {
+        request(server)
+            .get(`/${controller.endpoint}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .end((err, res) => {
+                should.not.exist(err);
+                should.equal(false, res.error, 'Error found');
+                should.exist(res.body.data, 'No "data" found');
+                should.equal(res.body.data.length, 3, 'Wrong number of objects were returned.  Expected XXX, received ' + res.body.data.length);
+                done();
+            });
+    });
+});
+
 // Get by id
 describe(`GET /${controller.endpoint}/{id}`, () => {
     it(`should return the ${controller.endpoint} matching the id in the path`, done => {
@@ -108,21 +126,3 @@ describe(`DELETE /${controller.endpoint}/{id}`, () => {
     });
 });
 
-
-// Get all
-xdescribe(`GET /${controller.type}`, () => {
-    it('Returns arrays of objects assessed.', done => {
-        request(server)
-            .get(`/${controller.endpoint}`)
-            .set('Accept', 'application/json')
-            .expect('Content-Type', /json/)
-            .expect(200)
-            .end((err, res) => {
-                should.not.exist(err);
-                should.equal(false, res.error, 'Error found');
-                should.exist(res.body.data, 'No "data" found');
-                should.equal(res.body.data.length, 3, 'Wrong number of objects were returned.  Expected XXX, received ' + res.body.data.length);
-                done();
-            });
-    });
-});
