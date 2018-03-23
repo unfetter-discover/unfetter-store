@@ -37,6 +37,7 @@ const get = (req, res) => {
         .sort(query.sort)
         .limit(query.limit)
         .skip(query.skip)
+        .select(query.project)
         .exec((err, result) => {
             if (err) {
                 return res.status(500).json({

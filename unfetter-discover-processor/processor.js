@@ -1,9 +1,9 @@
 /* ~~~ Program Constants ~~~ */
 
 // The maximum amount of tries mongo will attempt to connect
-const MAX_NUM_CONNECT_ATTEMPTS = 10;
+const MAX_NUM_CONNECT_ATTEMPTS = process.env.MAX_NUM_CONNECT_ATTEMPTS || 10;
 // The amount of time between each connection attempt in ms
-const CONNECTION_RETRY_TIME = 5000;
+const CONNECTION_RETRY_TIME = process.env.CONNECTION_RETRY_TIME || 5000;
 const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
 const PROCESSOR_STATUS_ID = process.env.PROCESSOR_STATUS_ID || 'f09ad23d-c9f7-40a3-8afa-d9560e6df95b';
 
@@ -223,7 +223,6 @@ mongoose.connection.on('connected', function (err) {
                 process.exit(1);
             });
         } else {
-            console.log(')(#*)#(*%()#*%#%UTILRES*)(', res);
             // Add mitre data
             if (argv.addMitreData !== undefined && argv.addMitreData === true) {
                 console.log('Adding Mitre data');
