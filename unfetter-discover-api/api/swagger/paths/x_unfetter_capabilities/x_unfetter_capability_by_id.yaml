@@ -1,0 +1,97 @@
+x-swagger-router-controller: x_unfetter_capabilities
+get:
+  tags:
+  - STIX-Unfetter Capability
+  description: Returns the details of a capability
+  operationId: getById
+  parameters:
+  - name: id
+    in: path
+    description: Model ID
+    type: string
+    required: true
+  - name: extendedproperties
+    in: query
+    type: boolean
+    description: boolean to include extended stix properties
+  - name: metaproperties
+    in: query
+    type: boolean
+    description: boolean to include extended meta properties
+  produces: 
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/XUnfetterCapabilityJsonApiSingleItem"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"
+
+patch:
+  tags:
+  - STIX-Unfetter Capability
+  description: Patch attributes for a model instance and persist it into the data source.
+  operationId: update
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+    - name: data
+      in: body
+      description: An object of model property name/value pairs
+      required: true
+      schema:
+        $ref: "#/definitions/XUnfetterCapabilityCreateUpdate"
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/XUnfetterCapabilityJsonApiSingleItem"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
+
+delete:
+  tags:
+  - STIX-Unfetter Capability
+  description: Delete a capability instance by {{id}} from the data source.
+  operationId: deleteById
+  produces: 
+  - application/vnd.api+json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/StixDelete"
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

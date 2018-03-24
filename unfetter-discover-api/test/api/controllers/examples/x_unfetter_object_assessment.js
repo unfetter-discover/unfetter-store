@@ -1,6 +1,6 @@
 var xUnfetterObjectAssessment = {
-    endpoint: 'x-unfetter-assessment-object-assessments',
-    type: 'x-unfetter-assessment-object-assessment',
+    endpoint: 'x-unfetter-object-assessments',
+    type: 'x-unfetter-object-assessment',
     attributes: {
         name: 'lorem',
         description: 'lorem ipsum',

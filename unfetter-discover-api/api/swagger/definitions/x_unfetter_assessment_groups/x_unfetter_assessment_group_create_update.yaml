@@ -1,0 +1,28 @@
+  # The main assessment object.  Stores the overall assessment report, the chosen answers
+  #    to the questions, and the risks accepted
+    allOf:
+    - $ref: '#/definitions/StixCommon'
+    - properties:
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: ['x-unfetter-assessment-group']
+            attributes:
+              type: object
+              properties:
+                description:
+                  type: string
+                name:
+                  type: string
+                created_by_ref:
+                  type: string
+                object_refs:
+                  type: array
+                  items:
+                    type: string
+                assessment_sets:
+                  type: array
+                  items:
+                    type: string

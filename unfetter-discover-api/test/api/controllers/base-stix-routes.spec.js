@@ -52,12 +52,12 @@ const controllers = [
 ];
 
 describe('stix controllers', () => {
-    for (let controller of controllers) {
+    for (const controller of controllers) {
         describe(controller.type, () => {
             // Create
-            describe(`POST /${controller.type}`, () => {
+            describe(`POST /${controller.endpoint}`, () => {
                 it(`should create an ${controller.type}`, done => {
-                    let stixObj = {};
+                    const stixObj = {};
                     stixObj.type = controller.type;
                     stixObj.attributes = controller.attributes;
                     if (controller.id) {
@@ -65,7 +65,7 @@ describe('stix controllers', () => {
                     }
                     request(server)
                         .post(`/${controller.endpoint}`)
-                        .send({data:stixObj})
+                        .send({ data: stixObj })
                         .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
                         // TODO determine appropiate status code(s) to check for
                         // .expect(201)
@@ -131,7 +131,6 @@ describe('stix controllers', () => {
                             should.exist(res.body.data.attributes.x_extended_property_test);
                             should(typeof res.body.data).equal('object', `There should be exactly 1 ${controller.endpoint} returned.`);
                             done();
-                            console.log(res.body.data);
                         });
                 });
             });
@@ -156,8 +155,8 @@ describe('stix controllers', () => {
             describe(`GET /${controller.endpoint}?filter=filterstring`, () => {
                 it(`should filter ${controller.endpoint} created > 1980`, done => {
                     const filter = encodeURIComponent(JSON.stringify({
-                        "stix.created": {
-                            "$gte": "1980-01-01T00:00:00.000Z"
+                        'stix.created': {
+                            $gte: '1980-01-01T00:00:00.000Z'
                         }
                     }));
                     request(server)
