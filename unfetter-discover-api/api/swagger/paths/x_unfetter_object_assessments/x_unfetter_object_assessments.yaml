@@ -44,7 +44,7 @@ get:
     "200":
       description: Success
       schema:
-        $ref: "#/definitions/ErrorJsonApi"
+        $ref: "#/definitions/XUnfetterObjectAssessmentsJsonApi"
     default:
       description: Error
       schema:
