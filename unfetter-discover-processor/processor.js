@@ -1,10 +1,11 @@
 /* ~~~ Program Constants ~~~ */
 
 // The maximum amount of tries mongo will attempt to connect
-const MAX_NUM_CONNECT_ATTEMPTS = 10;
+const MAX_NUM_CONNECT_ATTEMPTS = process.env.MAX_NUM_CONNECT_ATTEMPTS || 10;
 // The amount of time between each connection attempt in ms
-const CONNECTION_RETRY_TIME = 5000;
+const CONNECTION_RETRY_TIME = process.env.CONNECTION_RETRY_TIME || 5000;
 const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
+const PROCESSOR_STATUS_ID = process.env.PROCESSOR_STATUS_ID || 'f09ad23d-c9f7-40a3-8afa-d9560e6df95b';
 
 /* ~~~ Vendor Libraries ~~~ */
 
@@ -57,6 +58,9 @@ const stixModel = mongoose.model('stix', new mongoose.Schema({
 const configModel = mongoose.model('config', new mongoose.Schema({
     _id: String
 }, { strict: false }), 'config');
+const utilModel = mongoose.model('utility', new mongoose.Schema({
+    _id: String
+}, { strict: false }), 'utility');
 
 /* ~~~ Utility Functions ~~~ */
 
@@ -177,21 +181,27 @@ function run(stixObjects = []) {
         Promise.all(promises)
             .then(results => {
                 console.log('Successfully executed all operations');
-                mongoose.connection.close(() => {
-                    console.log('closed mongo connection');
+                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'COMPLETE' }, { upsert: true }, (err, res) => {
+                    mongoose.connection.close(() => {
+                        console.log('closed mongo connection');
+                    });
                 });
             })
             .catch(err => {
                 console.log('Error: ', err.message);
-                mongoose.connection.close(() => {
-                    console.log('closed mongo connection');
-                    process.exit(1);
+                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'COMPLETE' }, { upsert: true }, (err, res) => {
+                    mongoose.connection.close(() => {
+                        console.log('closed mongo connection');
+                        process.exit(1);
+                    });
                 });
             })
     } else {
         console.log('There are no operations to perform');
-        mongoose.connection.close(() => {
-            console.log('closed mongo connection');
+        utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'COMPLETE' }, { upsert: true }, (err, res) => {
+            mongoose.connection.close(() => {
+                console.log('closed mongo connection');
+            });
         });
     }
 }
@@ -206,23 +216,32 @@ mongoose.connection.on('connected', function (err) {
     console.log('connected to mongodb');
     clearInterval(conIntervel);
 
-    // Add mitre data
-    if (argv.addMitreData !== undefined && argv.addMitreData === true) {
-        console.log('Adding Mitre data');
-        getMitreData()
-            .then(res => {
-                run(res);
-            })
-            .catch(err => {
-                console.log(err);
-                mongoose.connection.close(() => {
-                    console.log('closed mongo connection');
-                    process.exit(1);
-                });
+    utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'PENDING' }, { upsert: true }, (err, res) => {
+        if (err) {
+            mongoose.connection.close(() => {
+                console.log('Unable to set processor status');
+                process.exit(1);
             });
-    } else {
-        run();
-    }
+        } else {
+            // Add mitre data
+            if (argv.addMitreData !== undefined && argv.addMitreData === true) {
+                console.log('Adding Mitre data');
+                getMitreData()
+                    .then(res => {
+                        run(res);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        mongoose.connection.close(() => {
+                            console.log('closed mongo connection');
+                            process.exit(1);
+                        });
+                    });
+            } else {
+                run();
+            }
+        }
+    });    
 });
 mongoose.connection.on('error', function (err) {
     console.log('Mongoose connection error: ' + err);

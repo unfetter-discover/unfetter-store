@@ -104,6 +104,7 @@ stixCommons.makeSchema = childSchema => {
     schemaObj.index({ 'stix.name': 1 });
     schemaObj.index({ 'stix.type': 1 });
     schemaObj.index({ 'stix.kill_chain_phases.phase_name': 1 });
+    schemaObj.index({ 'stix.created_by_ref': 1 });
     return schemaObj;
 };
 
