@@ -29,21 +29,18 @@ passportConfig.jwtStandard = (req, res, next) => {
     if (!user || !user.approved) {
         return res.status(403).json({
             errors: [{
-                status: 403,
-                source: '',
-                title: 'Error',
-                code: '',
-                detail: 'Unauthorized.  You are not approved to use unfetter'
+                status: 403, source: '', title: 'Error', code: '', detail: 'Unauthorized.  You are not approved to use unfetter'
             }]
         });
+    } else {
+        next();
     }
-    next();
 };
 
 passportConfig.jwtAdmin = (req, res, next) => {
     const user = req.user;
     // Verify they have admin role
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || !user.approved || user.role !== 'ADMIN') {
         return res.status(403).json({
             errors: [{
                 status: 403, source: '', title: 'Error', code: '', detail: 'Unauthorized.  Only admins may access the admin route'
@@ -56,7 +53,7 @@ passportConfig.jwtAdmin = (req, res, next) => {
 passportConfig.jwtOrganizations = (req, res, next) => {
     const user = req.user;
     // Verify they have admin or org leader role
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'ORG_LEADER')) {
+    if (!user || !user.approved || (user.role !== 'ADMIN' && user.role !== 'ORG_LEADER')) {
         return res.status(403).json({
             errors: [{
                 status: 403, source: '', title: 'Error', code: '', detail: 'Unauthorized.  Only admins and organization leaders may access the organizations route'
