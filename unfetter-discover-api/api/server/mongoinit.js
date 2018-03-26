@@ -5,12 +5,41 @@ process.env.MONGO_DBNAME = process.env.MONGO_DBNAME || 'stix';
 const modelFactory = require('../controllers/shared/modelFactory');
 const mongoose = require('mongoose');
 
+const utilityModel = require('../models/utility');
 const identityModel = modelFactory.getModel('identity');
 const configModel = modelFactory.getModel('config');
+
+const PROCESSOR_STATUS_ID = process.env.PROCESSOR_STATUS_ID || 'f09ad23d-c9f7-40a3-8afa-d9560e6df95b';
+// The maximum amount of tries mongo will attempt to get processor Status
+const MAX_GET_PROCESSOR_STATUS_ATTEMPTS = process.env.MAX_GET_PROCESSOR_STATUS_ATTEMPTS || 10;
+// The amount of time between each connection attempt in ms
+const GET_PROCESSOR_RETRY_TIME = process.env.GET_PROCESSOR_RETRY_TIME || 5000;
 
 const mongoDebug = process.env.MONGO_DEBUG || false;
 mongoose.set('debug', mongoDebug);
 mongoose.Promise = global.Promise;
+
+const getProcessorStatus = () => new Promise((resolve, reject) => {
+    let retryAttempts = 0;
+    const getProcessInterval = setInterval(() => {
+        retryAttempts++;
+        console.log('Attempting to get processor status, try# ', retryAttempts);
+        if (retryAttempts >= MAX_GET_PROCESSOR_STATUS_ATTEMPTS) {
+            clearInterval(getProcessInterval);
+            reject('Maximum number of attempts to get processor status exceeded');
+        } else {
+            utilityModel.findById(PROCESSOR_STATUS_ID, (err, res) => {
+                if (!err && res) {
+                    const processorStatus = res.toObject();
+                    if (processorStatus.utilityValue === 'COMPLETE') {
+                        clearInterval(getProcessInterval);
+                        resolve(true);
+                    }
+                } 
+            });
+        }
+    }, GET_PROCESSOR_RETRY_TIME);
+});
 
 /**
  * @description populate global lookup values
@@ -73,9 +102,13 @@ module.exports = () => new Promise((resolve, reject) => {
         });
         db.on('connected', () => {
             console.log('connected to mongodb');
-            lookupGlobalValues()
-                .then(_ => resolve('Mongo DB running'))
-                .catch(errMsg => reject(errMsg));
+            getProcessorStatus()
+                .then(_ => {
+                    lookupGlobalValues()
+                        .then(_ => resolve('Mongo DB running'))
+                        .catch(errMsg => reject(errMsg));
+                })
+                .catch(err => reject(err));            
         });
         db.on('disconnected', () => console.log('disconnected from mongodb'));
         process.on('SIGINT', () => {

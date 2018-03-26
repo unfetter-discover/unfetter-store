@@ -4,11 +4,7 @@ const HttpsProxyAgent = require('https-proxy-agent');
 const MAX_NUM_CONNECT_ATTEMPTS = process.env.MAX_NUM_CONNECT_ATTEMPTS || 10;
 // The amount of time between each connection attempt in ms
 const CONNECTION_RETRY_TIME = process.env.CONNECTION_RETRY_TIME || 5000;
-const MITRE_STIX_URLS = {
-    enterprise: 'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json',
-    pre: 'https://raw.githubusercontent.com/mitre/cti/master/pre-attack/pre-attack.json',
-    mobile: 'https://raw.githubusercontent.com/mitre/cti/master/mobile-attack/mobile-attack.json'
-};
+const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
 const PROCESSOR_STATUS_ID = process.env.PROCESSOR_STATUS_ID || 'f09ad23d-c9f7-40a3-8afa-d9560e6df95b';
 
 /* ~~~ Vendor Libraries ~~~ */
@@ -76,14 +72,10 @@ const stixModel = mongoose.model('stix', new mongoose.Schema({
 }), 'stix');
 const configModel = mongoose.model('config', new mongoose.Schema({
     _id: String
-}, {
-    strict: false
-}), 'config');
+}, { strict: false }), 'config');
 const utilModel = mongoose.model('utility', new mongoose.Schema({
     _id: String
-}, {
-    strict: false
-}), 'utility');
+}, { strict: false }), 'utility');
 
 /* ~~~ Utility Functions ~~~ */
 
@@ -223,15 +215,7 @@ function run(stixObjects = []) {
         Promise.all(promises)
             .then(results => { // eslint-disable-line no-unused-vars
                 console.log('Successfully executed all operations');
-                // eslint-disable-next-line no-unused-vars
-                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-                    _id: PROCESSOR_STATUS_ID,
-                    utilityName: 'PROCESSOR_STATUS',
-                    utilityValue: 'COMPLETE'
-                }, {
-                    upsert: true
-                    // eslint-disable-next-line no-unused-vars
-                }, (err, res) => {
+                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'COMPLETE' }, { upsert: true }, (err, res) => {
                     mongoose.connection.close(() => {
                         console.log('closed mongo connection');
                     });
@@ -239,15 +223,7 @@ function run(stixObjects = []) {
             })
             .catch(err => {
                 console.log('Error: ', err.message);
-                // eslint-disable-next-line no-unused-vars
-                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-                    _id: PROCESSOR_STATUS_ID,
-                    utilityName: 'PROCESSOR_STATUS',
-                    utilityValue: 'COMPLETE'
-                }, {
-                    upsert: true
-                    // eslint-disable-next-line no-unused-vars
-                }, (error, res) => {
+                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'COMPLETE' }, { upsert: true }, (err, res) => {
                     mongoose.connection.close(() => {
                         console.log('closed mongo connection');
                         process.exit(1);
@@ -256,16 +232,7 @@ function run(stixObjects = []) {
             });
     } else {
         console.log('There are no operations to perform');
-        // eslint-disable-next-line no-unused-vars
-
-        utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-            _id: PROCESSOR_STATUS_ID,
-            utilityName: 'PROCESSOR_STATUS',
-            utilityValue: 'COMPLETE'
-        }, {
-            upsert: true
-            // eslint-disable-next-line no-unused-vars
-        }, (err, res) => {
+        utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'COMPLETE' }, { upsert: true }, (err, res) => {
             mongoose.connection.close(() => {
                 console.log('closed mongo connection');
             });
@@ -283,36 +250,32 @@ mongoose.connection.on('connected', err => { // eslint-disable-line no-unused-va
     console.log('connected to mongodb');
     clearInterval(conIntervel);
 
-    utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-        _id: PROCESSOR_STATUS_ID,
-        utilityName: 'PROCESSOR_STATUS',
-        utilityValue: 'PENDING'
-    }, {
-        upsert: true
-    }, (error, res) => { // eslint-disable-line no-unused-vars
-        if (error) {
+    utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'PENDING' }, { upsert: true }, (err, res) => {
+        if (err) {
             mongoose.connection.close(() => {
                 console.log('Unable to set processor status');
                 process.exit(1);
             });
-        } else if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
-            // Add mitre data
-            console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
-            getMitreData(argv.mitreAttackData)
-                .then(result => {
-                    run(result);
-                })
-                .catch(getMitreDataError => {
-                    console.log(getMitreDataError);
-                    mongoose.connection.close(() => {
-                        console.log('closed mongo connection');
-                        process.exit(1);
-                    });
-                });
         } else {
-            run();
+            // Add mitre data
+            if (argv.addMitreData !== undefined && argv.addMitreData === true) {
+                console.log('Adding Mitre data');
+                getMitreData()
+                    .then(res => {
+                        run(res);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        mongoose.connection.close(() => {
+                            console.log('closed mongo connection');
+                            process.exit(1);
+                        });
+                    });
+            } else {
+                run();
+            }
         }
-    });
+    });    
 });
 mongoose.connection.on('error', err => {
     console.log(`Mongoose connection error: ${err}`);
