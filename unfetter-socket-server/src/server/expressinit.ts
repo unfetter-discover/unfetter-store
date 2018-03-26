@@ -1,12 +1,13 @@
 const port = process.env.PORT || '3333';
 
+import { Server } from 'https';
+
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
-
 import app from './app';
 
-export function expressInit() {
+export default function expressInit(): Promise<Server> {
     return new Promise((resolve, reject) => {
         const server: https.Server = https.createServer({
             key: fs.readFileSync('/etc/pki/tls/certs/server.key'),

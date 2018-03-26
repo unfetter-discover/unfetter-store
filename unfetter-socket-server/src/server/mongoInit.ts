@@ -7,7 +7,7 @@ import * as mongoose from 'mongoose';
 import configModel from '../models/mongoose/config';
 import stixModel from '../models/mongoose/stix';
 
-const getConfig = () => new Promise((resolve, reject) => {
+const getConfig = (): Promise<string> => new Promise((resolve, reject) => {
     const promises = [];
 
     promises.push(stixModel.findOne({ 'stix.type': 'identity', 'stix.name': 'Unfetter Open' }).exec());
@@ -30,7 +30,7 @@ const getConfig = () => new Promise((resolve, reject) => {
         .catch((err) => reject(`Unable to get identities and/or configurations: ${err}`));
 });
 
-export function mongoInit() {
+export default function mongoInit(): Promise<string> {
     return new Promise((resolve, reject) => {
         if (global.conn === undefined) {
             mongoose.connect(`mongodb://${process.env.MONGO_REPOSITORY}:${process.env.MONGO_PORT}/${process.env.MONGO_DBNAME}`, {
