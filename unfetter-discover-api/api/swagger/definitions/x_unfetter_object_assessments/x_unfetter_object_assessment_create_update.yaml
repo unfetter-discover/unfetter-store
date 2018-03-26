@@ -1,28 +1,41 @@
-  # The main assessment object.  Stores the overall assessment report, the chosen answers
-  #    to the questions, and the risks accepted
-    allOf:
-    - $ref: '#/definitions/StixCommon'
-    - properties:
-        data:
-          type: object
-          properties:
-            type:
+type: object
+properties:
+  data:
+    type: object
+    properties:
+      attributes:
+        type: object
+        properties:
+
+          name:
+            type: string
+          description:
+            type: string
+          object_ref:
+            type: string
+          is_baseline:
+            type: boolean
+          created: 
+            type: string
+            format: date-time
+          modified:
+            type: string
+            format: date-time
+          set_ref:
+            type: array
+            items:
               type: string
-              enum: ['x-unfetter-object-assessment']
-            attributes:
-              type: object
+          assessment_objects:
+            type: array
+            items:
               properties:
-                description:
+                assessment_object_ref:
                   type: string
-                name:
-                  type: string
-                is_baseline:
-                  type: boolean
-                set_ref:
+                questions:
                   type: array
                   items:
-                    type: string
-                assessment_objects:
-                  type: array
-                  items:
-                    $ref: "./object-assessment-object.yaml"
+                    properties:
+                      name:
+                        type: string
+                      score:
+                        type: string

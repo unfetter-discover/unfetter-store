@@ -1,6 +1,8 @@
     type: object
     properties:
+      links:
+        $ref: "#/definitions/Links"
       data:
         type: array
         items:
-          $ref: "#/definitions/XUnfetterAssessmentSetsJsonApi"
+          $ref: "#/definitions/XUnfetterAssessmentSetJsonApi"

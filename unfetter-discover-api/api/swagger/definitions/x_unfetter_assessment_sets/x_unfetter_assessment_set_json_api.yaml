@@ -7,3 +7,5 @@
       example: "x-unfetter-assessment-set"
     attributes:
       $ref: "#/definitions/XUnfetterAssessmentSet"
+    links:
+      $ref: "#/definitions/Links"
