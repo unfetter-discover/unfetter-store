@@ -68,7 +68,7 @@ module.exports = class BaseController {
             }
 
 
-            const matcherQuery = BaseController.applySecurityFilterWhenNeeded(Object.assign({ 'stix.type': type }, query.filter), type, req.user);
+            const matcherQuery = this.applySecurityFilterWhenNeeded(Object.assign({ 'stix.type': type }, query.filter), type, req.user);
             model
                 .find(matcherQuery)
                 .sort(query.sort)
@@ -123,7 +123,7 @@ module.exports = class BaseController {
             const id = req.swagger.params.id ? req.swagger.params.id.value : '';
             // get the most recent one since there could be many with the same id
             // stix most recent is defined as the most recently modified one
-            const query = BaseController.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
             model
                 .find(query)
                 .sort({ modified: '-1' })
@@ -327,7 +327,7 @@ module.exports = class BaseController {
             if (req.swagger.params.id.value !== undefined && req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
-                const query = BaseController.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+                const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
                 model.findById(query, (err, result) => {
                     if (err) {
                         return res.status(500).json({
@@ -376,7 +376,7 @@ module.exports = class BaseController {
                         });
                     }
 
-                    const findOneAndUpdateQuery = BaseController.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+                    const findOneAndUpdateQuery = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
                     // guard pass complete
                     model.findOneAndUpdate(findOneAndUpdateQuery, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                         if (errUpdate) {
@@ -407,7 +407,7 @@ module.exports = class BaseController {
         };
     }
 
-    static deleteByIdCb(callback) {
+    deleteByIdCb(callback) {
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -422,12 +422,12 @@ module.exports = class BaseController {
         const model = this.model;
         const relationshipModel = modelFactory.getModel('relationship');
 
-        return BaseController.deleteByIdCb((req, res, id) => {
+        return this.deleteByIdCb((req, res, id) => {
             const promises = [];
             // per mongo documentation
             // Mongoose queries are not promises. However, they do have a .then() function for yield and async/await.
             // If you need a fully- fledged promise, use the .exec() function.
-            const query = BaseController.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
             promises.push(model.remove(query).exec());
             promises.push(relationshipModel.remove({ $or: [{ 'stix.source_ref': id }, { 'stix.target_ref': id }] }).exec());
             Promise.all(promises).then(response => {
@@ -453,7 +453,7 @@ module.exports = class BaseController {
      * @param {*} type
      * @param {*} user
      */
-    static applySecurityFilterWhenNeeded(query, type, user) {
+    applySecurityFilterWhenNeeded(query, type, user) {
         if (!type || !query) {
             return query;
         }

@@ -9,7 +9,7 @@ module.exports = {
     getById: controller.getById(),
     add: controller.add(),
     update: controller.update(),
-    deleteById: BaseController.deleteByIdCb((req, res, id) => {
+    deleteById: controller.deleteByIdCb((req, res, id) => {
         relationshipModel.findByIdAndRemove(id, (err, result) => {
             if (err) {
                 res.status(500).json({
