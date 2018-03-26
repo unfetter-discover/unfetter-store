@@ -5,4 +5,4 @@
       data:
         type: array
         items:
-          $ref: "#/definitions/XUnfetterCapabilityJsonApi"
+          $ref: "#/definitions/XUnfetterAssessmentGroupJsonApi"

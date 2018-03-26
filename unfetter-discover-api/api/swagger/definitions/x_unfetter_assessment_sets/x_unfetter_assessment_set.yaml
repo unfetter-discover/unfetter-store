@@ -5,20 +5,17 @@
       type: string
     description:
       type: string
-    version:
-      type: number
-    category:
-      type: string  
     created_by_ref:
       type: string
-      default: "identity-id"
+    assessment_group_ref:
+      type: string
+    assessments:
+      type: array
+      items:
+        type: string
     created: 
       type: string
       format: date-time
     modified:
       type: string
       format: date-time
-    external_references:
-      type: array
-      items:
-        $ref: "#/definitions/ExternalReference"

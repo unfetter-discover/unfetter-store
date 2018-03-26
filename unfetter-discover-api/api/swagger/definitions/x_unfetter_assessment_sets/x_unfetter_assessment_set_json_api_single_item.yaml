@@ -3,6 +3,4 @@
       links:
         $ref: "#/definitions/Links"
       data:
-        type: array
-        items:
-          $ref: "#/definitions/XUnfetterCapabilityJsonApi"
+        $ref: "#/definitions/XUnfetterAssessmentSetJsonApi"

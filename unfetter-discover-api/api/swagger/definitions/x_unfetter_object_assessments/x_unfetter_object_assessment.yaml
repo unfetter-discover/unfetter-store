@@ -1,0 +1,49 @@
+  type: object
+  properties:
+
+      name:
+        type: string
+      description:
+        type: string
+      object_ref:
+        type: string
+      is_baseline:
+        type: boolean
+      created: 
+        type: string
+        format: date-time
+      modified:
+        type: string
+        format: date-time
+      set_ref:
+        type: array
+        items:
+          type: string
+      assessment_objects:
+        type: array
+        items:
+          properties:
+            assessment_object_ref:
+              type: string
+            questions:
+              type: array
+              items:
+                properties:
+                  name:
+                    type: string
+                  score:
+                    type: string
+      
+        # type: array
+        # items:
+        #   properties:
+        #     assessment_object_ref:
+        #       type: string
+        #     questions:
+        #       type: array
+        #       items:
+        #         properties:
+        #           name:
+        #             type: string
+        #           score:
+        #             type: string

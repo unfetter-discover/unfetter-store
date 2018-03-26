@@ -4,8 +4,8 @@
       type: string
     type:
       type: string
-      example: "x-unfetter-capability"
+      example: "x-unfetter-assessment-group"
     attributes:
-      $ref: "#/definitions/XUnfetterCapability"
+      $ref: "#/definitions/XUnfetterAssessmentGroup"
     links:
       $ref: "#/definitions/Links"
