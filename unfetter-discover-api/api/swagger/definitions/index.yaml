@@ -354,7 +354,40 @@ XUnfetterCapabilityCreateUpdate:
 XUnfetterCapabilityJsonApiSingleItem:
   $ref: ./x_unfetter_capabilities/x_unfetter_capability_json_api_single_item.yaml
 XUnfetterCapability:
-  $ref: ./x_unfetter_capabilities/x_unfetter_capability.yaml  
+  $ref: ./x_unfetter_capabilities/x_unfetter_capability.yaml
+
+XUnfetterObjectAssessmentJsonApi:
+  $ref: ./x_unfetter_object_assessments/x_unfetter_object_assessment_json_api.yaml
+XUnfetterObjectAssessmentsJsonApi:
+  $ref: ./x_unfetter_object_assessments/x_unfetter_object_assessments_json_api.yaml
+XUnfetterObjectAssessmentCreateUpdate:
+  $ref: ./x_unfetter_object_assessments/x_unfetter_object_assessment_create_update.yaml
+XUnfetterObjectAssessmentJsonApiSingleItem:
+  $ref: ./x_unfetter_object_assessments/x_unfetter_object_assessment_json_api_single_item.yaml
+XUnfetterObjectAssessment:
+  $ref: ./x_unfetter_object_assessments/x_unfetter_object_assessment.yaml
+
+XUnfetterAssessmentGroupJsonApi:
+  $ref: ./x_unfetter_assessment_groups/x_unfetter_assessment_group_json_api.yaml
+XUnfetterAssessmentGroupsJsonApi:
+  $ref: ./x_unfetter_assessment_groups/x_unfetter_assessment_groups_json_api.yaml
+XUnfetterAssessmentGroupCreateUpdate:
+  $ref: ./x_unfetter_assessment_groups/x_unfetter_assessment_group_create_update.yaml
+XUnfetterAssessmentGroupJsonApiSingleItem:
+  $ref: ./x_unfetter_assessment_groups/x_unfetter_assessment_group_json_api_single_item.yaml
+XUnfetterAssessmentGroup:
+  $ref: ./x_unfetter_assessment_groups/x_unfetter_assessment_group.yaml
+
+XUnfetterAssessmentSetJsonApi:
+  $ref: ./x_unfetter_assessment_sets/x_unfetter_assessment_set_json_api.yaml
+XUnfetterAssessmentSetsJsonApi:
+  $ref: ./x_unfetter_assessment_sets/x_unfetter_assessment_sets_json_api.yaml
+XUnfetterAssessmentSetCreateUpdate:
+  $ref: ./x_unfetter_assessment_sets/x_unfetter_assessment_set_create_update.yaml
+XUnfetterAssessmentSetJsonApiSingleItem:
+  $ref: ./x_unfetter_assessment_sets/x_unfetter_assessment_set_json_api_single_item.yaml
+XUnfetterAssessmentSet:
+  $ref: ./x_unfetter_assessment_sets/x_unfetter_assessment_set.yaml
 
 # Custom Routes
 

@@ -3,16 +3,10 @@ properties:
   data:
     type: object
     properties:
-      type:
-        type: string
-        enum: ['x-unfetter-capability']
       attributes:
         type: object
         properties:
 
-          created_by_ref:
-            type: string
-            default: "identity-id"
           name:
             type: string
           description:
@@ -21,6 +15,9 @@ properties:
             type: number
           category:
             type: string  
+          created_by_ref:
+            type: string
+            default: "identity-id"
           external_references:
             type: array
             items:

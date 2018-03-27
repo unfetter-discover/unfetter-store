@@ -2,7 +2,6 @@ var xUnfetterObjectAssessment = {
     endpoint: 'v3/x-unfetter-object-assessments',
     type: 'x-unfetter-object-assessment',
     attributes: {
-        created_by_ref: 'identity--a932fcc6-e032-176c-126f-cb970a5a1ade',
         name: 'lorem',
         description: 'lorem ipsum',
         object_ref: 'x-unfetter-capability-45256397-a396-40cd-b91a-95f39f99c24a',
