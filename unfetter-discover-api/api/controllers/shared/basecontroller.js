@@ -342,10 +342,10 @@ module.exports = class BaseController {
                     const incomingObj = req.swagger.params.data ? req.swagger.params.data.value.data.attributes : {};
                     const has = Object.prototype.hasOwnProperty;
                     for (const key in incomingObj) {
-                        if (incomingObj.has(key)) {
+                        if (has.call(incomingObj, key)) {
                             if (key === 'metaProperties') {
                                 for (const metaKey in incomingObj.metaProperties) {
-                                    if (incomingObj.metaProperties.has(metaKey)) {
+                                    if (has.call(incomingObj.metaProperties, metaKey)) {
                                         if (resultObj.metaProperties === undefined) {
                                             resultObj.metaProperties = {};
                                         }
@@ -411,7 +411,7 @@ module.exports = class BaseController {
         };
     }
 
-    static deleteByIdCb(callback) {
+    deleteByIdCb(callback) { // eslint-disable-line class-methods-use-this
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -457,7 +457,7 @@ module.exports = class BaseController {
      * @param {*} type
      * @param {*} user
      */
-    static applySecurityFilterWhenNeeded(query, type, user) {
+    applySecurityFilterWhenNeeded(query, type, user) { // eslint-disable-line class-methods-use-this
         if (!type || !query) {
             return query;
         }
