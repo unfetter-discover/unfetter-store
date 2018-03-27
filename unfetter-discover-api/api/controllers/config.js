@@ -3,6 +3,7 @@ const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const uuid = require('uuid');
+const lodash = require('lodash');
 
 const model = modelFactory.getModel('config');
 const controller = new BaseController('config');
@@ -38,13 +39,13 @@ module.exports = {
 
                 const requestedUrl = apiRoot + req.originalUrl;
                 const convertedResult = result
-                    .map(res => res.toObject())
-                    .map(res => {
+                    .map(response => response.toObject())
+                    .map(response => {
                         const retVal = {};
                         retVal.links = {};
-                        retVal.links.self = `${requestedUrl}/${res._id}`;
-                        retVal.attributes = res;
-                        retVal.attributes.id = res._id;
+                        retVal.links.self = `${requestedUrl}/${response._id}`;
+                        retVal.attributes = response;
+                        retVal.attributes.id = response._id;
                         return retVal;
                     });
                 return res.status(200).json({ links: { self: requestedUrl }, data: convertedResult });

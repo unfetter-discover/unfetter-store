@@ -1,15 +1,16 @@
 const lodash = require('lodash');
 
 const transform = function transformFun(obj, type, urlRoot) {
+    let localObj = obj;
     if (!(obj instanceof Object)) {
-        obj = obj.toObject();
+        localObj = obj.toObject();
     }
     const apiObj = {
         type,
-        id: obj.id,
-        attributes: obj,
+        id: localObj.id,
+        attributes: localObj,
         links: {
-            self: `${urlRoot}/${obj.id}`
+            self: `${urlRoot}/${localObj.id}`
         }
     };
     // delete apiObj.attributes._id;

@@ -1,18 +1,19 @@
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
+const lodash = require('lodash');
 
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const model = modelFactory.getModel('schemaless');
 const publish = require('../controllers/shared/publish');
 
 const transform = function transformFun(obj, urlRoot) {
-    obj = { ...obj.toObject().stix, ...obj.toObject().metaProperties, ...obj.toObject };
+    const newObj = { ...obj.toObject().stix, ...obj.toObject().metaProperties, ...obj.toObject };
     const apiObj = {
-        type: obj.type,
-        id: obj.id,
-        attributes: obj,
+        type: newObj.type,
+        id: newObj.id,
+        attributes: newObj,
         links: {
-            self: `${urlRoot}/${obj._id}`
+            self: `${urlRoot}/${newObj._id}`
         }
     };
     // delete apiObj.attributes._id;
@@ -48,7 +49,7 @@ const get = (req, res) => {
             }
 
             const requestedUrl = apiRoot + req.originalUrl;
-            const convertedResult = result.map(res => transform(res, requestedUrl));
+            const convertedResult = result.map(response => transform(response, requestedUrl));
             return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
         });
 };

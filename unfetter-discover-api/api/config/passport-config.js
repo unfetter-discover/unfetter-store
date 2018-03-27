@@ -10,8 +10,8 @@ passportConfig.setStrategy = passport => {
     const opts = {};
     opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
     opts.secretOrKey = config.jwtSecret;
-    passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
-        userModel.findById(jwt_payload._id, (err, user) => {
+    passport.use(new JwtStrategy(opts, (jwtPayload, done) => {
+        userModel.findById(jwtPayload._id, (err, user) => {
             if (err) {
                 return done(err, false);
             }
@@ -29,12 +29,15 @@ passportConfig.jwtStandard = (req, res, next) => {
     if (!user || !user.approved) {
         return res.status(403).json({
             errors: [{
-                status: 403, source: '', title: 'Error', code: '', detail: 'Unauthorized.  You are not approved to use unfetter'
+                status: 403,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Unauthorized.  You are not approved to use unfetter'
             }]
         });
-    } else {
-        next();
     }
+    next();
 };
 
 passportConfig.jwtAdmin = (req, res, next) => {
@@ -43,7 +46,11 @@ passportConfig.jwtAdmin = (req, res, next) => {
     if (!user || !user.approved || user.role !== 'ADMIN') {
         return res.status(403).json({
             errors: [{
-                status: 403, source: '', title: 'Error', code: '', detail: 'Unauthorized.  Only admins may access the admin route'
+                status: 403,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Unauthorized.  Only admins may access the admin route'
             }]
         });
     }
@@ -56,7 +63,11 @@ passportConfig.jwtOrganizations = (req, res, next) => {
     if (!user || !user.approved || (user.role !== 'ADMIN' && user.role !== 'ORG_LEADER')) {
         return res.status(403).json({
             errors: [{
-                status: 403, source: '', title: 'Error', code: '', detail: 'Unauthorized.  Only admins and organization leaders may access the organizations route'
+                status: 403,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Unauthorized.  Only admins and organization leaders may access the organizations route'
             }]
         });
     }

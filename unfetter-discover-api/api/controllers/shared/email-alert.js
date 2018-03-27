@@ -31,7 +31,7 @@ const emailUser = (userId, userEmail, template, subject, emailBody) => {
         },
         body
     })
-        .then(res => {
+        .then(res => { // eslint-disable-line no-unused-vars
             console.log('Publish API recieved user notification for', userId);
         })
         .catch(err => console.log('Error!', err));
