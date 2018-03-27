@@ -1,5 +1,5 @@
 var XUnfetterAssessmentSet = {
-    endpoint: 'x-unfetter-assessment-sets',
+    endpoint: 'v3/x-unfetter-assessment-sets',
     type: 'x-unfetter-assessment-set',
     attributes: {
         name: 'lorem',

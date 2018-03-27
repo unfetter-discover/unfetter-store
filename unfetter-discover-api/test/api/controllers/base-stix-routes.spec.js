@@ -7,7 +7,7 @@ const server = require('../../../app');
 // Controllers
 const attackPattern = require('./examples/attack_pattern');
 const campaign = require('./examples/campaign');
-const capability = require('./examples/capability');
+const capability = require('./examples/x_unfetter_capability');
 const courseOfAction = require('./examples/course_of_action');
 const identity = require('./examples/identity');
 const indicator = require('./examples/indicator');

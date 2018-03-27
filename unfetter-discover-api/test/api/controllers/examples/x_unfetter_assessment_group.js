@@ -1,5 +1,5 @@
 var XUnfetterAssessmentGroup = {
-    endpoint: 'x-unfetter-assessment-groups',
+    endpoint: 'v3/x-unfetter-assessment-groups',
     type: 'x-unfetter-assessment-group',
     attributes: {
         name: 'lorem',
