@@ -25,7 +25,7 @@ router.get('/users-pending-approval', (req, res) => {
             });
         }
         const users = result
-            .map(res => res.toObject())
+            .map(response => response.toObject())
             .map(user => ({
                 id: user._id,
                 attributes: user
@@ -44,7 +44,7 @@ router.get('/current-users', (req, res) => {
             });
         }
         const users = result
-            .map(res => res.toObject())
+            .map(response => response.toObject())
             .map(user => ({
                 id: user._id,
                 attributes: user
@@ -64,7 +64,7 @@ router.get('/current-users', (req, res) => {
             });
         }
         const users = result
-            .map(res => res.toObject())
+            .map(response => response.toObject())
             .map(user => ({
                 id: user._id,
                 attributes: user
@@ -362,23 +362,24 @@ router.get('/site-visits-graph/:days', (req, res) => {
     ];
 
     webAnalyticsModel.aggregate(query, (err, results) => {
-        if (err || !results || !results.length) {
+        let localResults = results;
+        if (err || !localResults || !localResults.length) {
             return res.status(500).json({
                 errors: [{
                     status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                 }]
             });
         }
-        results = results.map(res => {
-            const retVal = res;
-            retVal._id = new Date(res._id);
+        localResults = localResults.map(response => {
+            const retVal = response;
+            retVal._id = new Date(response._id);
             return retVal;
         });
-        const startDate = new Date(results[results.length - 1]._id);
-        const endDate = new Date(results[0]._id);
+        const startDate = new Date(localResults[localResults.length - 1]._id);
+        const endDate = new Date(localResults[0]._id);
         const zeroDates = [];
         for (let iDate = new Date(startDate); iDate < endDate; iDate.setDate(iDate.getDate() + 1)) {
-            const findDate = results.find(res => res._id.toDateString() === iDate.toDateString());
+            const findDate = localResults.find(response => response._id.toDateString() === iDate.toDateString());
             if (!findDate) {
                 zeroDates.push({
                     _id: new Date(iDate.getTime()),
@@ -387,7 +388,7 @@ router.get('/site-visits-graph/:days', (req, res) => {
                 });
             }
         }
-        const formatedRes = results
+        const formatedRes = localResults
             .concat(zeroDates)
             .sort((a, b) => b._id - a._id)
             .slice(0, numDays)
@@ -424,11 +425,11 @@ router.get('/heartbeat', (req, res) => {
         }
     ];
 
-    const fetchArr = services.map(service => new Promise((resolve, reject) => {
+    const fetchArr = services.map(service => new Promise((resolve, reject) => { // eslint-disable-line no-unused-vars
         fetch(service.url)
-            .then(res => res.json())
+            .then(response => response.json())
             .then(data => resolve({ service: service.service, status: data.status }))
-            .catch(err => resolve({ service: service.service, status: 'DOWN' }));
+            .catch(err => resolve({ service: service.service, status: 'DOWN' })); // eslint-disable-line no-unused-vars
     }));
 
     Promise.all(fetchArr)
@@ -441,7 +442,7 @@ router.get('/heartbeat', (req, res) => {
                 }
             });
         })
-        .catch(err => res.status(500).json({
+        .catch(err => res.status(500).json({ // eslint-disable-line no-unused-vars
             errors: [{
                 status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
             }]

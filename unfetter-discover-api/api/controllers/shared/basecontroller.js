@@ -414,7 +414,7 @@ module.exports = class BaseController {
         };
     }
 
-    deleteByIdCb(callback) {
+    deleteByIdCb(callback) { // eslint-disable-line class-methods-use-this
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -443,7 +443,7 @@ module.exports = class BaseController {
                 }
 
                 return res.status(404).json({ message: `Unable to delete the item.  No item found with id ${id}` });
-            }).catch(err => {
+            }).catch(err => { // eslint-disable-line no-unused-vars
                 res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: `An unknown error has occurred. [${err}]`
@@ -460,7 +460,7 @@ module.exports = class BaseController {
      * @param {*} type
      * @param {*} user
      */
-    applySecurityFilterWhenNeeded(query, type, user) {
+    applySecurityFilterWhenNeeded(query, type, user) { // eslint-disable-line class-methods-use-this
         if (!type || !query) {
             return query;
         }

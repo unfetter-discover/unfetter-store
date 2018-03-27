@@ -16,17 +16,17 @@ const downloadBundle = function downloadBundleFunc(req, res) {
             let objects;
             if (req.swagger.params.extendedproperties !== undefined && req.swagger.params.extendedproperties.value !== undefined && req.swagger.params.extendedproperties.value === true) {
                 objects = results
-                    .map(res => res.toObject())
-                    .map(res => {
-                        if (res.extendedProperties !== undefined) {
-                            return { ...res.stix, ...res.extendedProperties };
+                    .map(response => response.toObject())
+                    .map(response => {
+                        if (response.extendedProperties !== undefined) {
+                            return { ...response.stix, ...response.extendedProperties };
                         }
-                        return res.stix;
+                        return response.stix;
                     });
             } else {
                 objects = results
-                    .map(res => res.toObject())
-                    .map(res => res.stix);
+                    .map(response => response.toObject())
+                    .map(response => response.stix);
             }
 
             return res.json({

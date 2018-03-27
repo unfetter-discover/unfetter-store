@@ -39,8 +39,8 @@ module.exports = {
 
                 const requestedUrl = apiRoot + req.originalUrl;
                 const convertedResult = result
-                    .map(res => res.toObject())
-                    .map(res => {
+                    .map(response => response.toObject())
+                    .map(response => {
                         const retVal = {};
                         retVal.links = {};
                         retVal.links.self = `${requestedUrl}/${response._id}`;

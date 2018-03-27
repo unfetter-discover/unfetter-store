@@ -93,9 +93,9 @@ router.get('/github-callback', passport.authenticate('github', { failureRedirect
                         }]
                     });
                 }
-                userModel.create(newDocument, (err, result) => {
-                    if (err) {
-                        console.log(err);
+                userModel.create(newDocument, (createError, createResult) => {
+                    if (createError) {
+                        console.log(createError);
                         return res.status(500).json({
                             errors: [{
                                 status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
@@ -103,7 +103,7 @@ router.get('/github-callback', passport.authenticate('github', { failureRedirect
                         });
                     }
                     console.log(`First github login attempt by github id# ${githubUser.id}`);
-                    const token = jwt.sign(result.toObject(), config.jwtSecret, {
+                    const token = jwt.sign(createResult.toObject(), config.jwtSecret, {
                         expiresIn: global.unfetter.JWT_DURATION_SECONDS
                     });
                     res.header('Authorization', token);
@@ -161,8 +161,8 @@ router.get('/user-from-token', (req, res) => {
                 }]
             });
         }
-        userModel.findById(id, (err, result) => {
-            if (err || !result) {
+        userModel.findById(id, (error, result) => {
+            if (error || !result) {
                 return res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
@@ -373,17 +373,17 @@ router.get('/refreshtoken', passport.authenticate('jwt', { session: false }), (r
                 }]
             });
         }
-        userModel.findById(decoded._id, (err, user) => {
-            if (err | !user) {
+        userModel.findById(decoded._id, (error, user) => {
+            if (error || !user) {
                 return res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             }
-            user = user.toObject();
+            const userObject = user.toObject();
 
-            const newToken = jwt.sign(user, config.jwtSecret, {
+            const newToken = jwt.sign(userObject, config.jwtSecret, {
                 expiresIn: global.unfetter.JWT_DURATION_SECONDS
             });
             res.json({ data: { attributes: { token: `Bearer ${newToken}` } } });

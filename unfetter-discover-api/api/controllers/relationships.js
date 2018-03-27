@@ -26,7 +26,7 @@ module.exports = {
 
                 // Confirm we have two IDs to query for
                 if (sourceId && targetId) {
-                    stixSchemaless.find({ $or: [{ _id: sourceId }, { _id: targetId }] }, (err, results) => {
+                    stixSchemaless.find({ $or: [{ _id: sourceId }, { _id: targetId }] }, (error, results) => {
                         if (results.length === 2) {
                             // TODO handle deletion of a relationship when both related objects still exist
                             console.log('Both related objects still exist');
