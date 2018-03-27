@@ -391,4 +391,29 @@ router.get('/refreshtoken', passport.authenticate('jwt', { session: false }), (r
     });
 });
 
+router.get('/public-config', (req, res) => {
+    configModel.find({ configGroups: 'public' }, (err, results) => {
+        if (err || !results) {
+            return res.status(500).json({
+                errors: [{
+                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                }]
+            });
+        } else {
+            const requestedUrl = apiRoot + req.originalUrl;
+            const convertedResults = results
+                .map(res => res.toObject())
+                .map(res => {
+                    const retVal = {};
+                    retVal.links = {};
+                    retVal.links.self = `${requestedUrl}/${res._id}`;
+                    retVal.attributes = res;
+                    retVal.attributes.id = res._id;
+                    return retVal;
+                });
+            return res.status(200).json({ links: { self: requestedUrl }, data: convertedResults });
+        }
+    });
+});
+
 module.exports = router;
