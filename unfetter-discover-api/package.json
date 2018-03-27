@@ -8,15 +8,10 @@
   "license": "MIT",
   "main": "server.js",
   "dependencies": {
-    "assert": "^1.4.1",
     "body-parser": "^1.17.2",
-    "commander": "^2.9.0",
-    "connect": "^3.6.2",
     "express": "^4.12.3",
     "express-session": "^1.15.6",
     "https-proxy-agent": "^2.1.0",
-    "js-yaml": "^3.3.0",
-    "json-refs": "^2.1.6",
     "jsonwebtoken": "^8.0.1",
     "lodash": "^4.17.4",
     "mongoose": "^4.9.9",
@@ -25,18 +20,17 @@
     "passport-github": "^1.1.0",
     "passport-jwt": "^3.0.0",
     "randomcolor": "^0.5.3",
-    "should": "^7.1.0",
     "spdy": "^3.4.7",
-    "supertest": "^3.0.0",
     "swagger-express-mw": "^0.1.0",
-    "swagger-tools": "0.10.1",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
     "eslint": "^3.19.0",
     "eslint-config-airbnb-base": "^11.2.0",
     "eslint-plugin-import": "^2.3.0",
-    "nodemon": "^1.11.0"
+    "nodemon": "^1.11.0",
+    "should": "^7.1.0",
+    "supertest": "^3.0.0"
   },
   "scripts": {
     "compileswagger": "multi-file-swagger multifile.yaml > api/swagger/swagger.json && json2yaml ./api/swagger/swagger.json > ./api/swagger/swagger.yaml && swagger validate ./api/swagger/swagger.yaml",
@@ -44,9 +38,7 @@
     "startdev": "npm run compileswagger && nodemon --watch ./api --ignore 'api/swagger/swagger*.*' -e js,yaml,json,yml api/server/server.js",
     "startdeploy": "npm run compileswagger && pm2-docker start api/server/server.js -i max",
     "debugdev": "npm run compileswagger && nodemon --inspect=0.0.0.0:5555 --watch ./api --ignore 'api/swagger/swagger*.*' -e js,yaml,json,yml api/server/server.js",
-    "swaggerdev": "multi-file-swagger multifile-remote.yaml > api/swagger/swagger-remote.json && json2yaml ./api/swagger/swagger-remote.json > ./api/swagger/swagger-remote.yaml && swagger validate ./api/swagger/swagger.yaml && nodemon --watch ./api --ignore 'api/swagger/swagger*.*' -e js,yaml,json,yml app-editor.js",
-    "swagger-editor": "multi-file-swagger multifile-remote.yaml > api/swagger/swagger-remote.json && json2yaml ./api/swagger/swagger-remote.json > ./api/swagger/swagger-remote.yaml && node app-editor.js",
-    "test": "multi-file-swagger multifile.yaml > api/swagger/swagger.json && json2yaml ./api/swagger/swagger.json > ./api/swagger/swagger.yaml && swagger validate ./api/swagger/swagger.yaml && swagger project test",
+    "test": "npm run compileswagger && swagger project test",
     "lint": "eslint ./api/**"
   }
 }
