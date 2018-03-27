@@ -342,10 +342,17 @@ module.exports = class BaseController {
                     const incomingObj = req.swagger.params.data ? req.swagger.params.data.value.data.attributes : {};
                     const has = Object.prototype.hasOwnProperty;
                     for (const key in incomingObj) {
+<<<<<<< HEAD
                         if (has.call(incomingObj, key)) {
                             if (key === 'metaProperties') {
                                 for (const metaKey in incomingObj.metaProperties) {
                                     if (has.call(incomingObj.metaProperties, metaKey)) {
+=======
+                        if (incomingObj.has(key)) {
+                            if (key === 'metaProperties') {
+                                for (const metaKey in incomingObj.metaProperties) {
+                                    if (incomingObj.metaProperties.has(metaKey)) {
+>>>>>>> fixes unfetter-discover/unfetter#890
                                         if (resultObj.metaProperties === undefined) {
                                             resultObj.metaProperties = {};
                                         }
@@ -411,7 +418,11 @@ module.exports = class BaseController {
         };
     }
 
+<<<<<<< HEAD
     deleteByIdCb(callback) { // eslint-disable-line class-methods-use-this
+=======
+    static deleteByIdCb(callback) {
+>>>>>>> fixes unfetter-discover/unfetter#890
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -457,7 +468,11 @@ module.exports = class BaseController {
      * @param {*} type
      * @param {*} user
      */
+<<<<<<< HEAD
     applySecurityFilterWhenNeeded(query, type, user) { // eslint-disable-line class-methods-use-this
+=======
+    static applySecurityFilterWhenNeeded(query, type, user) {
+>>>>>>> fixes unfetter-discover/unfetter#890
         if (!type || !query) {
             return query;
         }
