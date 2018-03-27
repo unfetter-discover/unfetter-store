@@ -6,14 +6,10 @@ const scoreVals = ['S', 'M', 'L', 'N/A', 'N'];
 const StixSchema = {
     type: {
         type: String,
-        enum: ['x-unfetter-capability'],
-        default: 'x-unfetter-capability'
+        enum: ['x-unfetter-object-assessment'],
+        default: 'x-unfetter-object-assessment'
     },
     id: String,
-    created_by_ref: {
-        type: String,
-        required: [true, 'created_by_ref is required']
-    },
     name: {
         type: String,
         required: [true, 'name is required']

@@ -11,14 +11,11 @@ properties:
             type: string
           description:
             type: string
-          version:
-            type: number
-          category:
-            type: string  
           created_by_ref:
             type: string
-            default: "identity-id"
-          external_references:
+          assessment_group_ref:
+            type: string
+          assessments:
             type: array
             items:
-              $ref: "#/definitions/ExternalReference"
+              type: string
