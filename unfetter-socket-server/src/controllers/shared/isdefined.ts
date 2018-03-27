@@ -3,7 +3,7 @@ import { Request } from 'express';
 export function isDefined(obj: any, props: string[]): boolean {
     let holdingObj = { ...obj };
     for (let prop of props) {
-        if (holdingObj[prop] === undefined) {
+        if (holdingObj[prop] === undefined || holdingObj[prop] === null) {
             return false;
         } else {
             holdingObj = holdingObj[prop];
