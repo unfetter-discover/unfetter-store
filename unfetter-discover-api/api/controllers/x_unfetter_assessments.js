@@ -44,7 +44,7 @@ function calculateRiskByQuestion(assessments) {
     const returnObject = {};
     returnObject.risk = total / count;
     lodash.forEach(questions, question => {
-        question.risk /= question.total;
+        question.risk /= question.total; // eslint-disable-line no-param-reassign
     });
     returnObject.questions = questions;
     return returnObject;
@@ -82,7 +82,7 @@ function getPromises(assessment) {
     return promises;
 }
 
-const assessedObjects = controller.getByIdCb((err, result, req, res, id) => {
+const assessedObjects = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     const [assessment] = result;
 
     if (err) {
@@ -122,7 +122,7 @@ const assessedObjects = controller.getByIdCb((err, result, req, res, id) => {
                 },
             });
         })
-        .catch(promiseErr => res.status(500).json({
+        .catch(promiseErr => res.status(500).json({ // eslint-disable-line no-unused-vars
             errors: [{
                 status: 500,
                 source: '',
@@ -188,7 +188,7 @@ function calculateRiskPerKillChain(workingObjects, isIndicator) {
 // Will group assessed objects into Attack Kill Chains, and calculates the risks
 // The data is not json-api
 
-const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
+const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     let [assessment] = result;
 
     if (err) {
@@ -279,7 +279,7 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => {
 });
 
 // Get the Rollup Risk. Will return a totalRisk, then riskByMeasurement.
-const risk = controller.getByIdCb((err, result, req, res, id) => {
+const risk = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     if (err) {
         return res.status(500).json({
             errors: [{
@@ -492,16 +492,19 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
             if (results) {
                 const requestedUrl = apiRoot + req.originalUrl;
                 const returnObj = {};
-                returnObj.phases = results[0];
+                const PHASE_POSITION = 0;
+                const ABAP_POSITION = 1;
+                const APBKC_POSITION = 2;
+                returnObj.phases = results[PHASE_POSITION];
 
                 // TODO remove this, this is incorrect
-                // returnObj.totalRisk = results[0]
+                // returnObj.totalRisk = results[PHASE_POSITION]
                 //   .map(res => res.avgRisk)
                 //   .reduce((prev, cur) => cur += prev, 0)
-                //   / results[0].length;
+                //   / results[PHASE_POSITION].length;
 
-                returnObj.assessedByAttackPattern = results[1];
-                returnObj.attackPatternsByKillChain = results[2];
+                returnObj.assessedByAttackPattern = results[ABAP_POSITION];
+                returnObj.attackPatternsByKillChain = results[APBKC_POSITION];
 
                 return res.status(200).json({
                     links: {
@@ -515,7 +518,7 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
                 message: `No item found with id ${id}`
             });
         })
-        .catch(err =>
+        .catch(err => // eslint-disable-line no-unused-vars
             res.status(500).json({
                 errors: [{
                     status: 500,
@@ -600,8 +603,10 @@ const summaryAggregations = (req, res) => {
             if (results) {
                 const requestedUrl = apiRoot + req.originalUrl;
                 const returnObj = {};
-                const tempAttackPatternsByAssessedObject = results[0];
-                const allAttackPattenrns = results[1];
+                const APBAO_POSITION = 0;
+                const ALL_ATTACK_PATTERNS_POSITION = 1;
+                const tempAttackPatternsByAssessedObject = results[APBAO_POSITION];
+                const allAttackPattenrns = results[ALL_ATTACK_PATTERNS_POSITION];
                 const sophisticationSetMap = {};
 
                 // Push assessed attack patterns to a set by sophisication level
@@ -647,7 +652,7 @@ const summaryAggregations = (req, res) => {
                 message: `No item found with id ${id}`
             });
         })
-        .catch(err =>
+        .catch(err => // eslint-disable-line no-unused-vars
             res.status(500).json({
                 errors: [{
                     status: 500,
@@ -660,7 +665,7 @@ const summaryAggregations = (req, res) => {
 };
 
 // Get the total Risk of a single Assessed Object of a certain Assessed Object
-const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
+const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     if (err) {
         return res.status(500).json({
             errors: [{
@@ -686,7 +691,7 @@ const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id)
 });
 
 // Get the total Risk of a single Assessed Object of a certain Assessed Object
-const getAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
+const getAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     if (err) {
         return res.status(500).json({
             errors: [{
@@ -757,16 +762,16 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
         const assessedObject = assessment.stix.assessment_objects.find(o => o.stix.id === objectId);
 
         // go through and change the answer to each of these questions.
-        let risk = 0;
+        let riskValue = 0;
 
         lodash.forEach(assessedObject.questions, (question, index) => {
             if ((answer <= question.options.length) && ((questionId === '') || (questionId === index.toString()))) {
-                question.selected_value = question.options[answer];
-                risk += question.selected_value.risk;
-                question.risk = question.selected_value.risk;
+                question.selected_value = question.options[answer]; // eslint-disable-line no-param-reassign
+                riskValue += question.selected_value.risk;
+                question.risk = question.selected_value.risk; // eslint-disable-line no-param-reassign
             }
         });
-        assessedObject.risk = risk / assessedObject.questions.length;
+        assessedObject.risk = riskValue / assessedObject.questions.length;
 
 
         // Update the Mongoose model
@@ -821,8 +826,8 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
                     message: `Unable to update the item.  No item found with id ${id}`
                 });
             });
-        } catch (err) {
-            console.log(`error ${err}`);
+        } catch (error) {
+            console.log(`error ${error}`);
             return res.status(500).json({
                 errors: [{
                     status: 500,
@@ -906,7 +911,7 @@ const latestAssessmentPromise = (query, req, res) => {
                 data: mappedResults
             });
         })
-        .catch(err =>
+        .catch(err => // eslint-disable-line no-unused-vars
             res.status(500).json({
                 errors: [{
                     status: 500,
@@ -929,7 +934,7 @@ const latestAssessmentsByCreatorId = (req, res) => {
     //  group the assessments into its parent rollup id (an assessment can be a combination of 3 types)
     //  unwind the potential 3 assessments per rollup into individual entries
     //  sort on last modified
-    const latestAssessmentsByCreatorId = [{
+    const latestAssessmentsByCreatorIdChild = [{
         $match: {
             creator: id,
             'stix.type': 'x-unfetter-assessment',
@@ -988,7 +993,7 @@ const latestAssessmentsByCreatorId = (req, res) => {
     }
     ];
 
-    latestAssessmentPromise(latestAssessmentsByCreatorId, req, res);
+    latestAssessmentPromise(latestAssessmentsByCreatorIdChild, req, res);
 };
 
 /**

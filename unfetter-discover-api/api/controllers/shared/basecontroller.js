@@ -342,20 +342,24 @@ module.exports = class BaseController {
                     const incomingObj = req.swagger.params.data ? req.swagger.params.data.value.data.attributes : {};
                     const has = Object.prototype.hasOwnProperty;
                     for (const key in incomingObj) {
-                        if (key === 'metaProperties') {
-                            for (const metaKey in incomingObj.metaProperties) {
-                                if (resultObj.metaProperties === undefined) {
-                                    resultObj.metaProperties = {};
+                        if (has.call(incomingObj, key)) {
+                            if (key === 'metaProperties') {
+                                for (const metaKey in incomingObj.metaProperties) {
+                                    if (has.call(incomingObj.metaProperties, metaKey)) {
+                                        if (resultObj.metaProperties === undefined) {
+                                            resultObj.metaProperties = {};
+                                        }
+                                        resultObj.metaProperties[metaKey] = incomingObj.metaProperties[metaKey];
+                                    }
                                 }
-                                resultObj.metaProperties[metaKey] = incomingObj.metaProperties[metaKey];
+                            } else if (key.match(/^x_/) === null && has.call(incomingObj, key)) {
+                                resultObj.stix[key] = incomingObj[key];
+                            } else if (key.match(/^x_/) !== null && has.call(incomingObj, key)) {
+                                if (resultObj.extendedProperties === undefined) {
+                                    resultObj.extendedProperties = {};
+                                }
+                                resultObj.extendedProperties[key] = incomingObj[key];
                             }
-                        } else if (key.match(/^x_/) === null && has.call(incomingObj, key)) {
-                            resultObj.stix[key] = incomingObj[key];
-                        } else if (key.match(/^x_/) !== null && has.call(incomingObj, key)) {
-                            if (resultObj.extendedProperties === undefined) {
-                                resultObj.extendedProperties = {};
-                            }
-                            resultObj.extendedProperties[key] = incomingObj[key];
                         }
                     }
 
@@ -407,7 +411,7 @@ module.exports = class BaseController {
         };
     }
 
-    deleteByIdCb(callback) {
+    deleteByIdCb(callback) { // eslint-disable-line class-methods-use-this
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -436,7 +440,7 @@ module.exports = class BaseController {
                 }
 
                 return res.status(404).json({ message: `Unable to delete the item.  No item found with id ${id}` });
-            }).catch(err => {
+            }).catch(err => { // eslint-disable-line no-unused-vars
                 res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: `An unknown error has occurred. [${err}]`
@@ -453,7 +457,7 @@ module.exports = class BaseController {
      * @param {*} type
      * @param {*} user
      */
-    applySecurityFilterWhenNeeded(query, type, user) {
+    applySecurityFilterWhenNeeded(query, type, user) { // eslint-disable-line class-methods-use-this
         if (!type || !query) {
             return query;
         }

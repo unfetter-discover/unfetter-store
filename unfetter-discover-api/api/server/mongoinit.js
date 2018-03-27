@@ -6,6 +6,7 @@ const modelFactory = require('../controllers/shared/modelFactory');
 const mongoose = require('mongoose');
 
 const utilityModel = require('../models/utility');
+
 const identityModel = modelFactory.getModel('identity');
 const configModel = modelFactory.getModel('config');
 
@@ -22,11 +23,11 @@ mongoose.Promise = global.Promise;
 const getProcessorStatus = () => new Promise((resolve, reject) => {
     let retryAttempts = 0;
     const getProcessInterval = setInterval(() => {
-        retryAttempts++;
+        retryAttempts += 1;
         console.log('Attempting to get processor status, try# ', retryAttempts);
         if (retryAttempts >= MAX_GET_PROCESSOR_STATUS_ATTEMPTS) {
             clearInterval(getProcessInterval);
-            reject('Maximum number of attempts to get processor status exceeded');
+            reject(new Error('Maximum number of attempts to get processor status exceeded'));
         } else {
             utilityModel.findById(PROCESSOR_STATUS_ID, (err, res) => {
                 if (!err && res) {
@@ -35,7 +36,7 @@ const getProcessorStatus = () => new Promise((resolve, reject) => {
                         clearInterval(getProcessInterval);
                         resolve(true);
                     }
-                } 
+                }
             });
         }
     }, GET_PROCESSOR_RETRY_TIME);
@@ -49,7 +50,7 @@ const lookupGlobalValues = () => new Promise((resolve, reject) => {
 
     const promises = [];
 
-    promises.push(identityPromise = identityModel
+    promises.push(identityModel
         .findOne({ 'stix.type': 'identity', 'stix.name': 'Unfetter Open' }).exec());
 
     promises.push(configModel.find({}).exec());
@@ -98,7 +99,7 @@ const lookupGlobalValues = () => new Promise((resolve, reject) => {
 
             resolve('Identities recieved');
         })
-        .catch(err => reject('Unable to get identities and/or configurations: ', err));
+        .catch(err => reject(new Error('Unable to get identities and/or configurations: '), err));
 });
 
 module.exports = () => new Promise((resolve, reject) => {
@@ -119,17 +120,17 @@ module.exports = () => new Promise((resolve, reject) => {
         const db = global.unfetter.conn;
         db.on('error', () => {
             console.error(console, 'connection error:');
-            reject('error connecting to monogo');
+            reject(new Error('error connecting to mongo'));
         });
         db.on('connected', () => {
             console.log('connected to mongodb');
             getProcessorStatus()
-                .then(_ => {
+                .then(_ => { // eslint-disable-line no-unused-vars
                     lookupGlobalValues()
-                        .then(_ => resolve('Mongo DB running'))
+                        .then(__ => resolve('Mongo DB running')) // eslint-disable-line no-unused-vars
                         .catch(errMsg => reject(errMsg));
                 })
-                .catch(err => reject(err));            
+                .catch(err => reject(err));
         });
         db.on('disconnected', () => console.log('disconnected from mongodb'));
         process.on('SIGINT', () => {

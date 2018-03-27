@@ -6,14 +6,13 @@ const CTF_PARSE_PATH = process.env.CTF_PARSE_PATH || '/translate/report/data';
 
 const translateData = (req, res) => {
     const err = {
-        error:
-            {
-                status: 500,
-                source: '',
-                title: 'Error',
-                code: '',
-                detail: 'An unknown error has occurred.'
-            }
+        error: {
+            status: 500,
+            source: '',
+            title: 'Error',
+            code: '',
+            detail: 'An unknown error has occurred.'
+        }
     };
     if (!req || !req.swagger || !req.swagger.params) {
         return res.status(500).json(err);
@@ -25,7 +24,10 @@ const translateData = (req, res) => {
     const valueData = val.data || val;
     // repost to ctf endpoints
     const body = JSON.stringify(valueData);
-    const headers = { 'content-type': 'application/json', accept: 'application/json' };
+    const headers = {
+        'content-type': 'application/json',
+        accept: 'application/json'
+    };
     const url = `${CTF_PARSE_HOST}:${CTF_PARSE_PORT}${CTF_PARSE_PATH}`;
     fetch(url, {
         headers,
@@ -35,7 +37,9 @@ const translateData = (req, res) => {
         response.json().then(json => {
             // console.log('response', json);
             // format back to jsonapi, with data wrapper
-            res.json({ data: json });
+            res.json({
+                data: json
+            });
         });
     }).catch(ex => {
         err.error.detail = ex;
@@ -46,7 +50,7 @@ const translateData = (req, res) => {
 /**
  * @description sample generic formatted report
  */
-translateDataSample = (req, res) => {
+const translateDataSample = (req, res) => {
     const json = {
         systemName: 'sample-report-system',
         payload: {
@@ -64,7 +68,9 @@ translateDataSample = (req, res) => {
         }
     };
     // format back to jsonapi, with data wrapper
-    res.json({ data: json });
+    res.json({
+        data: json
+    });
 };
 
 module.exports = {
