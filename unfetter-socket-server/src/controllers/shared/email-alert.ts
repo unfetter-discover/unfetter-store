@@ -10,8 +10,7 @@ const HTTPS_PROXY_URL = process.env.HTTPS_PROXY_URL || null;
 const emailConfigFile = join(__dirname, '../../../config/private-config.email.json');
 
 let emailConfigJson: SmtpOptions | any;
-
-if (SEND_EMAIL_ALERTS) {
+if (SEND_EMAIL_ALERTS === true) {
     try {
         emailConfigJson = JSON.parse(readFileSync(emailConfigFile, 'utf8'));
 
