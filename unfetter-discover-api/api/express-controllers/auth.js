@@ -548,7 +548,7 @@ router.get('/username-available/:userName', passport.authenticate('jwt', {
             if (err) {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             } else {
-                res.json({ data: { attributes: { count: (count === 0) } } });
+                res.json({ data: { attributes: { available: (count === 0) } } });
             }
         });
     }
@@ -573,7 +573,7 @@ router.get('/email-available/:email', passport.authenticate('jwt', {
             if (err) {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             } else {
-                res.json({ data: { attributes: { count: (count === 0) } } });
+                res.json({ data: { attributes: { available: (count === 0) } } });
             }
         });
     }
