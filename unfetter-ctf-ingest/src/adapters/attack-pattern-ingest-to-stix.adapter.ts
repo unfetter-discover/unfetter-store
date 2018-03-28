@@ -54,6 +54,11 @@ export class AttackPatternIngestToStixAdapter {
         phase.phase_name = attackPatternIngest.objective;
         stix.kill_chain_phases = stix.kill_chain_phases || [];
         stix.kill_chain_phases.push(phase);
+
+        if (attackPatternIngest.stage) {
+            stix.extendedProperties = stix.extendedProperties || { x_ntctf_stage: '' };
+            stix.extendedProperties.x_ntctf_stage = attackPatternIngest.stage;
+        }
         return stix;
     }
 

@@ -11,6 +11,7 @@ describe('attack pattern ingest model', () => {
         ap.action = 'breaking and enter';
         ap.description = 'its when bad people break stuff';
         ap.example = 'like that time';
+        ap.stage = 'stage5';
     });
 
     it('should have a constructor', () => {
@@ -18,10 +19,12 @@ describe('attack pattern ingest model', () => {
     });
 
     it('should generate json', () => {
-        expect(ap.toJson()).toContain('killChain');
-        expect(ap.toJson()).toContain('description');
-        expect(ap.toJson()).toContain('action');
-        expect(ap.toJson()).toContain('objective');
-        expect(ap.toJson()).toContain('example');
+        const json = ap.toJson();
+        expect(json).toContain('killChain');
+        expect(json).toContain('description');
+        expect(json).toContain('action');
+        expect(json).toContain('objective');
+        expect(json).toContain('example');
+        expect(json).toContain('stage5');
     });
 });
