@@ -61,10 +61,6 @@ export class AttackPatternIngestToStixAdapter {
             stix.extendedProperties = stix.extendedProperties || { x_ntctf_stage: '' };
             stix.extendedProperties.x_ntctf_stage = attackPatternIngest.stage;
         }
-
-        const v4 = UUID.v4();
-        const id = stix.type + '--' + v4;
-        stix.id = id;
         return stix;
     }
 
