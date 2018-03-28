@@ -21,6 +21,6 @@
     "eslint-plugin-import": "^2.3.0"
   },
   "scripts": {
-    "lint": "eslint ./api/**"
+    "lint": "eslint ./*.js"
   }
 }
