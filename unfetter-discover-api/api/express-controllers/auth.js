@@ -534,7 +534,7 @@ router.get('/username-available/:userName', passport.authenticate('jwt', {
 }), (req, res) => {
     const userName = req.params.userName;
     if (!userName || userName === '') {
-        return res.status(400).json({
+        res.status(400).json({
             errors: [{
                 status: 400,
                 source: '',
@@ -546,7 +546,7 @@ router.get('/username-available/:userName', passport.authenticate('jwt', {
     } else {
         userModel.count({ userName }, (err, count) => {
             if (err) {
-                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             } else {
                 res.json({ data: { attributes: { available: (count === 0) } } });
             }
@@ -559,7 +559,7 @@ router.get('/email-available/:email', passport.authenticate('jwt', {
 }), (req, res) => {
     const email = req.params.email;
     if (!email || email === '') {
-        return res.status(400).json({
+        res.status(400).json({
             errors: [{
                 status: 400,
                 source: '',
@@ -571,7 +571,7 @@ router.get('/email-available/:email', passport.authenticate('jwt', {
     } else {
         userModel.count({ email }, (err, count) => {
             if (err) {
-                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             } else {
                 res.json({ data: { attributes: { available: (count === 0) } } });
             }

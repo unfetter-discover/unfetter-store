@@ -67,6 +67,7 @@ const UserSchema = new mongoose.Schema({
         }
     },
     identity: {
+        created_by_ref: String,
         id: {
             type: String
         },
@@ -87,6 +88,14 @@ const UserSchema = new mongoose.Schema({
             type: String,
             enum: ['identity'],
             default: 'identity'
+        },
+        created: {
+            type: Date,
+            default: Date.now
+        },
+        modified: {
+            type: Date,
+            default: Date.now
         }
     },
     created: {
