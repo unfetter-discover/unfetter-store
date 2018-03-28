@@ -529,4 +529,54 @@ router.get('/public-config', (req, res) => {
     });
 });
 
+router.get('/username-available/:userName', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    const userName = req.params.userName;
+    if (!userName || userName === '') {
+        return res.status(400).json({
+            errors: [{
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Unable to process userName'
+            }]
+        });
+    } else {
+        userModel.count({ userName }, (err, count) => {
+            if (err) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            } else {
+                res.json({ data: { attributes: { count: (count === 0) } } });
+            }
+        });
+    }
+});
+
+router.get('/email-available/:email', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    const email = req.params.email;
+    if (!email || email === '') {
+        return res.status(400).json({
+            errors: [{
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Unable to process email'
+            }]
+        });
+    } else {
+        userModel.count({ email }, (err, count) => {
+            if (err) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            } else {
+                res.json({ data: { attributes: { count: (count === 0) } } });
+            }
+        });
+    }
+});
+
 module.exports = router;
