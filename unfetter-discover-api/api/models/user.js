@@ -111,10 +111,10 @@ const UserSchema = new mongoose.Schema({
     },
     registrationInformation: {
         applicationNote: {
-            type: String 
+            type: String
         },
         requestedOrganization: {
-            type: String 
+            type: String
         }
     }
 });
@@ -122,4 +122,5 @@ const UserSchema = new mongoose.Schema({
 UserSchema.index({ userName: 1 });
 UserSchema.index({ role: 1 });
 
-const User = module.exports = mongoose.model('User', UserSchema, 'user');
+module.exports = mongoose.model('User', UserSchema, 'user');
+// const User = module.exports;

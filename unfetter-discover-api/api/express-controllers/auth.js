@@ -48,22 +48,35 @@ router.use(require('express-session')({
 router.use(passport.initialize());
 router.use(passport.session());
 
-router.get('/github-login', passport.authenticate('github', { scope: ['user:email'] }));
+router.get('/github-login', passport.authenticate('github', {
+    scope: ['user:email']
+}));
 
-router.get('/github-callback', passport.authenticate('github', { failureRedirect: '/auth/github-login' }), (req, res) => {
+router.get('/github-callback', passport.authenticate('github', {
+    failureRedirect: '/auth/github-login'
+}), (req, res) => {
     // hit unfetter api to update token
     const githubUser = req.user;
     if (!githubUser) {
-        res.json({ success: false, message: 'User object is empty' });
+        res.json({
+            success: false,
+            message: 'User object is empty'
+        });
     } else {
         let registered;
         let user = {};
 
-        userModel.find({ 'github.id': githubUser.id }, (err, result) => {
+        userModel.find({
+            'github.id': githubUser.id
+        }, (err, result) => {
             if (err) {
                 return res.status(500).json({
                     errors: [{
-                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        status: 500,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'An unknown error has occurred.'
                     }]
                 });
 
@@ -89,7 +102,11 @@ router.get('/github-callback', passport.authenticate('github', { failureRedirect
                     });
                     return res.status(400).json({
                         errors: [{
-                            status: 400, source: '', title: 'Error', code: '', detail: errors
+                            status: 400,
+                            source: '',
+                            title: 'Error',
+                            code: '',
+                            detail: errors
                         }]
                     });
                 }
@@ -98,7 +115,11 @@ router.get('/github-callback', passport.authenticate('github', { failureRedirect
                         console.log(createError);
                         return res.status(500).json({
                             errors: [{
-                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                                status: 500,
+                                source: '',
+                                title: 'Error',
+                                code: '',
+                                detail: 'An unknown error has occurred.'
                             }]
                         });
                     }
@@ -111,7 +132,7 @@ router.get('/github-callback', passport.authenticate('github', { failureRedirect
                 });
 
 
-            // Known user
+                // Known user
             } else {
                 user = result[0].toObject();
                 registered = user.registered;
@@ -132,7 +153,11 @@ router.get('/user-from-token', (req, res) => {
     if (!token) {
         return res.status(400).json({
             errors: [{
-                status: 400, source: '', title: 'Error', code: '', detail: ''
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: ''
             }]
         });
     }
@@ -149,7 +174,11 @@ router.get('/user-from-token', (req, res) => {
             console.log(`Error in /auth/user-from-token:\n${JSON.stringify(err, null, 2)}`);
             return res.status(500).json({
                 errors: [{
-                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                    status: 500,
+                    source: '',
+                    title: 'Error',
+                    code: '',
+                    detail: 'An unknown error has occurred.'
                 }]
             });
         }
@@ -157,7 +186,11 @@ router.get('/user-from-token', (req, res) => {
         if (!id) {
             return res.status(400).json({
                 errors: [{
-                    status: 400, source: '', title: 'Error', code: '', detail: 'Malformed token'
+                    status: 400,
+                    source: '',
+                    title: 'Error',
+                    code: '',
+                    detail: 'Malformed token'
                 }]
             });
         }
@@ -165,7 +198,11 @@ router.get('/user-from-token', (req, res) => {
             if (error || !result) {
                 return res.status(500).json({
                     errors: [{
-                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        status: 500,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'An unknown error has occurred.'
                     }]
                 });
             }
@@ -178,14 +215,20 @@ router.get('/user-from-token', (req, res) => {
     });
 });
 
-router.post('/finalize-registration', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.post('/finalize-registration', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
     const user = req.body.data.attributes;
     if (user) {
         userModel.findById(user._id, (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
-                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        status: 500,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'An unknown error has occurred.'
                     }]
                 });
             }
@@ -213,7 +256,11 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
                 });
                 return res.status(400).json({
                     errors: [{
-                        status: 400, source: '', title: 'Error', code: '', detail: errors
+                        status: 400,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: errors
                     }]
                 });
             }
@@ -221,7 +268,11 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
                 if (errInner || !resultInner) {
                     return res.status(500).json({
                         errors: [{
-                            status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            status: 500,
+                            source: '',
+                            title: 'Error',
+                            code: '',
+                            detail: 'An unknown error has occurred.'
                         }]
                     });
                 }
@@ -249,35 +300,55 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
     } else {
         return res.status(400).json({
             errors: [{
-                status: 400, source: '', title: 'Error', code: '', detail: 'Malformed request'
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Malformed request'
             }]
         });
     }
 });
 
-router.get('/profile/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.get('/profile/:id', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
     const userId = req.params.id;
     userModel.findById(userId, (err, result) => {
         if (err || !result) {
             return res.status(500).json({
                 errors: [{
-                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                    status: 500,
+                    source: '',
+                    title: 'Error',
+                    code: '',
+                    detail: 'An unknown error has occurred.'
                 }]
             });
         }
         const user = result.toObject();
-        res.json({ data: { attributes: user } });
+        res.json({
+            data: {
+                attributes: user
+            }
+        });
     });
 });
 
-router.post('/finalize-registration', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.post('/finalize-registration', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
     const user = req.body.data.attributes;
     if (user) {
         userModel.findById(user._id, (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
-                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        status: 500,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'An unknown error has occurred.'
                     }]
                 });
             }
@@ -305,7 +376,11 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
                 });
                 return res.status(400).json({
                     errors: [{
-                        status: 400, source: '', title: 'Error', code: '', detail: errors
+                        status: 400,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: errors
                     }]
                 });
             }
@@ -313,7 +388,11 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
                 if (errInner || !resultInner) {
                     return res.status(500).json({
                         errors: [{
-                            status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            status: 500,
+                            source: '',
+                            title: 'Error',
+                            code: '',
+                            detail: 'An unknown error has occurred.'
                         }]
                     });
                 }
@@ -341,18 +420,28 @@ router.post('/finalize-registration', passport.authenticate('jwt', { session: fa
     } else {
         return res.status(400).json({
             errors: [{
-                status: 400, source: '', title: 'Error', code: '', detail: 'Malformed request'
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Malformed request'
             }]
         });
     }
 });
 
-router.get('/refreshtoken', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.get('/refreshtoken', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
     const token = req.headers.authorization;
     if (!token) {
         return res.status(400).json({
             errors: [{
-                status: 400, source: '', title: 'Error', code: '', detail: ''
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: ''
             }]
         });
     }
@@ -369,7 +458,11 @@ router.get('/refreshtoken', passport.authenticate('jwt', { session: false }), (r
             console.log(`Error in /auth/user-from-token:\n${JSON.stringify(err, null, 2)}`);
             return res.status(500).json({
                 errors: [{
-                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                    status: 500,
+                    source: '',
+                    title: 'Error',
+                    code: '',
+                    detail: 'An unknown error has occurred.'
                 }]
             });
         }
@@ -377,7 +470,11 @@ router.get('/refreshtoken', passport.authenticate('jwt', { session: false }), (r
             if (error || !user) {
                 return res.status(500).json({
                     errors: [{
-                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        status: 500,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'An unknown error has occurred.'
                     }]
                 });
             }
@@ -386,33 +483,49 @@ router.get('/refreshtoken', passport.authenticate('jwt', { session: false }), (r
             const newToken = jwt.sign(userObject, config.jwtSecret, {
                 expiresIn: global.unfetter.JWT_DURATION_SECONDS
             });
-            res.json({ data: { attributes: { token: `Bearer ${newToken}` } } });
+            res.json({
+                data: {
+                    attributes: {
+                        token: `Bearer ${newToken}`
+                    }
+                }
+            });
         });
     });
 });
 
 router.get('/public-config', (req, res) => {
-    configModel.find({ configGroups: 'public' }, (err, results) => {
+    configModel.find({
+        configGroups: 'public'
+    }, (err, results) => {
         if (err || !results) {
             return res.status(500).json({
                 errors: [{
-                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                    status: 500,
+                    source: '',
+                    title: 'Error',
+                    code: '',
+                    detail: 'An unknown error has occurred.'
                 }]
             });
-        } else {
-            const requestedUrl = apiRoot + req.originalUrl;
-            const convertedResults = results
-                .map(res => res.toObject())
-                .map(res => {
-                    const retVal = {};
-                    retVal.links = {};
-                    retVal.links.self = `${requestedUrl}/${res._id}`;
-                    retVal.attributes = res;
-                    retVal.attributes.id = res._id;
-                    return retVal;
-                });
-            return res.status(200).json({ links: { self: requestedUrl }, data: convertedResults });
         }
+        const requestedUrl = apiRoot + req.originalUrl;
+        const convertedResults = results
+            .map(result => result.toObject())
+            .map(result => {
+                const retVal = {};
+                retVal.links = {};
+                retVal.links.self = `${requestedUrl}/${result._id}`;
+                retVal.attributes = result;
+                retVal.attributes.id = result._id;
+                return retVal;
+            });
+        return res.status(200).json({
+            links: {
+                self: requestedUrl
+            },
+            data: convertedResults
+        });
     });
 });
 

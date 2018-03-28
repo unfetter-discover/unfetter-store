@@ -72,10 +72,14 @@ const stixModel = mongoose.model('stix', new mongoose.Schema({
 }), 'stix');
 const configModel = mongoose.model('config', new mongoose.Schema({
     _id: String
-}, { strict: false }), 'config');
+}, {
+    strict: false
+}), 'config');
 const utilModel = mongoose.model('utility', new mongoose.Schema({
     _id: String
-}, { strict: false }), 'utility');
+}, {
+    strict: false
+}), 'utility');
 
 /* ~~~ Utility Functions ~~~ */
 
@@ -96,7 +100,19 @@ function filesToJson(filePaths) {
         .filter(jsonObj => jsonObj);
 }
 
-function mitreFetch(mitreUrl, instanceOptions) {
+function getMitreData() {
+    const instanceOptions = {};
+
+    if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
+        console.log('Attempting to configure proxy');
+        const proxy = url.parse(process.env.HTTPS_PROXY_URL);
+        // Workaround for UNABLE_TO_GET_ISSUER_CERT_LOCALLY fetch error due to proxy + self-signed cert
+        proxy.rejectUnauthorized = false;
+        instanceOptions.agent = new HttpsProxyAgent(proxy);
+    } else {
+        console.log('Not using a proxy');
+    }
+
     return new Promise((resolve, reject) => {
         fetch(mitreUrl, instanceOptions)
             .then(fetchRes => fetchRes.json())
@@ -120,28 +136,6 @@ function mitreFetch(mitreUrl, instanceOptions) {
                     });
                 resolve(stixToUpload);
             })
-            .catch(err => reject(err));
-    });
-}
-
-function getMitreData(frameworks) {
-    const instanceOptions = {};
-
-    if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
-        console.log('Attempting to configure proxy');
-        const proxy = url.parse(process.env.HTTPS_PROXY_URL);
-        // Workaround for UNABLE_TO_GET_ISSUER_CERT_LOCALLY fetch error due to proxy + self-signed cert
-        proxy.rejectUnauthorized = false;
-        instanceOptions.agent = new HttpsProxyAgent(proxy);
-    } else {
-        console.log('Not using a proxy');
-    }
-
-    const promises = [];
-    frameworks.forEach(framework => promises.push(mitreFetch(MITRE_STIX_URLS[framework], instanceOptions)));
-    return new Promise((resolve, reject) => {
-        Promise.all(promises)
-            .then(stixToUploadArr => resolve(stixToUploadArr.reduce((prev, cur) => prev.concat(cur), [])))
             .catch(err => reject(err));
     });
 }
@@ -186,16 +180,6 @@ function run(stixObjects = []) {
                 }
             });
         }
-
-        if (argv['auto-publish']) {
-            stixToUpload.forEach(stix => {
-                if (stix.metaProperties === undefined) {
-                    stix.metaProperties = {};
-                }
-                stix.metaProperties.published = true;
-            });
-        }
-
         promises.push(stixModel.create(stixToUpload));
     } else if (argv.enhancedStixProperties !== undefined) {
         // TODO attempt to upload to database if not STIX document provided
@@ -215,7 +199,15 @@ function run(stixObjects = []) {
         Promise.all(promises)
             .then(results => { // eslint-disable-line no-unused-vars
                 console.log('Successfully executed all operations');
-                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'COMPLETE' }, { upsert: true }, (err, res) => {
+                // eslint-disable-next-line no-unused-vars
+                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
+                    _id: PROCESSOR_STATUS_ID,
+                    utilityName: 'PROCESSOR_STATUS',
+                    utilityValue: 'COMPLETE'
+                }, {
+                    upsert: true
+                    // eslint-disable-next-line no-unused-vars
+                }, (err, res) => {
                     mongoose.connection.close(() => {
                         console.log('closed mongo connection');
                     });
@@ -223,7 +215,15 @@ function run(stixObjects = []) {
             })
             .catch(err => {
                 console.log('Error: ', err.message);
-                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'COMPLETE' }, { upsert: true }, (err, res) => {
+                // eslint-disable-next-line no-unused-vars
+                utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
+                    _id: PROCESSOR_STATUS_ID,
+                    utilityName: 'PROCESSOR_STATUS',
+                    utilityValue: 'COMPLETE'
+                }, {
+                    upsert: true
+                    // eslint-disable-next-line no-unused-vars
+                }, (error, res) => {
                     mongoose.connection.close(() => {
                         console.log('closed mongo connection');
                         process.exit(1);
@@ -232,7 +232,16 @@ function run(stixObjects = []) {
             });
     } else {
         console.log('There are no operations to perform');
-        utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'COMPLETE' }, { upsert: true }, (err, res) => {
+        // eslint-disable-next-line no-unused-vars
+
+        utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
+            _id: PROCESSOR_STATUS_ID,
+            utilityName: 'PROCESSOR_STATUS',
+            utilityValue: 'COMPLETE'
+        }, {
+            upsert: true
+            // eslint-disable-next-line no-unused-vars
+        }, (err, res) => {
             mongoose.connection.close(() => {
                 console.log('closed mongo connection');
             });
@@ -250,32 +259,36 @@ mongoose.connection.on('connected', err => { // eslint-disable-line no-unused-va
     console.log('connected to mongodb');
     clearInterval(conIntervel);
 
-    utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, { _id: PROCESSOR_STATUS_ID, utilityName: 'PROCESSOR_STATUS', utilityValue: 'PENDING' }, { upsert: true }, (err, res) => {
-        if (err) {
+    utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
+        _id: PROCESSOR_STATUS_ID,
+        utilityName: 'PROCESSOR_STATUS',
+        utilityValue: 'PENDING'
+    }, {
+        upsert: true
+    }, (error, res) => { // eslint-disable-line no-unused-vars
+        if (error) {
             mongoose.connection.close(() => {
                 console.log('Unable to set processor status');
                 process.exit(1);
             });
-        } else {
+        } else if (argv.addMitreData !== undefined && argv.addMitreData === true) {
             // Add mitre data
-            if (argv.addMitreData !== undefined && argv.addMitreData === true) {
-                console.log('Adding Mitre data');
-                getMitreData()
-                    .then(res => {
-                        run(res);
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        mongoose.connection.close(() => {
-                            console.log('closed mongo connection');
-                            process.exit(1);
-                        });
+            console.log('Adding Mitre data');
+            getMitreData()
+                .then(result => {
+                    run(result);
+                })
+                .catch(getMitreDataError => {
+                    console.log(getMitreDataError);
+                    mongoose.connection.close(() => {
+                        console.log('closed mongo connection');
+                        process.exit(1);
                     });
-            } else {
-                run();
-            }
+                });
+        } else {
+            run();
         }
-    });    
+    });
 });
 mongoose.connection.on('error', err => {
     console.log(`Mongoose connection error: ${err}`);
@@ -285,7 +298,8 @@ mongoose.connection.on('error', err => {
         process.exit(1);
     }
 });
-let conIntervel = setInterval(() => {
-    connAttempts++;
-    conn = mongoose.connect(`mongodb://${argv['host']}:${argv['port']}/${argv['database']}`);
+conIntervel = setInterval(() => {
+    connAttempts += 1;
+    // conn =
+    mongoose.connect(`mongodb://${argv.host}:${argv.port}/${argv.database}`);
 }, CONNECTION_RETRY_TIME);
