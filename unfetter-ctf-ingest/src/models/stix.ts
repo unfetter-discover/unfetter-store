@@ -1,6 +1,7 @@
 import { GranularMarking } from './granular-marking';
 import { KillChainPhase } from './kill-chain-phase';
 import { StixLabelEnum } from './stix-label.enum';
+import { UnfetterDictionary } from './unfetter-dictionary';
 
 /**
  * @description Stix 2.0 likeness
@@ -23,7 +24,7 @@ export class Stix {
     public created_by_ref: string;
     public granular_markings: GranularMarking[];
     public x_unfetter_object_actions: string[];
-
+    public extendedProperties: UnfetterDictionary<string>;
     public stix?: any;
 
     /**

@@ -24,12 +24,14 @@ export class UnfetterPosterMongoService {
 
         // generate id and wrap in stix
         const wrappedArr: WrappedStix[] = arr.map((el) => {
-            const v4 = UUID.v4();
-            const id = el.type + '-' + v4;
-            el.id = id;
+            if (!el.id) {
+                const v4 = UUID.v4();
+                const id = el.type + '-' + v4;
+                el.id = id;
+            }
             const wrapper: WrappedStix = {
-                _id: id,
-                id,
+                _id: el.id,
+                id: el.id,
                 stix: Object.assign({}, el),
             };
             return wrapper;
