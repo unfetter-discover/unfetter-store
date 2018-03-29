@@ -1,5 +1,8 @@
 const BaseController = require('./shared/basecontroller');
 const modelFactory = require('./shared/modelFactory');
+const stixModel = require('../models/schemaless');
+const dataHelper = require('../helpers/extended_data_helper');
+const sortArrayLength = require('../helpers/sort_by_array_length');
 
 const aggregationModel = modelFactory.getAggregationModel('stix');
 const controller = new BaseController('indicator');
@@ -187,6 +190,99 @@ const summaryStatistics = (req, res) => {
     });
 };
 
+const search = (req, res) => {
+    const searchParameters = req.swagger.params.searchparameters && req.swagger.params.searchparameters.value ? JSON.parse(req.swagger.params.searchparameters.value) : null;
+    const sorttype = req.swagger.params.sorttype && req.swagger.params.sorttype.value ? req.swagger.params.sorttype.value : 'NEWEST';
+    const sortObj = {};
+
+    // Database sorts
+    switch (sorttype) {
+    case 'NEWEST':
+        sortObj['stix.created'] = -1;
+        break;
+    case 'OLDEST':
+        sortObj['stix.created'] = 1;
+        break;
+    default:
+        break;
+    }
+    if (searchParameters) {
+        const promises = [];
+
+        // Get filtered indicators
+        const filterObj = { 'stix.type': 'indicator' };
+        if (searchParameters.indicatorName && searchParameters.indicatorName !== '') {
+            filterObj['stix.name'] = { $regex: `.*${searchParameters.indicatorName}.*`, $options: 'i' };
+        }
+        if (searchParameters.labels && searchParameters.labels.length) {
+            filterObj['stix.labels'] = { $in: searchParameters.labels };
+        }
+        if (searchParameters.organizations && searchParameters.organizations.length) {
+            filterObj['stix.created_by_ref'] = { $in: searchParameters.organizations };
+        }
+        if (searchParameters.killChainPhases && searchParameters.killChainPhases.length) {
+            filterObj['stix.kill_chain_phases.phase_name'] = { $in: searchParameters.killChainPhases };
+        }
+
+        promises.push(stixModel.find(filterObj).sort(sortObj).exec());
+
+        // Get relationships of attack patterns if in params, or resolve []
+        if (searchParameters.attackPatterns && searchParameters.attackPatterns.length) {
+            const apFilter = {
+                'stix.type': 'relationship',
+                'stix.relationship_type': 'indicates',
+                'stix.target_ref': {
+                    $in: searchParameters.attackPatterns
+                }
+            };
+            promises.push(stixModel.find(apFilter).select({ 'stix.source_ref': 1 }).exec());
+        } else {
+            promises.push(Promise.resolve([]));
+        }
+
+        // TODO get sensors, or determine if it should be done client side
+
+        Promise.all(promises)
+            .then(([indicatorsRes, apRelationships]) => {
+                let indicators = dataHelper.getEnhancedData(indicatorsRes, req.swagger.params);
+                if (apRelationships.length) {
+                    const indicatorsRelatedToAps = apRelationships.map(apRel => apRel.toObject()).map(apRel => apRel.stix.source_ref);
+                    indicators = indicators.filter(indicator => indicatorsRelatedToAps.includes(indicator.id));
+                }
+
+                // Server side sorts (can't be done easily in mongo)
+                switch (sorttype) {
+                case 'LIKES':
+                    indicators = indicators.sort((a, b) => sortArrayLength(a, b, 'likes'));
+                    break;
+                case 'COMMENTS':
+                    indicators = indicators.sort((a, b) => sortArrayLength(a, b, 'comments'));
+                    break;
+                default:
+                    break;
+                }
+                res.json({ data: { filtered: indicators, full: indicatorsRes.map(ind => ind.toObject()), rels: apRelationships.map(r => r.toObject()) } });
+            })
+            .catch(err => {
+                res.status(500).json({
+                    errors: [{
+                        status: 500,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: `An error has occured: ${err}`
+                    }]
+                });
+            });
+    } else {
+        return res.status(400).json({
+            errors: [{
+                status: 500, source: '', title: 'Error', code: '', detail: 'Search parameters are required.'
+            }]
+        });
+    }
+};
+
 module.exports = {
     get,
     getById: controller.getById(),
@@ -194,5 +290,6 @@ module.exports = {
     update: controller.update(),
     deleteById: controller.deleteById(),
     attackPatternsByIndicator,
-    summaryStatistics
+    summaryStatistics,
+    search
 };
