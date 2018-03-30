@@ -63,7 +63,7 @@ const count = (req, res) => {
             if (err) {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             }
-            return res.json({ data: { attributes: { countRes } } });
+            return res.json({ data: { attributes: { count: countRes } } });
         });
 };
 

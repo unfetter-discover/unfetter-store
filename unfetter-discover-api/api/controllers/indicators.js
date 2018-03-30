@@ -3,7 +3,9 @@ const modelFactory = require('./shared/modelFactory');
 const stixModel = require('../models/schemaless');
 const dataHelper = require('../helpers/extended_data_helper');
 const sortArrayLength = require('../helpers/sort_by_array_length');
+const jsonApiConverter = require('../helpers/json_api_converter');
 
+const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const aggregationModel = modelFactory.getAggregationModel('stix');
 const controller = new BaseController('indicator');
 
@@ -212,7 +214,7 @@ const search = (req, res) => {
         // Get filtered indicators
         const filterObj = { 'stix.type': 'indicator' };
         if (searchParameters.indicatorName && searchParameters.indicatorName !== '') {
-            filterObj['stix.name'] = { $regex: `.*${searchParameters.indicatorName}.*`, $options: 'i' };
+            filterObj['stix.name'] = { $regex: `.*${searchParameters.indicatorName.replace(/[-[\]{}()*+?.,\\^$|#]/g, '\\$&')}.*`, $options: 'i' };
         }
         if (searchParameters.labels && searchParameters.labels.length) {
             filterObj['stix.labels'] = { $in: searchParameters.labels };
@@ -302,14 +304,9 @@ const search = (req, res) => {
                 default:
                     break;
                 }
-                res.json({
-                    data: {
-                        filtered: indicators,
-                        full: indicatorsRes.map(ind => ind.toObject()),
-                        rels: apRelationshipsRes.map(r => r.toObject()),
-                        sensors: sensorsRes.map(s => s.toObject())
-                    }
-                });
+                const requestedUrl = apiRoot + req.originalUrl;
+                const convertedResult = jsonApiConverter.convertJsonToJsonApi(indicators, 'indicator', requestedUrl);
+                return res.json({ data: convertedResult, links: { self: requestedUrl } });
             })
             .catch(err => {
                 res.status(500).json({
