@@ -240,14 +240,55 @@ const search = (req, res) => {
             promises.push(Promise.resolve([]));
         }
 
+        // Get sensors if in params, or resovle []
+        if (searchParameters.sensors && searchParameters.sensors.length) {
+            const sensorFilter = {
+                'stix.type': 'x-unfetter-sensor',
+                'metaProperties.observedData': { $exists: 1 },
+                _id: { $in: searchParameters.sensors }
+            };
+            promises.push(stixModel.find(sensorFilter).select({ 'metaProperties.observedData': 1 }).exec());
+        } else {
+            promises.push(Promise.resolve([]));
+        }
+
         // TODO get sensors, or determine if it should be done client side
 
         Promise.all(promises)
-            .then(([indicatorsRes, apRelationships]) => {
+            .then(([indicatorsRes, apRelationshipsRes, sensorsRes]) => {
                 let indicators = dataHelper.getEnhancedData(indicatorsRes, req.swagger.params);
-                if (apRelationships.length) {
-                    const indicatorsRelatedToAps = apRelationships.map(apRel => apRel.toObject()).map(apRel => apRel.stix.source_ref);
+
+                // Server side filter of attack patterns
+                if (searchParameters.attackPatterns && searchParameters.attackPatterns.length && apRelationshipsRes.length) {
+                    const indicatorsRelatedToAps = apRelationshipsRes
+                        .map(apRel => apRel.toObject())
+                        .map(apRel => apRel.stix.source_ref);
+
                     indicators = indicators.filter(indicator => indicatorsRelatedToAps.includes(indicator.id));
+                }
+
+                // Server side filter of sensors
+                if (searchParameters.sensors && searchParameters.sensors.length && sensorsRes.length) {
+                    const sensors = sensorsRes.map(sensor => sensor.toObject());
+                    indicators = indicators
+                        .filter(indicator => indicator.metaProperties && indicator.metaProperties.observedData)
+                        .filter(indicator =>
+                            sensors.filter(sensor => {
+                                let retVal = true;
+                                indicator.metaProperties.observedData.forEach(obsData => {
+                                    let sensorMatch = false;
+                                    sensor.metaProperties.observedData.forEach(sensorObsData => {
+                                        if (sensorObsData.name === obsData.name && sensorObsData.action === obsData.action && sensorObsData.property === obsData.property) {
+                                            sensorMatch = true;
+                                        }
+                                    });
+                                    if (!sensorMatch) {
+                                        retVal = false;
+                                    }
+                                });
+                                return retVal;
+                            }).length > 0
+                        );
                 }
 
                 // Server side sorts (can't be done easily in mongo)
@@ -261,7 +302,14 @@ const search = (req, res) => {
                 default:
                     break;
                 }
-                res.json({ data: { filtered: indicators, full: indicatorsRes.map(ind => ind.toObject()), rels: apRelationships.map(r => r.toObject()) } });
+                res.json({
+                    data: {
+                        filtered: indicators,
+                        full: indicatorsRes.map(ind => ind.toObject()),
+                        rels: apRelationshipsRes.map(r => r.toObject()),
+                        sensors: sensorsRes.map(s => s.toObject())
+                    }
+                });
             })
             .catch(err => {
                 res.status(500).json({
