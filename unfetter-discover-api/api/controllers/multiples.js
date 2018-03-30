@@ -54,6 +54,20 @@ const get = (req, res) => {
         });
 };
 
+const count = (req, res) => {
+    const filter = req.swagger.params.filter && req.swagger.params.filter.value ? JSON.parse(req.swagger.params.filter.value) : {};
+
+    // TODO apply security filter to this
+    model
+        .count(filter, (err, count) => {
+            if (err) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            } else {
+                res.json({ data: { attributes: { count } } });
+            }
+        });
+};
+
 const addComment = (req, res) => {
     res.header('Content-Type', 'application/vnd.api+json');
 
@@ -536,6 +550,7 @@ const addInteraction = (req, res) => {
 
 module.exports = {
     get,
+    count,
     addComment,
     addLike,
     removeLike,
