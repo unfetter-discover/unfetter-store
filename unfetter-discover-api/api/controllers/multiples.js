@@ -59,12 +59,11 @@ const count = (req, res) => {
 
     // TODO apply security filter to this
     model
-        .count(filter, (err, count) => {
+        .count(filter, (err, countRes) => {
             if (err) {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
-            } else {
-                res.json({ data: { attributes: { count } } });
             }
+            return res.json({ data: { attributes: { countRes } } });
         });
 };
 

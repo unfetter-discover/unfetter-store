@@ -16,7 +16,15 @@ get:
     "200":
       description: Success
       schema:
-        type: object
+        properties:
+          data:
+            type: object
+            properties:
+              attributes:
+                type: object
+                properties:
+                  count:
+                    type: number
     default:
       description: Error
       schema:
