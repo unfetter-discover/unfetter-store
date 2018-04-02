@@ -4,6 +4,7 @@ const stixModel = require('../models/schemaless');
 const dataHelper = require('../helpers/extended_data_helper');
 const sortArrayLength = require('../helpers/sort_by_array_length');
 const jsonApiConverter = require('../helpers/json_api_converter');
+const SecurityHelper = require('../helpers/security_helper');
 
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const aggregationModel = modelFactory.getAggregationModel('stix');
@@ -225,8 +226,12 @@ const search = (req, res) => {
         if (searchParameters.killChainPhases && searchParameters.killChainPhases.length) {
             filterObj['stix.kill_chain_phases.phase_name'] = { $in: searchParameters.killChainPhases };
         }
+        if (searchParameters.published && searchParameters.published.length) {
+            // Mapping is there because mat-option insists on giving a string
+            filterObj['metaProperties.published'] = { $in: searchParameters.published.map(p => p === 'true') };
+        }
 
-        promises.push(stixModel.find(filterObj).sort(sortObj).exec());
+        promises.push(stixModel.find(SecurityHelper.applySecurityFilter(filterObj, req.user)).sort(sortObj).exec());
 
         // Get relationships of attack patterns if in params, or resolve []
         if (searchParameters.attackPatterns && searchParameters.attackPatterns.length) {
@@ -249,7 +254,7 @@ const search = (req, res) => {
                 'metaProperties.observedData': { $exists: 1 },
                 _id: { $in: searchParameters.sensors }
             };
-            promises.push(stixModel.find(sensorFilter).select({ 'metaProperties.observedData': 1 }).exec());
+            promises.push(stixModel.find(SecurityHelper.applySecurityFilter(sensorFilter, req.user)).select({ 'metaProperties.observedData': 1 }).exec());
         } else {
             promises.push(Promise.resolve([]));
         }

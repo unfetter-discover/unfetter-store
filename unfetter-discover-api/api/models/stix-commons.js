@@ -35,6 +35,13 @@ stixCommons.external_references = mongoose.Schema({
     external_id: String
 }, { _id: false });
 
+stixCommons.metaProperties = mongoose.Schema({
+    published: {
+        type: Boolean,
+        default: true
+    }
+}, { _id: false, strict: false });
+
 stixCommons.motivations = [
     'accidental',
     'coercion',
@@ -57,13 +64,11 @@ stixCommons.resource_level = [
     'government'
 ];
 
-// Data model redesign
-
 stixCommons.mongoRoot = {
     _id: String,
     organization: String,
     extendedProperties: Object,
-    metaProperties: Object,
+    metaProperties: stixCommons.metaProperties,
     creator: String
 };
 

@@ -1,6 +1,7 @@
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
 const lodash = require('lodash');
+const SecurityHelper = require('../helpers/security_helper');
 
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const model = modelFactory.getModel('schemaless');
@@ -59,7 +60,7 @@ const count = (req, res) => {
 
     // TODO apply security filter to this
     model
-        .count(filter, (err, countRes) => {
+        .count(SecurityHelper.applySecurityFilter(filter, req.user), (err, countRes) => {
             if (err) {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             }
