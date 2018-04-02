@@ -59,7 +59,7 @@ const count = (req, res) => {
 
     // TODO apply security filter to this
     model
-        .count(SecurityHelper.applySecurityFilter(filter, req.user), (err, countRes) => {
+        .count(filter, (err, countRes) => {
             if (err) {
                 return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
             }
