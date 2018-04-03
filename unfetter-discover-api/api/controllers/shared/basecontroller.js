@@ -327,7 +327,7 @@ module.exports = class BaseController {
             if (req.swagger.params.id.value !== undefined && req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
-                const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+                const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
                 model.findById(query, (err, result) => {
                     if (err) {
                         return res.status(500).json({
@@ -335,6 +335,8 @@ module.exports = class BaseController {
                                 status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                             }]
                         });
+                    } else if (!result) {
+                        return res.status(404).json({ message: 'Unable to retrieve document' });
                     }
 
                     // set the new values
@@ -380,7 +382,7 @@ module.exports = class BaseController {
                         });
                     }
 
-                    const findOneAndUpdateQuery = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+                    const findOneAndUpdateQuery = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
                     // guard pass complete
                     model.findOneAndUpdate(findOneAndUpdateQuery, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                         if (errUpdate) {
@@ -431,7 +433,7 @@ module.exports = class BaseController {
             // per mongo documentation
             // Mongoose queries are not promises. However, they do have a .then() function for yield and async/await.
             // If you need a fully- fledged promise, use the .exec() function.
-            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
             promises.push(model.remove(query).exec());
             promises.push(relationshipModel.remove({ $or: [{ 'stix.source_ref': id }, { 'stix.target_ref': id }] }).exec());
             Promise.all(promises).then(response => {
@@ -457,7 +459,7 @@ module.exports = class BaseController {
      * @param {*} type
      * @param {*} user
      */
-    applySecurityFilterWhenNeeded(query, type, user) { // eslint-disable-line class-methods-use-this
+    applySecurityFilterWhenNeeded(query, type, user, read = true) { // eslint-disable-line class-methods-use-this
         if (!type || !query) {
             return query;
         }
@@ -466,7 +468,7 @@ module.exports = class BaseController {
         const filterTypes = new Set([assessmentType, 'indicator']);
         if (filterTypes.has(type)) {
             console.log(`applying filter on type ${type}`);
-            return SecurityHelper.applySecurityFilter(query, user);
+            return SecurityHelper.applySecurityFilter(query, user, read);
         }
         console.log(`skipping filter for type, ${type}`);
         return query;
