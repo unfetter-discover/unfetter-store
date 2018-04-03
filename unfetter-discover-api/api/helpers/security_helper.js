@@ -3,7 +3,7 @@
  * @param {*} user
  * @returns true if this user object has the admin role and is not locked, otherwise false
  */
-const isAdmin = (user) => {
+const isAdmin = user => {
     if (!user) {
         return false;
     }

@@ -13,7 +13,7 @@ const writeErrorResp = (res, msg) => {
             source: '',
             title: 'Error',
             code: '',
-            detail: detail,
+            detail,
         },
     });
 };
@@ -30,7 +30,7 @@ const callPromise = (query, req, res) => {
                 data: results
             });
         })
-        .catch((err) => {
+        .catch(err => {
             writeErrorResp(res, err);
         });
 };
@@ -198,13 +198,13 @@ const getLatestThreatReports = (req, res) => {
     callPromise(latest, req, res);
 };
 
-const threatReportGroupAndUnwind = () => {
+const threatReportGroupAndUnwind = () =>
     // aggregate pipeline
     // no match
     // group on workproduct ids
     // unwind the arrays
     // sort on last modified
-    return [{
+    [{
         $group: {
             _id: '$metaProperties.work_products.id',
             workproductId: {
@@ -238,7 +238,6 @@ const threatReportGroupAndUnwind = () => {
             modified: -1
         }
     }];
-};
 
 const modelFactory = () => mongoose.model('aggregations', schema, 'stix');
 
