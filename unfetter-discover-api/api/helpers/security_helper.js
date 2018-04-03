@@ -71,6 +71,7 @@ const applySecurityFilter = (query, user) => {
 
     const securityFilter = {
         $or: [
+            { 'metaProperties.published': { $exists: false } },
             { 'metaProperties.published': true },
             { 'stix.created_by_ref': { $exists: true, $in: orgIds } }
         ]
