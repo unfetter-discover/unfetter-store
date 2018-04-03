@@ -49,6 +49,11 @@ const argv = require('yargs')
     .boolean('a')
     .default('a', process.env.AUTO_PUBLISH || true)
 
+    .alias('a', 'auto-publish')
+    .describe('a', 'Auto publish STIX to all organizations')
+    .boolean('a')
+    .default('a', process.env.AUTO_PUBLISH || true)
+
     .help('help')
     .argv;
 
@@ -180,6 +185,16 @@ function run(stixObjects = []) {
                 }
             });
         }
+
+        if (argv['auto-publish']) {
+            stixToUpload.forEach(stix => {
+                if (stix.metaProperties === undefined) {
+                    stix.metaProperties = {};
+                }
+                stix.metaProperties.published = true;
+            });
+        }
+
         promises.push(stixModel.create(stixToUpload));
     } else if (argv.enhancedStixProperties !== undefined) {
         // TODO attempt to upload to database if not STIX document provided

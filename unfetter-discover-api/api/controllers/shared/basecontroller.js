@@ -466,7 +466,7 @@ module.exports = class BaseController {
         }
 
         const assessmentType = 'x-unfetter-assessment';
-        const filterTypes = new Set([assessmentType]);
+        const filterTypes = new Set([assessmentType, 'indicator']);
         if (filterTypes.has(type)) {
             console.log(`applying filter on type ${type}`);
             return SecurityHelper.applySecurityFilter(query, user);

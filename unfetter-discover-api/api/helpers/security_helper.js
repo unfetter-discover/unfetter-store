@@ -21,7 +21,7 @@ const isAdmin = user => {
 
 /**
  * @description
- * A user can see an object iff
+ * A user can see an object if
  *  the object is open to all
  *      ie, the object has a created_by_ref, with a group of unfetter open
  *  current user is admin
@@ -69,7 +69,13 @@ const applySecurityFilter = (query, user) => {
             return 1;
         });
 
-    const securityFilter = { 'stix.created_by_ref': { $exists: true, $in: orgIds } };
+    const securityFilter = {
+        $or: [
+            { 'metaProperties.published': { $exists: false } },
+            { 'metaProperties.published': true },
+            { 'stix.created_by_ref': { $exists: true, $in: orgIds } }
+        ]
+    };
     return { ...query, ...securityFilter };
 };
 

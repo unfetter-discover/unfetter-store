@@ -33,7 +33,7 @@
     "no-use-before-define": "off",
     "new-cap":"off",
     "no-unused-vars":"warn",
-    "no-param-reassign":"warn",
+    "no-param-reassign":"off",
     "camelcase":"warn"
   },
   "env": {
