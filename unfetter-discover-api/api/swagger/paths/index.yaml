@@ -106,6 +106,8 @@
   $ref: ./multiples/add_comment.yaml
 /multiples/{id}/like:
   $ref: ./multiples/add_like.yaml
+/multiples/{id}/publish:
+  $ref: ./multiples/publish.yaml
 /multiples/{id}/unlike:
   $ref: ./multiples/remove_like.yaml
 /multiples/{id}/interaction:
