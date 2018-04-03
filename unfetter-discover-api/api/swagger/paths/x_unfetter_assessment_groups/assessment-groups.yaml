@@ -1,7 +1,7 @@
-x-swagger-router-controller: x_unfetter_assessment_sets
+x-swagger-router-controller: x_unfetter_assessment_groups
 get:
   tags:
-  - STIX-Unfetter Assessment Sets
+  - STIX-Unfetter Assessment Group
   description: Find all instances of the model matched by filter from the data source.
   operationId: get
   produces: 
@@ -44,14 +44,14 @@ get:
     "200":
       description: Success
       schema:
-        $ref: "#/definitions/XUnfetterAssessmentSetsJsonApi"
+        $ref: "#/definitions/XUnfetterAssessmentGroupsJsonApi"
     default:
       description: Error
       schema:
         $ref: "#/definitions/ErrorJsonApi"
 post:
   tags:
-  - STIX-Unfetter Assessment Sets
+  - STIX-Unfetter Assessment Group
   description: Create a new instance of the model and persist it into the data source.
   operationId: add
   produces: 
@@ -64,12 +64,12 @@ post:
       description: Model instance data
       required: true
       schema:
-        $ref: "#/definitions/XUnfetterAssessmentSetCreateUpdate"
+        $ref: "#/definitions/XUnfetterAssessmentGroupCreateUpdate"
   responses:
     "201":
       description: Created
       schema:
-        $ref: "#/definitions/XUnfetterAssessmentSetsJsonApi"
+        $ref: "#/definitions/XUnfetterAssessmentGroupsJsonApi"
     default:
       description: Error
       schema:
