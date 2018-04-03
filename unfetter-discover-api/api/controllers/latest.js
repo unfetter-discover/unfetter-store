@@ -173,7 +173,7 @@ const getLatestThreatReportsByCreatorId = (req, res) => {
         },
         ...threatReportGroupAndUnwind()
     ];
-    console.log(JSON.stringify(latestByCreatorWithRollup));
+    // console.log(JSON.stringify(latestByCreatorWithRollup));
     callPromise(latestByCreatorWithRollup, req, res);
 };
 
@@ -194,7 +194,7 @@ const getLatestThreatReports = (req, res) => {
         },
         ...threatReportGroupAndUnwind()
     ];
-    console.log(JSON.stringify(latest));
+    // console.log(JSON.stringify(latest));
     callPromise(latest, req, res);
 };
 
