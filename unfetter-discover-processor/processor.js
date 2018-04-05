@@ -43,6 +43,11 @@ const argv = require('yargs')
     .describe('m', 'Option to uploaded STIX data from Mite\'s github')
     .boolean('m')
 
+    .alias('a', 'auto-publish')
+    .describe('a', 'Auto publish STIX to all organizations')
+    .boolean('a')
+    .default('a', process.env.AUTO_PUBLISH || true)
+
     .help('help')
     .argv;
 
@@ -52,7 +57,14 @@ const stixModel = mongoose.model('stix', new mongoose.Schema({
     _id: String,
     stix: {
         created: Date,
-        modified: Date
+        modified: Date,
+        first_seen: Date,
+        last_seen: Date,
+        published: Date,
+        valid_from: Date,
+        valid_until: Date,
+        first_observed: Date,
+        last_observed: Date
     }
 }, {
     strict: false
@@ -167,6 +179,16 @@ function run(stixObjects = []) {
                 }
             });
         }
+
+        if (argv['auto-publish']) {
+            stixToUpload.forEach(stix => {
+                if (stix.metaProperties === undefined) {
+                    stix.metaProperties = {};
+                }
+                stix.metaProperties.published = true;
+            });
+        }
+
         promises.push(stixModel.create(stixToUpload));
     } else if (argv.enhancedStixProperties !== undefined) {
         // TODO attempt to upload to database if not STIX document provided

@@ -52,6 +52,8 @@
   $ref: ./indicators/attack-patterns-by-indicator.yaml
 /indicators/summary-statistics:
   $ref: ./indicators/summary-statistics.yaml
+/indicators/search:
+  $ref: ./indicators/search.yaml
 
 /intrusion-sets:
   $ref: ./intrusion_sets/intrusion_sets.yaml
@@ -100,10 +102,14 @@
 
 /multiples:
   $ref: ./multiples/multiples.yaml
+/multiples/count:
+  $ref: ./multiples/multiples_count.yaml
 /multiples/{id}/comment:
   $ref: ./multiples/add_comment.yaml
 /multiples/{id}/like:
   $ref: ./multiples/add_like.yaml
+/multiples/{id}/publish:
+  $ref: ./multiples/publish.yaml
 /multiples/{id}/unlike:
   $ref: ./multiples/remove_like.yaml
 /multiples/{id}/interaction:

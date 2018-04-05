@@ -1,10 +1,11 @@
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
 const lodash = require('lodash');
+const SecurityHelper = require('../helpers/security_helper');
 
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const model = modelFactory.getModel('schemaless');
-const publish = require('../controllers/shared/publish');
+const publishNotification = require('../controllers/shared/publish');
 
 const transform = function transformFun(obj, urlRoot) {
     const newObj = { ...obj.toObject().stix, ...obj.toObject().metaProperties, ...obj.toObject };
@@ -51,6 +52,19 @@ const get = (req, res) => {
             const requestedUrl = apiRoot + req.originalUrl;
             const convertedResult = result.map(response => transform(response, requestedUrl));
             return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
+        });
+};
+
+const count = (req, res) => {
+    const filter = req.swagger.params.filter && req.swagger.params.filter.value ? JSON.parse(req.swagger.params.filter.value) : {};
+
+    // TODO apply security filter to this
+    model
+        .count(SecurityHelper.applySecurityFilter(filter, req.user), (err, countRes) => {
+            if (err) {
+                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            }
+            return res.json({ data: { attributes: { count: countRes } } });
         });
 };
 
@@ -140,14 +154,14 @@ const addComment = (req, res) => {
                     // Notifify user if its another user leaving a comment
                     if (req.user && req.user._id && obj.creator && req.user._id.toString() !== obj.creator.toString()) {
                         if (newDocument.stix.type === 'indicator') {
-                            publish.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
+                            publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
                         } else {
-                            publish.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100));
+                            publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100));
                         }
                     }
 
                     // Update comment for all, if stricter UAC is added, confirm comment is for Unfetter open before update all
-                    publish.updateSocialForAll('COMMENT', commentObj, resultObj._id);
+                    publishNotification.updateSocialForAll('COMMENT', commentObj, resultObj._id);
 
                     return res.status(200).json({
                         links: { self: requestedUrl, },
@@ -314,6 +328,84 @@ const removeLike = (req, res) => {
             }
 
             resultObj.metaProperties.likes = resultObj.metaProperties.likes.filter(like => like.user.id.toString() !== user._id.toString());
+
+            const newDocument = new model(resultObj);
+            const error = newDocument.validateSync();
+            if (error) {
+                const errors = [];
+                lodash.forEach(error.errors, field => {
+                    errors.push(field.message);
+                });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: errors
+                    }]
+                });
+            }
+
+            // guard pass complete
+            model.findOneAndUpdate({ _id: id }, newDocument, { new: true }, (errUpdate, resultUpdate) => {
+                if (errUpdate) {
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                        }]
+                    });
+                }
+
+                if (resultUpdate) {
+                    const requestedUrl = apiRoot + req.originalUrl;
+                    const obj = newDocument.toObject();
+                    return res.status(200).json({
+                        links: { self: requestedUrl, },
+                        data: { attributes: { ...obj.stix, ...obj.extendedProperties, metaProperties: obj.metaProperties } }
+                    });
+                }
+
+                return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
+            });
+        });
+    } else {
+        return res.status(400).json({
+            errors: [{
+                status: 400, source: '', title: 'Error', code: '', detail: 'malformed request'
+            }]
+        });
+    }
+};
+
+const publish = (req, res) => {
+    res.header('Content-Type', 'application/vnd.api+json');
+
+    if (req.swagger.params.id.value !== undefined) {
+        const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+
+        let user;
+        if (process.env.RUN_MODE === 'DEMO') {
+            user = {
+                _id: '1234',
+                userName: 'Demo-User',
+                firstName: 'Demo',
+                lastName: 'User'
+            };
+        } else {
+            user = req.user;
+        }
+
+        model.findById(SecurityHelper.applySecurityFilter({ _id: id }, user), (err, result) => {
+            if (err || !result) {
+                return res.status(500).json({
+                    errors: [{
+                        status: 500, source: '', title: 'Error', code: '', detail: 'Unable to find STIX document.'
+                    }]
+                });
+            }
+            const resultObj = result.toObject();
+            if (resultObj.metaProperties === undefined) {
+                resultObj.metaProperties = {};
+            }
+
+            resultObj.metaProperties.published = true;
 
             const newDocument = new model(resultObj);
             const error = newDocument.validateSync();
@@ -536,9 +628,11 @@ const addInteraction = (req, res) => {
 
 module.exports = {
     get,
+    count,
     addComment,
     addLike,
     removeLike,
+    publish,
     addLabel,
     addInteraction
 };

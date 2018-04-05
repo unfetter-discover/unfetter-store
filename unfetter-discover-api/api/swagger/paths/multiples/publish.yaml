@@ -1,0 +1,29 @@
+x-swagger-router-controller: multiples
+get:
+  tags:  
+  - STIX-Multiples
+  description: Ability to publish a STIX draft
+  operationId: publish
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    "404":
+      description: Item Not Found
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

@@ -21,7 +21,7 @@ const isAdmin = user => {
 
 /**
  * @description
- * A user can see an object iff
+ * A user can see an object if
  *  the object is open to all
  *      ie, the object has a created_by_ref, with a group of unfetter open
  *  current user is admin
@@ -33,7 +33,7 @@ const isAdmin = user => {
  * @param {*} user user object found for the current user
  * @returns {object} mongo query, with security filter attached
  */
-const applySecurityFilter = (query, user) => {
+const applySecurityFilter = (query, user, read = true) => {
     if (!query || process.env.RUN_MODE !== 'UAC' || !user) {
         console.log(`skipping filter for query=${query}, RUN_MODE=${process.env.RUN_MODE}, user=${user}`);
         return query;
@@ -69,7 +69,21 @@ const applySecurityFilter = (query, user) => {
             return 1;
         });
 
-    const securityFilter = { 'stix.created_by_ref': { $exists: true, $in: orgIds } };
+    let securityFilter;
+
+    // Apply more exceptions mode for applying read permissions
+    if (read) {
+        securityFilter = {
+            $or: [
+                { 'metaProperties.published': { $exists: false } },
+                { 'metaProperties.published': true },
+                { 'stix.created_by_ref': { $exists: true, $in: orgIds } }
+            ]
+        };
+    } else {
+        securityFilter = { 'stix.created_by_ref': { $exists: true, $in: orgIds } };
+    }
+
     return { ...query, ...securityFilter };
 };
 
