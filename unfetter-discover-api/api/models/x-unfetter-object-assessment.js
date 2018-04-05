@@ -4,6 +4,10 @@ const stixCommons = require('./stix-commons');
 const scoreVals = ['S', 'M', 'L', 'N/A', 'N'];
 
 const StixSchema = {
+    created_by_ref: {
+        type: String,
+        required: [true, 'created_by_ref is required']
+    },
     type: {
         type: String,
         enum: ['x-unfetter-object-assessment'],
@@ -25,6 +29,7 @@ const StixSchema = {
     },
     set_ref: [String],
     assessment_objects: [{
+        _id: false,
         assessed_object_ref: String,
         questions: [
             {

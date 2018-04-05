@@ -1,26 +1,28 @@
 # STIX routes
 
 /v3/x-unfetter-capabilities:
-  $ref: ./x_unfetter_capabilities/x_unfetter_capabilities.yaml
+  $ref: ./x_unfetter_capabilities/capabilities.yaml
 /v3/x-unfetter-capabilities/{id}:
-  $ref: ./x_unfetter_capabilities/x_unfetter_capability_by_id.yaml
+  $ref: ./x_unfetter_capabilities/capability-by-id.yaml
 
 /v3/x-unfetter-assessment-sets:
-  $ref: ./x_unfetter_assessment_sets/x_unfetter_assessment_sets.yaml
+  $ref: ./x_unfetter_assessment_sets/assessment-sets.yaml
 /v3/x-unfetter-assessment-sets/{id}:
-  $ref: ./x_unfetter_assessment_sets/x_unfetter_assessment_set_by_id.yaml
+  $ref: ./x_unfetter_assessment_sets/assessment-set-by-id.yaml
 
 /v3/x-unfetter-assessment-groups:
-  $ref: ./x_unfetter_assessment_groups/x_unfetter_assessment_groups.yaml
+  $ref: ./x_unfetter_assessment_groups/assessment-groups.yaml
 /v3/x-unfetter-assessment-groups/{id}:
-  $ref: ./x_unfetter_assessment_groups/x_unfetter_assessment_group_by_id.yaml
+  $ref: ./x_unfetter_assessment_groups/assessment-group-by-id.yaml
 
 /v3/x-unfetter-object-assessments:
-  $ref: ./x_unfetter_object_assessments/x_unfetter_object_assessments.yaml
+  $ref: ./x_unfetter_object_assessments/object-assessments.yaml
 /v3/x-unfetter-object-assessments/{id}:
-  $ref: ./x_unfetter_object_assessments/x_unfetter_object_assessment_by_id.yaml
-
-
+  $ref: ./x_unfetter_object_assessments/object-assessment-by-id.yaml
+/v3/x-unfetter-object-assessments/latest/{creatorId}:
+  $ref: ./x_unfetter_object_assessments/latest-object-assessments-by-creator.yaml
+/v3/x-unfetter-object-assessments/latest:
+  $ref: ./x_unfetter_object_assessments/latest-object-assessments.yaml
 
 /attack-patterns:
   $ref: ./attack_patterns/attack_patterns.yaml

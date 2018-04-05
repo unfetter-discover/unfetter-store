@@ -1,8 +1,8 @@
-x-swagger-router-controller: x_unfetter_assessment_groups
+x-swagger-router-controller: x_unfetter_object_assessments
 get:
   tags:
-  - STIX-Unfetter Assessment Groups
-  description: Returns the details of a assessment group
+  - STIX-Unfetter Object Assessment
+  description: Returns the details of a object assessment
   operationId: getById
   parameters:
   - name: id
@@ -24,7 +24,7 @@ get:
     "200":
       description: Success
       schema:
-        $ref: "#/definitions/XUnfetterAssessmentGroupJsonApiSingleItem"
+        $ref: "#/definitions/XUnfetterObjectAssessmentJsonApiSingleItem"
     "404":
       description: Item Not Found
       schema:
@@ -36,7 +36,7 @@ get:
 
 patch:
   tags:
-  - STIX-Unfetter Assessment Groups
+  - STIX-Unfetter Object Assessment
   description: Patch attributes for a model instance and persist it into the data source.
   operationId: update
   produces: 
@@ -54,12 +54,12 @@ patch:
       description: An object of model property name/value pairs
       required: true
       schema:
-        $ref: "#/definitions/XUnfetterAssessmentGroupCreateUpdate"
+        $ref: "#/definitions/XUnfetterObjectAssessmentCreateUpdate"
   responses:
     "200":
       description: Success
       schema:
-        $ref: "#/definitions/XUnfetterAssessmentGroupJsonApiSingleItem"
+        $ref: "#/definitions/XUnfetterObjectAssessmentJsonApiSingleItem"
     "404":
       description: Item Not Found
       schema:
@@ -71,8 +71,8 @@ patch:
 
 delete:
   tags:
-  - STIX-Unfetter Assessment Groups
-  description: Delete a assessment group instance by {{id}} from the data source.
+  - STIX-Unfetter Object Assessment
+  description: Delete a object assessment instance by {{id}} from the data source.
   operationId: deleteById
   produces: 
   - application/vnd.api+json

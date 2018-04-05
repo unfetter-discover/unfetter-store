@@ -1,7 +1,7 @@
 x-swagger-router-controller: x_unfetter_assessment_sets
 get:
   tags:
-  - STIX-Unfetter Assessment Sets
+  - STIX-Unfetter Assessment Set
   description: Returns the details of a assessment set
   operationId: getById
   parameters:
@@ -36,7 +36,7 @@ get:
 
 patch:
   tags:
-  - STIX-Unfetter Assessment Sets
+  - STIX-Unfetter Assessment Set
   description: Patch attributes for a model instance and persist it into the data source.
   operationId: update
   produces: 
@@ -71,7 +71,7 @@ patch:
 
 delete:
   tags:
-  - STIX-Unfetter Assessment Sets
+  - STIX-Unfetter Assessment Set
   description: Delete a assessment set instance by {{id}} from the data source.
   operationId: deleteById
   produces: 

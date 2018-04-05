@@ -1,0 +1,25 @@
+x-swagger-router-controller: x_unfetter_object_assessments
+get:
+  tags:
+  - STIX-Unfetter Object Assessment
+  - Dashboard-Unfetter Object Assessment
+  description: Find all instances of object assessments from creator, sorted by last modified
+  operationId: latestObjectAssessmentsByCreatorId
+  parameters:
+  - name: creatorId
+    in: path
+    description: creator id
+    type: string
+    required: true
+    format: JSON
+  produces: 
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object     
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"
