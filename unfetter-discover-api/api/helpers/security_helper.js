@@ -47,7 +47,10 @@ const applySecurityFilter = (query, user, read = true) => {
     }
 
     const unfetterOpenUserId = global.unfetter.openIdentity._id || '';
-    const orgs = user.organizations || [];
+    const orgs = user.organizations
+        .map(o => o.toObject())
+        .filter(o => o.approved) || [];
+
     const currentUserOrgIds = orgs.map(el => el.id);
     const hasOpenId = currentUserOrgIds.findIndex(el => el === unfetterOpenUserId) > -1;
     if (hasOpenId === false) {
