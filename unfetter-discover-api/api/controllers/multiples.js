@@ -35,7 +35,7 @@ const get = (req, res) => {
     }
 
     model
-        .find(query.filter)
+        .find(SecurityHelper.applySecurityFilter(query.filter))
         .sort(query.sort)
         .limit(query.limit)
         .skip(query.skip)
