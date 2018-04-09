@@ -351,8 +351,9 @@ router.post('/profile/preferences/:id', passport.authenticate('jwt', {
             }]
         });
     }
+
     const preferences = req.body.data.preferences || {};
-    userModel.findById(userId, (err, result) => {
+    userModel.findByIdAndUpdate(userId, { preferences: { ...preferences } }, (err, result) => {
         if (err || !result) {
             return res.status(500).json({
                 errors: [{
@@ -360,29 +361,16 @@ router.post('/profile/preferences/:id', passport.authenticate('jwt', {
                     source: '',
                     title: 'Error',
                     code: '',
-                    detail: 'An unknown error has occurred.'
+                    detail: err,
                 }]
             });
         }
+
         const user = result.toObject();
-        user.preferences = { ...preferences };
-        userModel.updateOne(user, (updateErr, updateResult) => {
-            if (updateErr || !updateResult) {
-                return res.status(500).json({
-                    errors: [{
-                        status: 500,
-                        source: '',
-                        title: 'Error',
-                        code: '',
-                        detail: updateErr,
-                    }]
-                });
+        return res.json({
+            data: {
+                attributes: user,
             }
-            res.json({
-                data: {
-                    attributes: user,
-                }
-            });
         });
     });
 });
