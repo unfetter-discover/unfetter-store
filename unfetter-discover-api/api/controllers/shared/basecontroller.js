@@ -273,20 +273,26 @@ module.exports = class BaseController {
                         });
                     }
 
-                    // Notify org members
-                    if (req.user && req.user._id && obj.stix.created_by_ref) {
-                        identityModel.findById(obj.stix.created_by_ref, (identityErr, identityResult) => {
-                            if (identityErr || !identityResult) {
-                                console.log('Unable to find identity, cannot publish to organization');
-                            } else {
-                                const identityObj = identityResult.toObject();
-                                if (obj.stix.type === 'indicator') {
-                                    publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`, `/indicator-sharing/single/${newDocument._id}`);
+                    // Socket handling
+                    if (process.env.RUN_MODE !== 'DEMO') {
+                        // Notify org members
+                        if (req.user && req.user._id && obj.stix.created_by_ref) {
+                            identityModel.findById(obj.stix.created_by_ref, (identityErr, identityResult) => {
+                                if (identityErr || !identityResult) {
+                                    console.log('Unable to find identity, cannot publish to organization');
                                 } else {
-                                    publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
+                                    const identityObj = identityResult.toObject();
+                                    if (obj.stix.type === 'indicator') {
+                                        publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`, `/indicator-sharing/single/${newDocument._id}`);
+                                    } else {
+                                        publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
+
+                        // Send new STIX id to add
+                        publish.sendStixId(newDocument._id, newDocument.stix.type);
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;

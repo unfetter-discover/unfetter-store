@@ -93,6 +93,24 @@ router.post('/social/all', (req: Request, res: Response) => {
     }
 });
 
+// Send new stix id to all
+router.post('/stixid/all', (req: Request, res: Response) => {
+    if (isDefinedJsonApi(req, ['notification'])) {
+        const { userId, notification }: UserNotification = req.body.data.attributes;
+
+        const appNotification = new CreateAppNotification(WSMessageTypes.STIXID, notification);
+
+        connections.forEach((connection: Connection) => {
+            connection.client.send(appNotification);
+        });
+
+        return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved stix-all notification' }));
+    } else {
+        console.log('Malformed request to', req.url);
+        return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
+    }
+});
+
 interface OrgNotification extends UserNotification {
     orgId: any;
 }
