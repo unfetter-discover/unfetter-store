@@ -16,11 +16,19 @@ const latestObjectAssessmentPromise = (query, req, res) => {
     Promise.resolve(aggregationModel.aggregate(query))
         .then(results => {
             const requestedUrl = req.originalUrl;
+
+            const mappedResults = results
+                .map(r => {
+                    const retVal = { ...r };
+                    retVal.id = r.stix.id;
+                    return retVal;
+                });
+
             return res.status(200).json({
                 links: {
                     self: requestedUrl,
                 },
-                data: results
+                data: mappedResults
             });
         })
         .catch(err => // eslint-disable-line no-unused-vars
@@ -30,7 +38,7 @@ const latestObjectAssessmentPromise = (query, req, res) => {
                     source: '',
                     title: 'Error',
                     code: '',
-                    detail: `Error getting object assessments by latest:\n${err}`
+                    detail: `Error getting latest object assessments:\n${err}`
                 }]
             }));
 };
