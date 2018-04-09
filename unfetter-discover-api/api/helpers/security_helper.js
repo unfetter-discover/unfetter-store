@@ -47,7 +47,8 @@ const applySecurityFilter = (query, user, read = true) => {
     }
 
     const unfetterOpenUserId = global.unfetter.openIdentity._id || '';
-    const orgs = user.organizations
+    const userOrgs = user.organizations || [];
+    const orgs = userOrgs
         .map(o => o.toObject())
         .filter(o => o.approved) || [];
 
