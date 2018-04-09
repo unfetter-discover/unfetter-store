@@ -4,7 +4,11 @@ const HttpsProxyAgent = require('https-proxy-agent');
 const MAX_NUM_CONNECT_ATTEMPTS = process.env.MAX_NUM_CONNECT_ATTEMPTS || 10;
 // The amount of time between each connection attempt in ms
 const CONNECTION_RETRY_TIME = process.env.CONNECTION_RETRY_TIME || 5000;
-const MITRE_STIX_URL = 'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
+const MITRE_STIX_URLS = {
+    enterprise: 'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json',
+    pre: 'https://raw.githubusercontent.com/mitre/cti/master/pre-attack/pre-attack.json',
+    mobile: 'https://raw.githubusercontent.com/mitre/cti/master/mobile-attack/mobile-attack.json'
+};
 const PROCESSOR_STATUS_ID = process.env.PROCESSOR_STATUS_ID || 'f09ad23d-c9f7-40a3-8afa-d9560e6df95b';
 
 /* ~~~ Vendor Libraries ~~~ */
@@ -43,11 +47,6 @@ const argv = require('yargs')
     .describe('m', 'Option to upload STIX data from Mitre ATT&CK\'s github')
     .choices('m', ['enterprise', 'pre', 'mobile'])
     .array('m')
-
-    .alias('a', 'auto-publish')
-    .describe('a', 'Auto publish STIX to all organizations')
-    .boolean('a')
-    .default('a', process.env.AUTO_PUBLISH || true)
 
     .alias('a', 'auto-publish')
     .describe('a', 'Auto publish STIX to all organizations')
@@ -105,21 +104,9 @@ function filesToJson(filePaths) {
         .filter(jsonObj => jsonObj);
 }
 
-function getMitreData() {
-    const instanceOptions = {};
-
-    if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
-        console.log('Attempting to configure proxy');
-        const proxy = url.parse(process.env.HTTPS_PROXY_URL);
-        // Workaround for UNABLE_TO_GET_ISSUER_CERT_LOCALLY fetch error due to proxy + self-signed cert
-        proxy.rejectUnauthorized = false;
-        instanceOptions.agent = new HttpsProxyAgent(proxy);
-    } else {
-        console.log('Not using a proxy');
-    }
-
+function mitreFetch(url, instanceOptions) {
     return new Promise((resolve, reject) => {
-        fetch(mitreUrl, instanceOptions)
+        fetch(url, instanceOptions)
             .then(fetchRes => fetchRes.json())
             .then(fetchRes => {
                 const stixToUpload = fetchRes.objects
@@ -141,6 +128,28 @@ function getMitreData() {
                     });
                 resolve(stixToUpload);
             })
+            .catch(err => reject(err));
+    });
+}
+
+function getMitreData(frameworks) {
+    const instanceOptions = {};
+
+    if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
+        console.log('Attempting to configure proxy');
+        const proxy = url.parse(process.env.HTTPS_PROXY_URL);
+        // Workaround for UNABLE_TO_GET_ISSUER_CERT_LOCALLY fetch error due to proxy + self-signed cert
+        proxy.rejectUnauthorized = false;
+        instanceOptions.agent = new HttpsProxyAgent(proxy);
+    } else {
+        console.log('Not using a proxy');
+    }
+
+    const promises = [];
+    frameworks.forEach(framework => promises.push(mitreFetch(MITRE_STIX_URLS[framework], instanceOptions)));
+    return new Promise((resolve, reject) => {
+        Promise.all(promises)
+            .then(stixToUploadArr => resolve(stixToUploadArr.reduce((prev, cur) => prev.concat(cur), [])))
             .catch(err => reject(err));
     });
 }
@@ -286,10 +295,10 @@ mongoose.connection.on('connected', err => { // eslint-disable-line no-unused-va
                 console.log('Unable to set processor status');
                 process.exit(1);
             });
-        } else if (argv.addMitreData !== undefined && argv.addMitreData === true) {
+        } else if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
             // Add mitre data
             console.log('Adding Mitre data');
-            getMitreData()
+            getMitreData(argv.mitreAttackData)
                 .then(result => {
                     run(result);
                 })
