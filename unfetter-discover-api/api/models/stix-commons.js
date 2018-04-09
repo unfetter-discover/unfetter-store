@@ -38,7 +38,7 @@ stixCommons.external_references = mongoose.Schema({
 stixCommons.metaProperties = mongoose.Schema({
     published: {
         type: Boolean,
-        default: true
+        default: false
     }
 }, { _id: false, strict: false });
 

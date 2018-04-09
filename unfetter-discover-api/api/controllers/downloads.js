@@ -1,8 +1,9 @@
 const model = require('../models/schemaless');
+const SecurityHelper = require('../helpers/security_helper');
 
 const downloadBundle = function downloadBundleFunc(req, res) {
     model
-        .find({ stix: { $exists: 1 } })
+        .find(SecurityHelper.applySecurityFilter({ stix: { $exists: 1 } }))
         .exec((err, results) => {
             if (err) {
                 return res.status(500).json({
