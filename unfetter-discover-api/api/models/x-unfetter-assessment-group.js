@@ -17,6 +17,10 @@ const StixSchema = {
         required: [true, 'name is required']
     },
     description: String,
+    published: {
+        type: Boolean,
+        default: false
+    },
     object_refs: [String],
     assessment_sets: [String]
 };

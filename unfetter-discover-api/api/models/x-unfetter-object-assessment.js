@@ -19,6 +19,10 @@ const StixSchema = {
         required: [true, 'name is required']
     },
     description: String,
+    published: {
+        type: Boolean,
+        default: false
+    },
     object_ref: {
         type: String,
         required: [true, 'object_ref is required']
