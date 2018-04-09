@@ -89,7 +89,7 @@
   $ref: ./sightings/sightings.yaml
 /sightings/{id}:
   $ref: ./sightings/sighting_by_id.yaml
-/sighting-group/{id}:
+/sightings/group/{id}:
   $ref: ./sightings/sighting_group.yaml
 
 /threat-actors:
