@@ -335,6 +335,46 @@ router.get('/profile/:id', passport.authenticate('jwt', {
     });
 });
 
+router.post('/profile/preferences/:id', passport.authenticate('jwt', {
+    session: false
+}), (req, res) => {
+    const userId = req.params.id.trim();
+    const requestingUser = req.user._id.toString().trim();
+    if (userId !== requestingUser) {
+        return res.status(500).json({
+            errors: [{
+                status: 500,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Current users credentials must match the requesting user id'
+            }]
+        });
+    }
+
+    const preferences = req.body.data.preferences || {};
+    userModel.findByIdAndUpdate(userId, { preferences: { ...preferences } }, (err, result) => {
+        if (err || !result) {
+            return res.status(500).json({
+                errors: [{
+                    status: 500,
+                    source: '',
+                    title: 'Error',
+                    code: '',
+                    detail: err,
+                }]
+            });
+        }
+
+        const user = result.toObject();
+        return res.json({
+            data: {
+                attributes: user,
+            }
+        });
+    });
+});
+
 router.post('/finalize-registration', passport.authenticate('jwt', {
     session: false
 }), (req, res) => {

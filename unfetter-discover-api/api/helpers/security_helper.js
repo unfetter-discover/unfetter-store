@@ -21,16 +21,18 @@ const isAdmin = user => {
 
 /**
  * @description
- * A user can see an object if
+ * A user can see an object if and only if
  *  the object is open to all
  *      ie, the object has a created_by_ref, with a group of unfetter open
  *  current user is admin
  *      ie, the user has the ADMIN role in the database and is seen in the request object
  *  current user has created_by_ref org
  *      ie, the object has a created_by_ref, with a group id this current user belongs
+ *  the function is requested as read = true, and an object has published = true
  *
  * @param {*} query a mongo query object
  * @param {*} user user object found for the current user
+ * @param {boolean} read - default to true, allows users to see 'published' items as readonly
  * @returns {object} mongo query, with security filter attached
  */
 const applySecurityFilter = (query, user, read = true) => {
@@ -47,7 +49,8 @@ const applySecurityFilter = (query, user, read = true) => {
     }
 
     const unfetterOpenUserId = global.unfetter.openIdentity._id || '';
-    const orgs = user.organizations
+    const userOrgs = user.organizations || [];
+    const orgs = userOrgs
         .map(o => o.toObject())
         .filter(o => o.approved) || [];
 

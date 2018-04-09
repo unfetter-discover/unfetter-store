@@ -7,6 +7,12 @@ const UserSchema = new mongoose.Schema({
     lastName: {
         type: String
     },
+    preferences: {
+        killchain: {
+            type: String,
+            default: 'mitre-attack'
+        }
+    },
     organizations: {
         type: [{
             _id: false,
