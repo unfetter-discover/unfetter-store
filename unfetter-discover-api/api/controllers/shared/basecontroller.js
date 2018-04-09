@@ -466,13 +466,14 @@ module.exports = class BaseController {
         if (!type || !query) {
             return query;
         }
+        return SecurityHelper.applySecurityFilter(query, user, read);
 
-        const filterTypes = new Set(['x-unfetter-assessment', 'indicator', 'report']);
-        if (filterTypes.has(type)) {
-            console.log(`applying filter on type ${type}`);
-            return SecurityHelper.applySecurityFilter(query, user, read);
-        }
-        console.log(`skipping filter for type, ${type}`);
-        return query;
+        // const filterTypes = new Set(['x-unfetter-assessment', 'indicator', 'report']);
+        // if (filterTypes.has(type)) {
+        //     console.log(`applying filter on type ${type}`);
+        //     return SecurityHelper.applySecurityFilter(query, user, read);
+        // }
+        // console.log(`skipping filter for type, ${type}`);
+        // return query;
     }
 };
