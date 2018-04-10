@@ -91,8 +91,10 @@
   $ref: ./sightings/sightings.yaml
 /sightings/{id}:
   $ref: ./sightings/sighting_by_id.yaml
-/sightings/group/{id}:
+/sightings/group:
   $ref: ./sightings/sighting_group.yaml
+/sightings/group/{id}:
+  $ref: ./sightings/sighting_group_by_id.yaml
 
 /threat-actors:
   $ref: ./threat_actors/threat_actors.yaml
