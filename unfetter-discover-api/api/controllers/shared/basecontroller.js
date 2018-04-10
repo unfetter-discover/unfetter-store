@@ -288,8 +288,11 @@ module.exports = class BaseController {
                                         publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
+
+                        // Send new STIX id to add
+                        publish.sendStixId(newDocument._id, newDocument.stix.type);
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;

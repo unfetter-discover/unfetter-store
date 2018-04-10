@@ -95,6 +95,22 @@ const updateSocialForAll = (notificationType, notificationBody, stixId) => {
         .catch(err => console.log('Error!', err));
 };
 
+const sendStixId = (stixId, type) => {
+    const body = JSON.stringify(new CreateNotification(null, null, 'STIXID', null, { id: stixId, type }, stixId, null, null));
+    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/stixid/all`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+        },
+        body
+    })
+        .then(res => { // eslint-disable-line no-unused-vars
+            console.log('Publish API recieved notification for stixid update');
+        })
+        .catch(err => console.log('Error!', err));
+};
+
 module.exports = {
     notifyUser,
     notifyOrg,
