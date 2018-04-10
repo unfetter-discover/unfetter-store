@@ -1,0 +1,29 @@
+x-swagger-router-controller: sightings
+get:
+  tags:  
+  - STIX-Sighting
+  description: Returns a sighting and related objects
+  operationId: sightingGroupById
+  parameters:
+    - name: id
+      in: path
+      description: Model id
+      required: true
+      type: string
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    "404":
+      description: Item Not Found
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
