@@ -2,25 +2,11 @@ const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
 const lodash = require('lodash');
 const SecurityHelper = require('../helpers/security_helper');
+const jsonApiConverter = require('../helpers/json_api_converter');
 
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const model = modelFactory.getModel('schemaless');
 const publishNotification = require('../controllers/shared/publish');
-
-const transform = function transformFun(obj, urlRoot) {
-    const newObj = { ...obj.toObject().stix, ...obj.toObject().metaProperties, ...obj.toObject };
-    const apiObj = {
-        type: newObj.type,
-        id: newObj.id,
-        attributes: newObj,
-        links: {
-            self: `${urlRoot}/${newObj._id}`
-        }
-    };
-    // delete apiObj.attributes._id;
-    // delete apiObj.attributes.__v;
-    return apiObj;
-};
 
 const get = (req, res) => {
     res.header('Content-Type', 'application/vnd.api+json');
@@ -50,7 +36,7 @@ const get = (req, res) => {
             }
 
             const requestedUrl = apiRoot + req.originalUrl;
-            const convertedResult = result.map(response => transform(response, requestedUrl));
+            const convertedResult = result.map(response => jsonApiConverter.transform(response, requestedUrl));
             return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
         });
 };
