@@ -1,6 +1,6 @@
 const lodash = require('lodash');
 
-const transform = function transformFun(obj, type, urlRoot) {
+const transform = (obj, type, urlRoot) => {
     let localObj = obj;
     if (!(obj instanceof Object)) {
         localObj = obj.toObject();
@@ -13,12 +13,10 @@ const transform = function transformFun(obj, type, urlRoot) {
             self: `${urlRoot}/${localObj.id}`
         }
     };
-    // delete apiObj.attributes._id;
-    // delete apiObj.attributes.__v;
     return apiObj;
 };
 
-const convertJsonToJsonApi = function convertFunc(obj, type, urlRoot) {
+const convertJsonToJsonApi = (obj, type, urlRoot) => {
     if (Array.isArray(obj)) {
         return lodash.map(obj, item => transform(item, type, urlRoot));
     } else if (typeof obj === 'object') {
@@ -29,5 +27,6 @@ const convertJsonToJsonApi = function convertFunc(obj, type, urlRoot) {
 };
 
 module.exports = {
-    convertJsonToJsonApi
+    convertJsonToJsonApi,
+    transform
 };
