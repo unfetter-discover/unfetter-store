@@ -2,6 +2,7 @@ const BaseController = require('./shared/basecontroller');
 const stixModel = require('../models/schemaless');
 const SecurityHelper = require('../helpers/security_helper');
 const parser = require('../helpers/url_parser');
+const jsonApiConverter = require('../helpers/json_api_converter');
 
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 
@@ -16,18 +17,6 @@ function transformMongoDoc(mongoDoc) {
     const mongoObj = { ...mongoDoc.toObject() };
     return { ...mongoObj.stix, ...mongoObj.extendedProperties, ...mongoObj.metaProperties };
 }
-
-const jsonApiTransform = (obj, urlRoot) => {
-    const apiObj = {
-        type: obj.type,
-        id: obj.id,
-        attributes: obj,
-        links: {
-            self: `${urlRoot}/${obj.id}`
-        }
-    };
-    return apiObj;
-};
 
 /**
  * @param  {*} req
@@ -99,7 +88,7 @@ const sightingGroup = (req, res) => {
                 }
                 data = data.concat(identitiesResults.map(ir => transformMongoDoc(ir)));
                 const requestedUrl = apiRoot + req.originalUrl;
-                const convertedResult = data.map(dat => jsonApiTransform(dat, requestedUrl));
+                const convertedResult = data.map(dat => jsonApiConverter.transform(dat, requestedUrl));
                 return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
             });
         });
@@ -173,7 +162,7 @@ const sightingGroupById = (req, res) => {
                     data = data.concat(identitiesResults.map(ir => transformMongoDoc(ir)));
                     // TODO jsonapi
                     const requestedUrl = apiRoot + req.originalUrl;
-                    const convertedResult = data.map(dat => jsonApiTransform(dat, requestedUrl));
+                    const convertedResult = data.map(dat => jsonApiConverter.transform(dat, requestedUrl));
                     return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                 });
             });

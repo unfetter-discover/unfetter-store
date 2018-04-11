@@ -104,9 +104,9 @@ function filesToJson(filePaths) {
         .filter(jsonObj => jsonObj);
 }
 
-function mitreFetch(url, instanceOptions) {
+function mitreFetch(mitreUrl, instanceOptions) {
     return new Promise((resolve, reject) => {
-        fetch(url, instanceOptions)
+        fetch(mitreUrl, instanceOptions)
             .then(fetchRes => fetchRes.json())
             .then(fetchRes => {
                 const stixToUpload = fetchRes.objects
@@ -297,7 +297,7 @@ mongoose.connection.on('connected', err => { // eslint-disable-line no-unused-va
             });
         } else if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
             // Add mitre data
-            console.log('Adding Mitre data');
+            console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
             getMitreData(argv.mitreAttackData)
                 .then(result => {
                     run(result);

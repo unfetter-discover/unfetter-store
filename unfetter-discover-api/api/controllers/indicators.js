@@ -266,12 +266,17 @@ const search = (req, res) => {
                 let indicators = dataHelper.getEnhancedData(indicatorsRes, req.swagger.params);
 
                 // Server side filter of attack patterns
-                if (searchParameters.attackPatterns && searchParameters.attackPatterns.length && apRelationshipsRes.length) {
-                    const indicatorsRelatedToAps = apRelationshipsRes
-                        .map(apRel => apRel.toObject())
-                        .map(apRel => apRel.stix.source_ref);
+                if (searchParameters.attackPatterns && searchParameters.attackPatterns.length) {
+                    if (apRelationshipsRes.length) {
+                        const indicatorsRelatedToAps = apRelationshipsRes
+                            .map(apRel => apRel.toObject())
+                            .map(apRel => apRel.stix.source_ref);
 
-                    indicators = indicators.filter(indicator => indicatorsRelatedToAps.includes(indicator.id));
+                        indicators = indicators.filter(indicator => indicatorsRelatedToAps.includes(indicator.id));
+                    } else {
+                        // No relationships found, assign empty array
+                        indicators = [];
+                    }
                 }
 
                 // Server side filter of sensors
