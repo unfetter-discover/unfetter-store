@@ -28,6 +28,8 @@
   $ref: ./attack_patterns/attack_patterns.yaml
 /attack-patterns/{id}:
   $ref: ./attack_patterns/attack_patterns_by_id.yaml
+/attack-patterns/intrusion-sets-by-attack-pattern:
+  $ref: ./attack_patterns/intrusion-sets-by-attack-pattern.yaml
 
 /campaigns:
   $ref: ./campaigns/campaigns.yaml
