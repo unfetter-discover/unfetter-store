@@ -82,5 +82,6 @@ module.exports = {
     getById: controller.getById(),
     add: controller.add(),
     update: controller.update(),
-    deleteById: controller.deleteById()
+    deleteById: controller.deleteById(),
+    intrusionSetsByAttackPattern
 };
