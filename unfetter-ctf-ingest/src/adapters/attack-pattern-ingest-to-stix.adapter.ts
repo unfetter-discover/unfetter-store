@@ -63,7 +63,7 @@ export class AttackPatternIngestToStixAdapter {
         }
 
         const v4 = UUID.v4();
-        const id = stix.type + '-' + v4;
+        const id = stix.type + '--' + v4;
         stix.id = id;
         return stix;
     }

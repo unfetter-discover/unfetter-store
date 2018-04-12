@@ -97,7 +97,6 @@ const lookupGlobalValues = () => new Promise((resolve, reject) => {
                 global.unfetter.JWT_DURATION_SECONDS = 900;
             }
 
-            global.unfetter.defaultFramework = process.env.KILL_CHAIN || 'mitre-attack';
             resolve('Identities recieved');
         })
         .catch(err => reject(new Error('Unable to get identities and/or configurations: '), err));
