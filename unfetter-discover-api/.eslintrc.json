@@ -7,7 +7,7 @@
     "no-underscore-dangle": 0,
     "comma-dangle": 0,
     "class-methods-use-this": [
-      false
+      0
     ],
     "no-console": 0,
     "consistent-return": 0,

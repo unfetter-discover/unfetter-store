@@ -419,7 +419,7 @@ module.exports = class BaseController {
         };
     }
 
-    deleteByIdCb(callback) { 
+    deleteByIdCb(callback) {
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
