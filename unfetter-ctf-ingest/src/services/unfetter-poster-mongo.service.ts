@@ -26,7 +26,7 @@ export class UnfetterPosterMongoService {
         const wrappedArr: WrappedStix[] = arr.map((el) => {
             if (!el.id) {
                 const v4 = UUID.v4();
-                const id = el.type + '-' + v4;
+                const id = el.type + '--' + v4;
                 el.id = id;
             }
             const wrapper: WrappedStix = {

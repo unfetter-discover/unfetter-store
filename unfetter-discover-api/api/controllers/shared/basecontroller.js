@@ -224,13 +224,13 @@ module.exports = class BaseController {
                         let relType = '';
                         // TODO make this better
                         switch (type) {
-                        case 'indicator':
-                            relType = 'indicates';
-                            break;
-                        case 'x-unfetter-sensor':
-                            relType = 'detects';
-                            break;
-                        default:
+                            case 'indicator':
+                                relType = 'indicates';
+                                break;
+                            case 'x-unfetter-sensor':
+                                relType = 'detects';
+                                break;
+                            default:
                         }
                         const tempRelationship = {
                             stix: {
@@ -419,7 +419,7 @@ module.exports = class BaseController {
         };
     }
 
-    deleteByIdCb(callback) { // eslint-disable-line class-methods-use-this
+    deleteByIdCb(callback) {
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
@@ -465,7 +465,7 @@ module.exports = class BaseController {
      * @param {*} type
      * @param {*} user
      */
-    applySecurityFilterWhenNeeded(query, type, user, read = true) { // eslint-disable-line class-methods-use-this
+    applySecurityFilterWhenNeeded(query, type, user, read = true) {
         if (!type || !query) {
             return query;
         }

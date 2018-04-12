@@ -48,7 +48,7 @@ export class RssToStixAdapter {
         }
 
         const id = UUID.v4();
-        stix.id = stix.type + '-' + id;
+        stix.id = stix.type + '--' + id;
         const sourceType = 'open source';
         const reportId = item.guid;
         const description = item.description;

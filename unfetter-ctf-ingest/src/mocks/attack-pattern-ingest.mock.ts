@@ -5,7 +5,7 @@ export class AttackPatternIngestMock extends Mock<AttackPatternIngest> {
 
     public mockOne(num?: number): AttackPatternIngest {
         const mock = new AttackPatternIngest();
-        mock.action = 'action' + ( '-' + num || '');
+        mock.action = 'action' + ( '--' + num || '');
         mock.description = 'description';
         mock.killChain = 'them sofly';
         mock.objective = 'world peace?';
