@@ -23,6 +23,8 @@ mongooseModel.user = require('../../models/user');
 
 // Assessments 3.0
 mongooseModel['x-unfetter-capability'] = require('../../models/x-unfetter-capability');
+mongooseModel['x-unfetter-category'] = require('../../models/x-unfetter-category');
+mongooseModel['x-unfetter-assessed-object'] = require('../../models/x-unfetter-assessed-object');
 mongooseModel['x-unfetter-assessment-set'] = require('../../models/x-unfetter-assessment-set');
 mongooseModel['x-unfetter-assessment-group'] = require('../../models/x-unfetter-assessment-group');
 mongooseModel['x-unfetter-object-assessment'] = require('../../models/x-unfetter-object-assessment');
