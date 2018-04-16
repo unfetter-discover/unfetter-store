@@ -1,6 +1,6 @@
 {
   "name": "unfetter-socket-server",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Web socket server for Unfetter",
   "scripts": {
     "checkup": "npm run clean && npm run build && npm run lint && npm run coverage",
