@@ -356,6 +356,17 @@ XUnfetterCapabilityJsonApiSingleItem:
 XUnfetterCapability:
   $ref: ./x_unfetter_capabilities/x_unfetter_capability.yaml
 
+XUnfetterCategoryJsonApi:
+  $ref: ./x_unfetter_categories/x_unfetter_category_json_api.yaml
+XUnfetterCategoriesJsonApi:
+  $ref: ./x_unfetter_categories/x_unfetter_categories_json_api.yaml
+XUnfetterCategoryCreateUpdate:
+  $ref: ./x_unfetter_categories/x_unfetter_category_create_update.yaml
+XUnfetterCategoryJsonApiSingleItem:
+  $ref: ./x_unfetter_categories/x_unfetter_category_json_api_single_item.yaml
+XUnfetterCategory:
+  $ref: ./x_unfetter_categories/x_unfetter_category.yaml
+  
 XUnfetterObjectAssessmentJsonApi:
   $ref: ./x_unfetter_object_assessments/x_unfetter_object_assessment_json_api.yaml
 XUnfetterObjectAssessmentsJsonApi:
