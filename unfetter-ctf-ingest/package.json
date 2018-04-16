@@ -1,7 +1,7 @@
 {
   "name": "unfetter-ctf-ingest",
-  "version": "0.3.7",
-  "description": "Ingest Cyber Threat Framework (CTF) data into Unfetter",
+  "version": "0.3.6",
+  "description": "ingest cyber threat framework data into unfetter",
   "scripts": {
     "checkup": "npm run clean && npm run build && npm run lint && npm run docs && npm run coverage && npm run swagger:verify",
     "test": "jasmine-ts --config=jasmine.json",
@@ -15,8 +15,7 @@
     "lint": "tsc -v && tslint src/**/*.ts",
     "generate:attack-pattern:fromcsv": "ts-node -v && ts-node src/cli/attack-pattern-ingest.cli.ts -o attack-patterns.stix.json",
     "generate:reports:fromcsv": "ts-node -v && ts-node src/cli/report-ctf-ingest.cli.ts -o reports.stix.json",
-    "generate:reports:alerts:fromrss": "ts-node -v && ts-node src/cli/rss-reports-to-stix.cli.ts -i https://www.us-cert.gov/ncas/alerts.xml -o reports.alerts.stix.json",
-    "generate:reports:vulns:fromrss": "ts-node -v && ts-node src/cli/rss-reports-to-stix.cli.ts -i https://www.kb.cert.org/vulfeed -o reports.vulns.stix.json",
+    "generate:reports:fromrss": "ts-node -v && ts-node src/cli/rss-reports-ingest.cli.ts -o reports.stix.json",
     "ingest:reports:fromcsv": "ts-node -v && ts-node src/cli/report-ctf-ingest.cli.ts",
     "ingest:attack-pattern:fromcsv": "ts-node -v && ts-node src/cli/attack-pattern-ingest.cli.ts",
     "docs": "typedoc --out tsdocs --ignoreCompilerErrors --exclude '**/*.spec.ts' src/",
@@ -42,7 +41,6 @@
     "node-fetch": "^2.1.1",
     "papaparse": "^4.3.6",
     "request": "^2.85.0",
-    "stix": "https://github.com/unfetter-discover/stix/tarball/develop",
     "swagger-express-mw": "^0.7.0",
     "uuid": "^3.2.0",
     "validator": "^9.4.0",

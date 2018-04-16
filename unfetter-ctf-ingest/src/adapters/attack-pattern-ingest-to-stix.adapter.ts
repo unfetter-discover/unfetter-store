@@ -1,8 +1,10 @@
-import { KillChainPhase } from 'stix/stix/kill-chain-phase';
-import { StixCoreEnum } from 'stix/stix/stix-core.enum';
-import { Stix } from 'stix/unfetter/stix';
 import * as UUID from 'uuid';
+
+import { AttackPattern } from '../models/attack-pattern';
 import { AttackPatternIngest } from '../models/attack-pattern-ingest';
+import { KillChainPhase } from '../models/kill-chain-phase';
+import { MarkingDefinition } from '../models/marking-definition';
+import { Stix } from '../models/stix';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
 import { StixLookupService } from '../services/stix-lookup.service';
 
@@ -55,6 +57,11 @@ export class AttackPatternIngestToStixAdapter {
         }
         stix.kill_chain_phases = stix.kill_chain_phases || [];
         stix.kill_chain_phases.push(phase);
+
+        if (attackPatternIngest.stage) {
+            stix.extendedProperties = stix.extendedProperties || { x_ntctf_stage: '' };
+            stix.extendedProperties.x_ntctf_stage = attackPatternIngest.stage;
+        }
 
         const v4 = UUID.v4();
         const id = stix.type + '--' + v4;
