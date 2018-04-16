@@ -1,6 +1,10 @@
 {
   "name": "unfetter-discover-api",
+<<<<<<< HEAD
   "version": "0.3.7",
+=======
+  "version": "0.3.6",
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
   "private": true,
   "description": "Unfetter Discover API",
   "keywords": [],
@@ -12,7 +16,10 @@
     "express": "^4.12.3",
     "express-session": "^1.15.6",
     "https-proxy-agent": "^2.1.0",
+<<<<<<< HEAD
     "ip-regex": "^3.0.0",
+=======
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
     "jsonwebtoken": "^8.0.1",
     "lodash": "^4.17.4",
     "mongoose": "^4.9.9",

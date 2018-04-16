@@ -21,6 +21,14 @@ const StixSchema = {
         type: String,
         required: [true, 'object_ref is required']
     },
+<<<<<<< HEAD
+=======
+    is_baseline: {
+        type: Boolean,
+        required: [true, 'is_baseline is required']
+    },
+    set_ref: [String],
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
     assessed_objects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'XUnfetterAssessedObject' }]
 };
 

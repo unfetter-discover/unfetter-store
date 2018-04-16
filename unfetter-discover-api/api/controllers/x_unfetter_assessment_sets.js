@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const modelFactory = require('./shared/modelFactory');
 const BaseController = require('./shared/basecontroller');
 const SecurityHelper = require('../helpers/security_helper');
@@ -182,13 +183,22 @@ const latestAssessmentSets = (req, res) => {
 
     latestAssessmentSetPromise(latestAssessmentSetsByCreatedByRefs, req, res);
 };
+=======
+const BaseController = require('./shared/basecontroller');
+
+const controller = new BaseController('x-unfetter-assessment-set');
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
 
 module.exports = {
     get: controller.get(),
     getById: controller.getById(),
     add: controller.add(),
     update: controller.update(),
+<<<<<<< HEAD
     deleteById: controller.deleteById(),
     latestAssessmentSetsByCreatorId,
     latestAssessmentSets,
+=======
+    deleteById: controller.deleteById()
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
 };

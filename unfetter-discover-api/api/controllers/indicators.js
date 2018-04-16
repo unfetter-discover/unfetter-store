@@ -231,10 +231,13 @@ const search = (req, res) => {
             filterObj['metaProperties.published'] = { $in: searchParameters.published.map(p => p === 'true') };
         }
 
+<<<<<<< HEAD
         if (searchParameters.validStixPattern) {
             filterObj['metaProperties.validStixPattern'] = true;
         }
 
+=======
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
         promises.push(stixModel.find(SecurityHelper.applySecurityFilter(filterObj, req.user)).sort(sortObj).exec());
 
         // Get relationships of attack patterns if in params, or resolve []

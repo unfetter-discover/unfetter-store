@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const stixCommons = require('./stix-commons');
+<<<<<<< HEAD
 const xunfetterAssessObject = require('./x-unfetter-assessed-object').xunfetterAssessObject;
+=======
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
 
 const StixSchema = {
     type: {
@@ -19,7 +22,11 @@ const StixSchema = {
     },
     description: String,
     version: Number,
+<<<<<<< HEAD
     assessed_objects: [xunfetterAssessObject]
+=======
+    assessed_objects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'XUnfetterAssessedObject' }]
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
 };
 
 const XUnfetterCategory = mongoose.model('XUnfetterCategory', stixCommons.makeSchema(StixSchema), 'stix');

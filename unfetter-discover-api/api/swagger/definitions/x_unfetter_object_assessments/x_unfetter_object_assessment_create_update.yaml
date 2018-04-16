@@ -13,12 +13,24 @@ properties:
             type: string
           object_ref:
             type: string
+<<<<<<< HEAD
+=======
+          is_baseline:
+            type: boolean
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
           created: 
             type: string
             format: date-time
           modified:
             type: string
             format: date-time
+<<<<<<< HEAD
+=======
+          set_ref:
+            type: array
+            items:
+              type: string
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
           assessment_objects:
             type: array
             items:
