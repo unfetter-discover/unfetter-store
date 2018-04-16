@@ -1,6 +1,6 @@
 {
   "name": "unfetter-utils",
-  "version": "0.3.4",
+  "version": "0.3.6",
   "description": "Unfetter Utilities",
   "private": true,
   "main": "index.js",
