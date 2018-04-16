@@ -5,6 +5,11 @@
 /v3/x-unfetter-capabilities/{id}:
   $ref: ./x_unfetter_capabilities/capability-by-id.yaml
 
+/v3/x-unfetter-categories:
+  $ref: ./x_unfetter_categories/categories.yaml
+/v3/x-unfetter-categories/{id}:
+  $ref: ./x_unfetter_categories/category-by-id.yaml
+
 /v3/x-unfetter-assessment-sets:
   $ref: ./x_unfetter_assessment_sets/assessment-sets.yaml
 /v3/x-unfetter-assessment-sets/{id}:

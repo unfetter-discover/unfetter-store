@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const stixCommons = require('./stix-commons');
 
-const scoreVals = ['S', 'M', 'L', 'N/A', 'N'];
-
 const StixSchema = {
     created_by_ref: {
         type: String,
@@ -28,48 +26,7 @@ const StixSchema = {
         required: [true, 'is_baseline is required']
     },
     set_ref: [String],
-    assessment_objects: [{
-        _id: false,
-        assessed_object_ref: String,
-        questions: [
-            {
-                name: {
-                    type: String,
-                    enum: ['protect'],
-                    default: 'protect',
-                },
-                score: {
-                    type: String,
-                    enum: scoreVals,
-                    default: null
-                }
-            },
-            {
-                name: {
-                    type: String,
-                    enum: ['detect'],
-                    default: 'detect',
-                },
-                score: {
-                    type: String,
-                    enum: scoreVals,
-                    default: null
-                }
-            },
-            {
-                name: {
-                    type: String,
-                    enum: ['respond'],
-                    default: 'respond',
-                },
-                score: {
-                    type: String,
-                    enum: scoreVals,
-                    default: null
-                }
-            }
-        ]
-    }]
+    assessed_objects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'XUnfetterAssessedObject' }]
 };
 
 const objectAssessment = mongoose.model('XUnfetterObjectAssessment', stixCommons.makeSchema(StixSchema), 'stix');
