@@ -2,10 +2,10 @@
 
 /**
  * @description method to accept stix data and rewrite the extended and metadata fields for storage into mongo
- * ie 
+ * ie
  * @code { extendedproperties, stix, metaProperties } => { stix: { extendedproperties, metaProperties }}
- * @param {*} result 
- * @param {*} swaggerParams 
+ * @param {*} result
+ * @param {*} swaggerParams
  * @returns {object} object with extended fields rewritten, as needed
  */
 const getEnhancedData = (result, swaggerParams) => {
@@ -18,13 +18,13 @@ const getEnhancedData = (result, swaggerParams) => {
     }
 
     // no extended or meta properties
-    if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+    if (swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value !== undefined && swaggerParams.extendedproperties.value === false && ((swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined) || swaggerParams.metaproperties.value === false)) {
         data = result
             .map(res => res.toObject())
             .map(res => res.stix);
 
         // both extended and meta properties
-    } else if ((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
+    } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value !== undefined && swaggerParams.metaproperties.value === true) {
         data = result
             .map(res => res.toObject())
             .map(res => {
@@ -39,15 +39,14 @@ const getEnhancedData = (result, swaggerParams) => {
             });
 
         // Exteded properties only
-    } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && (swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined || swaggerParams.metaproperties.value === false)) {
+    } else if (((swaggerParams.extendedproperties !== undefined && swaggerParams.extendedproperties.value === undefined) || swaggerParams.extendedproperties.value === true) && ((swaggerParams.metaproperties !== undefined && swaggerParams.metaproperties.value === undefined) || swaggerParams.metaproperties.value === false)) {
         data = result
             .map(res => res.toObject())
             .map(res => {
                 if (res.extendedProperties !== undefined) {
                     return { ...res.stix, ...res.extendedProperties };
-                } else {
-                    return res.stix;
                 }
+                return res.stix;
             });
 
         // Meta properties only
@@ -57,9 +56,8 @@ const getEnhancedData = (result, swaggerParams) => {
             .map(res => {
                 if (res.metaProperties !== undefined) {
                     return { ...res.stix, metaProperties: res.metaProperties };
-                } else {
-                    return res.stix;
                 }
+                return res.stix;
             });
 
         // Delete this if this function works!
@@ -67,7 +65,7 @@ const getEnhancedData = (result, swaggerParams) => {
         console.log('DOOOOM!!!! This block should never be reached.');
     }
     return data;
-}
+};
 
 module.exports = {
     getEnhancedData,

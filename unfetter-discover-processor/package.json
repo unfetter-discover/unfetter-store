@@ -1,6 +1,6 @@
 {
   "name": "unfetter-discover-processor",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Records Processor for Unfetter Discover",
   "private": true,
   "directories": {
@@ -21,6 +21,6 @@
     "eslint-plugin-import": "^2.3.0"
   },
   "scripts": {
-    "lint": "eslint ./api/**"
+    "lint": "eslint ./*.js"
   }
 }

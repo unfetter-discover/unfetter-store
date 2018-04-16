@@ -1,6 +1,5 @@
 import { Router, Response, Request, NextFunction } from 'express';
 
-import io from '../server/server';
 import { connections, findConnectionsByUserId } from '../models/connections';
 import { AppNotification, CreateAppNotification } from '../models/notification';
 import { WSMessageTypes } from '../models/messages';
@@ -88,6 +87,24 @@ router.post('/social/all', (req: Request, res: Response) => {
         });
 
         return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved social-all notification' }));
+    } else {
+        console.log('Malformed request to', req.url);
+        return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
+    }
+});
+
+// Send new stix id to all
+router.post('/stixid/all', (req: Request, res: Response) => {
+    if (isDefinedJsonApi(req, ['notification'])) {
+        const { userId, notification }: UserNotification = req.body.data.attributes;
+
+        const appNotification = new CreateAppNotification(WSMessageTypes.STIXID, notification);
+
+        connections.forEach((connection: Connection) => {
+            connection.client.send(appNotification);
+        });
+
+        return res.json(new CreateJsonApiSuccess({ 'message': 'Successfully recieved stix-all notification' }));
     } else {
         console.log('Malformed request to', req.url);
         return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));

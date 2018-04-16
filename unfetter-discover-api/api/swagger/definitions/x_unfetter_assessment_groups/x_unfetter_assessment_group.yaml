@@ -1,0 +1,26 @@
+  type: object
+  properties:
+
+
+          name:
+            type: string
+          description:
+            type: string
+          created: 
+            type: string
+            format: date-time
+          modified:
+            type: string
+            format: date-time
+          created_by_ref:
+            type: string
+            default: "identity-id"
+          object_refs:
+            type: array
+            items:
+              type: string
+          assessment_sets:
+            type: array
+            items:
+              type: string
+              

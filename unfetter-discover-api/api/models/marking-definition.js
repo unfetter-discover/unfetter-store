@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const StixSchema = {
@@ -19,6 +18,6 @@ const StixSchema = {
     }
 };
 
-const MarkingDefinition = mongoose.model('MarkingDefinition', stixCommons['makeSchema'](StixSchema), 'stix');
+const MarkingDefinition = mongoose.model('MarkingDefinition', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = MarkingDefinition;

@@ -58,3 +58,6 @@ typings/
 .env
 
 dist/
+
+.DS_Store/
+.DS_Store

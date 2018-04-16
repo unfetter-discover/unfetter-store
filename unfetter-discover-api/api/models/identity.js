@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const StixSchema = {
     id: String,
+    created_by_ref: String,
     name: {
         type: String,
         required: [true, 'name is required']
@@ -24,6 +24,6 @@ const StixSchema = {
     }
 };
 
-const Identity = mongoose.model('Identity', stixCommons['makeSchema'](StixSchema), 'stix');
+const Identity = mongoose.model('Identity', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = Identity;

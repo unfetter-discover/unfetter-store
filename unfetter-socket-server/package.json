@@ -1,6 +1,6 @@
 {
   "name": "unfetter-socket-server",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Web socket server for Unfetter",
   "scripts": {
     "checkup": "npm run clean && npm run build && npm run lint && npm run coverage",
@@ -8,7 +8,7 @@
     "clean": "rimraf dist/ tsdocs/ coverage/ .nyc_output/",
     "start": "npm run build && npm run watch",
     "build": "npm run build-ts",
-    "serve": "nodemon dist/server/server.js",
+    "serve": "nodemon --inspect=0.0.0.0:6555 --nolazy dist/server/server.js",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve\"",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",

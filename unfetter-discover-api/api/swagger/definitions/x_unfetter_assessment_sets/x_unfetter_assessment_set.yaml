@@ -1,0 +1,21 @@
+  type: object
+  properties:
+
+    name:
+      type: string
+    description:
+      type: string
+    created_by_ref:
+      type: string
+    assessment_group_ref:
+      type: string
+    assessments:
+      type: array
+      items:
+        type: string
+    created: 
+      type: string
+      format: date-time
+    modified:
+      type: string
+      format: date-time

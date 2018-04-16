@@ -1,37 +1,40 @@
 const model = require('../models/schemaless');
+const SecurityHelper = require('../helpers/security_helper');
 
 const downloadBundle = function downloadBundleFunc(req, res) {
+    model
+        .find(SecurityHelper.applySecurityFilter({ stix: { $exists: 1 } }))
+        .exec((err, results) => {
+            if (err) {
+                return res.status(500).json({
+                    errors: [{
+                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                    }]
+                });
+            }
 
-  model
-    .find({'stix':{'$exists':1}})
-    .exec((err, results) => {
+            let objects;
+            if (req.swagger.params.extendedproperties !== undefined && req.swagger.params.extendedproperties.value !== undefined && req.swagger.params.extendedproperties.value === true) {
+                objects = results
+                    .map(response => response.toObject())
+                    .map(response => {
+                        if (response.extendedProperties !== undefined) {
+                            return { ...response.stix, ...response.extendedProperties };
+                        }
+                        return response.stix;
+                    });
+            } else {
+                objects = results
+                    .map(response => response.toObject())
+                    .map(response => response.stix);
+            }
 
-      if(err) {
-        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
-      } else {
-
-        let objects;
-        if (req.swagger.params.extendedproperties !== undefined && req.swagger.params.extendedproperties.value !== undefined && req.swagger.params.extendedproperties.value === true) {
-          objects = results
-            .map(res => res.toObject())
-            .map(res => {
-              if (res.extendedProperties !== undefined) {
-                return { ...res.stix, ...res.extendedProperties };
-              } else {
-                return res.stix;
-              }
-            })
-        } else {
-          objects = results
-            .map(res => res.toObject())
-            .map(res => res.stix);
-        }
-
-        return res.json({ type: 'bundle', id: 'stix-archive-bundle', spec_version: '2.0', objects });
-      }
-    });
+            return res.json({
+                type: 'bundle', id: 'stix-archive-bundle', spec_version: '2.0', objects
+            });
+        });
 };
 
 module.exports = {
-  downloadBundle
+    downloadBundle
 };

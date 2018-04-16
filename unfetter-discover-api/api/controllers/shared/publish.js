@@ -36,14 +36,14 @@ const notifyUser = (userId, notificationType, heading, notificationBody, link = 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
         },
         body
     })
-    .then((res) => {
-        console.log('Publish API recieved user notification for', userId);
-    })
-    .catch((err) => console.log('Error!', err));
+        .then(res => { // eslint-disable-line no-unused-vars
+            console.log('Publish API recieved user notification for', userId);
+        })
+        .catch(err => console.log('Error!', err));
 };
 
 const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, link = null, emailData = null) => {
@@ -52,30 +52,30 @@ const notifyOrg = (userId, orgId, notificationType, heading, notificationBody, l
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
         },
         body
     })
-    .then((res) => {
-        console.log('Publish API recieved organization notification for', orgId);
-    })
-    .catch((err) => console.log('Error!', err));
+        .then(res => { // eslint-disable-line no-unused-vars
+            console.log('Publish API recieved organization notification for', orgId);
+        })
+        .catch(err => console.log('Error!', err));
 };
 
-const notifyAdmin = (notificationType, heading, notificationBody, link = null, emailData = null, ) => {
+const notifyAdmin = (notificationType, heading, notificationBody, link = null, emailData = null) => {
     const body = JSON.stringify(new CreateNotification(null, null, notificationType, heading, notificationBody, null, link, emailData));
     fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/notification/admin`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
         },
         body
     })
-    .then((res) => {
-        console.log('Publish API recieved admin notification');
-    })
-    .catch((err) => console.log('Error!', err));
+        .then(res => { // eslint-disable-line no-unused-vars
+            console.log('Publish API recieved admin notification');
+        })
+        .catch(err => console.log('Error!', err));
 };
 
 const updateSocialForAll = (notificationType, notificationBody, stixId) => {
@@ -85,20 +85,36 @@ const updateSocialForAll = (notificationType, notificationBody, stixId) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            Accept: 'application/json'
         },
         body
     })
-    .then((res) => {
-        console.log('Publish API recieved notification for social update');
+        .then(res => { // eslint-disable-line no-unused-vars
+            console.log('Publish API recieved notification for social update');
+        })
+        .catch(err => console.log('Error!', err));
+};
+
+const sendStixId = (stixId, type) => {
+    const body = JSON.stringify(new CreateNotification(null, null, 'STIXID', null, { id: stixId, type }, stixId, null, null));
+    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/stixid/all`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+        },
+        body
     })
-    .catch((err) => console.log('Error!', err));
+        .then(res => { // eslint-disable-line no-unused-vars
+            console.log('Publish API recieved notification for stixid update');
+        })
+        .catch(err => console.log('Error!', err));
 };
 
 module.exports = {
     notifyUser,
     notifyOrg,
     notifyAdmin,
-    updateSocialForAll
+    updateSocialForAll,
+    sendStixId
 };
-                                        

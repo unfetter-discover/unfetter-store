@@ -1,12 +1,15 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+const publicPath = process.env.PUBLIC_PATH || '/';
 
 module.exports = {
     entry: './src/js/app.js',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js',
-        publicPath: '/dist'
+        publicPath
     },
     module: {
         rules: [
@@ -37,21 +40,26 @@ module.exports = {
                 from: 'src/explorer',
                 to: 'explorer'
             }
-        ])
+        ]),
+        new HtmlWebpackPlugin({
+            path: '/',
+            hash: true,
+            template: './src/index.html'
+        })
     ],
     devServer: {
         port: 3200,
-        publicPath: "/",
+        publicPath: '/',
         stats: {
             colors: true
         },
         proxy: {
-            "/api": {
-                "target": "https://localhost",
-                "secure": false,
-                "logLevel": "debug",
-                "ignorePath": false,
-                "changeOrigin": true
+            '/api': {
+                'target': 'https://localhost',
+                'secure': false,
+                'logLevel': 'debug',
+                'ignorePath': false,
+                'changeOrigin': true
             }
         }
     }

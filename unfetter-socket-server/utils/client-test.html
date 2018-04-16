@@ -4,25 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Socket Test</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 </head>
 <body>
     <h1>Socket Test</h1>
     <hr>
+    <input type="text" placeholder="Token" id="token">
+    <button id="connect">Connect</button>
+    <hr>
     <div id="output"></div>
     <script>
-    var output = document.getElementById('output');
-    var exampleSocket = io("https://localhost:13333", {
-        secure: true,
-        path: '/socket',
-        query: 'token=add token here'
-    });
-    exampleSocket.on('message', (msg) => {
-        console.log(msg, 'from server');
-        output.innerHTML = JSON.stringify(msg, null, 2);
-    });
-    exampleSocket.emit('message', 'hi! from client');
+    document.addEventListener('DOMContentLoaded', () => {
+        const button = document.getElementById('connect');
+        button.addEventListener('click', () => {
+            const tokenInput = document.getElementById('token');
+            const query = `token=${tokenInput.value}`;
+            const output = document.getElementById('output');
+            const exampleSocket = io("https://localhost:13333", {
+                secure: true,
+                path: '/socket',
+                query
+            });
+            exampleSocket.on('message', (msg) => {
+                console.log(msg, 'from server');
+                const newDiv = document.createElement('pre');
+                newDiv.innerHTML = JSON.stringify(msg, null, 2);
+                output.append(newDiv);
+                output.append(document.createElement('hr'));
+            });
+            exampleSocket.emit('message', 'hi! from client');
+        });        
+    });    
     </script>
 </body>
 </html>

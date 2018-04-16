@@ -1,6 +1,7 @@
+import * as UUID from 'uuid';
+
 import { AttackPattern } from '../models/attack-pattern';
 import { AttackPatternIngest } from '../models/attack-pattern-ingest';
-import { Ctf } from '../models/ctf';
 import { KillChainPhase } from '../models/kill-chain-phase';
 import { MarkingDefinition } from '../models/marking-definition';
 import { Stix } from '../models/stix';
@@ -55,6 +56,15 @@ export class AttackPatternIngestToStixAdapter {
         phase.phase_name = attackPatternIngest.objective;
         stix.kill_chain_phases = stix.kill_chain_phases || [];
         stix.kill_chain_phases.push(phase);
+
+        if (attackPatternIngest.stage) {
+            stix.extendedProperties = stix.extendedProperties || { x_ntctf_stage: '' };
+            stix.extendedProperties.x_ntctf_stage = attackPatternIngest.stage;
+        }
+
+        const v4 = UUID.v4();
+        const id = stix.type + '--' + v4;
+        stix.id = id;
         return stix;
     }
 

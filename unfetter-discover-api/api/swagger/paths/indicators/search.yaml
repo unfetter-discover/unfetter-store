@@ -1,0 +1,57 @@
+x-swagger-router-controller: indicators
+get:
+  tags:  
+  - STIX-Indicators
+  description: Search functionality for analytic exchange
+  operationId: search
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  parameters:
+  - name: searchparameters
+    in: query
+    description: 'Ex: {"indicatorName": "remote"}'
+    required: true
+    type: string
+  - name: sorttype
+    in: query
+    description: 'Ex: "NEWEST", "OLDEST", "LIKES", "COMMENTS"'
+    required: false
+    type: string
+  - name: limit
+    in: query
+    description: 'Ex: 5'
+    required: false
+    type: number
+  - name: skip
+    in: query
+    description: 'Ex: 10'
+    required: false
+    type: number
+  - name: extendedproperties
+    in: query
+    type: boolean
+    description: boolean to include extended stix properties
+  - name: metaproperties
+    in: query
+    type: boolean
+    description: boolean to include extended meta properties
+  - name: project
+    in: query
+    description: 'Ex: {"stix.created_by_ref":1} or {"stix.created_by_ref":0}'
+    required: false
+    type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    "404":
+      description: Item Not Found
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

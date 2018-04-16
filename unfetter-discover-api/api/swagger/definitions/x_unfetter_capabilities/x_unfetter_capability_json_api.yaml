@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "x-unfetter-capability"
+    attributes:
+      $ref: "#/definitions/XUnfetterCapability"
+    links:
+      $ref: "#/definitions/Links"

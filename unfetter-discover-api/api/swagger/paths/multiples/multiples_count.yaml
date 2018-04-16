@@ -1,0 +1,31 @@
+x-swagger-router-controller: multiples
+get:
+  tags:  
+  - STIX-Multiples
+  description: Get a count of stix objects matching a filter
+  operationId: count
+  produces: 
+  - application/vnd.api+json
+  parameters:
+    - name: filter
+      in: query
+      description: 'Ex: {"stix.name":"Cryptolocker"}'
+      required: false
+      type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        properties:
+          data:
+            type: object
+            properties:
+              attributes:
+                type: object
+                properties:
+                  count:
+                    type: number
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

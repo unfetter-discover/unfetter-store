@@ -6,48 +6,72 @@ const config = require('./config');
 
 const passportConfig = {};
 
-passportConfig.setStrategy = (passport) => {
+passportConfig.setStrategy = passport => {
     const opts = {};
     opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
     opts.secretOrKey = config.jwtSecret;
-    passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
-        userModel.findById(jwt_payload._id, (err, user) => {
+    passport.use(new JwtStrategy(opts, (jwtPayload, done) => {
+        userModel.findById(jwtPayload._id, (err, user) => {
             if (err) {
                 return done(err, false);
             }
 
             if (user) {
                 return done(null, user);
-            } else {
-                return done(null, false);
             }
+            return done(null, false);
         });
     }));
 };
 
 passportConfig.jwtStandard = (req, res, next) => {
-    // Do nothing if they pass strategy
+    const user = req.user;
+    if (!user || !user.approved) {
+        return res.status(403).json({
+            errors: [{
+                status: 403,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Unauthorized.  You are not approved to use unfetter'
+            }]
+        });
+    }
     next();
 };
 
 passportConfig.jwtAdmin = (req, res, next) => {
     const user = req.user;
     // Verify they have admin role
-    if (!user || user.role !== 'ADMIN') {
-        return res.status(403).json({ errors: [{ status: 403, source: '', title: 'Error', code: '', detail: 'Unauthorized.  Only admins may access the admin route' }] });
-    } else {
-        next();
+    if (!user || !user.approved || user.role !== 'ADMIN') {
+        return res.status(403).json({
+            errors: [{
+                status: 403,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Unauthorized.  Only admins may access the admin route'
+            }]
+        });
     }
+    next();
 };
 
 passportConfig.jwtOrganizations = (req, res, next) => {
     const user = req.user;
     // Verify they have admin or org leader role
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'ORG_LEADER')) {
-        return res.status(403).json({ errors: [{ status: 403, source: '', title: 'Error', code: '', detail: 'Unauthorized.  Only admins and organization leaders may access the organizations route' }] });
-    } else {
-        next();
+    if (!user || !user.approved || (user.role !== 'ADMIN' && user.role !== 'ORG_LEADER')) {
+        return res.status(403).json({
+            errors: [{
+                status: 403,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Unauthorized.  Only admins and organization leaders may access the organizations route'
+            }]
+        });
     }
+    next();
 };
 
 module.exports = passportConfig;

@@ -1,0 +1,44 @@
+x-swagger-router-controller: sightings
+get:
+  tags:  
+  - STIX-Sighting
+  description: Returns multiple sightings and their related objects.  All parameters are applied ONLY to the sightings
+  operationId: sightingGroup
+  parameters:
+    - name: filter
+      in: query
+      description: 'Ex: {"stix.name":"Powershell Execution"}'
+      required: false
+      type: string
+    - name: sort
+      in: query
+      description: 'Ex: {"stix.name":"1"} or {"stix.name":"-1"}'
+      required: false
+      type: string
+    - name: limit
+      in: query
+      description: 'Ex: 5'
+      required: false
+      type: number
+    - name: skip
+      in: query
+      description: 'Ex: 10'
+      required: false
+      type: number
+  produces: 
+  - application/vnd.api+json
+  consumes:
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    "404":
+      description: Item Not Found
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

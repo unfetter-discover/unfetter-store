@@ -1,7 +1,6 @@
 x-swagger-router-controller: latest
 get:
   tags:
-  - STIX-Unfetter
   - Ids sort by modified
   description: Find all Ids of stix type given sorted by last modified
   operationId: getLatestByType

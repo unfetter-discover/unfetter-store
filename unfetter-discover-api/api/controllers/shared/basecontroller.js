@@ -1,5 +1,3 @@
-
-const mongoose = require('mongoose');
 const lodash = require('lodash');
 const stix = require('../../helpers/stix');
 const jsonApiConverter = require('../../helpers/json_api_converter');
@@ -9,7 +7,7 @@ const publish = require('./publish');
 const DataHelper = require('../../helpers/extended_data_helper');
 const SecurityHelper = require('../../helpers/security_helper');
 
-const apiRoot = 'https://localhost/api';
+const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 
 module.exports = class BaseController {
     constructor(type) {
@@ -25,30 +23,33 @@ module.exports = class BaseController {
 
             const query = parser.dbQueryParams(req);
             if (query.error) {
-                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: query.error }] });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: query.error
+                    }]
+                });
             }
 
             model
                 .aggregate(query.aggregations)
                 .exec((err, result) => {
-
                     if (err) {
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            }]
+                        });
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
                     const convertedResult = jsonApiConverter.convertJsonToJsonApi(result, type, requestedUrl);
                     return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                 });
-        }
+        };
     }
 
     get() {
-        const type = this.type;
-        const model = this.model;
-        return this.getCb((err, convertedResult, requestedUrl, req, res) => {
-            return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
-        });
+        return this.getCb((err, convertedResult, requestedUrl, req, res) => res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult }));
     }
 
     getCb(callback) {
@@ -59,8 +60,13 @@ module.exports = class BaseController {
 
             const query = parser.dbQueryParams(req);
             if (query.error) {
-                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: query.error }] });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: query.error
+                    }]
+                });
             }
+
 
             const matcherQuery = this.applySecurityFilterWhenNeeded(Object.assign({ 'stix.type': type }, query.filter), type, req.user);
             model
@@ -70,9 +76,12 @@ module.exports = class BaseController {
                 .skip(query.skip)
                 .select(query.project)
                 .exec((err, result) => {
-
                     if (err) {
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            }]
+                        });
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
@@ -81,15 +90,18 @@ module.exports = class BaseController {
                     // return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
                     callback(err, convertedResult, requestedUrl, req, res);
                 });
-        }
+        };
     }
 
     getById() {
         const type = this.type;
-        const model = this.model;
         return this.getByIdCb((err, result, req, res, id) => {
             if (err) {
-                return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                return res.status(500).json({
+                    errors: [{
+                        status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                    }]
+                });
             }
 
             if (result && result.length === 1) {
@@ -119,7 +131,7 @@ module.exports = class BaseController {
                 .exec((err, result) => {
                     callback(err, result, req, res, id);
                 });
-        }
+        };
     }
 
     add() {
@@ -131,6 +143,7 @@ module.exports = class BaseController {
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
             const obj = {};
+
             if (req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const data = req.swagger.params.data.value.data;
                 const relationships = [];
@@ -145,8 +158,8 @@ module.exports = class BaseController {
                 obj.stix.id = stix.id(obj.stix.type);
 
                 // Process extended properties
-                let extendedProperties = {};
-                for (let prop of Object.keys(data.attributes)) {
+                const extendedProperties = {};
+                for (const prop of Object.keys(data.attributes)) {
                     if (prop.match(/^x_/) !== null) {
                         extendedProperties[prop] = data.attributes[prop];
                         delete obj.stix[prop];
@@ -161,7 +174,7 @@ module.exports = class BaseController {
                         relatedIds = obj.stix.metaProperties.relationships;
                         delete obj.stix.metaProperties.relationships;
                     }
-                    let tempMeta = obj.stix.metaProperties;
+                    const tempMeta = obj.stix.metaProperties;
                     delete obj.stix.metaProperties;
                     obj.metaProperties = tempMeta;
                 }
@@ -169,13 +182,17 @@ module.exports = class BaseController {
                 // If using UAC, confirm user can post to that group
                 if (process.env.RUN_MODE === 'UAC' && req.user && req.user.role !== 'ADMIN' && obj.stix.created_by_ref) {
                     const userOrgIds = req.user.organizations
-                        .filter((org) => org.approved)
-                        .map((org) => org.id);
+                        .filter(org => org.approved)
+                        .map(org => org.id);
 
 
                     if (!userOrgIds.includes(obj.stix.created_by_ref)) {
                         console.log(req.user.userName, 'attempted to add a STIX message to a organization he/she does not belong to');
-                        return res.status(500).json({ errors: [{ status: 401, source: '', title: 'Error', code: '', detail: 'User is not allowed to create a STIX for this organization.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 401, source: '', title: 'Error', code: '', detail: 'User is not allowed to create a STIX for this organization.'
+                            }]
+                        });
                     }
                 }
 
@@ -189,16 +206,20 @@ module.exports = class BaseController {
                 const error = newDocument.validateSync();
                 if (error) {
                     const errors = [];
-                    lodash.forEach(error.errors, (field) => {
+                    lodash.forEach(error.errors, field => {
                         errors.push(field.message);
                     });
-                    return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                    return res.status(400).json({
+                        errors: [{
+                            status: 400, source: '', title: 'Error', code: '', detail: errors
+                        }]
+                    });
                 }
 
                 newDocument._id = newDocument.stix.id;
 
                 if (relatedIds) {
-                    for (let relatedId of relatedIds) {
+                    for (const relatedId of relatedIds) {
                         const relId = stix.id('relationship');
                         let relType = '';
                         // TODO make this better
@@ -206,13 +227,18 @@ module.exports = class BaseController {
                             case 'indicator':
                                 relType = 'indicates';
                                 break;
+                            case 'x-unfetter-sensor':
+                                relType = 'detects';
+                                break;
+                            default:
                         }
                         const tempRelationship = {
-                            'stix': {
-                                'id': relId,
-                                'source_ref': newDocument.stix.id,
-                                'target_ref': relatedId,
-                                'relationship_type': relType
+                            stix: {
+                                id: relId,
+                                source_ref: newDocument.stix.id,
+                                target_ref: relatedId,
+                                relationship_type: relType,
+                                created_by_ref: obj.stix.created_by_ref
                             }
                         };
 
@@ -240,23 +266,33 @@ module.exports = class BaseController {
                 model.create(newDocument, (err, result) => {
                     if (err) {
                         console.log(err);
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            }]
+                        });
                     }
 
-                    // Notify org members
-                    if (req.user && req.user._id && obj.stix.created_by_ref) {
-                        identityModel.findById(obj.stix.created_by_ref, (identityErr, identityResult) => {
-                            if (identityErr || !identityResult) {
-                                console.log('Unable to find identity, cannot publish to organization');
-                            } else {
-                                const identityObj = identityResult.toObject();
-                                if (obj.stix.type === 'indicator') {
-                                    publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`, `/indicator-sharing/single/${newDocument._id}`);
+                    // Socket handling
+                    if (process.env.RUN_MODE !== 'DEMO') {
+                        // Notify org members
+                        if (req.user && req.user._id && obj.stix.created_by_ref) {
+                            identityModel.findById(obj.stix.created_by_ref, (identityErr, identityResult) => {
+                                if (identityErr || !identityResult) {
+                                    console.log('Unable to find identity, cannot publish to organization');
                                 } else {
-                                    publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
+                                    const identityObj = identityResult.toObject();
+                                    if (obj.stix.type === 'indicator') {
+                                        publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`, `/indicator-sharing/single/${newDocument._id}`);
+                                    } else {
+                                        publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
+                                    }
                                 }
-                            }
-                        })
+                            });
+                        }
+
+                        // Send new STIX id to add
+                        publish.sendStixId(newDocument._id, newDocument.stix.type);
                     }
 
                     const requestedUrl = apiRoot + req.originalUrl;
@@ -264,7 +300,7 @@ module.exports = class BaseController {
                     let returnObj = { ...resObj.stix };
 
                     if (resObj.extendedProperties) {
-                        returnObj = { ...returnObj, ...resObj.extendedProperties }
+                        returnObj = { ...returnObj, ...resObj.extendedProperties };
                     }
 
                     if (resObj.metaProperties) {
@@ -278,7 +314,11 @@ module.exports = class BaseController {
                     return res.status(201).json({ links: { self: requestedUrl, }, data: convertedResult });
                 });
             } else {
-                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: 'malformed request'
+                    }]
+                });
             }
         };
     }
@@ -293,10 +333,16 @@ module.exports = class BaseController {
             if (req.swagger.params.id.value !== undefined && req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
-                const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+                const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
                 model.findById(query, (err, result) => {
                     if (err) {
-                        return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                        return res.status(500).json({
+                            errors: [{
+                                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                            }]
+                        });
+                    } else if (!result) {
+                        return res.status(404).json({ message: 'Unable to retrieve document' });
                     }
 
                     // set the new values
@@ -304,20 +350,24 @@ module.exports = class BaseController {
                     const incomingObj = req.swagger.params.data ? req.swagger.params.data.value.data.attributes : {};
                     const has = Object.prototype.hasOwnProperty;
                     for (const key in incomingObj) {
-                        if (key === 'metaProperties') {
-                            for (const metaKey in incomingObj.metaProperties) {
-                                if (resultObj.metaProperties === undefined) {
-                                    resultObj.metaProperties = {};
+                        if (has.call(incomingObj, key)) {
+                            if (key === 'metaProperties') {
+                                for (const metaKey in incomingObj.metaProperties) {
+                                    if (has.call(incomingObj.metaProperties, metaKey)) {
+                                        if (resultObj.metaProperties === undefined) {
+                                            resultObj.metaProperties = {};
+                                        }
+                                        resultObj.metaProperties[metaKey] = incomingObj.metaProperties[metaKey];
+                                    }
                                 }
-                                resultObj.metaProperties[metaKey] = incomingObj.metaProperties[metaKey];
+                            } else if (key.match(/^x_/) === null && has.call(incomingObj, key)) {
+                                resultObj.stix[key] = incomingObj[key];
+                            } else if (key.match(/^x_/) !== null && has.call(incomingObj, key)) {
+                                if (resultObj.extendedProperties === undefined) {
+                                    resultObj.extendedProperties = {};
+                                }
+                                resultObj.extendedProperties[key] = incomingObj[key];
                             }
-                        } else if (key.match(/^x_/) === null && has.call(incomingObj, key)) {
-                            resultObj.stix[key] = incomingObj[key];
-                        } else if (key.match(/^x_/) !== null && has.call(incomingObj, key)) {
-                            if (resultObj.extendedProperties === undefined) {
-                                resultObj.extendedProperties = {};
-                            }
-                            resultObj.extendedProperties[key] = incomingObj[key];
                         }
                     }
 
@@ -328,21 +378,29 @@ module.exports = class BaseController {
                     const error = newDocument.validateSync();
                     if (error) {
                         const errors = [];
-                        lodash.forEach(error.errors, (field) => {
+                        lodash.forEach(error.errors, field => {
                             errors.push(field.message);
                         });
-                        return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: errors }] });
+                        return res.status(400).json({
+                            errors: [{
+                                status: 400, source: '', title: 'Error', code: '', detail: errors
+                            }]
+                        });
                     }
 
-                    const findOneAndUpdateQuery = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+                    const findOneAndUpdateQuery = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
                     // guard pass complete
                     model.findOneAndUpdate(findOneAndUpdateQuery, newDocument, { new: true }, (errUpdate, resultUpdate) => {
                         if (errUpdate) {
-                            return res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                            return res.status(500).json({
+                                errors: [{
+                                    status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+                                }]
+                            });
                         }
 
                         if (resultUpdate) {
-                            let resObj = resultUpdate.toObject();
+                            const resObj = resultUpdate.toObject();
                             const requestedUrl = apiRoot + req.originalUrl;
                             const convertedResult = jsonApiConverter.convertJsonToJsonApi(resObj.extendedProperties !== undefined ? { ...resObj.stix, ...resObj.extendedProperties } : resObj.stix, type, requestedUrl);
                             return res.status(200).json({ links: { self: requestedUrl, }, data: convertedResult });
@@ -352,7 +410,11 @@ module.exports = class BaseController {
                     });
                 });
             } else {
-                return res.status(400).json({ errors: [{ status: 400, source: '', title: 'Error', code: '', detail: 'malformed request' }] });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400, source: '', title: 'Error', code: '', detail: 'malformed request'
+                    }]
+                });
             }
         };
     }
@@ -377,17 +439,21 @@ module.exports = class BaseController {
             // per mongo documentation
             // Mongoose queries are not promises. However, they do have a .then() function for yield and async/await.
             // If you need a fully- fledged promise, use the .exec() function.
-            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user);
+            const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
             promises.push(model.remove(query).exec());
             promises.push(relationshipModel.remove({ $or: [{ 'stix.source_ref': id }, { 'stix.target_ref': id }] }).exec());
-            Promise.all(promises).then((response) => {
+            Promise.all(promises).then(response => {
                 if (response && response.length > 0 && response[0].result && response[0].result.n === 1) {
                     return res.status(200).json({ data: { type: 'Success', message: `Deleted id ${id}` } });
                 }
 
                 return res.status(404).json({ message: `Unable to delete the item.  No item found with id ${id}` });
-            }).catch((err) => {
-                res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+            }).catch(err => { // eslint-disable-line no-unused-vars
+                res.status(500).json({
+                    errors: [{
+                        status: 500, source: '', title: 'Error', code: '', detail: `An unknown error has occurred. [${err}]`
+                    }]
+                });
             });
         });
     }
@@ -395,25 +461,22 @@ module.exports = class BaseController {
     /**
      * @description apply filter for only give model types, user and node environment conditions
      * @see SecurityHelper#applySecurityFilter
-     * @param {*} query 
+     * @param {*} query
      * @param {*} type
      * @param {*} user
      */
-    applySecurityFilterWhenNeeded(query, type, user) {
+    applySecurityFilterWhenNeeded(query, type, user, read = true) {
         if (!type || !query) {
             return query;
         }
+        return SecurityHelper.applySecurityFilter(query, user, read);
 
-        const assessmentType = 'x-unfetter-assessment';
-        const filterTypes = new Set([assessmentType]);
-        if (filterTypes.has(type)) {
-            console.log(`applying filter on type ${type}`);
-            return SecurityHelper.applySecurityFilter(query, user);
-        } else {
-            console.log(`skipping filter for type, ${type}`);
-            return query;
-        }
+        // const filterTypes = new Set(['x-unfetter-assessment', 'indicator', 'report']);
+        // if (filterTypes.has(type)) {
+        //     console.log(`applying filter on type ${type}`);
+        //     return SecurityHelper.applySecurityFilter(query, user, read);
+        // }
+        // console.log(`skipping filter for type, ${type}`);
+        // return query;
     }
-
-
-}
+};

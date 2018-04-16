@@ -1,48 +1,51 @@
 const mongoose = require('mongoose');
-const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const StixSchema = {
-  id: String,
-  name: {
-    type: String,
-    required: [true, 'Name is required']
-  },
-  assessment_objects: [{
-    _id: false,
-    risk: Number,
-    stix: {
-      id: String,
-      description: String,
-      type: {
-        type: String
-      },
-      name: String,
+    created_by_ref: {
+        type: String,
+        required: [true, 'created_by_ref is required']
     },
-    questions: [{
-      _id: false,
-      selected_value: {
-        risk: Number,
-        name: String
-      },
-      options: [{
+    id: String,
+    name: {
+        type: String,
+        required: [true, 'Name is required']
+    },
+    assessment_objects: [{
         _id: false,
         risk: Number,
-        name: String
-      }],
-      risk: Number,
-      name: String
-    }]
-  }],
-  description: String,
-  target_ref: String,
-  type: {
-    type: String,
-    enum: ['x-unfetter-assessment'],
-    default: 'x-unfetter-assessment',
-  },
+        stix: {
+            id: String,
+            description: String,
+            type: {
+                type: String
+            },
+            name: String,
+        },
+        questions: [{
+            _id: false,
+            selected_value: {
+                risk: Number,
+                name: String
+            },
+            options: [{
+                _id: false,
+                risk: Number,
+                name: String
+            }],
+            risk: Number,
+            name: String
+        }]
+    }],
+    description: String,
+    target_ref: String,
+    type: {
+        type: String,
+        enum: ['x-unfetter-assessment'],
+        default: 'x-unfetter-assessment',
+    },
 };
 
-const XUnfetterAssessment = mongoose.model('XUnfetterAssessment', stixCommons['makeSchema'](StixSchema), 'stix');
+const XUnfetterAssessment = mongoose.model('XUnfetterAssessment', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = XUnfetterAssessment;

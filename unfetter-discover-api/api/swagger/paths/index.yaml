@@ -1,9 +1,40 @@
 # STIX routes
 
+/v3/x-unfetter-capabilities:
+  $ref: ./x_unfetter_capabilities/capabilities.yaml
+/v3/x-unfetter-capabilities/{id}:
+  $ref: ./x_unfetter_capabilities/capability-by-id.yaml
+
+/v3/x-unfetter-categories:
+  $ref: ./x_unfetter_categories/categories.yaml
+/v3/x-unfetter-categories/{id}:
+  $ref: ./x_unfetter_categories/category-by-id.yaml
+
+/v3/x-unfetter-assessment-sets:
+  $ref: ./x_unfetter_assessment_sets/assessment-sets.yaml
+/v3/x-unfetter-assessment-sets/{id}:
+  $ref: ./x_unfetter_assessment_sets/assessment-set-by-id.yaml
+
+/v3/x-unfetter-assessment-groups:
+  $ref: ./x_unfetter_assessment_groups/assessment-groups.yaml
+/v3/x-unfetter-assessment-groups/{id}:
+  $ref: ./x_unfetter_assessment_groups/assessment-group-by-id.yaml
+
+/v3/x-unfetter-object-assessments:
+  $ref: ./x_unfetter_object_assessments/object-assessments.yaml
+/v3/x-unfetter-object-assessments/{id}:
+  $ref: ./x_unfetter_object_assessments/object-assessment-by-id.yaml
+/v3/x-unfetter-object-assessments/latest/{creatorId}:
+  $ref: ./x_unfetter_object_assessments/latest-object-assessments-by-creator.yaml
+/v3/x-unfetter-object-assessments/latest:
+  $ref: ./x_unfetter_object_assessments/latest-object-assessments.yaml
+
 /attack-patterns:
   $ref: ./attack_patterns/attack_patterns.yaml
 /attack-patterns/{id}:
   $ref: ./attack_patterns/attack_patterns_by_id.yaml
+/attack-patterns/intrusion-sets-by-attack-pattern:
+  $ref: ./attack_patterns/intrusion-sets-by-attack-pattern.yaml
 
 /campaigns:
   $ref: ./campaigns/campaigns.yaml
@@ -22,10 +53,14 @@
 
 /indicators:
   $ref: ./indicators/indicators.yaml
-/indicators/attack-patterns-by-indicator:
-  $ref: ./indicators/attack-patterns-by-indicator.yaml
 /indicators/{id}:
   $ref: ./indicators/indicator_by_id.yaml
+/indicators/attack-patterns-by-indicator:
+  $ref: ./indicators/attack-patterns-by-indicator.yaml
+/indicators/summary-statistics:
+  $ref: ./indicators/summary-statistics.yaml
+/indicators/search:
+  $ref: ./indicators/search.yaml
 
 /intrusion-sets:
   $ref: ./intrusion_sets/intrusion_sets.yaml
@@ -61,6 +96,10 @@
   $ref: ./sightings/sightings.yaml
 /sightings/{id}:
   $ref: ./sightings/sighting_by_id.yaml
+/sightings/group:
+  $ref: ./sightings/sighting_group.yaml
+/sightings/group/{id}:
+  $ref: ./sightings/sighting_group_by_id.yaml
 
 /threat-actors:
   $ref: ./threat_actors/threat_actors.yaml
@@ -74,10 +113,14 @@
 
 /multiples:
   $ref: ./multiples/multiples.yaml
+/multiples/count:
+  $ref: ./multiples/multiples_count.yaml
 /multiples/{id}/comment:
   $ref: ./multiples/add_comment.yaml
 /multiples/{id}/like:
   $ref: ./multiples/add_like.yaml
+/multiples/{id}/publish:
+  $ref: ./multiples/publish.yaml
 /multiples/{id}/unlike:
   $ref: ./multiples/remove_like.yaml
 /multiples/{id}/interaction:

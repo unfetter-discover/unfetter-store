@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
-const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const StixSchema = {
     id: String,
+    created_by_ref: {
+        type: String,
+        required: [true, 'created_by_ref is required']
+    },
     first_seen: {
         type: Date,
         default: Date.now
@@ -28,6 +31,6 @@ const StixSchema = {
     },
 };
 
-const Sighting = mongoose.model('Sighting', stixCommons['makeSchema'](StixSchema), 'stix');
+const Sighting = mongoose.model('Sighting', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = Sighting;

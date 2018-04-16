@@ -1,0 +1,17 @@
+x-swagger-router-controller: attack_patterns
+get:
+  tags:  
+  - STIX-Attack Pattern
+  description: finds instrusion sets by attack pattern
+  operationId: intrusionSetsByAttackPattern
+  produces: 
+  - application/vnd.api+json  
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

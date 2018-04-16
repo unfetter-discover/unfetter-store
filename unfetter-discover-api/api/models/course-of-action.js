@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
-const BaseSchema = require('./stix-base');
 const stixCommons = require('./stix-commons');
 
 const StixSchema = {
     id: String,
+    created_by_ref: {
+        type: String,
+        required: [true, 'created_by_ref is required']
+    },
     name: {
         type: String,
         required: [true, 'name is required']
@@ -19,6 +22,6 @@ const StixSchema = {
     }
 };
 
-const CourseOfAction = mongoose.model('CourseOfAction', stixCommons['makeSchema'](StixSchema), 'stix');
+const CourseOfAction = mongoose.model('CourseOfAction', stixCommons.makeSchema(StixSchema), 'stix');
 
 module.exports = CourseOfAction;

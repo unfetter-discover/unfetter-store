@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "x-unfetter-object-assessment"
+    attributes:
+      $ref: "#/definitions/XUnfetterObjectAssessment"
+    links:
+      $ref: "#/definitions/Links"

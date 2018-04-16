@@ -1,14 +1,17 @@
 const mongoose = require('mongoose');
 
-const BaseSchema = require('./stix-base');
-const stixCommons = require('./stix-commons');
-
 const UserSchema = new mongoose.Schema({
     firstName: {
         type: String
     },
     lastName: {
         type: String
+    },
+    preferences: {
+        killchain: {
+            type: String,
+            default: 'mitre-attack'
+        }
     },
     organizations: {
         type: [{
@@ -70,6 +73,7 @@ const UserSchema = new mongoose.Schema({
         }
     },
     identity: {
+        created_by_ref: String,
         id: {
             type: String
         },
@@ -90,42 +94,33 @@ const UserSchema = new mongoose.Schema({
             type: String,
             enum: ['identity'],
             default: 'identity'
+        },
+        created: {
+            type: Date,
+            default: Date.now
+        },
+        modified: {
+            type: Date,
+            default: Date.now
         }
     },
     created: {
         type: Date,
         default: Date.now,
         required: [true, 'created is required']
+    },
+    registrationInformation: {
+        applicationNote: {
+            type: String
+        },
+        requestedOrganization: {
+            type: String
+        }
     }
 });
 
-UserSchema.index({ 'userName': 1 });
-UserSchema.index({ 'role': 1 });
+UserSchema.index({ userName: 1 });
+UserSchema.index({ role: 1 });
 
-const User = module.exports = mongoose.model('User', UserSchema, 'user');
-
-// module.exports.getUserById = function (id, callback) {
-//     User.findById(id, callback);
-// }
-
-// module.exports.getUserByUsername = function (username, callback) {
-//     const query = { username: username }
-//     User.findOne(query, callback);
-// }
-
-// module.exports.addUser = function (newUser, callback) {
-//     bcrypt.genSalt(10, (err, salt) => {
-//         bcrypt.hash(newUser.password, salt, (err, hash) => {
-//             if (err) throw err;
-//             newUser.password = hash;
-//             newUser.save(callback);
-//         });
-//     });
-// }
-
-// module.exports.comparePassword = function (candidatePassword, hash, callback) {
-//     bcrypt.compare(candidatePassword, hash, (err, isMatch) => {
-//         if (err) throw err;
-//         callback(null, isMatch);
-//     });
-// }
+module.exports = mongoose.model('User', UserSchema, 'user');
+// const User = module.exports;

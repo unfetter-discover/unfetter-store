@@ -10,7 +10,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const mainEl = 'main';
 // Grace period between attempts to refresh JWT token
 const refreshBuffer = 0.3;
-let token = ''
+let token = '';
 
 function showErrorCard(title, body) {
     const el = document.getElementById(mainEl);
