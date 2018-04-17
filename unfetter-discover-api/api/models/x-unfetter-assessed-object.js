@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const stixCommons = require('./stix-commons');
 
-const scoreVals = ['S', 'M', 'L', 'N/A', 'N'];
+const scoreVals = ['L', 'M', 'S', 'N/A', 'N'];
 
 const StixSchema = {
     id: String,
@@ -15,32 +15,8 @@ const StixSchema = {
         {
             name: {
                 type: String,
-                enum: ['protect'],
-                default: 'protect',
-            },
-            score: {
-                type: String,
-                enum: scoreVals,
-                default: null
-            }
-        },
-        {
-            name: {
-                type: String,
-                enum: ['detect'],
-                default: 'detect',
-            },
-            score: {
-                type: String,
-                enum: scoreVals,
-                default: null
-            }
-        },
-        {
-            name: {
-                type: String,
-                enum: ['respond'],
-                default: 'respond',
+                enum: ['mitigate', 'indicate', 'respond'],
+                default: null,
             },
             score: {
                 type: String,
@@ -51,6 +27,10 @@ const StixSchema = {
     ]
 };
 
-const assessedObject = mongoose.model('XUnfetterAssessedObject', stixCommons.makeSchema(StixSchema), 'stix');
+const xunfetterAssessObject = StixSchema;
+const assessedObject = mongoose.model('XUnfetterAssessedObject', xunfetterAssessObject, 'stix');
 
-module.exports = assessedObject;
+module.exports = {
+    assessedObject,
+    xunfetterAssessObject,
+};
