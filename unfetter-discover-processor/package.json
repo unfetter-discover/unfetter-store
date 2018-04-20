@@ -24,6 +24,7 @@
     "yargs": "^8.0.2"
   },
   "devDependencies": {
+    "@types/jasmine": "^2.8.6",
     "@types/mongoose": "^5.0.10",
     "@types/node": "^9.6.6",
     "@types/node-fetch": "^1.6.8",
