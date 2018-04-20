@@ -7,6 +7,10 @@ import * as mongoose from 'mongoose';
 
 import argv from './cli.service';
 
+/**
+ * @returns Promise
+ * @description Attempts to connect to mongo DB, resolves when successful
+ */
 export default function mongoInit(): Promise<mongoose.Connection> {
     return new Promise((resolve, reject) => {
         let conIntervel: any;

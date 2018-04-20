@@ -16,6 +16,12 @@ import * as HttpsProxyAgent from 'https-proxy-agent';
 import fetch from 'node-fetch';
 import * as url from 'url';
 
+/**
+ * @param  {string} mitreUrl
+ * @param  {any} instanceOptions
+ * @returns Promise
+ * @description Fetches data from MITRE ATT&CK GitHub
+ */
 function mitreFetch(mitreUrl: string, instanceOptions: any): Promise<any[]> {
     return new Promise((resolve, reject) => {
         fetch(mitreUrl, instanceOptions)
@@ -45,6 +51,11 @@ function mitreFetch(mitreUrl: string, instanceOptions: any): Promise<any[]> {
     });
 }
 
+/**
+ * @param  {string[]} frameworks
+ * @returns Promise
+ * @description Grabs multiple MITRE ATT&CK framework datasets from GitHub, combines into one array
+ */
 export default function getMitreData(frameworks: string[]): Promise<any> {
     const instanceOptions: any = {};
 

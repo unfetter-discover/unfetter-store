@@ -17,6 +17,10 @@ import getMitreData from './services/mitre-data.service';
 
 /* ~~~ Main Function ~~~ */
 
+/**
+ * @param  {any=[]} stixObjects
+ * @description Main driver function
+ */
 function run(stixObjects: any = []) {
     const promises = [];
     // STIX files
@@ -24,7 +28,7 @@ function run(stixObjects: any = []) {
         console.log('Processing the following STIX files: ', argv.stix);
         const stixToUpload = filesToJson(argv.stix)
             .map((bundle: any) => bundle.objects)
-            .reduce((prev: any, cur) => prev.concat(cur), [])
+            .reduce((prev: any, cur: any) => prev.concat(cur), [])
             .map((stix: any) => {
                 const retVal: any = {};
                 retVal._id = stix.id;
@@ -37,7 +41,7 @@ function run(stixObjects: any = []) {
         if (argv.enhancedStixProperties !== undefined) {
             console.log('Processing the following enhanced STIX properties files: ', argv.enhancedStixProperties);
             const enhancedPropsToUpload = filesToJson(argv.enhancedStixProperties)
-                .reduce((prev: any, cur) => prev.concat(cur), []);
+                .reduce((prev: any, cur: any) => prev.concat(cur), []);
 
             enhancedPropsToUpload.forEach((enhancedProps: any) => {
                 const stixToEnhance = stixToUpload.find((stix: any) => stix._id === enhancedProps.id);
@@ -75,7 +79,7 @@ function run(stixObjects: any = []) {
     if (argv.config !== undefined) {
         console.log('Processing the following configuration files: ', argv.config);
         const configToUpload = filesToJson(argv.config)
-            .reduce((prev: any[], cur) => prev.concat(cur), []);
+            .reduce((prev: any[], cur: any) => prev.concat(cur), []);
         promises.push(MongooseModels.configModel.create(configToUpload));
     }
 
