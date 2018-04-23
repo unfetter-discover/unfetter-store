@@ -1,6 +1,3 @@
-/* ~~~ Program Constants ~~~ */
-
-const PROCESSOR_STATUS_ID = process.env.PROCESSOR_STATUS_ID || 'f09ad23d-c9f7-40a3-8afa-d9560e6df95b';
 
 /* ~~~ Vendor Libraries ~~~ */
 
@@ -14,6 +11,9 @@ import MongooseModels from './models/mongoose-models';
 import mongoInit from './services/mongoose-connection.service';
 import argv from './services/cli.service';
 import getMitreData from './services/mitre-data.service';
+import StixToUnfetterAdapater from './adapters/stix-to-unfetter.adapter';
+import ProcessorStatusService from './services/processor-status.service';
+import ProcessorStatus from './models/processor-status.emum';
 
 /* ~~~ Main Function ~~~ */
 
@@ -43,31 +43,15 @@ function run(stixObjects: any = []) {
             const enhancedPropsToUpload = filesToJson(argv.enhancedStixProperties)
                 .reduce((prev: any, cur: any) => prev.concat(cur), []);
 
-            enhancedPropsToUpload.forEach((enhancedProps: any) => {
-                const stixToEnhance = stixToUpload.find((stix: any) => stix._id === enhancedProps.id);
-                if (stixToEnhance) {
-                    if (enhancedProps.extendedProperties !== undefined) {
-                        stixToEnhance.extendedProperties = enhancedProps.extendedProperties;
-                    }
-
-                    if (enhancedProps.metaProperties !== undefined) {
-                        stixToEnhance.metaProperties = enhancedProps.metaProperties;
-                    }
-                } else {
-                    // TODO attempt to upload to database if not in processed STIX document
-                    console.log('STIX property enhancement failed - Unable to find matching stix for: ', enhancedProps._id);
-                }
-            });
+            StixToUnfetterAdapater.enhanceStix(stixToUpload, enhancedPropsToUpload);
         }
 
         if (argv['auto-publish']) {
-            stixToUpload.forEach((stix: any) => {
-                if (stix.metaProperties === undefined) {
-                    stix.metaProperties = {};
-                }
-                stix.metaProperties.published = true;
-            });
+            StixToUnfetterAdapater.autoPublish(stixToUpload);
         }
+
+        // Record modified date at startup
+        StixToUnfetterAdapater.saveModified(stixToUpload);   
 
         promises.push(MongooseModels.stixModel.create(stixToUpload));
     } else if (argv.enhancedStixProperties !== undefined) {
@@ -87,59 +71,35 @@ function run(stixObjects: any = []) {
         Promise.all(promises)
             .then((results) => {
                 console.log('Successfully executed all operations');
-                MongooseModels.utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-                    _id: PROCESSOR_STATUS_ID,
-                    utilityName: 'PROCESSOR_STATUS',
-                    utilityValue: 'COMPLETE'
-                }, {
-                        upsert: true
-                    }, (err, res) => {
-                        mongoose.connection.close(() => {
-                            console.log('closed mongo connection');
-                        });
+                ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE, (error, _) => {
+                    mongoose.connection.close(() => {
+                        console.log('closed mongo connection');
                     });
+                });
             })
             .catch((err) => {
                 console.log('Error: ', err.message);
-                MongooseModels.utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-                    _id: PROCESSOR_STATUS_ID,
-                    utilityName: 'PROCESSOR_STATUS',
-                    utilityValue: 'COMPLETE'
-                }, {
-                        upsert: true
-                    }, (error, res) => {
-                        mongoose.connection.close(() => {
-                            console.log('closed mongo connection');
-                            process.exit(1);
-                        });
+                ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE, (error, _) => {
+                    mongoose.connection.close(() => {
+                        console.log('closed mongo connection');
+                        process.exit(1);
                     });
+                });
             });
     } else {
         console.log('There are no operations to perform');
 
-        MongooseModels.utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-            _id: PROCESSOR_STATUS_ID,
-            utilityName: 'PROCESSOR_STATUS',
-            utilityValue: 'COMPLETE'
-        }, {
-                upsert: true
-            }, (err, res) => {
-                mongoose.connection.close(() => {
-                    console.log('closed mongo connection');
-                });
+        ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE, (error, _) => {
+            mongoose.connection.close(() => {
+                console.log('closed mongo connection');
             });
+        });
     }
 }
 
 mongoInit()
     .then((conn) => {
-        MongooseModels.utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-            _id: PROCESSOR_STATUS_ID,
-            utilityName: 'PROCESSOR_STATUS',
-            utilityValue: 'PENDING'
-        }, {
-            upsert: true
-        }, (error, res) => {
+        ProcessorStatusService.updateProcessorStatus(ProcessorStatus.PENDING, (error, _) => {
             if (error) {
                 conn.close(() => {
                     console.log('Unable to set processor status');
@@ -164,4 +124,7 @@ mongoInit()
             }
         });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+        console.log(err);
+        process.exit(1);
+    });
