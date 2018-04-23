@@ -19,6 +19,7 @@ RUN $WORKING_DIRECTORY/set-npm-repo.sh
 COPY package.json $WORKING_DIRECTORY
 
 RUN npm --loglevel error install
+RUN npm --loglevel error i -g ts-node typescript
 RUN find / -name "cb-never*.tgz" -delete && \
     rm -rf /usr/share/man && \
     rm -rf /tmp/* && \
