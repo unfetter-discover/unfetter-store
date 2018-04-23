@@ -53,7 +53,15 @@ function run(stixObjects: any = []) {
         StixToUnfetterAdapater.saveModified(stixToUpload);
         
         // TODO delete this, is for testing only - Get existing records with matching IDs
-        UnfetterUpdaterService.getMatchingDocs(stixToUpload);
+        // UnfetterUpdaterService.generateUpserts(stixToUpload)
+        //     .then((e) => {
+        //         console.log('~~~~', e);
+        //         return Promise.all(e[1]);
+        //     })
+        //     .then((f) => {
+        //         console.log('%%%%%');
+        //         console.log(f);
+        //     });
 
         promises.push(MongooseModels.stixModel.create(stixToUpload));
     } else if (argv.enhancedStixProperties !== undefined) {
