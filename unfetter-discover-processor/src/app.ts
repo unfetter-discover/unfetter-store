@@ -1,8 +1,6 @@
-
 /* ~~~ Vendor Libraries ~~~ */
 
 import * as mongoose from 'mongoose';
-import * as yargs from 'yargs';
 
 /* ~~~ Local Imports ~~~ */
 
@@ -14,6 +12,7 @@ import getMitreData from './services/mitre-data.service';
 import StixToUnfetterAdapater from './adapters/stix-to-unfetter.adapter';
 import ProcessorStatusService from './services/processor-status.service';
 import ProcessorStatus from './models/processor-status.emum';
+import UnfetterUpdaterService from './services/unfetter-updater.service';
 
 /* ~~~ Main Function ~~~ */
 
@@ -51,7 +50,10 @@ function run(stixObjects: any = []) {
         }
 
         // Record modified date at startup
-        StixToUnfetterAdapater.saveModified(stixToUpload);   
+        StixToUnfetterAdapater.saveModified(stixToUpload);
+        
+        // TODO delete this, is for testing only - Get existing records with matching IDs
+        UnfetterUpdaterService.getMatchingDocs(stixToUpload);
 
         promises.push(MongooseModels.stixModel.create(stixToUpload));
     } else if (argv.enhancedStixProperties !== undefined) {
@@ -124,7 +126,4 @@ mongoInit()
             }
         });
     })
-    .catch((err) => {
-        console.log(err);
-        process.exit(1);
-    });
+    .catch((err) => console.log(err));
