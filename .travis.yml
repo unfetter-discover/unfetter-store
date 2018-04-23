@@ -22,7 +22,8 @@ script:
   - docker exec -it unfetter-socket-server npm run lint
   - docker exec -it unfetter-socket-server npm run test
 # always get container not running with this next call
-#  - docker exec -it unfetter-discover-processor npm run lint
+  - docker exec unfetter-discover-processor npm run lint
+  - docker exec unfetter-discover-processor npm run test
   - docker exec -it unfetter-ctf-ingest npm run lint
   - docker exec -it unfetter-ctf-ingest npm run docker:test
 
