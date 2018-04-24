@@ -73,16 +73,20 @@ class IPGeoProvider {
         this.url = url;
         this.active = active;
         this.batchSeparator = batchSeparator;
-        this.setKey = (req) => {};
+        this.setKey = req => {};
     }
 
     withHeaderKey(header, key) {
-        this.setKey = req => req.headers = { header, key, };
+        this.setKey = req => {
+            req.headers = { header, key, };
+        };
         return this;
     }
 
     withQueryParamKey(param, key) {
-        this.setKey = req => req.uri = `${req.uri}${(req.uri.indexOf('?') > 0) ? '&' : '?'}${param}=${key}`;
+        this.setKey = req => {
+            req.uri = `${req.uri}${(req.uri.indexOf('?') > 0) ? '&' : '?'}${param}=${key}`;
+        };
         return this;
     }
 }
@@ -172,7 +176,7 @@ const lookup = (req, res) => {
         return res.status(503).json(RequestError.create().status(503).title('No IP-geo providers')
             .message('There are no active providers for geolocation services in our current configuration.  ' +
                     'Please ask administrators to add new providers.')
-            .build())
+            .build());
     }
 
     queryProviders(activeProviders, ip.value, res);
