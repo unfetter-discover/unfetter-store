@@ -1,10 +1,8 @@
+import { KillChainPhase } from 'stix/stix/kill-chain-phase';
+import { StixCoreEnum } from 'stix/stix/stix-core.enum';
+import { Stix } from 'stix/unfetter/stix';
 import * as UUID from 'uuid';
-
-import { AttackPattern } from '../models/attack-pattern';
 import { AttackPatternIngest } from '../models/attack-pattern-ingest';
-import { KillChainPhase } from '../models/kill-chain-phase';
-import { MarkingDefinition } from '../models/marking-definition';
-import { Stix } from '../models/stix';
 import { StixLookupMongoService } from '../services/stix-lookup-mongo.service';
 import { StixLookupService } from '../services/stix-lookup.service';
 
@@ -39,28 +37,24 @@ export class AttackPatternIngestToStixAdapter {
      */
     public async mapAttackPatternIngestToStix(attackPatternIngest: AttackPatternIngest): Promise<Stix> {
         const stix = new Stix();
-        stix.type = 'attack-pattern';
-
+        stix.type = StixCoreEnum.ATTACK_PATTERN;
         if (!attackPatternIngest) {
             return stix;
         }
 
         stix.created = new Date().toISOString();
-        const ident: any = await this.lookupSystemIdentity();
-        stix.created_by_ref = ident.stix.id;
+        const ident = await this.lookupSystemIdentity();
+        stix.created_by_ref = ident.id || '';
         stix.description = attackPatternIngest.description;
         stix.name = attackPatternIngest.action;
 
-        const phase = new KillChainPhase();
-        phase.kill_chain_name = attackPatternIngest.killChain;
-        phase.phase_name = attackPatternIngest.objective;
+        const phase = new KillChainPhase(attackPatternIngest.killChain, attackPatternIngest.objective);
+        if (attackPatternIngest.stage) {
+            const extendedPhase: any = phase;
+            extendedPhase['x_ntctf_stage'] = attackPatternIngest.stage || '';
+        }
         stix.kill_chain_phases = stix.kill_chain_phases || [];
         stix.kill_chain_phases.push(phase);
-
-        if (attackPatternIngest.stage) {
-            stix.extendedProperties = stix.extendedProperties || { x_ntctf_stage: '' };
-            stix.extendedProperties.x_ntctf_stage = attackPatternIngest.stage;
-        }
 
         const v4 = UUID.v4();
         const id = stix.type + '--' + v4;
@@ -69,10 +63,13 @@ export class AttackPatternIngestToStixAdapter {
     }
 
     /**
-     * @description
+     * @description returns the system identity
+     * @return Promise<Stix>
      */
     public async lookupSystemIdentity(): Promise<Stix> {
-        return this.lookupService.findSystemIdentity();
+        const oldStix = await this.lookupService.findSystemIdentity();
+        const stix = Object.assign(new Stix(), oldStix, oldStix.stix);
+        return Promise.resolve(stix);
     }
 
     /**
