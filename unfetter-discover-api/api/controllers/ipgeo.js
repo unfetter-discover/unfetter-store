@@ -13,43 +13,36 @@ class RequestError {
             title: '',
             errors: []
         };
-        console.log('created request error object', re);
         return re;
     }
 
     status(status) {
         this.err.status = status;
-        console.log('set status', this);
         return this;
     }
 
     title(title = '') {
         this.err.title = title;
-        console.log('set title', this);
         return this;
     }
 
     addError(source = undefined, code = undefined, message = 'An unknown error has occurred.') {
         this.err.errors.push({ code, source, message, });
-        console.log('added error', this);
         return this;
     }
 
     code(code = '') {
         this.current().code = code;
-        console.log('set code', this);
         return this;
     }
 
     source(source) {
         this.current().source = source;
-        console.log('set source', this);
         return this;
     }
 
     message(message = '') {
         this.current().message = message;
-        console.log('set message', this);
         return this;
     }
 
@@ -61,7 +54,6 @@ class RequestError {
     }
 
     build() {
-        console.log('final', this.err);
         return this.err;
     }
 
@@ -137,7 +129,7 @@ function queryProviders(providers, ip, res, error = RequestError.create()) {
         timeout
     }).then(response => response
         .json())
-        .then(json => res.status(200).json({ success: true, provider: provider.id, ...json }))
+        .then(json => res.status(200).json({ data: { success: true, provider: provider.id, ...json } }))
         .catch(ex => {
             error.addError().source(provider.id).message(ex);
             queryProviders(providers, ip, res, error);
@@ -146,18 +138,15 @@ function queryProviders(providers, ip, res, error = RequestError.create()) {
 
 const lookup = (req, res) => {
     if (!req || !req.swagger || !req.swagger.params) {
-        console.log('no req or swagger or params object');
         return res.status(500).json(RequestError.create().addError().build());
     }
 
-    console.log('pulling ip value');
     const ip = req.swagger.params.ip;
     if (!ip || !ip.value) {
         return res.status(400).json(RequestError.create().status(400).title('No IP Address Provided')
             .message('You must provide an IP address to locate.')
             .build());
     }
-    console.log('testing ip value', ip.value);
     try {
         if (!ipregex().test(ip.value)) {
             return res.status(400).json(RequestError.create().status(400).title('Invalid IP Address Provided')
@@ -170,7 +159,6 @@ const lookup = (req, res) => {
             .build());
     }
 
-    console.log('starting queries');
     const activeProviders = IPGEO_PROVIDERS.filter(provider => provider.active);
     if (activeProviders.length === 0) {
         return res.status(503).json(RequestError.create().status(503).title('No IP-geo providers')
