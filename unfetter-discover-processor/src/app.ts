@@ -21,104 +21,87 @@ import UnfetterUpdaterService from './services/unfetter-updater.service';
  * @description Main driver function
  */
 async function run(stixObjects: any = []) {
-    const promises = [];
-    // STIX files
-    if (argv.stix !== undefined) {
-        console.log('Processing the following STIX files: ', argv.stix);
-        const stixToUpload = filesToJson(argv.stix)
-            .map((bundle: any) => bundle.objects)
-            .reduce((prev: any, cur: any) => prev.concat(cur), [])
-            .map((stix: any) => {
-                const retVal: any = {};
-                retVal._id = stix.id;
-                retVal.stix = stix;
-                return retVal;
-            })
-            .concat(stixObjects);
+    let _error: any;
+    try {
+        const promises: Array<Promise<any>> = [];
+        // STIX files
+        if (argv.stix !== undefined) {
+            console.log('Processing the following STIX files: ', argv.stix);
+            const stixToUpload = filesToJson(argv.stix)
+                .map((bundle: any) => bundle.objects)
+                .reduce((prev: any, cur: any) => prev.concat(cur), [])
+                .map((stix: any) => {
+                    const retVal: any = {};
+                    retVal._id = stix.id;
+                    retVal.stix = stix;
+                    return retVal;
+                })
+                .concat(stixObjects);
 
-        // Enhanced stix files
-        if (argv.enhancedStixProperties !== undefined) {
-            console.log('Processing the following enhanced STIX properties files: ', argv.enhancedStixProperties);
-            const enhancedPropsToUpload = filesToJson(argv.enhancedStixProperties)
-                .reduce((prev: any, cur: any) => prev.concat(cur), []);
+            // Enhanced stix files
+            if (argv.enhancedStixProperties !== undefined) {
+                console.log('Processing the following enhanced STIX properties files: ', argv.enhancedStixProperties);
+                const enhancedPropsToUpload = filesToJson(argv.enhancedStixProperties)
+                    .reduce((prev: any, cur: any) => prev.concat(cur), []);
 
-            StixToUnfetterAdapater.enhanceStix(stixToUpload, enhancedPropsToUpload);
+                StixToUnfetterAdapater.enhanceStix(stixToUpload, enhancedPropsToUpload);
+            }
+
+            if (argv['auto-publish']) {
+                StixToUnfetterAdapater.autoPublish(stixToUpload);
+            }
+
+            // Record modified date at startup
+            StixToUnfetterAdapater.saveModified(stixToUpload);
+
+            // Find docs tagged for updating
+            const [ updateDocIds, updatePromises ] = await UnfetterUpdaterService.generateUpdates(stixToUpload);
+            promises.concat(updatePromises);
+            // Remove stixToUpload tagged for updating
+            UnfetterUpdaterService.removeUpdateDocs(stixToUpload, updateDocIds);
+
+            promises.push(MongooseModels.stixModel.create(stixToUpload));
+        } else if (argv.enhancedStixProperties !== undefined) {
+            // TODO attempt to upload to database if not STIX document provided
+            console.log('Enhanced STIX files require a base STIX file');
         }
 
-        if (argv['auto-publish']) {
-            StixToUnfetterAdapater.autoPublish(stixToUpload);
+        // Config files
+        if (argv.config !== undefined) {
+            console.log('Processing the following configuration files: ', argv.config);
+            const configToUpload = filesToJson(argv.config)
+                .reduce((prev: any[], cur: any) => prev.concat(cur), []);
+            promises.push(MongooseModels.configModel.create(configToUpload));
         }
 
-        // Record modified date at startup
-        StixToUnfetterAdapater.saveModified(stixToUpload);
-        
-        // TODO delete this, is for testing only - Get existing records with matching IDs
-        // UnfetterUpdaterService.generateUpserts(stixToUpload)
-        //     .then((e) => {
-        //         console.log('~~~~', e);
-        //         return Promise.all(e[1]);
-        //     })
-        //     .then((f) => {
-        //         console.log('%%%%%');
-        //         console.log(f);
-        //     });
-
-        promises.push(MongooseModels.stixModel.create(stixToUpload));
-    } else if (argv.enhancedStixProperties !== undefined) {
-        // TODO attempt to upload to database if not STIX document provided
-        console.log('Enhanced STIX files require a base STIX file');
-    }
-
-    // Config files
-    if (argv.config !== undefined) {
-        console.log('Processing the following configuration files: ', argv.config);
-        const configToUpload = filesToJson(argv.config)
-            .reduce((prev: any[], cur: any) => prev.concat(cur), []);
-        promises.push(MongooseModels.configModel.create(configToUpload));
-    }
-
-    if (promises !== undefined && promises.length) {
-        Promise.all(promises)
-            .then(async (results) => {
-                console.log('Successfully executed all operations');
-                try {                    
-                    const _ = await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
-                } catch (error) {
-                    console.log('Error while attempting to update processor: ', error);                    
-                } finally {
-                    mongoose.connection.close(() => {
-                        console.log('closed mongo connection');
-                    });
-                }
-            })
-            .catch(async (err) => {
-                console.log(JSON.stringify(err, null, 2));
-                console.log('Error: ', err.message);
-                try {                    
-                    const _ = await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
-                } catch (error) {
-                    console.log('Error while attempting to update processor: ', error);                    
-                } finally {
-                    mongoose.connection.close(() => {
-                        console.log('closed mongo connection');
-                        // Return 0 if `E11000 duplicate key error collection`
-                        if (err.code === 11000) {
-                            process.exit(1);
-                        }
-                    });
-                }
-            });
-    } else {
-        console.log('There are no operations to perform');
+        if (promises !== undefined && promises.length) {
+            await Promise.all(promises);
+            console.log('Successfully executed all operations');
+        } else {
+            console.log('There are no operations to perform');            
+        }    
+    } catch (error) {
+        // Ignore if `E11000 duplicate key error collection`
+        if (error.code && error.code === 11000) {
+            console.log('Warning: There was an attempt to insert documents with duplicate keys - These documents were NOT updated.');
+        } else {
+            _error = error;
+            console.log(error);
+        }
+    } finally {
         try {            
-            const _ = await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
+            await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
         } catch (error) {
-            console.log('Error while attempting to update processor: ', error);            
+            _error = error;
+            console.log(error);
         } finally {
             mongoose.connection.close(() => {
                 console.log('closed mongo connection');
+                if (_error) {
+                    process.exit(1);
+                }
             });
-        }
+        }        
     }
 }
 
@@ -127,13 +110,13 @@ async function run(stixObjects: any = []) {
     try {
         conn = await mongoInit();
         await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.PENDING);
-        // Add MITRE data
         if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
             console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
             const mitreData = await getMitreData(argv.mitreAttackData);
+            // Add MITRE data
             run(mitreData);
-            // Local data only
         } else {
+            // Local data only
             run();
         }
     } catch (error) {

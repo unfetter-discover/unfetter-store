@@ -66,13 +66,13 @@ export default class UnfetterUpdaterService {
      * merges existing documents with the new documents, 
      * and Mongoose update commands to update the existing documents
      */
-    public static generateUpserts(stixToUpload: any[]): Promise<[string[], Array<Promise<any>>]> {
+    public static generateUpdates(stixToUpload: any[]): Promise<[string[], Array<Promise<any>>]> {
         return new Promise((resolve, reject) => {
             this.getMatchingDocs(stixToUpload)
                 .then((matchingDocs: Array<{ old: any, new: any }>) => {
                     const docIds: string[] = matchingDocs.map((doc) => doc.new._id);
-                    const promises = [];
-                    for (const matchingDoc of matchingDocs) {
+                    const promises: any[] = [];
+                    matchingDocs.forEach((matchingDoc) => {
                         const temp: any = {
                             _id: matchingDoc.old._id,
                             stix: {
@@ -97,10 +97,25 @@ export default class UnfetterUpdaterService {
                             }
                         }
                         promises.push(MongooseModels.stixModel.findByIdAndUpdate(temp._id, temp).exec());
-                    }
+                    });
                     resolve([docIds, promises]);
                 })
                 .catch((err) => reject(err));
+        });
+    }
+
+    /**
+     * @param  {any[]} stixToUpload
+     * @param  {string[]} updateDocIds
+     * @returns void
+     * @description Removed docs tagged for updating from stixToUpload
+     */
+    public static removeUpdateDocs(stixToUpload: any[], updateDocIds: string[]): void {
+        updateDocIds.forEach((updateDocId) => {
+            const index = stixToUpload.findIndex((stix) => stix._id === updateDocId);
+            if (index > -1) {
+                stixToUpload.splice(index, 1);
+            }
         });
     }
 }
