@@ -20,7 +20,7 @@ import UnfetterUpdaterService from './services/unfetter-updater.service';
  * @param  {any=[]} stixObjects
  * @description Main driver function
  */
-function run(stixObjects: any = []) {
+async function run(stixObjects: any = []) {
     const promises = [];
     // STIX files
     if (argv.stix !== undefined) {
@@ -79,59 +79,71 @@ function run(stixObjects: any = []) {
 
     if (promises !== undefined && promises.length) {
         Promise.all(promises)
-            .then((results) => {
+            .then(async (results) => {
                 console.log('Successfully executed all operations');
-                ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE, (error, _) => {
+                try {                    
+                    const _ = await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
+                } catch (error) {
+                    console.log('Error while attempting to update processor: ', error);                    
+                } finally {
                     mongoose.connection.close(() => {
                         console.log('closed mongo connection');
                     });
-                });
+                }
             })
-            .catch((err) => {
+            .catch(async (err) => {
+                console.log(JSON.stringify(err, null, 2));
                 console.log('Error: ', err.message);
-                ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE, (error, _) => {
+                try {                    
+                    const _ = await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
+                } catch (error) {
+                    console.log('Error while attempting to update processor: ', error);                    
+                } finally {
                     mongoose.connection.close(() => {
                         console.log('closed mongo connection');
-                        process.exit(1);
+                        // Return 0 if `E11000 duplicate key error collection`
+                        if (err.code === 11000) {
+                            process.exit(1);
+                        }
                     });
-                });
+                }
             });
     } else {
         console.log('There are no operations to perform');
-
-        ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE, (error, _) => {
+        try {            
+            const _ = await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
+        } catch (error) {
+            console.log('Error while attempting to update processor: ', error);            
+        } finally {
             mongoose.connection.close(() => {
                 console.log('closed mongo connection');
             });
-        });
+        }
     }
 }
 
-mongoInit()
-    .then((conn) => {
-        ProcessorStatusService.updateProcessorStatus(ProcessorStatus.PENDING, (error, _) => {
-            if (error) {
-                conn.close(() => {
-                    console.log('Unable to set processor status');
-                    process.exit(1);
-                });
-            } else if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
-                // Add mitre data
-                console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
-                getMitreData(argv.mitreAttackData)
-                    .then((result: any) => {
-                        run(result);
-                    })
-                    .catch((getMitreDataError) => {
-                        console.log(getMitreDataError);
-                        conn.close(() => {
-                            console.log('closed mongo connection');
-                            process.exit(1);
-                        });
-                    });
-            } else {
-                run();
-            }
-        });
-    })
-    .catch((err) => console.log(err));
+(async () => {
+    let conn;
+    try {
+        conn = await mongoInit();
+        await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.PENDING);
+        // Add MITRE data
+        if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
+            console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
+            const mitreData = await getMitreData(argv.mitreAttackData);
+            run(mitreData);
+            // Local data only
+        } else {
+            run();
+        }
+    } catch (error) {
+        if (conn) {
+            mongoose.connection.close(() => {
+                console.log('Unable to set processor status');
+                process.exit(1);
+            });
+        } else {
+            console.log('Error while attempting to initialize mongo: ', error);
+        }
+    }
+})();
