@@ -1,13 +1,14 @@
 import MongooseModels from '../models/mongoose-models';
+import { IUFStix } from '../models/interfaces';
 
 export default class UnfetterUpdaterService {
 
     /**
-     * @param  {any[]} stixToUpload
-     * @returns Promise<Array<{old: any, new: any}>>
+     * @param  {IUFStix[]} stixToUpload
+     * @returns Promise<Array<{old: IUFStix, new: IUFStix}>>
      * @description Generates a list of STIX that needs to be upserted based off of modified or modified_at_ingest dates
      */
-    public static getMatchingDocs(stixToUpload: any[]): Promise<Array<{old: any, new: any}>> {
+    public static getMatchingDocs(stixToUpload: IUFStix[]): Promise<Array<{old: IUFStix, new: IUFStix}>> {
         return new Promise((resolve, reject) => {
             const stixIds = stixToUpload.map((stix) => stix._id);
 
@@ -20,8 +21,8 @@ export default class UnfetterUpdaterService {
                         // Some sample STIX does not have a modified date
                         .filter((s) => !!s.stix.modified);
 
-                    const stixToUpate: Array<{old: any, new: any}> = stixToUpload
-                        .filter((stix) => {
+                    const stixToUpate: Array<{old: IUFStix, new: IUFStix}> = stixToUpload
+                        .filter((stix: IUFStix) => {
                             try {
                                 const loadedDoc = savedStix.find((doc) => doc._id === stix._id);
                                 const modifiedDate: Date = stix.stix.modified ? new Date(stix.stix.modified) : null;
@@ -60,16 +61,16 @@ export default class UnfetterUpdaterService {
     }
 
     /**
-     * @param  {any[]} stixToUpload
+     * @param  {IUFStix[]} stixToUpload
      * @returns Promise<[string[], Array<Promise<any>>]>
      * @description Generates a list of matching doc IDs, 
      * merges existing documents with the new documents, 
      * and Mongoose update commands to update the existing documents
      */
-    public static generateUpdates(stixToUpload: any[]): Promise<[string[], Array<Promise<any>>]> {
+    public static generateUpdates(stixToUpload: IUFStix[]): Promise<[string[], Array<Promise<any>>]> {
         return new Promise((resolve, reject) => {
             this.getMatchingDocs(stixToUpload)
-                .then((matchingDocs: Array<{ old: any, new: any }>) => {
+                .then((matchingDocs: Array<{ old: IUFStix, new: IUFStix }>) => {
                     const docIds: string[] = matchingDocs.map((doc) => doc.new._id);
                     const promises: any[] = [];
                     matchingDocs.forEach((matchingDoc) => {
@@ -105,14 +106,14 @@ export default class UnfetterUpdaterService {
     }
 
     /**
-     * @param  {any[]} stixToUpload
+     * @param  {IUFStix[]} stixToUpload
      * @param  {string[]} updateDocIds
      * @returns void
      * @description Removed docs tagged for updating from stixToUpload
      */
-    public static removeUpdateDocs(stixToUpload: any[], updateDocIds: string[]): void {
+    public static removeUpdateDocs(stixToUpload: IUFStix[], updateDocIds: string[]): void {
         updateDocIds.forEach((updateDocId) => {
-            const index = stixToUpload.findIndex((stix) => stix._id === updateDocId);
+            const index = stixToUpload.findIndex((stix: IUFStix) => stix._id === updateDocId);
             if (index > -1) {
                 stixToUpload.splice(index, 1);
             }

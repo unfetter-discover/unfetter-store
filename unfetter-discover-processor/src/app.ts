@@ -1,8 +1,4 @@
-/* ~~~ Vendor Libraries ~~~ */
-
 import * as mongoose from 'mongoose';
-
-/* ~~~ Local Imports ~~~ */
 
 import filesToJson from './adapters/files.adapter';
 import MongooseModels from './models/mongoose-models';
@@ -13,14 +9,13 @@ import StixToUnfetterAdapater from './adapters/stix-to-unfetter.adapter';
 import ProcessorStatusService from './services/processor-status.service';
 import ProcessorStatus from './models/processor-status.emum';
 import UnfetterUpdaterService from './services/unfetter-updater.service';
-
-/* ~~~ Main Function ~~~ */
+import { IStixBundle, IStix, IUFStix, IEnhancedProperties, IConfig } from './models/interfaces';
 
 /**
  * @param  {any=[]} stixObjects
  * @description Main driver function
  */
-async function run(stixObjects: any = []) {
+async function run(stixObjects: IUFStix | any[] = []) {
     let _error: any;
     try {
         const promises: Array<Promise<any>> = [];
@@ -28,12 +23,13 @@ async function run(stixObjects: any = []) {
         if (argv.stix !== undefined) {
             console.log('Processing the following STIX files: ', argv.stix);
             const stixToUpload = filesToJson(argv.stix)
-                .map((bundle: any) => bundle.objects)
-                .reduce((prev: any, cur: any) => prev.concat(cur), [])
-                .map((stix: any) => {
-                    const retVal: any = {};
-                    retVal._id = stix.id;
-                    retVal.stix = stix;
+                .map((bundle: IStixBundle) => bundle.objects)
+                .reduce((prev: IStix[], cur: IStix[]) => prev.concat(cur), [])
+                .map((stix: IStix): IUFStix => {
+                    const retVal: IUFStix = {
+                        _id: stix.id,
+                        stix
+                    };
                     return retVal;
                 })
                 .concat(stixObjects);
@@ -42,12 +38,13 @@ async function run(stixObjects: any = []) {
             if (argv.enhancedStixProperties !== undefined) {
                 console.log('Processing the following enhanced STIX properties files: ', argv.enhancedStixProperties);
                 const enhancedPropsToUpload = filesToJson(argv.enhancedStixProperties)
-                    .reduce((prev: any, cur: any) => prev.concat(cur), []);
-
+                    .reduce((prev: IEnhancedProperties[], cur: IEnhancedProperties[]) => prev.concat(cur), []);
+                
                 StixToUnfetterAdapater.enhanceStix(stixToUpload, enhancedPropsToUpload);
             }
 
             if (argv['auto-publish']) {
+                // Set published to true
                 StixToUnfetterAdapater.autoPublish(stixToUpload);
             }
 
@@ -57,6 +54,7 @@ async function run(stixObjects: any = []) {
             // Find docs tagged for updating
             const [ updateDocIds, updatePromises ] = await UnfetterUpdaterService.generateUpdates(stixToUpload);
             promises.concat(updatePromises);
+
             // Remove stixToUpload tagged for updating
             UnfetterUpdaterService.removeUpdateDocs(stixToUpload, updateDocIds);
 
@@ -70,7 +68,7 @@ async function run(stixObjects: any = []) {
         if (argv.config !== undefined) {
             console.log('Processing the following configuration files: ', argv.config);
             const configToUpload = filesToJson(argv.config)
-                .reduce((prev: any[], cur: any) => prev.concat(cur), []);
+                .reduce((prev: IConfig[], cur: IConfig[]) => prev.concat(cur), []);
             promises.push(MongooseModels.configModel.create(configToUpload));
         }
 
@@ -89,6 +87,7 @@ async function run(stixObjects: any = []) {
             console.log(error);
         }
     } finally {
+        // Nested try/catch to update processor regardless of error or not
         try {            
             await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
         } catch (error) {

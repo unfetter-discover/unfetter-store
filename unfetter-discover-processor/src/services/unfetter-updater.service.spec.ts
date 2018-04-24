@@ -1,5 +1,6 @@
 import UnfetterUpdaterService from './unfetter-updater.service';
 import MongooseModels from '../models/mongoose-models';
+import { IUFStix } from '../models/interfaces';
 
 describe('UnfetterUpdaterService', () => {
 
@@ -48,7 +49,7 @@ describe('UnfetterUpdaterService', () => {
 
     describe('removeUpdateDocs', () => {
         it('should remove docs tagged for update', () => {
-            const mockStix = [
+            const mockStix: IUFStix[] | any[] = [
                 { _id: '12' },
                 { _id: '34' },          
                 { _id: '56' },          
