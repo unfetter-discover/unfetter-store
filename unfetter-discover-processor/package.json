@@ -3,7 +3,7 @@
   "version": "0.3.6",
   "description": "Records Processor for Unfetter Discover",
   "scripts": {
-    "checkup": "npm run clean && npm run build && npm run lint && npm run coverage",
+    "checkup": "npm run clean && npm run build && npm run lint && npm run docs && npm run coverage",
     "coverage": "nyc --extension .ts --reporter=lcov --reporter=text-lcov npm test && nyc report",
     "clean": "rimraf dist/ tsdocs/ coverage/ .nyc_output/",
     "start": "npm run build && npm run watch",
@@ -13,7 +13,13 @@
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
     "lint": "tsc -v && tslint src/**/*.ts",
+    "docs": "typedoc --out tsdocs --ignoreCompilerErrors --exclude '**/*.spec.ts' src/",
     "test": "jasmine-ts --config=jasmine.json"
+  },
+  "nyc": {
+    "exclude": [
+      "src/**/*.spec.ts"
+    ]
   },
   "author": "Unfetter",
   "license": "MIT",
@@ -38,6 +44,7 @@
     "rimraf": "^2.6.2",
     "ts-node": "^6.0.0",
     "tslint": "^5.9.1",
+    "typedoc": "^0.11.1",
     "typescript": "^2.8.3"
   }
 }

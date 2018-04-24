@@ -17,9 +17,10 @@ describe('UnfetterUpdaterService', () => {
     //             console.log('IN FIND');
     //         }
     //     }
-    //     spyOn(MongooseModels, 'stixModel').and.returnValue(mockStixModel);
+    //     spyOn(MongooseModels.stixModel, 'findByIdAndUpdate').and.returnValue({});
+    //     // spyOn(MongooseModels.stixModel, 'exec').and.returnValue(mockStixModel.exec);
+    //     spyOn(MongooseModels.stixModel, 'find').and.returnValue([]);
     //     // console.log(Object.keys(MongooseModels.stixModel));
-    //     console.log(UnfetterUpdaterService);
     // });
 
     // describe('generateUpdates', () => {
