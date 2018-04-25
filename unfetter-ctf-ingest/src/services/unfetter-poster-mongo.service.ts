@@ -30,7 +30,7 @@ export class UnfetterPosterMongoService {
                 el.id = id;
             }
 
-            const wrapper = new WrappedStix();
+            const wrapper: any = new WrappedStix();
             wrapper._id = el.id;
             wrapper.id = el.id;
             wrapper.stix = Object.assign({}, el);
