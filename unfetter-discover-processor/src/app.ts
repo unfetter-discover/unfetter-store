@@ -10,6 +10,7 @@ import ProcessorStatusService from './services/processor-status.service';
 import ProcessorStatus from './models/processor-status.emum';
 import UnfetterUpdaterService from './services/unfetter-updater.service';
 import { IStixBundle, IStix, IUFStix, IEnhancedProperties, IConfig } from './models/interfaces';
+import Interval from './models/interval.enum';
 
 /**
  * @param  {any=[]} stixObjects
@@ -104,7 +105,10 @@ async function run(stixObjects: IUFStix | any[] = []) {
     }
 }
 
-(async () => {
+/**
+ * @description Calls driver after mongo is ready
+ */
+async function init() {
     let conn;
     try {
         conn = await mongoInit();
@@ -127,5 +131,30 @@ async function run(stixObjects: IUFStix | any[] = []) {
         } else {
             console.log('Error while attempting to initialize mongo: ', error);
         }
+    }
+}
+
+(() => {
+    init();
+    // Continue to run at a set interval
+    if (argv.interval) {
+        let interval: number;
+        switch (argv.interval.toUpperCase()) {
+            case Interval.DAILY:
+                interval = 86400000;
+                break;
+            case Interval.WEEKLY:
+                interval = 604800000;
+                break;
+            case Interval.MONTHLY:
+                interval = 2592000000;
+                break;
+            default:
+                console.log('Unable to process interval');
+                process.exit(1);
+        }
+        // TODO delete this
+        interval = 10000;
+        setInterval(() => init(), interval);
     }
 })();
