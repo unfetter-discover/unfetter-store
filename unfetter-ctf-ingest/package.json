@@ -36,6 +36,7 @@
     "node-fetch": "^2.1.1",
     "papaparse": "^4.3.6",
     "request": "^2.85.0",
+    "stix": "https://github.com/unfetter-discover/stix/tarball/develop",
     "swagger-express-mw": "^0.7.0",
     "uuid": "^3.2.0",
     "validator": "^9.4.0",

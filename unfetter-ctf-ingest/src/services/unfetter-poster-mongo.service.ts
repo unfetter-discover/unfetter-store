@@ -1,7 +1,6 @@
-import { MongoClient } from 'mongodb';
-import fetch from 'node-fetch';
+import * as UnfetterStix from 'stix/unfetter/stix';
+import { WrappedStix } from 'stix/unfetter/wrapped-stix';
 import * as UUID from 'uuid';
-import { Environment } from '../environment';
 import { Stix } from '../models/stix';
 import { MongoConnectionService } from './mongo-connection.service';
 
@@ -15,25 +14,26 @@ export class UnfetterPosterMongoService {
      * @param arr
      * @return {Promise<void>}
      */
-    public async uploadStix(arr: Stix[] = []): Promise<void> {
+    public async uploadStix(arr: UnfetterStix.Stix[] | Stix[] = []): Promise<void> {
         if (!arr || arr.length < 1) {
             return;
         }
         console.log(`inserting ${arr.length} stix objects`);
         const collection = await MongoConnectionService.getCollection();
 
+        const array: any[] = arr;
         // generate id and wrap in stix
-        const wrappedArr: WrappedStix[] = arr.map((el) => {
+        const wrappedArr: WrappedStix[] = array.map((el: any) => {
             if (!el.id) {
                 const v4 = UUID.v4();
                 const id = el.type + '--' + v4;
                 el.id = id;
             }
-            const wrapper: WrappedStix = {
-                _id: el.id,
-                id: el.id,
-                stix: Object.assign({}, el),
-            };
+
+            const wrapper: any = new WrappedStix();
+            wrapper._id = el.id;
+            wrapper.id = el.id;
+            wrapper.stix = Object.assign({}, el);
             return wrapper;
         });
 
@@ -46,10 +46,4 @@ export class UnfetterPosterMongoService {
             .catch((err: any) => console.log(err)));
     }
 
-}
-
-interface WrappedStix {
-    _id: string;
-    id: string;
-    stix: Stix;
 }
