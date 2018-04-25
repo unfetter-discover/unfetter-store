@@ -182,6 +182,9 @@
 /config/{id}:
   $ref: ./config/config_by_id.yaml
 
+/lookup:
+  $ref: ./ipgeo/ipgeo.yaml
+
 /latest/threat-reports:
   $ref: ./latest/latest-threat-report.yaml
 /latest/threat-reports/creator/{id}:
