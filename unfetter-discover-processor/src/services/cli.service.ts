@@ -1,5 +1,8 @@
 import * as yargs from 'yargs';
 
+import Interval from '../models/interval.enum';
+import stringEnumToArray from '../adapters/string-enum-to-array.adapter';
+
 yargs.alias('h', 'host')
     .describe('h', 'Host name and/or IP address for MongoDB')
     .default('h', process.env.MONGO_HOST || 'localhost')
@@ -34,8 +37,12 @@ yargs.alias('h', 'host')
     .boolean('a')
     .default('a', process.env.AUTO_PUBLISH || true)
 
+    .alias('i', 'interval')
+    .describe('i', 'Continuously run processor at a given interval')
+    .choices('i', stringEnumToArray(Interval).map((interval) => interval.toLowerCase()))
+    
     .help('help');
-
+    
 const argv = yargs.argv;
-
+    
 export default argv;

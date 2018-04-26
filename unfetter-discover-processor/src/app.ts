@@ -1,167 +1,160 @@
-/* ~~~ Program Constants ~~~ */
-
-const PROCESSOR_STATUS_ID = process.env.PROCESSOR_STATUS_ID || 'f09ad23d-c9f7-40a3-8afa-d9560e6df95b';
-
-/* ~~~ Vendor Libraries ~~~ */
-
 import * as mongoose from 'mongoose';
-import * as yargs from 'yargs';
-
-/* ~~~ Local Imports ~~~ */
 
 import filesToJson from './adapters/files.adapter';
 import MongooseModels from './models/mongoose-models';
 import mongoInit from './services/mongoose-connection.service';
 import argv from './services/cli.service';
 import getMitreData from './services/mitre-data.service';
-
-/* ~~~ Main Function ~~~ */
+import StixToUnfetterAdapater from './adapters/stix-to-unfetter.adapter';
+import ProcessorStatusService from './services/processor-status.service';
+import ProcessorStatus from './models/processor-status.emum';
+import UnfetterUpdaterService from './services/unfetter-updater.service';
+import { IStixBundle, IStix, IUFStix, IEnhancedProperties, IConfig } from './models/interfaces';
+import Interval from './models/interval.enum';
 
 /**
  * @param  {any=[]} stixObjects
  * @description Main driver function
  */
-function run(stixObjects: any = []) {
-    const promises = [];
-    // STIX files
-    if (argv.stix !== undefined) {
-        console.log('Processing the following STIX files: ', argv.stix);
-        const stixToUpload = filesToJson(argv.stix)
-            .map((bundle: any) => bundle.objects)
-            .reduce((prev: any, cur: any) => prev.concat(cur), [])
-            .map((stix: any) => {
-                const retVal: any = {};
-                retVal._id = stix.id;
-                retVal.stix = stix;
-                return retVal;
-            })
-            .concat(stixObjects);
+async function run(stixObjects: IUFStix | any[] = []) {
+    let _error: any;
+    try {
+        const promises: Array<Promise<any>> = [];
+        // STIX files
+        if (argv.stix !== undefined) {
+            console.log('Processing the following STIX files: ', argv.stix);
+            const stixToUpload = filesToJson(argv.stix)
+                .map((bundle: IStixBundle) => bundle.objects)
+                .reduce((prev: IStix[], cur: IStix[]) => prev.concat(cur), [])
+                .map((stix: IStix): IUFStix => {
+                    const retVal: IUFStix = {
+                        _id: stix.id,
+                        stix
+                    };
+                    return retVal;
+                })
+                .concat(stixObjects);
 
-        // Enhanced stix files
-        if (argv.enhancedStixProperties !== undefined) {
-            console.log('Processing the following enhanced STIX properties files: ', argv.enhancedStixProperties);
-            const enhancedPropsToUpload = filesToJson(argv.enhancedStixProperties)
-                .reduce((prev: any, cur: any) => prev.concat(cur), []);
+            // Enhanced stix files
+            if (argv.enhancedStixProperties !== undefined) {
+                console.log('Processing the following enhanced STIX properties files: ', argv.enhancedStixProperties);
+                const enhancedPropsToUpload = filesToJson(argv.enhancedStixProperties)
+                    .reduce((prev: IEnhancedProperties[], cur: IEnhancedProperties[]) => prev.concat(cur), []);
+                
+                StixToUnfetterAdapater.enhanceStix(stixToUpload, enhancedPropsToUpload);
+            }
 
-            enhancedPropsToUpload.forEach((enhancedProps: any) => {
-                const stixToEnhance = stixToUpload.find((stix: any) => stix._id === enhancedProps.id);
-                if (stixToEnhance) {
-                    if (enhancedProps.extendedProperties !== undefined) {
-                        stixToEnhance.extendedProperties = enhancedProps.extendedProperties;
-                    }
+            if (argv['auto-publish']) {
+                // Set published to true
+                StixToUnfetterAdapater.autoPublish(stixToUpload);
+            }
 
-                    if (enhancedProps.metaProperties !== undefined) {
-                        stixToEnhance.metaProperties = enhancedProps.metaProperties;
-                    }
-                } else {
-                    // TODO attempt to upload to database if not in processed STIX document
-                    console.log('STIX property enhancement failed - Unable to find matching stix for: ', enhancedProps._id);
-                }
-            });
+            // Record modified date at startup
+            StixToUnfetterAdapater.saveModified(stixToUpload);
+
+            // Find docs tagged for updating
+            const [ updateDocIds, updatePromises ] = await UnfetterUpdaterService.generateUpdates(stixToUpload);
+            promises.concat(updatePromises);
+
+            // Remove stixToUpload tagged for updating
+            UnfetterUpdaterService.removeUpdateDocs(stixToUpload, updateDocIds);
+
+            promises.push(MongooseModels.stixModel.create(stixToUpload));
+        } else if (argv.enhancedStixProperties !== undefined) {
+            // TODO attempt to upload to database if not STIX document provided
+            console.log('Enhanced STIX files require a base STIX file');
         }
 
-        if (argv['auto-publish']) {
-            stixToUpload.forEach((stix: any) => {
-                if (stix.metaProperties === undefined) {
-                    stix.metaProperties = {};
-                }
-                stix.metaProperties.published = true;
-            });
+        // Config files
+        if (argv.config !== undefined) {
+            console.log('Processing the following configuration files: ', argv.config);
+            const configToUpload = filesToJson(argv.config)
+                .reduce((prev: IConfig[], cur: IConfig[]) => prev.concat(cur), []);
+            promises.push(MongooseModels.configModel.create(configToUpload));
         }
 
-        promises.push(MongooseModels.stixModel.create(stixToUpload));
-    } else if (argv.enhancedStixProperties !== undefined) {
-        // TODO attempt to upload to database if not STIX document provided
-        console.log('Enhanced STIX files require a base STIX file');
-    }
-
-    // Config files
-    if (argv.config !== undefined) {
-        console.log('Processing the following configuration files: ', argv.config);
-        const configToUpload = filesToJson(argv.config)
-            .reduce((prev: any[], cur: any) => prev.concat(cur), []);
-        promises.push(MongooseModels.configModel.create(configToUpload));
-    }
-
-    if (promises !== undefined && promises.length) {
-        Promise.all(promises)
-            .then((results) => {
-                console.log('Successfully executed all operations');
-                MongooseModels.utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-                    _id: PROCESSOR_STATUS_ID,
-                    utilityName: 'PROCESSOR_STATUS',
-                    utilityValue: 'COMPLETE'
-                }, {
-                        upsert: true
-                    }, (err, res) => {
-                        mongoose.connection.close(() => {
-                            console.log('closed mongo connection');
-                        });
-                    });
-            })
-            .catch((err) => {
-                console.log('Error: ', err.message);
-                MongooseModels.utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-                    _id: PROCESSOR_STATUS_ID,
-                    utilityName: 'PROCESSOR_STATUS',
-                    utilityValue: 'COMPLETE'
-                }, {
-                        upsert: true
-                    }, (error, res) => {
-                        mongoose.connection.close(() => {
-                            console.log('closed mongo connection');
-                            process.exit(1);
-                        });
-                    });
+        if (promises !== undefined && promises.length) {
+            await Promise.all(promises);
+            console.log('Successfully executed all operations');
+        } else {
+            console.log('There are no operations to perform');            
+        }    
+    } catch (error) {
+        // Ignore if `E11000 duplicate key error collection`
+        if (error.code && error.code === 11000) {
+            console.log('Warning: There was an attempt to insert documents with duplicate keys - These documents were NOT updated.');
+        } else {
+            _error = error;
+            console.log(error);
+        }
+    } finally {
+        // Nested try/catch to update processor regardless of error or not
+        try {            
+            await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
+        } catch (error) {
+            _error = error;
+            console.log(error);
+        } finally {
+            mongoose.connection.close(() => {
+                console.log('closed mongo connection');
+                if (_error) {
+                    process.exit(1);
+                }
             });
-    } else {
-        console.log('There are no operations to perform');
-
-        MongooseModels.utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-            _id: PROCESSOR_STATUS_ID,
-            utilityName: 'PROCESSOR_STATUS',
-            utilityValue: 'COMPLETE'
-        }, {
-                upsert: true
-            }, (err, res) => {
-                mongoose.connection.close(() => {
-                    console.log('closed mongo connection');
-                });
-            });
+        }        
     }
 }
 
-mongoInit()
-    .then((conn) => {
-        MongooseModels.utilModel.findByIdAndUpdate(PROCESSOR_STATUS_ID, {
-            _id: PROCESSOR_STATUS_ID,
-            utilityName: 'PROCESSOR_STATUS',
-            utilityValue: 'PENDING'
-        }, {
-            upsert: true
-        }, (error, res) => {
-            if (error) {
-                conn.close(() => {
-                    console.log('Unable to set processor status');
-                    process.exit(1);
-                });
-            } else if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
-                // Add mitre data
-                console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
-                getMitreData(argv.mitreAttackData)
-                    .then((result: any) => {
-                        run(result);
-                    })
-                    .catch((getMitreDataError) => {
-                        console.log(getMitreDataError);
-                        conn.close(() => {
-                            console.log('closed mongo connection');
-                            process.exit(1);
-                        });
-                    });
-            } else {
-                run();
-            }
-        });
-    })
-    .catch((err) => console.log(err));
+/**
+ * @description Calls driver after mongo is ready
+ */
+async function init() {
+    let conn;
+    try {
+        conn = await mongoInit();
+        await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.PENDING);
+        if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
+            console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
+            const mitreData = await getMitreData(argv.mitreAttackData);
+            // Add MITRE data
+            run(mitreData);
+        } else {
+            // Local data only
+            run();
+        }
+    } catch (error) {
+        if (conn) {
+            mongoose.connection.close(() => {
+                console.log('Unable to set processor status');
+                process.exit(1);
+            });
+        } else {
+            console.log('Error while attempting to initialize mongo: ', error);
+        }
+    }
+}
+
+(() => {
+    init();
+    // Continue to run at a set interval
+    if (argv.interval) {
+        let interval: number;
+        switch (argv.interval.toUpperCase()) {
+            case Interval.DAILY:
+                interval = 86400000;
+                break;
+            case Interval.WEEKLY:
+                interval = 604800000;
+                break;
+            case Interval.MONTHLY:
+                interval = 2592000000;
+                break;
+            default:
+                console.log('Unable to process interval');
+                process.exit(1);
+        }
+        // TODO delete this
+        interval = 10000;
+        setInterval(() => init(), interval);
+    }
+})();

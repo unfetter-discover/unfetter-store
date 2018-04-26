@@ -11,6 +11,7 @@ export default class MongooseModels {
             published: Date,
             valid_from: Date,
             valid_until: Date,
+            valid_to: Date,
             first_observed: Date,
             last_observed: Date
         }
