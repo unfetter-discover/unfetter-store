@@ -16,19 +16,21 @@ import * as HttpsProxyAgent from 'https-proxy-agent';
 import fetch from 'node-fetch';
 import * as url from 'url';
 
+import { IStix, IUFStix } from '../models/interfaces';
+
 /**
  * @param  {string} mitreUrl
  * @param  {any} instanceOptions
- * @returns Promise
+ * @returns Promise<IUFStix[]>
  * @description Fetches data from MITRE ATT&CK GitHub
  */
-function mitreFetch(mitreUrl: string, instanceOptions: any): Promise<any[]> {
+function mitreFetch(mitreUrl: string, instanceOptions: any): Promise<IUFStix[]> {
     return new Promise((resolve, reject) => {
         fetch(mitreUrl, instanceOptions)
             .then((fetchRes) => fetchRes.json())
             .then((fetchRes) => {
                 const stixToUpload = fetchRes.objects
-                    .map((stix: any) => {
+                    .map((stix: IStix): IUFStix => {
                         const retVal: any = {
                             _id: stix.id,
                             stix: {}
@@ -56,7 +58,7 @@ function mitreFetch(mitreUrl: string, instanceOptions: any): Promise<any[]> {
  * @returns Promise
  * @description Grabs multiple MITRE ATT&CK framework datasets from GitHub, combines into one array
  */
-export default function getMitreData(frameworks: string[]): Promise<any> {
+export default function getMitreData(frameworks: string[]): Promise<IUFStix[]> {
     const instanceOptions: any = {};
 
     if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
@@ -73,7 +75,7 @@ export default function getMitreData(frameworks: string[]): Promise<any> {
     frameworks.forEach((framework: MiteStixUrlTypes) => promisesArr.push(mitreFetch(MITRE_STIX_URLS[framework], instanceOptions)));
     return new Promise((resolve, reject) => {
         Promise.all(promisesArr)
-            .then((stixToUploadArr) => resolve(stixToUploadArr.reduce((prev: any[], cur: any) => prev.concat(cur), [])))
+            .then((stixToUploadArr: IUFStix[] | any) => resolve(stixToUploadArr.reduce((prev: IUFStix[], cur: IUFStix) => prev.concat(cur), [])))
             .catch((err) => reject(err));
     });
 }

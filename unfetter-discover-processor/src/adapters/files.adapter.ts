@@ -6,7 +6,7 @@ import { existsSync, readFileSync } from 'fs';
  * @description Returns JSON content of a file, if possible
  */
 function readJson(filePath: string): any {
-    let json;
+    let json: any;
     if (existsSync(filePath)) {
         const jsonString = readFileSync(filePath, 'utf-8');
         try {
@@ -22,11 +22,11 @@ function readJson(filePath: string): any {
 
 /**
  * @param  {string[]} filePaths
- * @returns any
+ * @returns any[]
  * @description Returns JSON contents of 1-n files
  */
-export default function filesToJson(filePaths: string[]): any {
+export default function filesToJson(filePaths: string[]): any[] {
     return filePaths
-        .map((filePath) => readJson(filePath))
-        .filter((jsonObj) => jsonObj);
+        .map((filePath: string) => readJson(filePath))
+        .filter((bundle: any) => !!bundle);
 }
