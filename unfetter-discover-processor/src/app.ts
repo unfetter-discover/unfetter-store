@@ -11,6 +11,7 @@ import ProcessorStatus from './models/processor-status.emum';
 import UnfetterUpdaterService from './services/unfetter-updater.service';
 import { IStixBundle, IStix, IUFStix, IEnhancedProperties, IConfig } from './models/interfaces';
 import Interval from './models/interval.enum';
+import getTaxiiData from './services/taxii-client.service';
 
 /**
  * @param  {any=[]} stixObjects
@@ -18,6 +19,18 @@ import Interval from './models/interval.enum';
  */
 async function run(stixObjects: IUFStix | any[] = []) {
     let _error: any;
+
+    // TODO move this ~~~ START
+    if (argv.taxiiRoot && argv.taxiiRoot.length && argv.taxiiCollection && argv.taxiiCollection.length) {
+        if ((argv.taxiiRoot.includes('all') && argv.taxiiRoot.length > 1) || (argv.taxiiCollection.includes('all') && argv.taxiiCollection.length > 1)) {
+            console.log('ERROR: Additional TAXII roots and/or collections may not be specified if `all` is present');
+            process.exit(1);
+        } else {
+            await getTaxiiData();
+        }
+    }
+    // TODO move this ~~~ END
+
     try {
         const promises: Array<Promise<any>> = [];
         // STIX files

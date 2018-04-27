@@ -12,11 +12,10 @@ const MITRE_STIX_URLS: MitreStixUrls = {
     mobile: 'https://raw.githubusercontent.com/mitre/cti/master/mobile-attack/mobile-attack.json'
 };
 
-import * as HttpsProxyAgent from 'https-proxy-agent';
 import fetch from 'node-fetch';
-import * as url from 'url';
 
 import { IStix, IUFStix } from '../models/interfaces';
+import ServiceHelpers from './service-helpers';
 
 /**
  * @param  {string} mitreUrl
@@ -59,20 +58,8 @@ function mitreFetch(mitreUrl: string, instanceOptions: any): Promise<IUFStix[]> 
  * @description Grabs multiple MITRE ATT&CK framework datasets from GitHub, combines into one array
  */
 export default function getMitreData(frameworks: string[]): Promise<IUFStix[]> {
-    const instanceOptions: any = {};
-
-    if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
-        console.log('Attempting to configure proxy');
-        const proxy: any = url.parse(process.env.HTTPS_PROXY_URL);
-        // Workaround for UNABLE_TO_GET_ISSUER_CERT_LOCALLY fetch error due to proxy + self-signed cert
-        proxy.rejectUnauthorized = false;        
-        instanceOptions.agent = new HttpsProxyAgent(proxy);
-    } else {
-        console.log('Not using a proxy');
-    }
-
     const promisesArr: [Promise<any>] | any = [];
-    frameworks.forEach((framework: MiteStixUrlTypes) => promisesArr.push(mitreFetch(MITRE_STIX_URLS[framework], instanceOptions)));
+    frameworks.forEach((framework: MiteStixUrlTypes) => promisesArr.push(mitreFetch(MITRE_STIX_URLS[framework], ServiceHelpers.instanceOptions)));
     return new Promise((resolve, reject) => {
         Promise.all(promisesArr)
             .then((stixToUploadArr: IUFStix[] | any) => resolve(stixToUploadArr.reduce((prev: IUFStix[], cur: IUFStix) => prev.concat(cur), [])))
