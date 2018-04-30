@@ -132,7 +132,7 @@ async function init() {
                 process.exit(1);
             } else {
                 console.log('Attemping to get data from TAXII server');
-                const taxiiData = await getTaxiiData();
+                const taxiiData = await getTaxiiData(argv);
                 stixObjects = stixObjects.concat(taxiiData);
             }
         }

@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 
-import argv from './cli.service';
 import ServiceHelpers from './service-helpers';
 import { IStix } from '../models/interfaces';
 
@@ -85,22 +84,23 @@ export class TaxiiClient {
 
 /**
  * @returns Promise<IStix[]>
+ * @param {any} localArgv
  * @description Returns a single array of all STIX results from all requests TAXII roots and collections
  */
-export default function getTaxiiData(): Promise<IStix[]> {
+export default function getTaxiiData(localArgv: any): Promise<IStix[]> {
     return new Promise(async (resolve, reject) => {
         try {
             let taxiiUrl;
-            if (argv.taxiiPort) {
-                taxiiUrl = `${argv.taxiiHost}:${argv.taxiiPort}`;
+            if (localArgv.taxiiPort) {
+                taxiiUrl = `${localArgv.taxiiHost}:${localArgv.taxiiPort}`;
             } else {
-                taxiiUrl = argv.taxiiHost;
+                taxiiUrl = localArgv.taxiiHost;
             }
 
             // Get roots
             const allRoots = await TaxiiClient.getRoots(taxiiUrl);
             const roots = allRoots
-                .filter((root) => argv.taxiiRoot[0].toString().toUpperCase() === 'ALL' || argv.taxiiRoot.includes(root));
+                .filter((root) => localArgv.taxiiRoot[0].toString().toUpperCase() === 'ALL' || localArgv.taxiiRoot.includes(root));
 
             if (!roots.length) {
                 reject('Can not find roots');
@@ -110,7 +110,7 @@ export default function getTaxiiData(): Promise<IStix[]> {
                     // Get collections by root
                     const allCollectionIds = await TaxiiClient.getCollections(taxiiUrl, root);
                     const collectionIds = allCollectionIds
-                        .filter((collectionId: string) => argv.taxiiCollection[0].toString().toUpperCase() === 'ALL' || argv.taxiiCollection.includes(collectionId));
+                        .filter((collectionId: string) => localArgv.taxiiCollection[0].toString().toUpperCase() === 'ALL' || localArgv.taxiiCollection.includes(collectionId));
 
                     for (const collectionId of collectionIds) {
                         // Get objects by collection
