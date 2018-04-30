@@ -1,72 +1,128 @@
 import fetch from 'node-fetch';
 
 import argv from './cli.service';
-import TaxiiClient from '../taxii-client/taxii-client';
 import ServiceHelpers from './service-helpers';
+import { IStix } from '../models/interfaces';
 
-/**
- * @param  {string} url
- * @returns Promise
- */
-function getRoots(url: string): Promise<string[]> {
-    return new Promise((resolve, reject) => {
-        fetch(`http://${url}/taxii`, {
-            ...ServiceHelpers.instanceOptions,
-            headers: ServiceHelpers.taxiiHeaders
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.api_roots) {
-                    // Get last part of URL
-                    const apiRoots = data.api_roots
-                        .map((apiRootUrl: string) => apiRootUrl.split('/').pop());
-                    resolve(apiRoots);
-                } else {
-                    resolve([]);
-                }
+export class TaxiiClient {
+    /**
+     * @param  {string} url
+     * @returns Promise<string[]>
+     * @description Gets api roots present on a TAXII server
+     */
+    public static getRoots(url: string): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            fetch(`http://${url}/taxii`, {
+                ...ServiceHelpers.instanceOptions,
+                headers: ServiceHelpers.taxiiHeaders
             })
-            .catch((err) => reject(err));
-    });
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.api_roots) {
+                        // Get last part of URL
+                        const apiRoots = data.api_roots
+                            .map((apiRootUrl: string) => apiRootUrl.split('/').pop());
+                        resolve(apiRoots);
+                    } else {
+                        resolve([]);
+                    }
+                })
+                .catch((err) => reject(err));
+        });
+    }
+
+    /**
+     * @param  {string} url
+     * @param  {string} root
+     * @returns Promise<string[]>
+     * @description Gets TAXII collections by api root
+     */
+    public static getCollections(url: string, root: string): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            fetch(`http://${url}/${root}/collections`, {
+                ...ServiceHelpers.instanceOptions,
+                headers: ServiceHelpers.taxiiHeaders
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.collections) {
+                        const collectionIds: string[] = data.collections
+                            .map((collection: any) => collection.id);
+                        resolve(collectionIds);
+                    } else {
+                        resolve([]);
+                    }
+                })
+                .catch((err) => reject(err));
+        });
+    }
+
+    /**
+     * @param  {string} url
+     * @param  {string} root
+     * @param  {string} collectionId
+     * @returns Promise<IStix[]>
+     * @description Gets STIX objects by a TAXII root and collection id
+     */
+    public static getObjects(url: string, root: string, collectionId: string): Promise<IStix[]> {
+        return new Promise((resolve, reject) => {
+            fetch(`http://${url}/${root}/collections/${collectionId}/objects`, {
+                ...ServiceHelpers.instanceOptions,
+                headers: ServiceHelpers.stixHeaders
+            })
+                .then((response) => response.json())
+                .then((bundle: { objects: IStix[] }) => {
+                    if (bundle.objects && bundle.objects.length) {
+                        resolve(bundle.objects);
+                    } else {
+                        resolve([]);
+                    }
+                })
+                .catch((err) => reject(err));
+        });
+    }
 }
 
 /**
- * @param  {string} url
- * @param  {string[]} collections
- * @returns Promise
+ * @returns Promise<IStix[]>
+ * @description Returns a single array of all STIX results from all requests TAXII roots and collections
  */
-function getCollections(url: string, root: string): Promise<string[]> {
+export default function getTaxiiData(): Promise<IStix[]> {
     return new Promise(async (resolve, reject) => {
-        
-    });
-}
-
-/**
- * @returns Promise
- */
-export default function getTaxiiData(): Promise<any> {
-    return new Promise(async (resolve, reject) => {
-        let taxiiUrl;
-        if (argv.taxiiPort) {
-            taxiiUrl = `${argv.taxiiHost}:${argv.taxiiPort}`;
-        } else {
-            taxiiUrl = argv.taxiiHost;
-        }
-
-        console.log('~~~', taxiiUrl);
-        const allRoots = await getRoots(taxiiUrl);
-        const roots = allRoots.filter((root) => argv.taxiiRoot[0].toUpperCase() === 'ALL' || argv.taxiiRoot.includes(root));
-        if (!roots.length) {
-            reject('Can not find roots');
-        } else {
-            const collections = [];
-            for (const root of roots) {
-                const collection = await getCollections(taxiiUrl, root);
-                // TODO find out hwo to get collections
+        try {
+            let taxiiUrl;
+            if (argv.taxiiPort) {
+                taxiiUrl = `${argv.taxiiHost}:${argv.taxiiPort}`;
+            } else {
+                taxiiUrl = argv.taxiiHost;
             }
-        }
-        console.log('@@@@', roots);
-    // const [roots, collections] = await Promise.all([getRoots(taxiiUrl), getCollections(taxiiUrl)]);
 
-    // const taxiiClient = new TaxiiClient(taxiiUrl);
+            // Get roots
+            const allRoots = await TaxiiClient.getRoots(taxiiUrl);
+            const roots = allRoots
+                .filter((root) => argv.taxiiRoot[0].toString().toUpperCase() === 'ALL' || argv.taxiiRoot.includes(root));
+
+            if (!roots.length) {
+                reject('Can not find roots');
+            } else {
+                let allObjects: IStix[] = [];
+                for (const root of roots) {
+                    // Get collections by root
+                    const allCollectionIds = await TaxiiClient.getCollections(taxiiUrl, root);
+                    const collectionIds = allCollectionIds
+                        .filter((collectionId: string) => argv.taxiiCollection[0].toString().toUpperCase() === 'ALL' || argv.taxiiCollection.includes(collectionId));
+
+                    for (const collectionId of collectionIds) {
+                        // Get objects by collection
+                        const objects = await TaxiiClient.getObjects(taxiiUrl, root, collectionId);
+                        allObjects = allObjects.concat(objects);
+                    }
+                }
+                console.log(`Retrieved ${allObjects.length} items from TAXII server`);
+                resolve(allObjects);
+            }
+        } catch (error) {
+            reject(error);
+        }
     });
 }

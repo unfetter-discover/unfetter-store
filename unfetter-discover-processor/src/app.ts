@@ -20,17 +20,6 @@ import getTaxiiData from './services/taxii-client.service';
 async function run(stixObjects: IUFStix | any[] = []) {
     let _error: any;
 
-    // TODO move this ~~~ START
-    if (argv.taxiiRoot && argv.taxiiRoot.length && argv.taxiiCollection && argv.taxiiCollection.length) {
-        if ((argv.taxiiRoot.includes('all') && argv.taxiiRoot.length > 1) || (argv.taxiiCollection.includes('all') && argv.taxiiCollection.length > 1)) {
-            console.log('ERROR: Additional TAXII roots and/or collections may not be specified if `all` is present');
-            process.exit(1);
-        } else {
-            await getTaxiiData();
-        }
-    }
-    // TODO move this ~~~ END
-
     try {
         const promises: Array<Promise<any>> = [];
         // STIX files
@@ -126,15 +115,34 @@ async function init() {
     try {
         conn = await mongoInit();
         await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.PENDING);
+
+        let stixObjects: any[] = [];
+
+        // ~~~ MITRE ATT&CK Data ~~~
         if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
             console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
             const mitreData = await getMitreData(argv.mitreAttackData);
-            // Add MITRE data
-            run(mitreData);
+            stixObjects = stixObjects.concat(mitreData);
+        }
+
+        // ~~~ TAXII Server Data ~~~
+        if (argv.taxiiRoot && argv.taxiiRoot.length && argv.taxiiCollection && argv.taxiiCollection.length) {
+            if ((argv.taxiiRoot.includes('all') && argv.taxiiRoot.length > 1) || (argv.taxiiCollection.includes('all') && argv.taxiiCollection.length > 1)) {
+                console.log('ERROR: Additional TAXII roots and/or collections may not be specified if `all` is present');
+                process.exit(1);
+            } else {
+                console.log('Attemping to get data from TAXII server');
+                const taxiiData = await getTaxiiData();
+                stixObjects = stixObjects.concat(taxiiData);
+            }
+        }
+
+        if (stixObjects.length) {
+            run(stixObjects);
         } else {
-            // Local data only
             run();
         }
+
     } catch (error) {
         if (conn) {
             mongoose.connection.close(() => {
