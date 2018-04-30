@@ -1,4 +1,4 @@
-import { IUFStix, IEnhancedProperties } from '../models/interfaces';
+import { IUFStix, IEnhancedProperties, IStix } from '../models/interfaces';
 
 export default class StixToUnfetterAdapater {
     /**
@@ -58,5 +58,30 @@ export default class StixToUnfetterAdapater {
                 }
             }
         });
-    }    
+    }
+
+    /**
+     * @param  {IStix} stix
+     * @returns IUFStix
+     * @description Transform STIX into an Unfetter MongoDB document by moving STIX core
+     *      properties to `stix` and custom x_ properties to `extendedProperties`
+     */
+    public static stixToUnfetterStix(stix: IStix): IUFStix {
+        const safeStix = { ...stix };
+        const retVal: IUFStix | any = {
+            _id: stix.id,
+            stix: {}
+        };
+        for (const prop in safeStix) {
+            if (prop.match(/^x_/) !== null) {
+                if (retVal.extendedProperties === undefined) {
+                    retVal.extendedProperties = {};
+                }
+                retVal.extendedProperties[prop] = safeStix[prop];
+            } else {
+                retVal.stix[prop] = safeStix[prop];
+            }
+        }
+        return retVal;
+    }
 }

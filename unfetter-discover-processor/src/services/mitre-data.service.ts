@@ -16,6 +16,7 @@ import fetch from 'node-fetch';
 
 import { IStix, IUFStix } from '../models/interfaces';
 import ServiceHelpers from './service-helpers';
+import StixToUnfetterAdapater from '../adapters/stix-to-unfetter.adapter';
 
 /**
  * @param  {string} mitreUrl
@@ -28,24 +29,9 @@ function mitreFetch(mitreUrl: string, instanceOptions: any): Promise<IUFStix[]> 
         fetch(mitreUrl, instanceOptions)
             .then((fetchRes) => fetchRes.json())
             .then((fetchRes) => {
-                const stixToUpload = fetchRes.objects
-                    .map((stix: IStix): IUFStix => {
-                        const retVal: any = {
-                            _id: stix.id,
-                            stix: {}
-                        };
-                        for (const prop in stix) {
-                            if (prop.match(/^x_/) !== null) {
-                                if (retVal.extendedProperties === undefined) {
-                                    retVal.extendedProperties = {};
-                                }
-                                retVal.extendedProperties[prop] = stix[prop];
-                            } else {
-                                retVal.stix[prop] = stix[prop];
-                            }
-                        }
-                        return retVal;
-                    });
+                const stixToUpload: IUFStix[] = fetchRes.objects
+                    .map(StixToUnfetterAdapater.stixToUnfetterStix);
+
                 resolve(stixToUpload);
             })
             .catch((err) => reject(err));

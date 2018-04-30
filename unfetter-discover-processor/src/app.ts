@@ -116,7 +116,7 @@ async function init() {
         conn = await mongoInit();
         await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.PENDING);
 
-        let stixObjects: any[] = [];
+        let stixObjects: IUFStix[] = [];
 
         // ~~~ MITRE ATT&CK Data ~~~
         if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {

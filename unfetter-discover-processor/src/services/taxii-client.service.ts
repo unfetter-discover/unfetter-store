@@ -1,7 +1,8 @@
 import fetch from 'node-fetch';
 
 import ServiceHelpers from './service-helpers';
-import { IStix } from '../models/interfaces';
+import { IStix, IUFStix } from '../models/interfaces';
+import StixToUnfetterAdapater from '../adapters/stix-to-unfetter.adapter';
 
 export class TaxiiClient {
     /**
@@ -87,7 +88,7 @@ export class TaxiiClient {
  * @param {any} localArgv
  * @description Returns a single array of all STIX results from all requests TAXII roots and collections
  */
-export default function getTaxiiData(localArgv: any): Promise<IStix[]> {
+export default function getTaxiiData(localArgv: any): Promise<IUFStix[]> {
     return new Promise(async (resolve, reject) => {
         try {
             let taxiiUrl;
@@ -118,8 +119,7 @@ export default function getTaxiiData(localArgv: any): Promise<IStix[]> {
                         allObjects = allObjects.concat(objects);
                     }
                 }
-                console.log(`Retrieved ${allObjects.length} items from TAXII server`);
-                resolve(allObjects);
+                resolve(allObjects.map(StixToUnfetterAdapater.stixToUnfetterStix));
             }
         } catch (error) {
             reject(error);
