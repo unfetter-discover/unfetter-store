@@ -40,6 +40,24 @@ yargs.alias('h', 'host')
     .alias('i', 'interval')
     .describe('i', 'Continuously run processor at a given interval')
     .choices('i', stringEnumToArray(Interval).map((interval) => interval.toLowerCase()))
+
+    // ~~~ TAXII ~~~    
+
+    .alias('z', 'taxii-host')
+    .describe('z', 'Host name and/or IP address for TAXII Server')
+    .default('z', process.env.TAXII_HOST || 'localhost')
+
+    .alias('y', 'taxii-port')
+    .describe('y', 'Port for TAXII Server')
+    .default('y', process.env.TAXII_PORT || 3002)
+
+    .alias('x', 'taxii-root')
+    .describe('x', 'Enter the name of TAXII roots, or `all` to recieve data from all roots - The taxii-collection argument must be used in addition to this')
+    .array('x')
+
+    .alias('w', 'taxii-collection')
+    .describe('w', 'Enter the ID of TAXII collections, or `all` to recieve data from all collections - The taxii-root argument must be used in addition to this')
+    .array('w')
     
     .help('help');
     
