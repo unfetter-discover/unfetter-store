@@ -15,7 +15,8 @@ const StixSchema = {
         {
             name: {
                 type: String,
-                enum: ['mitigate', 'indicate', 'respond'],
+                // enum: ['mitigate', 'indicate', 'respond'],
+                enum: ['protect', 'detect', 'respond'],
                 default: null,
             },
             score: {
