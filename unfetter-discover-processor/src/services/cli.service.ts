@@ -52,12 +52,18 @@ yargs.alias('h', 'host')
     .default('y', process.env.TAXII_PORT || 3002)
 
     .alias('x', 'taxii-root')
-    .describe('x', 'Enter the name of TAXII roots, or `all` to recieve data from all roots - The taxii-collection argument must be used in addition to this')
+    .describe('x', 'The name of TAXII roots, or `all` to recieve data from all roots - The taxii-collection argument must be used in addition to this')
     .array('x')
 
     .alias('w', 'taxii-collection')
-    .describe('w', 'Enter the ID of TAXII collections, or `all` to recieve data from all collections - The taxii-root argument must be used in addition to this')
+    .describe('w', 'The ID of TAXII collections, or `all` to recieve data from all collections - The taxii-root argument must be used in addition to this')
     .array('w')
+
+    .alias('v', 'taxii-client-certificate')
+    .describe('v', 'File location of the .pem certificate')
+
+    .alias('t', 'taxii-client-key')
+    .describe('t', 'File location of the .pem key')    
     
     .help('help');
     
