@@ -12,7 +12,7 @@ export class TaxiiClient {
      */
     public static getRoots(url: string): Promise<string[]> {
         return new Promise((resolve, reject) => {
-            fetch(`http://${url}/taxii`, {
+            fetch(`https://${url}/taxii`, {
                 ...ServiceHelpers.instanceOptions,
                 headers: ServiceHelpers.taxiiHeaders
             })
@@ -39,7 +39,7 @@ export class TaxiiClient {
      */
     public static getCollections(url: string, root: string): Promise<string[]> {
         return new Promise((resolve, reject) => {
-            fetch(`http://${url}/${root}/collections`, {
+            fetch(`https://${url}/${root}/collections`, {
                 ...ServiceHelpers.instanceOptions,
                 headers: ServiceHelpers.taxiiHeaders
             })
@@ -66,7 +66,7 @@ export class TaxiiClient {
      */
     public static getObjects(url: string, root: string, collectionId: string): Promise<IStix[]> {
         return new Promise((resolve, reject) => {
-            fetch(`http://${url}/${root}/collections/${collectionId}/objects`, {
+            fetch(`https://${url}/${root}/collections/${collectionId}/objects`, {
                 ...ServiceHelpers.instanceOptions,
                 headers: ServiceHelpers.stixHeaders
             })
