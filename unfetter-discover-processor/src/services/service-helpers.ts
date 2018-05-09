@@ -15,7 +15,7 @@ import argv from './cli.service';
  * @description Holds https proxy options
  */
 const instanceOptions: any = {};
-process.env.HTTPS_PROXY_URL = 'foo.com';
+
 // HTTP proxy
 if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
     console.log('Attempting to configure proxy');
