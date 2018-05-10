@@ -144,11 +144,17 @@ async function init() {
         }
 
     } catch (error) {
+        console.log('%%%%%', error);
         if (conn) {
-            mongoose.connection.close(() => {
-                console.log('Unable to set processor status');
-                process.exit(1);
-            });
+            try {
+                await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
+            } catch (nestedError) {
+                console.log('Error while attempting to set processor');
+            } finally {
+                mongoose.connection.close(() => {
+                    process.exit(1);
+                });
+            }            
         } else {
             console.log('Error while attempting to initialize mongo: ', error);
         }
@@ -174,8 +180,6 @@ async function init() {
                 console.log('Unable to process interval');
                 process.exit(1);
         }
-        // TODO delete this
-        interval = 10000;
         setInterval(() => init(), interval);
     }
 })();
