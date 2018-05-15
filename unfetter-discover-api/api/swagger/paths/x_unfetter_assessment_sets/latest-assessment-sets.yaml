@@ -1,0 +1,18 @@
+x-swagger-router-controller: x_unfetter_assessment_sets
+get:
+  tags:
+  - STIX-Unfetter Assessment Set
+  - Dashboard-Unfetter Baseline
+  description: Find all instances of assessment sets (baselines), sorted by last modified, restrict to current user and RUN_MODE rules
+  operationId: latestAssessmentSets
+  produces: 
+  - application/json
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/DetailedErrorResponse"
