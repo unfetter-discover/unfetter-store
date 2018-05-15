@@ -2,7 +2,6 @@ x-swagger-router-controller: x_unfetter_assessments
 get:
   tags:
   - STIX-Unfetter Assessment
-  - Dashboard-Unfetter Assessment
   description: Returns the details of an assessment report
   operationId: assessedObjects
   parameters:
