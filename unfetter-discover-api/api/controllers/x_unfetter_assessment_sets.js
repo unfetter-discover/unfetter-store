@@ -110,7 +110,7 @@ const latestAssessmentSetsByCreatorId = (req, res) => {
 };
 
 /**
- * @description fetch baselines (assessment sets) whereby the created_by_ref is in the current users organizations
+ * @description fetch baselines (assessment sets) whereby the created_by_ref is in the current user's organizations
  *  , sort based on last modified
  */
 const latestAssessmentSets = (req, res) => {
