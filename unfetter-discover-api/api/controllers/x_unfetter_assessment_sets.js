@@ -44,7 +44,7 @@ const latestAssessmentSetPromise = (query, req, res) => {
 };
 
 /**
- * @description fetch assessment sets for given creator id, sort base on last modified
+ * @description fetch assessment sets for given creator id, sort based on last modified
  */
 const latestAssessmentSetsByCreatorId = (req, res) => {
     const id = req.swagger.params.creatorId ? req.swagger.params.creatorId.value : '';
@@ -110,8 +110,8 @@ const latestAssessmentSetsByCreatorId = (req, res) => {
 };
 
 /**
- * @description fetch assessments whereby the created_by_ref is in the current users organizations
- *  , sort base on last modified
+ * @description fetch baselines (assessment sets) whereby the created_by_ref is in the current users organizations
+ *  , sort based on last modified
  */
 const latestAssessmentSets = (req, res) => {
     const query = parser.dbQueryParams(req);
