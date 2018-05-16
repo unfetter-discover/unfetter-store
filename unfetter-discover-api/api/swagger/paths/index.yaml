@@ -14,6 +14,11 @@
   $ref: ./x_unfetter_assessment_sets/assessment-sets.yaml
 /v3/x-unfetter-assessment-sets/{id}:
   $ref: ./x_unfetter_assessment_sets/assessment-set-by-id.yaml
+/v3/x-unfetter-assessment-sets/latest/{creatorId}:
+  $ref: ./x_unfetter_assessment_sets/latest-assessment-sets-by-creator.yaml
+/v3/x-unfetter-assessment-sets/latest:
+  $ref: ./x_unfetter_assessment_sets/latest-assessment-sets.yaml
+
 
 /v3/x-unfetter-assessment-groups:
   $ref: ./x_unfetter_assessment_groups/assessment-groups.yaml
