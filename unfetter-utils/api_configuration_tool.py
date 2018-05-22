@@ -7,7 +7,7 @@ template = {
     "github": {
         "clientID": "",
         "clientSecret": "",
-        "callbackURL": "https://%s/api/auth/github-callback"
+        "callbackURL": "https://%s/api/auth/"
     },
     "sessionSecret": "",
     "jwtSecret": "",
@@ -37,10 +37,6 @@ if __name__ == '__main__':
 
     if file_exists:
         print 'Configuration file already exists: You may skip any entry to preserve the current setting by hitting [enter].\n'
-
-    api_domain = str(raw_input('Please enter the public domain that the Unfetter-Discover-API is hosted on: '))
-    if not file_exists or api_domain != '':
-        private_config['github']['callbackURL'] = template['github']['callbackURL'] % (api_domain)
 
     ui_domain = str(raw_input('Please enter the public domain that the Unfetter-UI is hosted on: '))
     if not file_exists or ui_domain != '':

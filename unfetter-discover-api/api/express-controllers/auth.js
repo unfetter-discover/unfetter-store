@@ -3,7 +3,6 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const jwt = require('jsonwebtoken');
-const GithubStrategy = require('passport-github').Strategy;
 
 const config = require('../config/config');
 const userModel = require('../models/user');
@@ -11,25 +10,21 @@ const configModel = require('../models/config');
 const generateId = require('../helpers/stix').id;
 const publish = require('../controllers/shared/publish');
 
+const authSource = config.authService || 'github'; // @todo ??
+const strategyService = require(`../helpers/${authSource}-auth.js`);
+
 const SEND_EMAIL_ALERTS = process.env.SEND_EMAIL_ALERTS || false;
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
+const uiCallbackURL = config.unfetterUiCallbackURL;
 
-const githubStrategy = new GithubStrategy({
-    clientID: config.github.clientID,
-    clientSecret: config.github.clientSecret,
-    callbackURL: config.github.callbackURL
-}, (accessToken, refreshToken, profile, cb) => cb(null, profile));
+console.log('pre-auth values: ',
+        'config', JSON.stringify(config),
+        'source', JSON.stringify(authSource),
+        'service', JSON.stringify(strategyService));
+const strategy = strategyService.build(config, process.env);
+console.log('generated strategy', strategy); // @todo
 
-if (process.env.HTTPS_PROXY_URL && process.env.HTTPS_PROXY_URL !== '') {
-    console.log('Attempting to configure proxy');
-    const HttpsProxyAgent = require('https-proxy-agent');
-    githubStrategy._oauth2.setAgent(new HttpsProxyAgent(process.env.HTTPS_PROXY_URL));
-} else {
-    console.log('Not using a proxy');
-}
-
-// Github
-passport.use(githubStrategy);
+passport.use(strategy);
 
 passport.serializeUser((user, cb) => {
     cb(null, user);
@@ -48,16 +43,15 @@ router.use(require('express-session')({
 router.use(passport.initialize());
 router.use(passport.session());
 
-router.get('/github-login', passport.authenticate('github', {
-    scope: ['user:email']
-}));
+router.get('/login', passport.authenticate(authSource, {scope: ['user:email']}));
 
-router.get('/github-callback', passport.authenticate('github', {
-    failureRedirect: '/auth/github-login'
+router.get('/loginSuccess', passport.authenticate(authSource, {
+    failureRedirect: '/auth/login'
 }), (req, res) => {
+    console.log('auth callback', req, res); // @todo
     // hit unfetter api to update token
-    const githubUser = req.user;
-    if (!githubUser) {
+    const authUser = req.user;
+    if (!authUser) {
         res.json({
             success: false,
             message: 'User object is empty'
@@ -67,7 +61,7 @@ router.get('/github-callback', passport.authenticate('github', {
         let user = {};
 
         userModel.find({
-            'github.id': githubUser.id
+            [`${authSource}.id`]: authUser.id
         }, (err, result) => {
             if (err) {
                 return res.status(500).json({
@@ -84,11 +78,11 @@ router.get('/github-callback', passport.authenticate('github', {
             } else if (!result || result.length === 0) {
                 // TODO create user
                 registered = false;
-                user.github = {};
-                user.github.userName = githubUser.username;
-                user.github.id = githubUser.id;
-                if (githubUser._json.avatar_url) {
-                    user.github.avatar_url = githubUser._json.avatar_url;
+                user[authSource] = {};
+                user[authSource].userName = authUser.username;
+                user[authSource].id = authUser.id;
+                if (authUser._json.avatar_url) {
+                    user[authSource].avatar_url = authUser._json.avatar_url;
                 }
                 user.approved = false;
 
@@ -123,12 +117,12 @@ router.get('/github-callback', passport.authenticate('github', {
                             }]
                         });
                     }
-                    console.log(`First github login attempt by github id# ${githubUser.id}`);
+                    console.log(`First login attempt by ${authSource} id# ${authUser.id}`);
                     const token = jwt.sign(createResult.toObject(), config.jwtSecret, {
                         expiresIn: global.unfetter.JWT_DURATION_SECONDS
                     });
                     res.header('Authorization', token);
-                    res.redirect(`${config.unfetterUiCallbackURL}/${encodeURIComponent(token)}/${registered}/github`);
+                    res.redirect(`${uiCallbackURL}/${encodeURIComponent(token)}/${registered}/${authSource}`);
                 });
 
 
@@ -141,8 +135,8 @@ router.get('/github-callback', passport.authenticate('github', {
                     expiresIn: global.unfetter.JWT_DURATION_SECONDS
                 });
                 console.log(token);
-                console.log(`Returning github user:\n${JSON.stringify(user, null, 2)}`);
-                res.redirect(`${config.unfetterUiCallbackURL}/${encodeURIComponent(token)}/${registered}/github`);
+                console.log(`Returning ${authSource} user:\n${JSON.stringify(user, null, 2)}`);
+                res.redirect(`${uiCallbackURL}/${encodeURIComponent(token)}/${registered}/${authSource}`);
             }
         });
     }
@@ -286,9 +280,13 @@ router.post('/finalize-registration', passport.authenticate('jwt', {
                             email: user.email
                         }
                     };
-                    publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users', emailData);
+                    publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`,
+                            `${user.userName} registered to Unfetter and is pending approval by an admin.`,
+                            '/admin/approve-users', emailData);
                 } else {
-                    publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users');
+                    publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`,
+                            `${user.userName} registered to Unfetter and is pending approval by an admin.`,
+                            '/admin/approve-users');
                 }
                 return res.json({
                     data: {
@@ -446,9 +444,13 @@ router.post('/finalize-registration', passport.authenticate('jwt', {
                             email: user.email
                         }
                     };
-                    publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users', emailData);
+                    publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`,
+                            `${user.userName} registered to Unfetter and is pending approval by an admin.`,
+                            '/admin/approve-users', emailData);
                 } else {
-                    publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`, `${user.userName} registered to Unfetter and is pending approval by an admin.`, '/admin/approve-users');
+                    publish.notifyAdmin('NOTIFICATION', `${user.userName} Registered`,
+                            `${user.userName} registered to Unfetter and is pending approval by an admin.`,
+                            '/admin/approve-users');
                 }
                 return res.json({
                     data: {
@@ -586,7 +588,11 @@ router.get('/username-available/:userName', passport.authenticate('jwt', {
     } else {
         userModel.count({ userName }, (err, count) => {
             if (err) {
-                res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                res.status(500).json({
+                    errors: [
+                        { status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }
+                    ]
+                });
             } else {
                 res.json({ data: { attributes: { available: (count === 0) } } });
             }
@@ -611,7 +617,11 @@ router.get('/email-available/:email', passport.authenticate('jwt', {
     } else {
         userModel.count({ email }, (err, count) => {
             if (err) {
-                res.status(500).json({ errors: [{ status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }] });
+                res.status(500).json({
+                    errors: [
+                        { status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.' }
+                    ]
+                });
             } else {
                 res.json({ data: { attributes: { available: (count === 0) } } });
             }
