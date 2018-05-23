@@ -3,14 +3,11 @@ const GithubStrategy = require('passport-github').Strategy;
 module.exports = {
 
     build: function(config, env) {
-        console.log('building github strategy using', config, 'and', env);
         const githubStrategy = new GithubStrategy({
-                clientID: config.github.clientID,
-                clientSecret: config.github.clientSecret,
-                callbackURL: (env.API_ROOT || 'https://localhost/api') + '/auth/loginSuccess'
-            }, (accessToken, refreshToken, profile, callback) => {
-                return callback(null, profile);
-            }
+                ...config.github,
+                callbackURL: (env.API_ROOT || 'https://localhost/api') + '/auth/login/github/callback'
+            },
+            (accessToken, refreshToken, profile, callback) => callback(null, profile)
         );
         if (env.HTTPS_PROXY_URL && (env.HTTPS_PROXY_URL !== '')) {
             console.log('Attempting to configure proxy');
@@ -19,8 +16,30 @@ module.exports = {
         } else {
             console.log('Not using a proxy');
         }
-        console.log('returning', githubStrategy);
         return githubStrategy;
+    },
+
+    options: {scope: ['user:email']},
+
+    search: (user) => ({ 'github.id': user.id }),
+
+    sync: (storedUser, userinfo, approved) => {
+        storedUser.oauth = 'github';
+        if (!storedUser.github) {
+            storedUser.github = {
+                id: userinfo.id,
+                userName: null,
+                avatar: null,
+            };
+        }
+        storedUser.approved = approved;
+        storedUser.github.userName = userinfo.username;
+        if (userinfo._json.avatar_url) {
+            storedUser.github.avatar_url = userinfo._json.avatar_url;
+        }
+        if (storedUser.identity) {
+            storedUser.identity = {name: userinfo.username};
+        }
     },
 
 };

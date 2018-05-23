@@ -3,6 +3,9 @@ const LocalStrategy = require('passport-local').Strategy;
 const scrypt = require("scrypt");
 const scryptParameters = scrypt.paramsSync(0.1, 1);
 
+/**
+ * @todo This strategy is not fully implemented.
+ */
 module.exports = {
 
     build: function(config, env) {
