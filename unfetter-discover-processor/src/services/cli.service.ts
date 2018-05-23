@@ -41,6 +41,14 @@ yargs.alias('h', 'host')
     .describe('i', 'Continuously run processor at a given interval')
     .choices('i', stringEnumToArray(Interval).map((interval) => interval.toLowerCase()))
 
+    .alias('q', 'pattern-handler-domain')
+    .describe('q', 'Domain for pattern-handler')
+    .default('q', process.env.PATTERN_HANDLER_DOMAIN || 'localhost')
+
+    .alias('n', 'pattern-handler-port')
+    .describe('n', 'Port for pattern-handler')
+    .default('n', process.env.PATTERN_HANDLER_PORT || 5000)
+
     // ~~~ TAXII ~~~    
 
     .alias('z', 'taxii-host')
