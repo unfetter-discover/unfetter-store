@@ -84,6 +84,7 @@ export default class PatternHandlerService {
         return new Promise(async (resolve, reject) => {
             const { pattern } = stix.stix;
             const translations = await PatternHandlerService.getTranslations(pattern);
+            stix.metaProperties.validStixPattern = translations.validated;
             if (translations['cim-splunk'] || translations['car-splunk'] || translations['car-elastic']) {
                 if (!stix.metaProperties) {
                     stix.metaProperties = {};
