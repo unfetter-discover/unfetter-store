@@ -1,4 +1,4 @@
-FROM node:9.5-alpine
+FROM node:10.1-alpine
 
 LABEL maintainer "unfetter"
 LABEL Description="Node program that translates data into a form to be used by Unfetter"
