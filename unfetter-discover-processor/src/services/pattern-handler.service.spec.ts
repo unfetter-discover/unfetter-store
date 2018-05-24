@@ -1,4 +1,4 @@
-import PatternHandlerService, { PatternHandlerTranslateAll, PatternHandlerGetObjects } from './patter-handler.service';
+import PatternHandlerService, { PatternHandlerTranslateAll, PatternHandlerGetObjects } from './pattern-handler.service';
 import { IUFStix } from '../models/interfaces';
 
 describe('PatternHandlerService', () => {

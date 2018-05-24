@@ -12,7 +12,7 @@ import UnfetterUpdaterService from './services/unfetter-updater.service';
 import { IStixBundle, IStix, IUFStix, IEnhancedProperties, IConfig } from './models/interfaces';
 import Interval from './models/interval.enum';
 import getTaxiiData from './services/taxii-client.service';
-import PatternHandlerService from './services/patter-handler.service';
+import PatternHandlerService from './services/pattern-handler.service';
 
 /**
  * @param  {any=[]} stixObjects
@@ -56,11 +56,14 @@ async function run(stixObjects: IUFStix | any[] = []) {
             StixToUnfetterAdapater.saveModified(stixToUpload);
 
             // Get STIX pattern enhancements
-            try {                
-                await PatternHandlerService.handlePatterns(stixToUpload);
-            } catch (patternError) {
-                console.log('Unable to get handle patterns: ', patternError);
-            }
+            if (argv['auto-validate-patterns']) {
+                try {
+                    console.log('Attempting to automatically validate all STIX pattern');
+                    await PatternHandlerService.handlePatterns(stixToUpload);
+                } catch (patternError) {
+                    console.log('Unable to get handle patterns: ', patternError);
+                }
+            }            
 
             // Find docs tagged for updating
             const [ updateDocIds, updatePromises ] = await UnfetterUpdaterService.generateUpdates(stixToUpload);
@@ -152,7 +155,6 @@ async function init() {
         }
 
     } catch (error) {
-        console.log('%%%%%', error);
         if (conn) {
             try {
                 await ProcessorStatusService.updateProcessorStatus(ProcessorStatus.COMPLETE);
