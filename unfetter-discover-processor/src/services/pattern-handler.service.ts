@@ -84,11 +84,14 @@ export default class PatternHandlerService {
         return new Promise(async (resolve, reject) => {
             const { pattern } = stix.stix;
             const translations = await PatternHandlerService.getTranslations(pattern);
+
+            if (!stix.metaProperties) {
+                stix.metaProperties = {};
+            }
+
             stix.metaProperties.validStixPattern = translations.validated;
-            if (translations['cim-splunk'] || translations['car-splunk'] || translations['car-elastic']) {
-                if (!stix.metaProperties) {
-                    stix.metaProperties = {};
-                }
+
+            if (translations['cim-splunk'] || translations['car-splunk'] || translations['car-elastic']) {                
                 stix.metaProperties.queries = {
                     carElastic: {
                         query: translations['car-elastic'],

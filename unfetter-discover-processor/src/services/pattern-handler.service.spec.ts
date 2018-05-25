@@ -72,8 +72,10 @@ describe('PatternHandlerService', () => {
         objectSpy = spyOn(PatternHandlerService, 'getObjects').and.returnValue(Promise.resolve(mockPatternInvalidRet));
         PatternHandlerService.handlePatterns(mockIndicators)
             .then((_) => {
-                expect(Object.keys(mockIndicators[0].metaProperties).length).toBe(0);
-                expect(mockIndicators[1].metaProperties).not.toBeDefined();
+                expect(Object.keys(mockIndicators[0].metaProperties).length).toBe(1);
+                expect(Object.keys(mockIndicators[1].metaProperties).length).toBe(1);
+                expect(mockIndicators[1].metaProperties.validStixPattern).toBeFalsy();
+                expect(mockIndicators[1].metaProperties.validStixPattern).toBeFalsy();
                 done();
             });
     });
