@@ -140,10 +140,12 @@ if __name__ == '__main__':
 
             out_file = open(inp_file, 'w')
             json.dump(private_config, out_file, indent=4)
+            out_file.write('\n')
             out_file.close()
             print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(inp_file) + '\033[0m'
             socket_out_file = open (socket_server_config, 'w')
             json.dump(private_config, socket_out_file, indent=4)
+            socket_out_file.write('\n')
             socket_out_file.close()
             print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(socket_server_config) + '\033[0m'
 
@@ -158,7 +160,7 @@ if __name__ == '__main__':
                 try:
                     if os.path.isfile(env_uac_file):
                         env_file = open(env_uac_file, 'r')
-                        env_contents =  env_file.read().replace('\n', '')
+                        env_contents =  env_file.read().replace('\n', '').replace("'", '"')
                         env_file.close()
                         m = re.match(r'^\s*(.*)\s*=\s*(\{.*\}).*$', env_contents)
                         if m == None:
@@ -170,8 +172,9 @@ if __name__ == '__main__':
                             env = re.sub(r'([a-zA-Z_0-9]+):', r'"\1":', env).replace("'", '"')
                             env = json.loads(env)
                             env["authServices"] = services
+                            dump = json.dumps(env, indent=4).replace('"', "'")
                             env_file = open(env_uac_file, 'w')
-                            env_file.write(m.group(1).strip() + " = " + json.dumps(env, indent=4) + ";\n")
+                            env_file.write(m.group(1).strip() + " = " + dump + ";\n")
                             env_file.close()
                             print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(env_uac_file)
                             print '\nBye!\033[0m\n\n'
