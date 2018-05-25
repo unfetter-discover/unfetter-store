@@ -41,6 +41,21 @@ yargs.alias('h', 'host')
     .describe('i', 'Continuously run processor at a given interval')
     .choices('i', stringEnumToArray(Interval).map((interval) => interval.toLowerCase()))
 
+    // ~~~ Pattern Handling ~~~
+
+    .alias('q', 'pattern-handler-domain')
+    .describe('q', 'Domain for pattern-handler')
+    .default('q', process.env.PATTERN_HANDLER_DOMAIN || 'localhost')
+
+    .alias('n', 'pattern-handler-port')
+    .describe('n', 'Port for pattern-handler')
+    .default('n', process.env.PATTERN_HANDLER_PORT || 5000)
+
+    .alias('v', 'auto-validate-patterns')
+    .describe('v', 'Automatically validate, translate, and get objects from STIX patterns')
+    .boolean('v')
+    .default('v', process.env.AUTO_VALIDATE_PATTERNS || true)
+
     // ~~~ TAXII ~~~    
 
     .alias('z', 'taxii-host')
@@ -59,8 +74,8 @@ yargs.alias('h', 'host')
     .describe('w', 'The ID of TAXII collections, or `all` to recieve data from all collections - The taxii-root argument must be used in addition to this')
     .array('w')
 
-    .alias('v', 'taxii-client-certificate')
-    .describe('v', 'File location of the .pem certificate')
+    .alias('r', 'taxii-client-certificate')
+    .describe('r', 'File location of the .pem certificate')
 
     .alias('t', 'taxii-client-key')
     .describe('t', 'File location of the .pem key')    
