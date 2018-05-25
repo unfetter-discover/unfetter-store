@@ -9,7 +9,7 @@ const userModel = require('../models/user');
 const configModel = require('../models/config');
 const doauth = require('../helpers/auth_helpers');
 
-const authSources = (config.authServices || 'github').split('|');
+const authSources = config.authServices || ['github'];
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const uiCallbackURL = config.unfetterUiCallbackURL;
 
