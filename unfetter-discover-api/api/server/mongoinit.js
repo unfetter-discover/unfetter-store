@@ -16,7 +16,7 @@ const MAX_GET_PROCESSOR_STATUS_ATTEMPTS = process.env.MAX_GET_PROCESSOR_STATUS_A
 // The amount of time between each connection attempt in ms
 const GET_PROCESSOR_RETRY_TIME = process.env.GET_PROCESSOR_RETRY_TIME || 5000;
 
-const mongoDebug = process.env.MONGO_DEBUG || false;
+const mongoDebug = process.env.MONGO_DEBUG || true;
 mongoose.set('debug', mongoDebug);
 mongoose.Promise = global.Promise;
 
