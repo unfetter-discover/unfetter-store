@@ -6,7 +6,7 @@ module.exports = {
         const githubStrategy = new GithubStrategy(
             {
                 ...config.github,
-                callbackURL: `${(env.API_ROOT || 'https://localhost/api')}/auth/login/github/callback`
+                callbackURL: `${(env.API_ROOT || 'https://localhost/api')}/auth/github-callback`
             },
             (accessToken, refreshToken, profile, callback) => callback(null, profile)
         );

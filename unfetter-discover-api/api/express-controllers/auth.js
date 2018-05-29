@@ -54,12 +54,12 @@ router.use(passport.session());
 authSources.forEach(source => {
     const service = authServices[source];
 
-    if (service) {
-        router.get(`/login/${source}`, passport.authenticate(source, service.options));
+    if (service !== null) {
+        router.get(`/${source}-login`, passport.authenticate(source, service.options));
 
-        router.get(`/login/${source}/callback`,
-            passport.authenticate(source, { failureRedirect: `/auth/login/${source}` }),
-            (req, res) => doauth.handleLoginCallback(req.user, source, service, res)
+        router.get(`/${source}-callback`,
+            passport.authenticate(source, { failureRedirect: `/auth/${source}-login` }),
+                (req, res) => doauth.handleLoginCallback(req.user, source, service, res)
         );
     }
 });

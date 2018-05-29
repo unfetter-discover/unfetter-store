@@ -67,7 +67,7 @@ const UserSchema = new mongoose.Schema({
         },
         id: {
             type: String,
-            unique: true
+            sparse: true
         },
         avatar_url: {
             type: String
@@ -79,7 +79,7 @@ const UserSchema = new mongoose.Schema({
         },
         id: {
             type: String,
-            unique: true
+            sparse: true
         },
         avatar_url: {
             type: String

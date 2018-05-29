@@ -6,7 +6,7 @@ module.exports = {
         const gitlabStrategy = new GitlabStrategy(
             {
                 ...config.gitlab,
-                callbackURL: `${(env.API_ROOT || 'https://localhost/api')}/auth/login/gitlab/callback`
+                callbackURL: `${(env.API_ROOT || 'https://localhost/api')}/auth/gitlab-callback`
             },
             (accessToken, refreshToken, profile, cb) => cb(null, profile)
         );
@@ -24,19 +24,19 @@ module.exports = {
 
     search: user => ({ 'gitlab.id': user.id }),
 
-    sync: (storedUser, userinfo, approved) => {
-        storedUser.oauth = 'gitlab';
-        if (!storedUser.gitlab) {
-            storedUser.gitlab = {
-                id: userinfo.id,
+    sync: (user, gitlabInfo, approved) => {
+        user.oauth = 'gitlab';
+        user.approved = approved;
+        if (!user.gitlab) {
+            user.gitlab = {
+                id: gitlabInfo.id,
                 userName: null,
                 avatar: null,
             };
         }
-        storedUser.approved = approved;
-        storedUser.gitlab.userName = userinfo.username;
-        if (userinfo._json.avatar_url) {
-            storedUser.gitlab.avatar_url = userinfo._json.avatar_url;
+        user.gitlab.userName = gitlabInfo.username;
+        if (gitlabInfo._json.avatar_url) {
+            user.gitlab.avatar_url = gitlabInfo._json.avatar_url;
         }
     },
 
