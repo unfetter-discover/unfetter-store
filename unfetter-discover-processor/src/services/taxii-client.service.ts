@@ -106,7 +106,7 @@ export default function getTaxiiData(localArgv: any): Promise<IUFStix[]> {
             if (!roots.length) {
                 reject('Can not find roots');
             } else {
-                let allObjects: IStix[] = [];
+                let allObjects: IUFStix[] = [];
                 for (const root of roots) {
                     // Get collections by root
                     const allCollectionIds = await TaxiiClient.getCollections(taxiiUrl, root);
@@ -115,11 +115,16 @@ export default function getTaxiiData(localArgv: any): Promise<IUFStix[]> {
 
                     for (const collectionId of collectionIds) {
                         // Get objects by collection
-                        const objects = await TaxiiClient.getObjects(taxiiUrl, root, collectionId);
-                        allObjects = allObjects.concat(objects);
+                        const objects: IStix[] = await TaxiiClient.getObjects(taxiiUrl, root, collectionId);
+                        allObjects = allObjects
+                            .concat(
+                                objects
+                                    .map(StixToUnfetterAdapater.stixToUnfetterStix)
+                                    .map((obj) => ({ ...obj, metaProperties: { collection: [ collectionId ] }}))
+                            );
                     }
                 }
-                resolve(allObjects.map(StixToUnfetterAdapater.stixToUnfetterStix));
+                resolve(allObjects);
             }
         } catch (error) {
             reject(error);
