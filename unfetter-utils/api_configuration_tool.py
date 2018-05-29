@@ -32,13 +32,13 @@ if __name__ == '__main__':
 
     file_exists = False
 
+    private_config = template.copy()
     if os.path.isfile(inp_file):
         file_contents = open(inp_file, 'r')
-        private_config = json.loads(file_contents.read())
+        file_json = json.loads(file_contents.read())
+        private_config.update(file_json)
         file_contents.close()
         file_exists = True
-    else:
-        private_config = template
 
     if file_exists:
         print ("\n\033[32mConfiguration file already exists: "
@@ -77,6 +77,9 @@ if __name__ == '__main__':
             print ("\n\033[31mYou did not finish entering github information. "
                    "We'll continue, but you should probably CTRL-C and start over...?\n\033[0m")
 
+    else:
+        private_config.pop('github', None)
+
     use_gitlab = str(raw_input(
         '\nDo you wish to set the application up for Gitlab authentication? [y/n]: ')).strip().lower()
     if use_gitlab == 'y':
@@ -112,6 +115,9 @@ if __name__ == '__main__':
             # The gitlab properties don't exist? Move on.
             print ("\n\033[31mYou did not finish entering gitlab information. "
                    "We'll continue, but you should probably CTRL-C and start over...?\033[0m\n")
+
+    else:
+        private_config.pop('gitlab', None)
 
     if not at_least_one_service_configured:
         print '\n\033[31mYou need to define at least one authentication service.\033[0m\n'
