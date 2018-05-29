@@ -19,6 +19,7 @@
     "node-fetch": "^1.6.3",
     "passport": "^0.4.0",
     "passport-github": "^1.1.0",
+    "passport-gitlab": "^0.5.0",
     "passport-jwt": "^3.0.0",
     "randomcolor": "^0.5.3",
     "spdy": "^3.4.7",
