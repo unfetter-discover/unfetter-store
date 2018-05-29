@@ -21,4 +21,6 @@ const UserAuthSchema = mongoose.Schema({
     }
 });
 
-const UserAuth = module.exports = mongoose.model('UserAuth', UserAuthSchema, 'userId');
+const UserAuth = mongoose.model('UserAuth', UserAuthSchema, 'userId');
+
+module.exports = UserAuth;
