@@ -2,10 +2,11 @@ const GithubStrategy = require('passport-github').Strategy;
 
 module.exports = {
 
-    build: function(config, env) {
-        const githubStrategy = new GithubStrategy({
+    build: (config, env) => {
+        const githubStrategy = new GithubStrategy(
+            {
                 ...config.github,
-                callbackURL: (env.API_ROOT || 'https://localhost/api') + '/auth/login/github/callback'
+                callbackURL: `${(env.API_ROOT || 'https://localhost/api')}/auth/login/github/callback`
             },
             (accessToken, refreshToken, profile, callback) => callback(null, profile)
         );
@@ -19,9 +20,9 @@ module.exports = {
         return githubStrategy;
     },
 
-    options: {scope: ['user:email']},
+    options: { scope: ['user:email'] },
 
-    search: (user) => ({ 'github.id': user.id }),
+    search: user => ({ 'github.id': user.id }),
 
     sync: (storedUser, userinfo, approved) => {
         storedUser.oauth = 'github';
@@ -36,9 +37,6 @@ module.exports = {
         storedUser.github.userName = userinfo.username;
         if (userinfo._json.avatar_url) {
             storedUser.github.avatar_url = userinfo._json.avatar_url;
-        }
-        if (storedUser.identity) {
-            storedUser.identity = {name: userinfo.username};
         }
     },
 

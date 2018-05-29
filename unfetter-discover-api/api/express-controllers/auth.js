@@ -11,12 +11,27 @@ const doauth = require('../helpers/auth_helpers');
 
 const authSources = config.authServices || ['github'];
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
-const uiCallbackURL = config.unfetterUiCallbackURL;
 
+const authServices = {};
 authSources.forEach(source => {
-    const service = require(`../helpers/${source}-auth.js`);
-    const strategy = service.build(config, process.env);
-    passport.use(strategy);
+    // I hate to do this here, but production builds have to know what packages are required in order to bundle them.
+    // Serious [Node]JS fail.
+    let service = null;
+    switch (source) {
+        case 'github':
+            service = require('../helpers/github-auth.js');
+            break;
+        case 'gitlab':
+            service = require('../helpers/gitlab-auth.js');
+            break;
+        default:
+            break;
+    }
+    if (service) {
+        authServices[source] = service;
+        const strategy = service.build(config, process.env);
+        passport.use(strategy);
+    }
 });
 
 passport.serializeUser((user, cb) => {
@@ -37,57 +52,16 @@ router.use(passport.initialize());
 router.use(passport.session());
 
 authSources.forEach(source => {
-    const service = require(`../helpers/${source}-auth.js`);
+    const service = authServices[source];
 
-    router.get(`/login/${source}`, passport.authenticate(source, service.options));
+    if (service) {
+        router.get(`/login/${source}`, passport.authenticate(source, service.options));
 
-    router.get(`/login/${source}/callback`,
-        passport.authenticate(source, { failureRedirect: `/auth/login/${source}` }),
-        (req, res) => {
-            // hit unfetter api to update token
-            const authUser = req.user;
-            console.log(`Received ${source} user:\n${JSON.stringify(authUser, null, 2)}`);
-            if (!authUser) {
-                return doauth.setEmptyResponse(res);
-            } else {
-                let user = {};
-                userModel.find(service.search(authUser),
-                    (err, result) => {
-                        let registered = false;
-                        if (err) {
-                            return doauth.setErrorResponse(res, 500, 'An unknown error has occurred.');
-                        } else if (!result || (result.length === 0)) {
-                            // Unknown user
-                            service.sync(user, authUser, false);
-                            console.log(`First login attempt by ${source} id# ${user.id}`);
-                            doauth.startRegistration(user, res, (token) => {
-                                res.redirect(`${uiCallbackURL}/${encodeURIComponent(token)}/${registered}/${source}`);
-                            });
-                        } else {
-                            // Known user
-                            user = result[0].toObject();
-                            registered = user.registered;
-                            console.log(`Pre-synced ${source} user:\n${JSON.stringify(user, null, 2)}`);
-                            service.sync(user, authUser, user.approved);
-                            const token = jwt.sign(user, config.jwtSecret, {
-                                expiresIn: global.unfetter.JWT_DURATION_SECONDS
-                            });
-                            console.log(token);
-                            console.log(`Returning ${source} user:\n${JSON.stringify(user, null, 2)}`);
-                            userModel.findByIdAndUpdate(user._id, user,
-                                (err, result) => {
-                                    if (err || !result) {
-                                        return setErrorResponse(res, 500, 'An unknown error has occurred.');
-                                    }
-                                    res.redirect(`${uiCallbackURL}/${encodeURIComponent(token)}/${registered}/${source}`);
-                                }
-                            );
-                        }
-                    }
-                );
-            }
-        }
-    );
+        router.get(`/login/${source}/callback`,
+            passport.authenticate(source, { failureRedirect: `/auth/login/${source}` }),
+            (req, res) => doauth.handleLoginCallback(req.user, source, service, res)
+        );
+    }
 });
 
 router.get('/user-from-token',
@@ -117,10 +91,9 @@ router.get('/user-from-token',
                 userModel.findById(id,
                     (error, result) => {
                         if (error || !result) {
-                            return setErrorResponse(res, 500, 'An unknown error has occurred.');
-                        } else {
-                            return res.json({ data: { attributes: result.toObject() } });
+                            return doauth.setErrorResponse(res, 500, 'An unknown error has occurred.');
                         }
+                        return res.json({ data: { attributes: result.toObject() } });
                     }
                 );
             }
@@ -133,7 +106,7 @@ router.post('/finalize-registration',
     (req, res) => {
         const user = req.body.data.attributes;
         if (user) {
-            userModel.findById(user._id, (err, result) => doauth.storeRegistration(user, res));
+            userModel.findById(user._id, () => doauth.storeRegistration(user, res));
         } else {
             return doauth.setErrorResponse(res, 400, 'Malformed request');
         }
@@ -147,10 +120,9 @@ router.get('/profile/:id',
         userModel.findById(userId,
             (error, result) => {
                 if (error || !result) {
-                    return setErrorResponse(res, 500, 'An unknown error has occurred.');
-                } else {
-                    return res.json({ data: { attributes: result.toObject() } });
+                    return doauth.setErrorResponse(res, 500, 'An unknown error has occurred.');
                 }
+                return res.json({ data: { attributes: result.toObject() } });
             }
         );
     }
@@ -251,17 +223,15 @@ router.get('/username-available/:userName',
         const userName = req.params.userName;
         if (!userName || userName === '') {
             return doauth.setErrorResponse(res, 400, 'Unable to process userName');
-        } else {
-            userModel.count({ userName },
-                (err, count) => {
-                    if (err) {
-                        return doauth.setErrorResponse(res, 500, 'An unknown error has occurred.');
-                    } else {
-                        return res.json({ data: { attributes: { available: (count === 0) } } });
-                    }
-                }
-            );
         }
+        userModel.count({ userName },
+            (err, count) => {
+                if (err) {
+                    return doauth.setErrorResponse(res, 500, 'An unknown error has occurred.');
+                }
+                return res.json({ data: { attributes: { available: (count === 0) } } });
+            }
+        );
     }
 );
 
@@ -271,17 +241,15 @@ router.get('/email-available/:email',
         const email = req.params.email;
         if (!email || (email === '')) {
             return doauth.setErrorResponse(res, 400, 'Unable to process email');
-        } else {
-            userModel.count({ email },
-                (err, count) => {
-                    if (err) {
-                        return doauth.setErrorResponse(res, 500, 'An unknown error has occurred.');
-                    } else {
-                        return res.json({ data: { attributes: { available: (count === 0) } } });
-                    }
-                }
-            );
         }
+        userModel.count({ email },
+            (err, count) => {
+                if (err) {
+                    return doauth.setErrorResponse(res, 500, 'An unknown error has occurred.');
+                }
+                return res.json({ data: { attributes: { available: (count === 0) } } });
+            }
+        );
     }
 );
 
