@@ -22,6 +22,34 @@ template = {
     "unfetterUiCallbackURL": "https://%s/#/users/login-callback"
 }
 
+def update_ui_env(env_file_path):
+    if os.path.isfile(env_file_path):
+        env_file = open(env_file_path, 'r')
+        env_contents = env_file.read().replace('\n', '').replace("'", '"')
+        env_file.close()
+        m = re.match(
+            r'^\s*(.*)\s*=\s*(\{.*\}).*$', env_contents)
+        if m == None:
+            print """\n\033[31mCould not parse the environment file! Be sure to create it with this line:
+                    authServices: '{}'\033[0m\n""".format(json.dumps(services))
+        else:
+            env = m.group(2)
+            env = ''.join(env.split())
+            env = re.sub(r'([a-zA-Z_0-9]+):',
+                            r'"\1":', env).replace("'", '"')
+            env = json.loads(env)
+            env["authServices"] = services
+            dump = json.dumps(env, indent=4).replace('"', "'")
+            env_file = open(env_file_path, 'w')
+            env_file.write(m.group(1).strip() +
+                            " = " + dump + ";\n")
+            env_file.close()
+            print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(env_file_path)
+    else:
+        print """\n\033[31mCould not find the environment file! Be sure to update it with this line:
+                authServices: '{}'\033[0m\n""".format(json.dumps(services))
+
+
 if __name__ == '__main__':
 
     inp_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -163,30 +191,11 @@ if __name__ == '__main__':
                 if ui_path == '':
                     ui_path = '../../unfetter-ui'
                 env_uac_file = os.path.join(ui_path + '/src/environments/environment.uac.ts')
+                env_prod_file = os.path.join(ui_path + '/src/environments/environment.prod.ts')
                 try:
-                    if os.path.isfile(env_uac_file):
-                        env_file = open(env_uac_file, 'r')
-                        env_contents =  env_file.read().replace('\n', '').replace("'", '"')
-                        env_file.close()
-                        m = re.match(r'^\s*(.*)\s*=\s*(\{.*\}).*$', env_contents)
-                        if m == None:
-                            print """\n\033[31mCould not parse the environment file! Be sure to create it with this line:
-                                    authServices: '{}'\033[0m\n""".format(json.dumps(services))
-                        else:
-                            env = m.group(2)
-                            env = ''.join(env.split())
-                            env = re.sub(r'([a-zA-Z_0-9]+):', r'"\1":', env).replace("'", '"')
-                            env = json.loads(env)
-                            env["authServices"] = services
-                            dump = json.dumps(env, indent=4).replace('"', "'")
-                            env_file = open(env_uac_file, 'w')
-                            env_file.write(m.group(1).strip() + " = " + dump + ";\n")
-                            env_file.close()
-                            print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(env_uac_file)
-                            print '\nBye!\033[0m\n\n'
-                    else:
-                        print """\n\033[31mCould not find the environment file! Be sure to update it with this line:
-                                authServices: '{}'\033[0m\n""".format(json.dumps(services))
+                    update_ui_env(env_uac_file)
+                    update_ui_env(env_prod_file)
+                    print '\nBye!\033[0m\n\n'                    
                 except:
                     print '\033[31mError working with env file ', sys.exc_info(), '\033[0m'
 
