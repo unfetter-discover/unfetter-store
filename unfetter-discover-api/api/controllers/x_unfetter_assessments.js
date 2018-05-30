@@ -85,7 +85,6 @@ function getPromises(assessment) {
 
 const assessedObjects = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     const [assessment] = result;
-    console.log(`${JSON.stringify(assessment, null, '\t')}`);
     if (err) {
         return res.status(500).json({
             errors: [{
@@ -901,6 +900,9 @@ const latestAssessmentPromise = (query, req, res) => {
                                 break;
                             case 'x-unfetter-sensor':
                                 retVal.name = `${r.name} - Sensors`;
+                                break;
+                            case 'x-unfetter-object-assessment':
+                                retVal.name = `${r.name} - Capabilities`;
                                 break;
                             default:
                         }
