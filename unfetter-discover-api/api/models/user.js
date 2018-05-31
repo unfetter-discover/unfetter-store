@@ -60,13 +60,26 @@ const UserSchema = new mongoose.Schema({
         ],
         default: 'STANDARD_USER'
     },
+    oauth: String,
     github: {
         userName: {
             type: String
         },
         id: {
             type: String,
-            unique: true
+            sparse: true
+        },
+        avatar_url: {
+            type: String
+        }
+    },
+    gitlab: {
+        userName: {
+            type: String
+        },
+        id: {
+            type: String,
+            sparse: true
         },
         avatar_url: {
             type: String

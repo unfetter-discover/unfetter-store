@@ -1,5 +1,5 @@
+import { Stix } from 'stix/unfetter/stix';
 import { AttackPatternIngestToStixAdapter } from '../../adapters/attack-pattern-ingest-to-stix.adapter';
-import { Stix } from '../../models/stix';
 import { MongoConnectionService } from '../mongo-connection.service';
 import { AttackPatternIngestService } from './attack-pattern-ingest.service';
 
@@ -12,9 +12,7 @@ describe('ctf ingest service', () => {
 
     beforeEach(() => {
         mockIdent = new Stix();
-        mockIdent.stix = {};
-        mockIdent.stix.id = '123';
-        mockIdent.id = mockIdent.stix.id;
+        mockIdent.id = '123';
         mockIdent.name = 'system';
 
         const spy = spyOn(MongoConnectionService, 'getCollection');
@@ -59,10 +57,13 @@ describe('ctf ingest service', () => {
         expect(stix).toBeDefined();
         expect(stix.type).toEqual('attack-pattern');
         expect(stix.name).toContain('email addresses');
-        expect(stix.kill_chain_phases.length).toEqual(1);
-        expect(stix.kill_chain_phases[0].kill_chain_name).toBeDefined();
-        expect(stix.kill_chain_phases[0].kill_chain_name).toEqual('kill-chain-sample');
-        expect(stix.kill_chain_phases[0].phase_name).toBeDefined();
-        expect(stix.kill_chain_phases[0].phase_name).toEqual('reconnaissance');
+        expect(stix.kill_chain_phases).toBeDefined();
+        if (stix.kill_chain_phases) {
+            expect(stix.kill_chain_phases.length).toEqual(1);
+            expect(stix.kill_chain_phases[0].kill_chain_name).toBeDefined();
+            expect(stix.kill_chain_phases[0].kill_chain_name).toEqual('kill-chain-sample');
+            expect(stix.kill_chain_phases[0].phase_name).toBeDefined();
+            expect(stix.kill_chain_phases[0].phase_name).toEqual('reconnaissance');
+        }
     });
 });

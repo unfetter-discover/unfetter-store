@@ -1,0 +1,23 @@
+x-swagger-router-controller: ipgeo
+get:
+  tags:
+  - Lookup
+  description: Find the location of the given IP address.
+  operationId: lookup
+  produces: 
+  - application/vnd.api+json  
+  parameters:
+    - name: ip
+      in: query
+      description: 'Ex: 8.8.8.8'
+      required: true
+      type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        $ref: "#/definitions/ConfigJsonApi"
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

@@ -1,4 +1,4 @@
-FROM node:9.5-alpine
+FROM node:10.1-alpine
 
 LABEL MAINTAINER="unfetter"
 LABEL Description="Node program that loads STIX data into MongoDB"
@@ -19,6 +19,7 @@ RUN $WORKING_DIRECTORY/set-npm-repo.sh
 COPY package.json $WORKING_DIRECTORY
 
 RUN npm --loglevel error install
+RUN npm --loglevel error i -g ts-node typescript
 RUN find / -name "cb-never*.tgz" -delete && \
     rm -rf /usr/share/man && \
     rm -rf /tmp/* && \
