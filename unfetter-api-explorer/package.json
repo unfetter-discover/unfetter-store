@@ -1,6 +1,10 @@
 {
   "name": "unfetter-api-explorer",
+<<<<<<< HEAD
   "version": "0.3.7",
+=======
+  "version": "0.3.6",
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
   "description": "Unfetter API Explorer: Swagger documentation for Unfetter Discover API",
   "scripts": {
     "build": "npm run compile:swagger && webpack ",

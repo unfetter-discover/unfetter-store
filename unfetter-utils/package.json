@@ -1,6 +1,10 @@
 {
   "name": "unfetter-utils",
+<<<<<<< HEAD
   "version": "0.3.7",
+=======
+  "version": "0.3.6",
+>>>>>>> f20adeb... Rc 0.3.6 (#156)
   "description": "Unfetter Utilities",
   "private": true,
   "main": "index.js",
