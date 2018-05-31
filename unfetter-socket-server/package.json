@@ -1,6 +1,6 @@
 {
   "name": "unfetter-socket-server",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Web socket server for Unfetter",
   "scripts": {
     "checkup": "npm run clean && npm run build && npm run lint && npm run coverage",
@@ -17,6 +17,11 @@
   },
   "author": "Unfetter",
   "license": "MIT",
+  "nyc": {
+    "exclude": [
+      "src/**/*.spec.ts"
+    ]
+  },
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
