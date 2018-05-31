@@ -93,7 +93,7 @@ const attackPatternsByIndicator = (req, res) => {
     }
     ];
 
-    aggregationModel.aggregate(aggregationQuery, (err, results) => {
+    aggregationModel.aggregate(query, (err, results) => {
         if (err) {
             return res.status(500).json({
                 errors: [{
@@ -229,6 +229,10 @@ const search = (req, res) => {
         if (searchParameters.published && searchParameters.published.length) {
             // Mapping is there because mat-option insists on giving a string
             filterObj['metaProperties.published'] = { $in: searchParameters.published.map(p => p === 'true') };
+        }
+
+        if (searchParameters.validStixPattern) {
+            filterObj['metaProperties.validStixPattern'] = true;
         }
 
         promises.push(stixModel.find(SecurityHelper.applySecurityFilter(filterObj, req.user)).sort(sortObj).exec());

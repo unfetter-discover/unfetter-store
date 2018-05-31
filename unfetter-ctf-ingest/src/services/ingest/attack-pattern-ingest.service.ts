@@ -1,12 +1,11 @@
 import * as fs from 'fs';
+import { Stix } from 'stix/unfetter/stix';
+import { StixBundle } from 'stix/unfetter/stix-bundle';
 import { AttackPatternIngestToStixAdapter } from '../../adapters/attack-pattern-ingest-to-stix.adapter';
 import { AttackPatternIngest } from '../../models/attack-pattern-ingest';
-import { Stix } from '../../models/stix';
-import { StixBundle } from '../../models/stix-bundle';
 import { MongoConnectionService } from '../../services/mongo-connection.service';
 import { UnfetterPosterMongoService } from '../../services/unfetter-poster-mongo.service';
 import { CollectionType } from '../collection-type.enum';
-import { StixLookupMongoService } from '../stix-lookup-mongo.service';
 import { CsvParseService } from './parse-csv-service';
 
 /**
@@ -73,10 +72,53 @@ export class AttackPatternIngestService {
         const stixies = await this.adapter.convertAttackPatternIngestToStix(arr);
 
         if (stixies && stixies.length > 1) {
-            console.log(`generated ${stixies.length} stix objects.`);
-            // stixies.forEach((el) => console.log(el.toJson()));
+            console.log(`generated ${stixies.length} stix attack patterns.`);
         }
-        return Promise.resolve(stixies);
+
+        const reducedAttackPatterns = await this.collapseAttackPatternsAcrossPhases(stixies);
+        if (reducedAttackPatterns && reducedAttackPatterns.length > 1) {
+            console.log(`reduced to ${reducedAttackPatterns.length} attack patterns.`);
+        }
+        return Promise.resolve(reducedAttackPatterns);
+    }
+
+    /**
+     * @param  {Stix[]} attackPatterns
+     * @returns Promise
+     */
+    public async collapseAttackPatternsAcrossPhases(attackPatterns: Stix[] = []): Promise<Stix[]> {
+        if (!attackPatterns || attackPatterns.length === 0) {
+            return Promise.resolve(attackPatterns);
+        }
+
+        const arr = attackPatterns
+            .map((el) => {
+                const name = el.name;
+                const arrByName = attackPatterns.filter((_) => _.name === name) || [];
+                if (arrByName.length > 1) {
+                    const first = arrByName[0];
+                    if (first.id === el.id) {
+                        first.kill_chain_phases = first.kill_chain_phases || [];
+                        const lastPhases = arrByName
+                            .slice(1, arrByName.length)
+                            .map((byName) => byName.kill_chain_phases || [])
+                            .reduce((acc, x) => acc.concat(x), []);
+                        first.kill_chain_phases = [...first.kill_chain_phases, ...lastPhases];
+                        return first;
+                    } else {
+                        return undefined;
+                    }
+                } else if (arrByName.length === 1) {
+                    return arrByName[0];
+                } else {
+                    const msg = `warning, trouble finding attack pattern ${name} while collapsing phases, moving on...`;
+                    console.warn(msg);
+                    return undefined;
+                }
+            })
+            .filter((el) => el !== undefined);
+
+        return Promise.resolve(arr as Stix[]);
     }
 
 }

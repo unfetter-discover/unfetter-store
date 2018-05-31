@@ -57,28 +57,7 @@ const lookupGlobalValues = () => new Promise((resolve, reject) => {
 
     Promise.all(promises)
         .then(([identity, configurations]) => {
-            let openIdent;
-            if (identity) {
-                console.log('Open identity set to saved document');
-                openIdent = { ...identity.toObject() };
-            } else {
-                console.log('Open identity set to default');
-                openIdent = {
-                    _id: 'identity--e240b257-5c42-402e-a0e8-7b81ecc1c09a',
-                    stix: {
-                        name: 'Unfetter Open',
-                        identity_class: 'organization',
-                        id: 'identity--e240b257-5c42-402e-a0e8-7b81ecc1c09a',
-                        description: 'This is an organization open to all Unfetter users.',
-                        type: 'identity',
-                        modified: '2017-11-01T18:42:35.073Z',
-                        created: '2017-11-01T18:36:59.472Z',
-                        labels: [
-                            'open-group'
-                        ]
-                    }
-                };
-            }
+            const openIdent = { ...identity.toObject() };
             global.unfetter.identities = [
                 ...(global.unfetter.identities || []),
                 openIdent,

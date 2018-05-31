@@ -1,0 +1,4 @@
+{
+    "authService": "demo",
+    "unfetterUiCallbackURL": "https://localhost/#/users/login-callback"
+}
