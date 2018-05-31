@@ -13,12 +13,18 @@ properties:
             type: string
           object_ref:
             type: string
+          is_baseline:
+            type: boolean
           created: 
             type: string
             format: date-time
           modified:
             type: string
             format: date-time
+          set_ref:
+            type: array
+            items:
+              type: string
           assessment_objects:
             type: array
             items:

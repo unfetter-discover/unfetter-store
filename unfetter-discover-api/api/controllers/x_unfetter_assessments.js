@@ -4,13 +4,12 @@ const jsonApiConverter = require('../helpers/json_api_converter');
 const BaseController = require('./shared/basecontroller');
 
 const controller = new BaseController('x-unfetter-assessment');
-// NOTE: object return and query names are order dependent
-const ASSESSED_OBJECT_RETURN_TYPES = ['courseOfActions', 'indicators', 'sensors', 'capabilities'];
-const ASSESSED_OBJECT_QUERY_TYPES = ['course-of-action', 'indicator', 'x-unfetter-sensor', 'x-unfetter-object-assessment'];
+const returnProps = ['indicators', 'sensors', 'courseOfActions'];
+const ASSESSED_OBJECT_TYPES = ['indicator', 'x-unfetter-sensor', 'course-of-action'];
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const models = {};
 
-ASSESSED_OBJECT_QUERY_TYPES.forEach(assessedObjectType => {
+ASSESSED_OBJECT_TYPES.forEach(assessedObjectType => {
     models[assessedObjectType] = modelFactory.getModel(assessedObjectType);
 });
 models['attack-pattern'] = modelFactory.getModel('attack-pattern');
@@ -67,7 +66,7 @@ function getPromises(assessment) {
     // Generate promises using the ASSESSED_OBJECT_TYPES enum so Promise.all methods get the return in the order expected
     // Don't bother running a mongo query for empty objects
     const promises = [];
-    ASSESSED_OBJECT_QUERY_TYPES.forEach(assessedObjectType => {
+    ASSESSED_OBJECT_TYPES.forEach(assessedObjectType => {
         let assessedPromise;
         if (assessedObjectIDs[assessedObjectType] === undefined || assessedObjectIDs[assessedObjectType].length === 0) {
             assessedPromise = Promise.resolve([]);
@@ -85,6 +84,7 @@ function getPromises(assessment) {
 
 const assessedObjects = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     const [assessment] = result;
+
     if (err) {
         return res.status(500).json({
             errors: [{
@@ -99,22 +99,19 @@ const assessedObjects = controller.getByIdCb((err, result, req, res, id) => { //
 
     return Promise.all(getPromises(assessment))
         .then(results => {
-            const assessmentObjects = assessment.stix.assessment_objects;
-            const returnObject = ASSESSED_OBJECT_RETURN_TYPES
-                .map((returnProp, i) => {
-                    const assessmentRisks = results[i]
-                        .map(stix => {
-                            const stixObj = stix.toObject();
-                            const assessedData = assessmentObjects.find(assessmentObject => assessmentObject.stix.id === stix._id);
-                            if (assessedData !== null && assessedData !== undefined && assessedData.risk !== undefined) {
-                                stixObj.risk = assessedData.risk;
-                            }
-                            return stixObj;
-                        })
-                        .reduce((acc, x) => acc.concat(x), []);
-                    return assessmentRisks;
-                })
-                .reduce((acc, x) => acc.concat(x), []);
+            let returnObject = [];
+
+            returnProps.forEach((returnProp, i) => {
+                const temp = results[i].map(stix => {
+                    const stixObj = stix.toObject();
+                    const assessedData = lodash.find(assessment.assessment_objects, assessmentObject => assessmentObject.stix.id === stix._id);
+                    if (assessedData !== null && assessedData !== undefined && assessedData.risk !== undefined) {
+                        stixObj.risk = assessedData.risk;
+                    }
+                    return stixObj;
+                });
+                returnObject = returnObject.concat(temp);
+            });
 
             const requestedUrl = apiRoot + req.originalUrl;
             res.header('Content-Type', 'application/json');
@@ -800,35 +797,35 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
             Model.findOneAndUpdate({
                 _id: id
             }, newDocument, {
-                    new: true
-                }, (errUpdate, resultUpdate) => {
-                    if (errUpdate) {
-                        return res.status(500).json({
-                            errors: [{
-                                status: 500,
-                                source: '',
-                                title: 'Error',
-                                code: '',
-                                detail: 'An unknown error has occurred.'
-                            }]
-                        });
-                    }
-
-                    if (resultUpdate) {
-                        const requestedUrl = apiRoot + req.originalUrl;
-                        const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
-                        return res.status(200).json({
-                            links: {
-                                self: requestedUrl,
-                            },
-                            data: convertedResult
-                        });
-                    }
-
-                    return res.status(404).json({
-                        message: `Unable to update the item.  No item found with id ${id}`
+                new: true
+            }, (errUpdate, resultUpdate) => {
+                if (errUpdate) {
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500,
+                            source: '',
+                            title: 'Error',
+                            code: '',
+                            detail: 'An unknown error has occurred.'
+                        }]
                     });
+                }
+
+                if (resultUpdate) {
+                    const requestedUrl = apiRoot + req.originalUrl;
+                    const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
+                    return res.status(200).json({
+                        links: {
+                            self: requestedUrl,
+                        },
+                        data: convertedResult
+                    });
+                }
+
+                return res.status(404).json({
+                    message: `Unable to update the item.  No item found with id ${id}`
                 });
+            });
         } catch (error) {
             console.log(`error ${error}`);
             return res.status(500).json({
@@ -892,19 +889,16 @@ const latestAssessmentPromise = (query, req, res) => {
                     // TODO remove this when a better fix is in place
                     if (r.stix.type) {
                         switch (r.stix.type) {
-                            case 'course-of-action':
-                                retVal.name = `${r.name} - Mitigations`;
-                                break;
-                            case 'indicator':
-                                retVal.name = `${r.name} - Indicators`;
-                                break;
-                            case 'x-unfetter-sensor':
-                                retVal.name = `${r.name} - Sensors`;
-                                break;
-                            case 'x-unfetter-object-assessment':
-                                retVal.name = `${r.name} - Capabilities`;
-                                break;
-                            default:
+                        case 'course-of-action':
+                            retVal.name = `${r.name} - Mitigations`;
+                            break;
+                        case 'indicator':
+                            retVal.name = `${r.name} - Indicators`;
+                            break;
+                        case 'x-unfetter-sensor':
+                            retVal.name = `${r.name} - Sensors`;
+                            break;
+                        default:
                         }
                     }
                     return retVal;
@@ -1082,19 +1076,19 @@ const latestAssessments = (req, res) => {
 };
 
 module.exports = {
-    add: controller.add(),
-    assessedObjects,
-    deleteById: controller.deleteById(),
     get: controller.get(),
-    getAnswerByAssessedObject,
     getById: controller.getById(),
-    getRiskByAssessedObject,
-    latestAssessments,
-    latestAssessmentsByCreatorId,
-    risk,
-    riskByAttackPatternAndKillChain,
-    riskPerKillChain,
-    summaryAggregations,
+    add: controller.add(),
     update: controller.update(),
+    deleteById: controller.deleteById(),
+    assessedObjects,
+    risk,
+    riskPerKillChain,
+    riskByAttackPatternAndKillChain,
+    summaryAggregations,
+    getRiskByAssessedObject,
+    getAnswerByAssessedObject,
     updateAnswerByAssessedObject,
+    latestAssessmentsByCreatorId,
+    latestAssessments,
 };
