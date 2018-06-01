@@ -19,8 +19,8 @@ before_script:
 script:
   - docker exec -it unfetter-discover-api npm run lint
   - docker exec -it unfetter-discover-api npm run test
-  - docker exec -it unfetter-socket-server npm run lint
-  - docker exec -it unfetter-socket-server npm run test
+#  - docker exec -it unfetter-socket-server npm run lint
+#  - docker exec -it unfetter-socket-server npm run test
 # always get container not running with this next call
   - docker run unfetter-discover-processor npm run lint
   - docker run unfetter-discover-processor npm run test

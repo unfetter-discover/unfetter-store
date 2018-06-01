@@ -22,32 +22,33 @@ template = {
     "unfetterUiCallbackURL": "https://%s/#/users/login-callback"
 }
 
-def update_ui_env(env_file_path):
-    if os.path.isfile(env_file_path):
-        env_file = open(env_file_path, 'r')
+def update_ui_env(ui_cfg_file):
+    if os.path.isfile(ui_cfg_file):
+        env_file = open(ui_cfg_file, 'r')
         env_contents = env_file.read().replace('\n', '').replace("'", '"')
         env_file.close()
-        m = re.match(
-            r'^\s*(.*)\s*=\s*(\{.*\}).*$', env_contents)
+        m = re.match(r'^\s*(.*)\s*=\s*(\{.*\}).*$', env_contents)
         if m == None:
-            print """\n\033[31mCould not parse the environment file! Be sure to create it with this line:
+            print """\n\033[31mCould not parse the run configuration file! Be sure to create it with this line:
                     authServices: '{}'\033[0m\n""".format(json.dumps(services))
         else:
             env = m.group(2)
             env = ''.join(env.split())
-            env = re.sub(r'([a-zA-Z_0-9]+):',
-                            r'"\1":', env).replace("'", '"')
+            env = re.sub(r'([a-zA-Z_0-9]+):', r'"\1":', env).replace("'", '"')
             env = json.loads(env)
             env["authServices"] = services
             dump = json.dumps(env, indent=4).replace('"', "'")
-            env_file = open(env_file_path, 'w')
-            env_file.write(m.group(1).strip() +
-                            " = " + dump + ";\n")
+            env_file = open(ui_cfg_file, 'w')
+            env_file.write(m.group(1).strip() + " = " + dump + ";\n")
             env_file.close()
-            print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(env_file_path)
+            print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(ui_cfg_file)
     else:
-        print """\n\033[31mCould not find the environment file! Be sure to update it with this line:
-                authServices: '{}'\033[0m\n""".format(json.dumps(services))
+        print """\n\033[31mRun configuration file does not exist... Creating.\033[0m\n"""
+        env = {"authServices": services}
+        dump = json.dumps(env, indent=4).replace('"', "'")
+        env_file = open(ui_cfg_file, 'w')
+        env_file.write("export const runconfig = " + dump + ";\n")
+        env_file.close()
 
 
 if __name__ == '__main__':
@@ -184,17 +185,15 @@ if __name__ == '__main__':
             print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(socket_server_config) + '\033[0m'
 
             write_to_ui = str(raw_input(
-                '\nDo you wish to update the unfetter-ui environment file? [y/n]: ')).strip().lower()
+                '\nDo you wish to update the unfetter-ui run configuration file? [y/n]: ')).strip().lower()
             if (write_to_ui == 'y'):
                 ui_path = str(raw_input(
                     '\nPlease enter the path to the unfetter-ui directory [../../unfetter-ui]: ')).strip()
                 if ui_path == '':
                     ui_path = '../../unfetter-ui'
-                env_uac_file = os.path.join(ui_path + '/src/environments/environment.uac.ts')
-                env_prod_file = os.path.join(ui_path + '/src/environments/environment.prod.ts')
+                ui_cfg_file = os.path.join(ui_path + '/src/global/private-config.ts')
                 try:
-                    update_ui_env(env_uac_file)
-                    update_ui_env(env_prod_file)
+                    update_ui_env(ui_cfg_file)
                     print '\nBye!\033[0m\n\n'                    
                 except:
                     print '\033[31mError working with env file ', sys.exc_info(), '\033[0m'
