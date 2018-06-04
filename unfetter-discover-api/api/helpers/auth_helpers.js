@@ -135,10 +135,43 @@ const storeRegistration = (user, res) => {
     );
 };
 
+const AuthHelper = class {
+
+    constructor(name) {
+        this.name = name;
+    }
+
+    build(config, env) {
+        return null;
+    }
+
+    options() {
+        return null;
+    }
+
+    search(user) {
+        return null;
+    }
+
+    sync(user, loginInfo, approved) {
+        user.oauth = this.name;
+        user.approved = approved;
+        if (!user[this.name]) {
+            user[this.name] = {
+                id: loginInfo.id,
+                userName: null,
+                avatar: null,
+            };
+        }
+    }
+
+};
+
 module.exports = {
     setEmptyResponse,
     setErrorResponse,
     handleLoginCallback,
     startRegistration,
     storeRegistration,
+    AuthHelper,
 };

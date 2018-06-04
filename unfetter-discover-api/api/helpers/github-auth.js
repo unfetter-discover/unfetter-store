@@ -1,8 +1,13 @@
 const GithubStrategy = require('passport-github').Strategy;
+const AuthHelper = require('../helpers/auth_helpers').AuthHelper;
 
-(() => ({
+class GithubAuth extends AuthHelper {
 
-    build: (config, env) => {
+    constructor() {
+        super('github');
+    }
+
+    build(config, env) {
         const githubStrategy = new GithubStrategy(
             {
                 ...config.github,
@@ -18,28 +23,24 @@ const GithubStrategy = require('passport-github').Strategy;
             console.log('Not using a proxy');
         }
         return githubStrategy;
-    },
+    }
 
-    options: () => ({ scope: ['user:email'] }),
+    options() {
+        return { scope: ['user:email'] };
+    }
 
-    search: user => ({
-        'github.id': user.id
-    }),
+    search(user) {
+        return { 'github.id': user.id };
+    }
 
-    sync: (storedUser, userinfo, approved) => {
-        storedUser.oauth = 'github';
-        if (!storedUser.github) {
-            storedUser.github = {
-                id: userinfo.id,
-                userName: null,
-                avatar: null,
-            };
+    sync(user, githubInfo, approved) {
+        super.sync(user, githubInfo, approved);
+        user.github.userName = githubInfo.username;
+        if (githubInfo._json.avatar_url) {
+            user.github.avatar_url = githubInfo._json.avatar_url;
         }
-        storedUser.approved = approved;
-        storedUser.github.userName = userinfo.username;
-        if (userinfo._json.avatar_url) {
-            storedUser.github.avatar_url = userinfo._json.avatar_url;
-        }
-    },
+    }
 
-}))();
+}
+
+(() => new GithubAuth())();
