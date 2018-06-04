@@ -1,6 +1,6 @@
 const GithubStrategy = require('passport-github').Strategy;
 
-module.exports = {
+(() => ({
 
     build: (config, env) => {
         const githubStrategy = new GithubStrategy(
@@ -20,9 +20,11 @@ module.exports = {
         return githubStrategy;
     },
 
-    options: { scope: ['user:email'] },
+    options: () => ({ scope: ['user:email'] }),
 
-    search: user => ({ 'github.id': user.id }),
+    search: user => ({
+        'github.id': user.id
+    }),
 
     sync: (storedUser, userinfo, approved) => {
         storedUser.oauth = 'github';
@@ -40,4 +42,4 @@ module.exports = {
         }
     },
 
-};
+}))();

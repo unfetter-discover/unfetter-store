@@ -1,3 +1,5 @@
+const vm = require('vm');
+const fs = require('fs');
 const express = require('express');
 
 const router = express.Router();
@@ -9,30 +11,25 @@ const userModel = require('../models/user');
 const configModel = require('../models/config');
 const doauth = require('../helpers/auth_helpers');
 
-const authSources = config.authServices || ['github'];
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 
+const authSources = config.authServices || ['github'];
+const path = `${__dirname}/../helpers`;
 const authServices = {};
 authSources.forEach(source => {
-    // I hate to do this here, but production builds have to know what packages are required in order to bundle them.
-    // Serious [Node]JS fail.
-    let service = null;
-    switch (source) {
-        case 'github':
-            service = require('../helpers/github-auth.js');
-            break;
-        case 'gitlab':
-            service = require('../helpers/gitlab-auth.js');
-            break;
-        default:
-            break;
-    }
-    if (service) {
-        authServices[source] = service;
-        const strategy = service.build(config, process.env);
-        passport.use(strategy);
+    if (fs.existsSync(`${path}/${source}-auth.js`)) {
+        const helper = fs.readFileSync(`${path}/${source}-auth.js`);
+        const service = vm.runInNewContext(helper, { require });
+        if (service) {
+            const strategy = service.build(config, process.env);
+            if (strategy) {
+                authServices[source] = service;
+                passport.use(strategy);
+            }
+        }
     }
 });
+console.log('passport strategies loaded: ', Object.keys(authServices));
 
 passport.serializeUser((user, cb) => {
     cb(null, user);
@@ -51,12 +48,10 @@ router.use(require('express-session')({
 router.use(passport.initialize());
 router.use(passport.session());
 
-authSources.forEach(source => {
+Object.keys(authServices).forEach(source => {
     const service = authServices[source];
-
     if (service !== null) {
-        router.get(`/${source}-login`, passport.authenticate(source, service.options));
-
+        router.get(`/${source}-login`, passport.authenticate(source, service.options()));
         router.get(`/${source}-callback`,
             passport.authenticate(source, { failureRedirect: `/auth/${source}-login` }),
                 (req, res) => doauth.handleLoginCallback(req.user, source, service, res)

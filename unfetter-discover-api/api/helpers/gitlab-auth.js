@@ -1,6 +1,6 @@
 const GitlabStrategy = require('passport-gitlab').Strategy;
 
-module.exports = {
+(() => ({
 
     build: (config, env) => {
         const gitlabStrategy = new GitlabStrategy(
@@ -20,7 +20,7 @@ module.exports = {
         return gitlabStrategy;
     },
 
-    options: {},
+    options: () => null,
 
     search: user => ({ 'gitlab.id': user.id }),
 
@@ -40,4 +40,4 @@ module.exports = {
         }
     },
 
-};
+}))();
