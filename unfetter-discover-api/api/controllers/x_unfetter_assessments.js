@@ -214,27 +214,30 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => { /
                 assessment = assessment.toObject().stix;
             }
 
-            const indicators = results[0]
-                .filter(doc => doc !== undefined)
-                .map(doc => ({
-                    ...doc.toObject().stix,
-                    ...doc.toObject().metaProperties
-                }));
-            const indicatorRisks = [];
-            const sensors = results[1]
-                .filter(doc => doc !== undefined)
-                .map(doc => ({
-                    ...doc.toObject().stix,
-                    ...doc.toObject().metaProperties
-                }));
-            const sensorRisks = [];
-            const courseOfActions = results[2]
+            const courseOfActions = results[0]
                 .filter(doc => doc !== undefined)
                 .map(doc => ({
                     ...doc.toObject().stix,
                     ...doc.toObject().metaProperties
                 }));
             const coaRisks = [];
+
+            const indicators = results[1]
+                .filter(doc => doc !== undefined)
+                .map(doc => ({
+                    ...doc.toObject().stix,
+                    ...doc.toObject().metaProperties
+                }));
+            const indicatorRisks = [];
+
+            const sensors = results[2]
+                .filter(doc => doc !== undefined)
+                .map(doc => ({
+                    ...doc.toObject().stix,
+                    ...doc.toObject().metaProperties
+                }));
+            const sensorRisks = [];
+
             const returnObject = {};
             returnObject.indicators = [];
             returnObject.sensors = [];
