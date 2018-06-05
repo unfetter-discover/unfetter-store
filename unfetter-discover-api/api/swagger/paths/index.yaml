@@ -71,6 +71,8 @@
   $ref: ./intrusion_sets/intrusion_sets.yaml
 /intrusion-sets/{id}:
   $ref: ./intrusion_sets/intrusion_set_by_id.yaml
+/intrusion-sets/attack-patterns-by-intrusion-set:
+  $ref: ./intrusion_sets/attack_patterns_by_intrusion_set.yml
 
 /malwares:
   $ref: ./malwares/malwares.yaml
