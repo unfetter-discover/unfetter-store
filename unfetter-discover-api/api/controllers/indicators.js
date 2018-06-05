@@ -226,6 +226,11 @@ const search = (req, res) => {
         if (searchParameters.killChainPhases && searchParameters.killChainPhases.length) {
             filterObj['stix.kill_chain_phases.phase_name'] = { $in: searchParameters.killChainPhases };
         }
+        if (searchParameters.dataSources && searchParameters.dataSources.length) {
+            filterObj['extendedProperties.x_mitre_data_sources'] = {
+                $in: searchParameters.dataSources
+            };
+        }
         if (searchParameters.published && searchParameters.published.length) {
             // Mapping is there because mat-option insists on giving a string
             filterObj['metaProperties.published'] = { $in: searchParameters.published.map(p => p === 'true') };
