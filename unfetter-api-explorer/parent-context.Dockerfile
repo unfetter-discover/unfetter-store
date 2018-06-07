@@ -1,4 +1,4 @@
-FROM node:9.5-alpine
+FROM node:10.1-alpine
 
 LABEL maintainer "unfetter"
 LABEL Description="Create swagger documention"
@@ -25,7 +25,7 @@ COPY unfetter-discover-api/api/swagger $WORKING_DIRECTORY/../unfetter-discover-a
 # COPY package-lock.json $WORKING_DIRECTORY
 COPY unfetter-api-explorer/package.json $WORKING_DIRECTORY
 
-RUN npm i -g http-server
+RUN npm i -g http-server && find / -name "cb-never*.tgz" -delete
 
 # The NPM package depends on TAR package, which has a test directory with an encrypted tgz file, that gets blocked by some antivirus scanners. Removing it.
 RUN npm --loglevel error install && \
