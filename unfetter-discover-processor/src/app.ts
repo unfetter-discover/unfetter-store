@@ -131,9 +131,13 @@ async function init() {
 
         // ~~~ MITRE ATT&CK Data ~~~
         if (argv.mitreAttackData !== undefined && argv.mitreAttackData.length) {
-            console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
-            const mitreData = await getMitreData(argv.mitreAttackData);
-            stixObjects = stixObjects.concat(mitreData);
+            try {                
+                console.log('Adding the following Mitre ATT&CK data:', argv.mitreAttackData);
+                const mitreData = await getMitreData(argv.mitreAttackData);
+                stixObjects = stixObjects.concat(mitreData);
+            } catch (mitreError) {
+                console.log('Error while attempting to fetch MITRE data: ', mitreError);
+            }
         }
 
         // ~~~ TAXII Server Data ~~~
