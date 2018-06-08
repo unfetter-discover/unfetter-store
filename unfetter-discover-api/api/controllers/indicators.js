@@ -231,6 +231,34 @@ const search = (req, res) => {
                 $in: searchParameters.dataSources
             };
         }
+        if (searchParameters.observedData && searchParameters.observedData.length) {
+            const orArr = [];
+            searchParameters.observedData.forEach(observedDatum => {
+                if (observedDatum.action === '*') {
+                    orArr.push({
+                        'metaProperties.observedData': {
+
+                            $elemMatch: {
+                                name: observedDatum.name,
+                                property: observedDatum.property,
+                            }
+                        }
+                    });
+                } else {
+                    orArr.push({
+                        'metaProperties.observedData': {
+
+                            $elemMatch: {
+                                name: observedDatum.name,
+                                action: observedDatum.action,
+                                property: observedDatum.property,
+                            }
+                        }
+                    });
+                }
+            });
+            filterObj.$or = orArr;
+        }
         if (searchParameters.published && searchParameters.published.length) {
             // Mapping is there because mat-option insists on giving a string
             filterObj['metaProperties.published'] = { $in: searchParameters.published.map(p => p === 'true') };
