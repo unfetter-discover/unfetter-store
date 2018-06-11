@@ -3,4 +3,4 @@ import * as path from 'path';
 
 import { ConfigModel } from './configModel';
 
-export const CONFIG: ConfigModel = JSON.parse(fs.readFileSync(path.join(__dirname, '../../config/private-config.json'), 'utf8'));
+export const CONFIG: ConfigModel = JSON.parse(fs.readFileSync(path.join(__dirname, '../../config/private/private-config.json'), 'utf8'));

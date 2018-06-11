@@ -2,7 +2,7 @@ if (process.env.RUN_MODE === 'UAC') {
     const fs = require('fs');
     const path = require('path');
 
-    const privateConfigLocation = path.join(__dirname, 'private-config.json');
+    const privateConfigLocation = path.join(__dirname, 'private', 'private-config.json');
     let privateConfig;
 
     if (!fs.existsSync(privateConfigLocation)) {

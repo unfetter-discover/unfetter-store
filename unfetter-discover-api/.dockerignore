@@ -1,3 +1,5 @@
 node_modules
 npm-debug.log
+# old path
 api/config/private-config.json
+api/config/private/private-config.json

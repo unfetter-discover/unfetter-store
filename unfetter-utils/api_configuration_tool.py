@@ -41,10 +41,10 @@ def update_ui_env(ui_cfg_file):
 if __name__ == '__main__':
 
     inp_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                            '../unfetter-discover-api/api/config/private-config.json')
+                            '../unfetter-discover-api/api/config/private/private-config.json')
     
     socket_server_config = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                            '../unfetter-socket-server/config/private-config.json')
+                            '../unfetter-socket-server/config/private/private-config.json')
 
     file_exists = False
 
