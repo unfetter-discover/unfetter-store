@@ -1,7 +1,12 @@
+# old files/paths
 config/private-config.js
 config/private-config.json
 config/private-config.email.js
 config/private-config.email.json
+
+config/private/*
+!config/private/.gitkeep
+
 node_modules/
 dist/
 coverage/
