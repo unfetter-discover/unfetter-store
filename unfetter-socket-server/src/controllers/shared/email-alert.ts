@@ -7,7 +7,7 @@ let SEND_EMAIL_ALERTS = process.env.SEND_EMAIL_ALERTS || false;
 let SERVICE_EMAIL: string = process.env.SERVICE_EMAIL || null;
 const HTTPS_PROXY_URL = process.env.HTTPS_PROXY_URL || null;
 
-const emailConfigFile = join(__dirname, '../../../config/private/private-config.email.json');
+const emailConfigFile = join(__dirname, '..', '..', '..', 'config', 'private', 'private-config.email.json');
 
 let emailConfigJson: SmtpOptions | any;
 if (SEND_EMAIL_ALERTS === true) {
