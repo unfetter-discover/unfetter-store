@@ -1,0 +1,33 @@
+x-swagger-router-controller: multiples
+get:
+  tags:  
+  - STIX-Multiples
+  description: Given the STIX types of a source and target in a relationship object, it will return a mapping of the source type ID's to a list of objects of the target type.
+  operationId: relationshipMapper
+  produces:
+  - application/vnd.api+json
+  parameters:
+  - name: sourcetype
+    in: query
+    description: 'The STIX type of the source_ref in the relationships'
+    required: true
+    type: string
+  - name: targettype
+    in: query
+    description: 'The STIX type of the target_ref in the relationships, may be a single type of an array of types'
+    required: true
+    type: string
+  - name: fields
+    in: query
+    description: 'List of STIX fields included from related object, eg name description'
+    required: false
+    type: string
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"
