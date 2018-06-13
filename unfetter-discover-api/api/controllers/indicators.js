@@ -284,6 +284,22 @@ const search = (req, res) => {
             promises.push(Promise.resolve([]));
         }
 
+        // Get relationships of attack patterns derived from instrusion sets if in params, or resolve []
+        if (searchParameters.intrusionSetAttackPatterns && searchParameters.intrusionSetAttackPatterns.length) {
+            const isApFilter = {
+                'stix.type': 'relationship',
+                'stix.relationship_type': 'indicates',
+                'stix.target_ref': {
+                    $in: searchParameters.intrusionSetAttackPatterns
+                }
+            };
+            promises.push(stixModel.find(isApFilter).select({
+                'stix.source_ref': 1
+            }).exec());
+        } else {
+            promises.push(Promise.resolve([]));
+        }
+
         // Get sensors if in params, or resovle []
         if (searchParameters.sensors && searchParameters.sensors.length) {
             const sensorFilter = {
@@ -299,7 +315,7 @@ const search = (req, res) => {
         // TODO get sensors, or determine if it should be done client side
 
         Promise.all(promises)
-            .then(([indicatorsRes, apRelationshipsRes, sensorsRes]) => {
+            .then(([indicatorsRes, apRelationshipsRes, isApRelationshipsRes, sensorsRes]) => {
                 let indicators = dataHelper.getEnhancedData(indicatorsRes, req.swagger.params);
 
                 // Server side filter of attack patterns
@@ -310,6 +326,20 @@ const search = (req, res) => {
                             .map(apRel => apRel.stix.source_ref);
 
                         indicators = indicators.filter(indicator => indicatorsRelatedToAps.includes(indicator.id));
+                    } else {
+                        // No relationships found, assign empty array
+                        indicators = [];
+                    }
+                }
+
+                // Don't check for length as [] is intended to return nothing
+                if (searchParameters.intrusionSetAttackPatterns) {
+                    if (isApRelationshipsRes.length) {
+                        const indicatorsRelatedToIsAps = isApRelationshipsRes
+                            .map(apRel => apRel.toObject())
+                            .map(apRel => apRel.stix.source_ref);
+
+                        indicators = indicators.filter(indicator => indicatorsRelatedToIsAps.includes(indicator.id));
                     } else {
                         // No relationships found, assign empty array
                         indicators = [];
