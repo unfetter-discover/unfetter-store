@@ -19,7 +19,7 @@ properties:
           modified:
             type: string
             format: date-time
-          assessment_objects:
+          assessed_objects:
             type: array
             items:
               properties:
