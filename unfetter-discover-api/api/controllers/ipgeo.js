@@ -85,7 +85,9 @@ function queryProviders(providers, ip, res, error = RequestError.create()) {
         timeout
     }).then(response => response
         .json())
-        .then(json => res.status(200).json({ data: { success: true, provider: provider.id, ...json } }))
+        .then(json => res.status(200).json({
+            data: { success: true, provider: provider.id, ...provider.translate(json) }
+        }))
         .catch(ex => {
             error.addError().source(provider.id).message(ex);
             queryProviders(providers, ip, res, error);
