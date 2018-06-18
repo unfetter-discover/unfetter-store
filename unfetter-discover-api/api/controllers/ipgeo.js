@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const ipregex = require('ip-regex');
+const IPGEO_PROVIDERS = require('../config/ipgeo-config').IPGEO_PROVIDERS;
 
 /**
  * Uses the Builder pattern.
@@ -58,51 +59,6 @@ class RequestError {
     }
 
 }
-
-class IPGeoProvider {
-    constructor(id, url, active = true, batchSeparator = null) {
-        this.id = id;
-        this.url = url;
-        this.active = active;
-        this.batchSeparator = batchSeparator;
-        this.setKey = req => {};
-    }
-
-    withHeaderKey(header, key) {
-        this.setKey = req => {
-            req.headers = { header, key, };
-        };
-        return this;
-    }
-
-    withQueryParamKey(param, key) {
-        this.setKey = req => {
-            req.uri = `${req.uri}${(req.uri.indexOf('?') > 0) ? '&' : '?'}${param}=${key}`;
-        };
-        return this;
-    }
-}
-
-/*
- * TODO Need to find a way to add this information to the system configuration (not something a user needs to see).
- *      If we do so, we can also do more to add the optional/required personal keys that some providers require, or
- *      that can be purchased.
- */
-const IPGEO_PROVIDERS = [
-    // another free service allows up to 1500 requests per day, can be bulk(?)
-    new IPGeoProvider('ipdata.co', 'https://api.ipdata.co/*'),
-
-    // free-version service allows up to 1000 requests per day, no bulk queries
-    new IPGeoProvider('ipapi.co', 'https://ipapi.co/*/json/'),
-
-    // free-version service allows up to 10,000 requests per MONTH (bah!), can be bulk,
-    // and being replaced by newer (still free) service that requires sign-up by 1 July 2018
-    new IPGeoProvider('freegeoip', 'https://freegeoip.net/json/*', false),
-
-    // new endpoint for freegeoip with personal key ()
-    new IPGeoProvider('ipstack.com', 'http://api.ipstack.com/*', true, ',')
-        .withQueryParamKey('access_key', '64a9512c200c1edd5b5b521a441f0eff'),
-];
 
 /**
  * @param {IPGeoProvider} provider
