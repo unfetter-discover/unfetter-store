@@ -1,9 +1,10 @@
-const modelFactory = require('./shared/modelFactory');
-const lodash = require('lodash');
-const jsonApiConverter = require('../helpers/json_api_converter');
+const AssessmentPipelineHelper = require('../helpers/assessment_pipeline_helper');
 const BaseController = require('./shared/basecontroller');
 
 const controller = new BaseController('x-unfetter-assessment');
+const jsonApiConverter = require('../helpers/json_api_converter');
+const lodash = require('lodash');
+const modelFactory = require('./shared/modelFactory');
 // NOTE: object return and query names are order dependent
 const ASSESSED_OBJECT_RETURN_TYPES = ['courseOfActions', 'indicators', 'sensors', 'capabilities'];
 const ASSESSED_OBJECT_QUERY_TYPES = ['course-of-action', 'indicator', 'x-unfetter-sensor', 'x-unfetter-object-assessment'];
@@ -188,9 +189,10 @@ function calculateRiskPerKillChain(workingObjects, isIndicator) {
     return returnObjects;
 }
 
-// Will group assessed objects into Attack Kill Chains, and calculates the risks
-// The data is not json-api
-
+/**
+ * @description Will group assessed objects into Attack Kill Chains, and calculates the risks
+ *  The data is not json-api
+ */
 const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     let [assessment] = result;
 
@@ -308,186 +310,21 @@ const risk = controller.getByIdCb((err, result, req, res, id) => { // eslint-dis
     });
 });
 
-// TODO
-// Given a phase name of a Kill Chain, return all assessements for that Kill Chain
-// An Attack Pattern has a kill chain.  Indicators, Sensors and COA have also been given
-// kill chains to allow them to be grouped.  This function will return all the assessment
-// for ATTACK Kill Chains
-const riskByAttackPatternAndKillChain = function killChain(req, res) {
+/**
+ * TODO:
+ * Given a phase name of a Kill Chain, return all assessements for that Kill Chain
+ * An Attack Pattern has a kill chain.  Indicators, Sensors and COA have also been given
+ * kill chains to allow them to be grouped.  This function will return all the assessment
+ * for ATTACK Kill Chains
+ * @param {*} req
+ * @param {*} res
+ */
+const riskByAttackPatternAndKillChain = (req, res) => {
     const id = req.swagger.params.id ? req.swagger.params.id.value : '';
-
-    const attackPatternAggregations = [{
-        $match: {
-            _id: id
-        } // place id here
-    },
-    {
-        $unwind: '$stix.assessment_objects'
-    },
-    {
-        $lookup: {
-            from: 'stix',
-            localField: 'stix.assessment_objects.stix.id',
-            foreignField: 'stix.source_ref',
-            as: 'relationships'
-        }
-    },
-    {
-        $unwind: '$relationships'
-    },
-    {
-        $match: {
-            'relationships.stix.target_ref': {
-                $regex: /^attack-pattern.*/
-            }
-        }
-    },
-    {
-        $lookup: {
-            from: 'stix',
-            localField: 'relationships.stix.target_ref',
-            foreignField: 'stix.id',
-            as: 'attackPatterns'
-        }
-    },
-    {
-        $unwind: '$attackPatterns'
-    },
-    {
-        $match: {
-            'attackPatterns.stix.type': 'attack-pattern'
-        }
-    },
-    {
-        $unwind: '$attackPatterns.stix.kill_chain_phases'
-    },
-    {
-        $group: {
-            _id: '$attackPatterns.stix.kill_chain_phases.phase_name',
-            attackPatterns: {
-                $addToSet: {
-                    attackPatternName: '$attackPatterns.stix.name',
-                    attackPatternId: '$attackPatterns._id',
-                }
-            },
-            assessedObjects: {
-                $addToSet: {
-                    stix: '$stix.assessment_objects.stix',
-                    questions: '$stix.assessment_objects.questions',
-                    risk: '$stix.assessment_objects.risk',
-                }
-            },
-        }
-    },
-    {
-        $sort: {
-            _id: 1
-        }
-    },
-    ];
-
-    const assessedByAttackPattern = [{
-        $match: {
-            _id: id
-        } // place id here
-    },
-    {
-        $unwind: '$stix.assessment_objects'
-    },
-    {
-        $lookup: {
-            from: 'stix',
-            localField: 'stix.assessment_objects.stix.id',
-            foreignField: 'stix.source_ref',
-            as: 'relationships'
-        }
-    },
-    {
-        $unwind: '$relationships'
-    },
-    {
-        $match: {
-            'relationships.stix.target_ref': {
-                $regex: /^attack-pattern.*/
-            }
-        }
-    },
-    {
-        $lookup: {
-            from: 'stix',
-            localField: 'relationships.stix.target_ref',
-            foreignField: 'stix.id',
-            as: 'attackPatterns'
-        }
-    },
-    {
-        $unwind: '$attackPatterns'
-    },
-    {
-        $match: {
-            'attackPatterns.stix.type': 'attack-pattern'
-        }
-    },
-    {
-        $unwind: '$stix.assessment_objects.questions'
-    },
-    {
-        $group: {
-            _id: '$attackPatterns._id',
-            assessedObjects: {
-                $addToSet: {
-                    assId: '$stix.assessment_objects.stix.id',
-                    questions: '$stix.assessment_objects.questions',
-                    risk: '$stix.assessment_objects.risk',
-                }
-            },
-            risk: {
-                $avg: '$stix.assessment_objects.questions.risk'
-            },
-        }
-    },
-    ];
-
-    const attackPatternsByKillChain = [{
-        $match: {
-            'stix.type': 'attack-pattern',
-            $nor: [{
-                'stix.kill_chain_phases': {
-                    $exists: false
-                }
-            },
-            {
-                'stix.kill_chain_phases': {
-                    $size: 0
-                }
-            },
-            ]
-        }
-    },
-    {
-        $addFields: {
-            kill_chain_phases_copy: '$stix.kill_chain_phases',
-        }
-    },
-    {
-        $unwind: '$stix.kill_chain_phases'
-    },
-    {
-        $group: {
-            _id: '$stix.kill_chain_phases.phase_name',
-            attackPatterns: {
-                $addToSet: {
-                    name: '$stix.name',
-                    x_unfetter_sophistication_level: '$extendedProperties.x_unfetter_sophistication_level',
-                    description: '$stix.description',
-                    kill_chain_phases: '$kill_chain_phases_copy',
-                    external_references: '$stix.external_references',
-                    id: '$stix.id',
-                },
-            },
-        }
-    },
-    ];
+    const isCapability = req.swagger.params.isCapability.value || false;
+    const attackPatternAggregations = AssessmentPipelineHelper.buildAttackPatternAggregationsPipeline(id, isCapability);
+    const assessedByAttackPattern = AssessmentPipelineHelper.buildAttackPatternByKillChainPipeline(id, isCapability);
+    const attackPatternsByKillChain = AssessmentPipelineHelper.buildAttackPatternsByKillChainPipeline();
 
     Promise.all([
         aggregationModel.aggregate(attackPatternAggregations),
@@ -536,6 +373,11 @@ const riskByAttackPatternAndKillChain = function killChain(req, res) {
             }));
 };
 
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ */
 const summaryAggregations = (req, res) => {
     const id = req.swagger.params.id ? req.swagger.params.id.value : '';
 
@@ -670,7 +512,9 @@ const summaryAggregations = (req, res) => {
             }));
 };
 
-// Get the total Risk of a single Assessed Object of a certain Assessed Object
+/**
+ * @description Get the total Risk of a single Assessed Object of a certain Assessed Object
+ */
 const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     if (err) {
         return res.status(500).json({
@@ -696,7 +540,9 @@ const getRiskByAssessedObject = controller.getByIdCb((err, result, req, res, id)
     });
 });
 
-// Get the total Risk of a single Assessed Object of a certain Assessed Object
+/**
+ * @description Get the total Risk of a single Assessed Object of a certain Assessed Object
+ */
 const getAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, id) => { // eslint-disable-line no-unused-vars
     if (err) {
         return res.status(500).json({
@@ -723,12 +569,12 @@ const getAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, i
     });
 });
 
-
-// With a given assessmentID, and assessedObjectId, and a new answer value, go through the questions
-//   of that assessed object and give the new answers.
-//   Recalculate the updated risks.
-//   Updates mongo with the new values
-
+/**
+ * @description With a given assessmentID, and assessedObjectId, and a new answer value, go through the questions
+ * of that assessed object and give the new answers.
+ * Recalculate the updated risks.
+ * Updates mongo with the new values
+ */
 const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, id) => {
     // If there was an error returning the assessment object, return error.
     if (err) {
@@ -803,35 +649,35 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
             Model.findOneAndUpdate({
                 _id: id
             }, newDocument, {
-                    new: true
-                }, (errUpdate, resultUpdate) => {
-                    if (errUpdate) {
-                        return res.status(500).json({
-                            errors: [{
-                                status: 500,
-                                source: '',
-                                title: 'Error',
-                                code: '',
-                                detail: 'An unknown error has occurred.'
-                            }]
-                        });
-                    }
-
-                    if (resultUpdate) {
-                        const requestedUrl = apiRoot + req.originalUrl;
-                        const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
-                        return res.status(200).json({
-                            links: {
-                                self: requestedUrl,
-                            },
-                            data: convertedResult
-                        });
-                    }
-
-                    return res.status(404).json({
-                        message: `Unable to update the item.  No item found with id ${id}`
+                new: true
+            }, (errUpdate, resultUpdate) => {
+                if (errUpdate) {
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500,
+                            source: '',
+                            title: 'Error',
+                            code: '',
+                            detail: 'An unknown error has occurred.'
+                        }]
                     });
+                }
+
+                if (resultUpdate) {
+                    const requestedUrl = apiRoot + req.originalUrl;
+                    const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
+                    return res.status(200).json({
+                        links: {
+                            self: requestedUrl,
+                        },
+                        data: convertedResult
+                    });
+                }
+
+                return res.status(404).json({
+                    message: `Unable to update the item.  No item found with id ${id}`
                 });
+            });
         } catch (error) {
             console.log(`error ${error}`);
             return res.status(500).json({
@@ -895,19 +741,19 @@ const latestAssessmentPromise = (query, req, res) => {
                     // TODO remove this when a better fix is in place
                     if (r.stix.type) {
                         switch (r.stix.type) {
-                            case 'course-of-action':
-                                retVal.name = `${r.name} - Mitigations`;
-                                break;
-                            case 'indicator':
-                                retVal.name = `${r.name} - Indicators`;
-                                break;
-                            case 'x-unfetter-sensor':
-                                retVal.name = `${r.name} - Sensors`;
-                                break;
-                            case 'x-unfetter-object-assessment':
-                                retVal.name = `${r.name} - Capabilities`;
-                                break;
-                            default:
+                        case 'course-of-action':
+                            retVal.name = `${r.name} - Mitigations`;
+                            break;
+                        case 'indicator':
+                            retVal.name = `${r.name} - Indicators`;
+                            break;
+                        case 'x-unfetter-sensor':
+                            retVal.name = `${r.name} - Sensors`;
+                            break;
+                        case 'x-unfetter-object-assessment':
+                            retVal.name = `${r.name} - Capabilities`;
+                            break;
+                        default:
                         }
                     }
                     return retVal;
