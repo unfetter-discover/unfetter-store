@@ -1,5 +1,6 @@
 const AssessmentPipelineHelper = require('../helpers/assessment_pipeline_helper');
 const BaseController = require('./shared/basecontroller');
+
 const controller = new BaseController('x-unfetter-assessment');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const lodash = require('lodash');
@@ -315,8 +316,8 @@ const risk = controller.getByIdCb((err, result, req, res, id) => { // eslint-dis
  * An Attack Pattern has a kill chain.  Indicators, Sensors and COA have also been given
  * kill chains to allow them to be grouped.  This function will return all the assessment
  * for ATTACK Kill Chains
- * @param {*} req 
- * @param {*} res 
+ * @param {*} req
+ * @param {*} res
  */
 const riskByAttackPatternAndKillChain = (req, res) => {
     const id = req.swagger.params.id ? req.swagger.params.id.value : '';
@@ -373,9 +374,9 @@ const riskByAttackPatternAndKillChain = (req, res) => {
 };
 
 /**
- * 
- * @param {*} req 
- * @param {*} res 
+ *
+ * @param {*} req
+ * @param {*} res
  */
 const summaryAggregations = (req, res) => {
     const id = req.swagger.params.id ? req.swagger.params.id.value : '';
@@ -568,8 +569,6 @@ const getAnswerByAssessedObject = controller.getByIdCb((err, result, req, res, i
     });
 });
 
-
-
 /**
  * @description With a given assessmentID, and assessedObjectId, and a new answer value, go through the questions
  * of that assessed object and give the new answers.
@@ -650,35 +649,35 @@ const updateAnswerByAssessedObject = controller.getByIdCb((err, result, req, res
             Model.findOneAndUpdate({
                 _id: id
             }, newDocument, {
-                    new: true
-                }, (errUpdate, resultUpdate) => {
-                    if (errUpdate) {
-                        return res.status(500).json({
-                            errors: [{
-                                status: 500,
-                                source: '',
-                                title: 'Error',
-                                code: '',
-                                detail: 'An unknown error has occurred.'
-                            }]
-                        });
-                    }
-
-                    if (resultUpdate) {
-                        const requestedUrl = apiRoot + req.originalUrl;
-                        const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
-                        return res.status(200).json({
-                            links: {
-                                self: requestedUrl,
-                            },
-                            data: convertedResult
-                        });
-                    }
-
-                    return res.status(404).json({
-                        message: `Unable to update the item.  No item found with id ${id}`
+                new: true
+            }, (errUpdate, resultUpdate) => {
+                if (errUpdate) {
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500,
+                            source: '',
+                            title: 'Error',
+                            code: '',
+                            detail: 'An unknown error has occurred.'
+                        }]
                     });
+                }
+
+                if (resultUpdate) {
+                    const requestedUrl = apiRoot + req.originalUrl;
+                    const convertedResult = jsonApiConverter.convertJsonToJsonApi(resultUpdate.stix, assessment.stix.type, requestedUrl);
+                    return res.status(200).json({
+                        links: {
+                            self: requestedUrl,
+                        },
+                        data: convertedResult
+                    });
+                }
+
+                return res.status(404).json({
+                    message: `Unable to update the item.  No item found with id ${id}`
                 });
+            });
         } catch (error) {
             console.log(`error ${error}`);
             return res.status(500).json({
@@ -742,19 +741,19 @@ const latestAssessmentPromise = (query, req, res) => {
                     // TODO remove this when a better fix is in place
                     if (r.stix.type) {
                         switch (r.stix.type) {
-                            case 'course-of-action':
-                                retVal.name = `${r.name} - Mitigations`;
-                                break;
-                            case 'indicator':
-                                retVal.name = `${r.name} - Indicators`;
-                                break;
-                            case 'x-unfetter-sensor':
-                                retVal.name = `${r.name} - Sensors`;
-                                break;
-                            case 'x-unfetter-object-assessment':
-                                retVal.name = `${r.name} - Capabilities`;
-                                break;
-                            default:
+                        case 'course-of-action':
+                            retVal.name = `${r.name} - Mitigations`;
+                            break;
+                        case 'indicator':
+                            retVal.name = `${r.name} - Indicators`;
+                            break;
+                        case 'x-unfetter-sensor':
+                            retVal.name = `${r.name} - Sensors`;
+                            break;
+                        case 'x-unfetter-object-assessment':
+                            retVal.name = `${r.name} - Capabilities`;
+                            break;
+                        default:
                         }
                     }
                     return retVal;

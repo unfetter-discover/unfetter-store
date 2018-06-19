@@ -40,7 +40,7 @@ const buildAttackPatternByKillChainPipeline = (id = '', isCapability = false) =>
     ];
 
     return pipeline;
-}
+};
 
 /**
  * @description - builds the pipeline for an assessments attack pattern
@@ -92,7 +92,7 @@ const buildAttackPatternAggregationsPipeline = (id = '', isCapability = false) =
     ];
 
     return pipeline;
-}
+};
 
 /**
  * @description - the initial matcher pipeline phase for an assessments query
@@ -110,7 +110,7 @@ const buildAssessmentInitialMatcherPipeline = (id = '') => {
         },
     ];
     return initialMatcher;
-}
+};
 
 /**
  * @description - the pipeline phase to take a capability and generated its related attack patterns
@@ -119,24 +119,24 @@ const buildAssessmentInitialMatcherPipeline = (id = '') => {
 const buildAssessmentCapabilityToAttackPatternPipeline = () => {
     const capabilityAssessmentToAttackPatterns = [
         {
-            '$lookup': {
+            $lookup: {
                 from: 'stix', localField: 'stix.assessment_objects.stix.id', foreignField: 'stix.id', as: 'object_assessments'
             }
         },
         {
-            '$unwind': '$object_assessments'
+            $unwind: '$object_assessments'
         },
         {
-            $replaceRoot: { newRoot: "$object_assessments" }
+            $replaceRoot: { newRoot: '$object_assessments' }
         },
         {
-            '$unwind': '$stix.assessment_objects'
+            $unwind: '$stix.assessment_objects'
         },
         {
-            $replaceRoot: { newRoot: "$stix.assessment_objects" }
+            $replaceRoot: { newRoot: '$stix.assessment_objects' }
         },
         {
-            $project: { 'attackPatterns': '$assessed_object_ref' }
+            $project: { attackPatterns: '$assessed_object_ref' }
         },
         {
             $group: {
@@ -154,7 +154,7 @@ const buildAssessmentCapabilityToAttackPatternPipeline = () => {
     ];
 
     return capabilityAssessmentToAttackPatterns;
-}
+};
 
 /**
  * @description - the pipeline phase to take an assessments relationship objects and generated its retrieve attack patterns
@@ -191,7 +191,7 @@ const buildAssessmentRelationsToAttackPatternPipeline = () => {
     ];
 
     return assessmentRelationshipsToAttackPatterns;
-}
+};
 
 /**
  * @description - the pipeline to query for attack patterns by kill chain
@@ -241,7 +241,7 @@ const buildAttackPatternsByKillChainPipeline = () => {
     ];
 
     return pipeline;
-}
+};
 
 module.exports = {
     buildAssessmentCapabilityToAttackPatternPipeline,
@@ -251,7 +251,3 @@ module.exports = {
     buildAttackPatternByKillChainPipeline,
     buildAttackPatternsByKillChainPipeline,
 };
-
-
-
-
