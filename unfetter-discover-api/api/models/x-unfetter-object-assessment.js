@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const stixCommons = require('./stix-commons');
+const xunfetterAssessObject = require('./x-unfetter-assessed-object').xunfetterAssessObject;
 
 const StixSchema = {
     created_by_ref: {
@@ -21,7 +22,7 @@ const StixSchema = {
         type: String,
         required: [true, 'object_ref is required']
     },
-    assessed_objects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'XUnfetterAssessedObject' }]
+    assessed_objects: [xunfetterAssessObject]
 };
 
 const objectAssessment = mongoose.model('XUnfetterObjectAssessment', stixCommons.makeSchema(StixSchema), 'stix');
