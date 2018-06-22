@@ -326,12 +326,17 @@ module.exports = class BaseController {
     update() {
         const type = this.type;
         const model = this.model;
+        const relationshipModel = modelFactory.getModel('relationship');
+
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
 
             // get the old item
             if (req.swagger.params.id.value !== undefined && req.swagger.params.data !== undefined && req.swagger.params.data.value.data.attributes !== undefined) {
                 const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+                const relationshipsToAdd = [];
+                const relationshipsIdsToDelete = [];
+                let relatedIds;
 
                 const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
                 model.findById(query, (err, result) => {
@@ -371,6 +376,16 @@ module.exports = class BaseController {
                         }
                     }
 
+                    if (resultObj.metaProperties !== undefined) {
+                        if (resultObj.metaProperties.relationships !== undefined) {
+                            relatedIds = resultObj.metaProperties.relationships;
+                            delete resultObj.metaProperties.relationships;
+                        }
+                        const tempMeta = resultObj.metaProperties;
+                        delete resultObj.metaProperties;
+                        resultObj.metaProperties = tempMeta;
+                    }
+
                     // then validate
                     // guard
                     resultObj.stix.modified = new Date();
@@ -385,6 +400,80 @@ module.exports = class BaseController {
                             errors: [{
                                 status: 400, source: '', title: 'Error', code: '', detail: errors
                             }]
+                        });
+                    }
+
+                    if (relatedIds && relatedIds.length) {
+                        relationshipModel.find({ 'stix.source_ref': resultObj._id }, (relErr, relResults) => {
+                            if (relErr) {
+                                console.log(`Unable to find related objects for: ${resultObj._id}`);
+                            } else {
+                                const existingRelObjs = relResults
+                                    .map(doc => doc.toObject());
+
+                                // Add relationships for objs that do not already exist
+                                relatedIds.forEach(relId => {
+                                    if (!existingRelObjs.map(relObj => relObj.stix.target_ref).includes(relId)) {
+                                        const newId = stix.id('relationship');
+                                        let relType = '';
+                                        // TODO make this better
+                                        switch (resultObj.stix.type) {
+                                        case 'indicator':
+                                            relType = 'indicates';
+                                            break;
+                                        case 'x-unfetter-sensor':
+                                            relType = 'detects';
+                                            break;
+                                        default:
+                                        }
+                                        const tempRelationship = {
+                                            stix: {
+                                                id: newId,
+                                                source_ref: resultObj._id,
+                                                target_ref: relId,
+                                                relationship_type: relType,
+                                                created_by_ref: resultObj.stix.created_by_ref
+                                            }
+                                        };
+
+                                        const newRelationshipDocument = new relationshipModel(tempRelationship);
+                                        const relationshipErrors = newRelationshipDocument.validateSync();
+                                        if (relationshipErrors) {
+                                            console.log('Error attempting to synchronize a relationship obj', relationshipErrors);
+                                        } else {
+                                            newRelationshipDocument._id = newRelationshipDocument.stix.id;
+                                            relationshipsToAdd.push(newRelationshipDocument);
+                                        }
+                                    }
+                                });
+
+                                // Delete relationships that were removed
+                                existingRelObjs.forEach(existingRelObj => {
+                                    if (!relatedIds.includes(existingRelObj.stix.target_ref)) {
+                                        relationshipsIdsToDelete.push(existingRelObj._id);
+                                    }
+                                });
+
+                                if (relationshipsToAdd.length) {
+                                    relationshipModel.insertMany(relationshipsToAdd, (addRelErr, addRelResults) => {
+                                        if (addRelErr) {
+                                            console.log('Error while creating relationships for ', newDocument._id, ': ', addRelErr);
+                                        } else {
+                                            console.log('Successfully created ', addRelResults.length, ' relationships for: ', newDocument._id);
+                                        }
+                                    });
+                                }
+
+                                if (relationshipsIdsToDelete.length) {
+                                    relationshipModel.remove({ _id: { $in: relationshipsIdsToDelete } }, (delRelErr, delRelResults) => {
+                                        if (delRelErr) {
+                                            console.log('Error while deleted relationships for ', newDocument._id, ': ', delRelErr);
+                                        } else {
+                                            console.log('Successfully deleted ', delRelResults.length, ' relationships for: ', newDocument._id);
+                                        }
+                                    });
+                                }
+                            }
                         });
                     }
 
