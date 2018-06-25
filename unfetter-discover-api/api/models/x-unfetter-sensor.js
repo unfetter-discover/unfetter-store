@@ -9,7 +9,8 @@ const StixSchema = {
     },
     name: {
         type: String,
-        required: [true, 'name is required']
+        required: [true, 'name is required'],
+        index: true
     },
     kill_chain_phases: [stixCommons.kill_chain_phases],
     aliases: [String],
