@@ -14,11 +14,15 @@ const StixSchema = {
     },
     name: {
         type: String,
-        required: [true, 'name is required']
+        required: [true, 'name is required'],
+        index: true
     },
     description: String,
     object_refs: [String],
-    assessment_sets: [String]
+    assessment_sets: [{
+        type: String,
+        index: 1
+    }]
 };
 
 const assessmentGroup = mongoose.model('XUnfetterAssessmentGroup', stixCommons.makeSchema(StixSchema), 'stix');

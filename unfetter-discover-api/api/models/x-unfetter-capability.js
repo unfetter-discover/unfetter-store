@@ -14,7 +14,8 @@ const StixSchema = {
     },
     name: {
         type: String,
-        required: [true, 'name is required']
+        required: [true, 'name is required'],
+        index: true
     },
     description: String,
     version: Number,

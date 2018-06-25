@@ -9,7 +9,8 @@ const ExtendedSchema = {
     },
     name: {
         type: String,
-        required: [true, 'name is required']
+        required: [true, 'name is required'],
+        index: true
     },
     description: {
         type: String
