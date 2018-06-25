@@ -9,7 +9,8 @@ const StixSchema = {
     id: String,
     name: {
         type: String,
-        required: [true, 'Name is required']
+        required: [true, 'Name is required'],
+        index: true
     },
     assessment_objects: [{
         _id: false,
