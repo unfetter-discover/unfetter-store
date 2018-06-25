@@ -179,7 +179,7 @@ if __name__ == '__main__':
                     '\nPlease enter the path to the unfetter-ui directory [\033[4m../../unfetter-ui\033[0m]]: ')).strip()
                 if ui_path == '':
                     ui_path = '../../unfetter-ui'
-                ui_cfg_file = os.path.join(ui_path + '/src/assets/private-config.json')
+                ui_cfg_file = os.path.join(ui_path + '/src/assets/config/local-settings.json')
                 try:
                     update_ui_env(ui_cfg_file)
                     print '\nBye!\033[0m\n\n'                    
