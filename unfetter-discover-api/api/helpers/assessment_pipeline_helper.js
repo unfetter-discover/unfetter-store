@@ -130,10 +130,10 @@ const buildAssessmentCapabilityToAttackPatternPipeline = () => {
             $replaceRoot: { newRoot: '$object_assessments' }
         },
         {
-            $unwind: '$stix.assessed_objects'
+            $unwind: '$stix.assessment_objects'
         },
         {
-            $replaceRoot: { newRoot: '$stix.assessed_objects' }
+            $replaceRoot: { newRoot: '$stix.assessment_objects' }
         },
         {
             $project: { attackPatterns: '$assessed_object_ref' }
