@@ -32,8 +32,9 @@ router.get('/user-notifications', (req, res) => {
     });
 });
 
-router.get('/user-notifications/process/:action/:userId/:notificationId?', (req, res) => {
-    const { action, userId, notificationId } = req.params;
+router.get('/user-notifications/process/:action/:notificationId?', (req, res) => {
+    const userId = req.user._id;
+    const { action, notificationId } = req.params;
 
     if (
         (!action || !Object.keys(NOTIFICATION_ACTIONS).includes(action) || !userId) ||
