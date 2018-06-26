@@ -23,7 +23,11 @@ if __name__ == '__main__':
 
     print '\n***************\n\nRegistered Users:\n\n\tIndex - User Name - User Role'
     for i in range(0, len(users)):
-        print '\t' + str(i) + ' -- ' + users[i][u'userName'] + ' -- ' + users[i][u'role']
+        if 'github' in users[i]:
+            uacKey = u'github'
+        else:
+            uacKey = u'gitlab'
+        print '\t' + str(i) + ' -- ' + users[i][uacKey][u'userName'] + ' -- ' + users[i][u'role']
 
     print '\n***************\n'
 
@@ -51,4 +55,8 @@ if __name__ == '__main__':
         users[user_index][u'approved'] = True
 
         users_collection.update_one({'_id': users[user_index][u'_id']}, {'$set': users[user_index]})
-        print users[user_index][u'userName'] + ' successully updated.'
+        if 'github' in users[user_index]:
+            uacKey = u'github'
+        else:
+            uacKey = u'gitlab'
+        print users[user_index][uacKey][u'userName'] + ' successully updated.'
