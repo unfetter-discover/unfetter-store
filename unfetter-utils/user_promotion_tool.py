@@ -19,13 +19,6 @@ if __name__ == '__main__':
     users_collection = db[UNFETTER_USERS_COLLECTION]
     users_raw = users_collection.find({ 'registered': True })
     users = [user for user in users_raw]
-
-    print '\n***************\n\nRegistered Users:\n\n\tIndex - User Name - User Role'
-    for i in range(0, len(users)):
-        print '\t' + str(i) + ' -- ' + users[i][u'userName'] + ' -- ' + users[i][u'role']
-
-    print '\n***************\n'
-
     inp = 'y'
     first_go = True
     while inp == 'Y' or inp =='y':
@@ -36,7 +29,6 @@ if __name__ == '__main__':
 
         if inp != 'Y' and inp !='y':
             break
-
         print '\n***************\n\nRegistered Users:\n\n\tIndex - User Name - User Role'
         for i in range(0, len(users)):
             print '\t' + str(i) + ' -- ' + users[i][u'userName'] + ' -- ' + users[i][u'role']
