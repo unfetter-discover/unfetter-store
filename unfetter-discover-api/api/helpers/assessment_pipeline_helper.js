@@ -46,7 +46,7 @@ const buildAttackPatternByKillChainPipeline = (id = '', isCapability = false) =>
  * @description - builds the pipeline for an assessments attack pattern
  * @return Array
  */
-const buildAttackPatternAggregationsPipeline = (id = '', isCapability = false) => {
+const buildAttackPatternsByPhasePipeline = (id = '', isCapability = false) => {
     const initialMatcher = buildAssessmentInitialMatcherPipeline(id);
     // capability vs old relationships assessment style datamodel
     const assessmentToAttackPatterns = isCapability === true ?
@@ -127,21 +127,31 @@ const buildAssessmentCapabilityToAttackPatternPipeline = () => {
             $unwind: '$object_assessments'
         },
         {
-            $replaceRoot: { newRoot: '$object_assessments' }
+            $unwind: '$object_assessments.stix.assessed_objects'
         },
         {
-            $unwind: '$stix.assessed_objects'
-        },
-        {
-            $replaceRoot: { newRoot: '$stix.assessed_objects' }
-        },
-        {
-            $project: { attackPatterns: '$assessed_object_ref' }
+            $project: {
+                attackPatterns: '$object_assessments.stix.assessed_objects.assessed_object_ref',
+                stix: '$stix',
+                object_assessments: '$object_assessments',
+            }
         },
         {
             $group: {
-                _id: '$attackPatterns'
+                assessmentId: { $addToSet: '$_id' },
+                _id: '$attackPatterns',
+                stix: { $push: '$stix' },
+                object_assessments: { $push: '$object_assessments' },
             }
+        },
+        {
+            $unwind: '$object_assessments',
+        },
+        {
+            $unwind: '$stix',
+        },
+        {
+            $unwind: '$assessmentId',
         },
         {
             $lookup: {
@@ -150,9 +160,8 @@ const buildAssessmentCapabilityToAttackPatternPipeline = () => {
                 foreignField: 'stix.id',
                 as: 'attackPatterns'
             }
-        }
+        },
     ];
-
     return capabilityAssessmentToAttackPatterns;
 };
 
@@ -247,7 +256,7 @@ module.exports = {
     buildAssessmentCapabilityToAttackPatternPipeline,
     buildAssessmentInitialMatcherPipeline,
     buildAssessmentRelationsToAttackPatternPipeline,
-    buildAttackPatternAggregationsPipeline,
+    buildAttackPatternsByPhasePipeline,
     buildAttackPatternByKillChainPipeline,
     buildAttackPatternsByKillChainPipeline,
 };

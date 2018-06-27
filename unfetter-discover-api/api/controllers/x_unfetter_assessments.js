@@ -322,12 +322,12 @@ const risk = controller.getByIdCb((err, result, req, res, id) => { // eslint-dis
 const riskByAttackPatternAndKillChain = (req, res) => {
     const id = req.swagger.params.id ? req.swagger.params.id.value : '';
     const isCapability = req.swagger.params.isCapability.value || false;
-    const attackPatternAggregations = AssessmentPipelineHelper.buildAttackPatternAggregationsPipeline(id, isCapability);
+    const attackPatternsByPhase = AssessmentPipelineHelper.buildAttackPatternsByPhasePipeline(id, isCapability);
     const assessedByAttackPattern = AssessmentPipelineHelper.buildAttackPatternByKillChainPipeline(id, isCapability);
     const attackPatternsByKillChain = AssessmentPipelineHelper.buildAttackPatternsByKillChainPipeline();
 
     Promise.all([
-        aggregationModel.aggregate(attackPatternAggregations),
+        aggregationModel.aggregate(attackPatternsByPhase),
         aggregationModel.aggregate(assessedByAttackPattern),
         aggregationModel.aggregate(attackPatternsByKillChain),
     ])
@@ -339,13 +339,6 @@ const riskByAttackPatternAndKillChain = (req, res) => {
                 const ABAP_POSITION = 1;
                 const APBKC_POSITION = 2;
                 returnObj.phases = results[PHASE_POSITION];
-
-                // TODO remove this, this is incorrect
-                // returnObj.totalRisk = results[PHASE_POSITION]
-                //   .map(res => res.avgRisk)
-                //   .reduce((prev, cur) => cur += prev, 0)
-                //   / results[PHASE_POSITION].length;
-
                 returnObj.assessedByAttackPattern = results[ABAP_POSITION];
                 returnObj.attackPatternsByKillChain = results[APBKC_POSITION];
 
