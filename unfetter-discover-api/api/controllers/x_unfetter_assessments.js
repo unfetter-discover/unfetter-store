@@ -68,87 +68,81 @@ function getPromises(assessment) {
      // Generate promises using the ASSESSED_OBJECT_TYPES enum so Promise.all methods get the return in the order expected
     // Don't bother running a mongo query for empty objects
     const promises = [];
+
     ASSESSED_OBJECT_QUERY_TYPES.forEach(assessedObjectType => {
         let assessedPromise;
+        const initialMatch = {
+            $match: {
+                _id: {
+                    $in: assessedObjectIDs[assessedObjectType]
+                }
+            }
+        };
         if (assessedObjectIDs[assessedObjectType] === undefined || assessedObjectIDs[assessedObjectType].length === 0) {
             assessedPromise = Promise.resolve([]);
         } else if (assessedObjectType !== ASSESSED_OBJECT_QUERY_TYPES[3]) { // capability
-            assessedPromise = models[assessedObjectType].aggregate({
-                $match: {
-                    _id: {
-                        $in: assessedObjectIDs[assessedObjectType]
-                    }
-                }
-            });
+            assessedPromise = models[assessedObjectType].aggregate(initialMatch);
         } else {
-            console.log('It\'s a capability!');
-            console.log(`getting ids in assessedObjectIDs[${assessedObjectType}]: ${JSON.stringify(assessedObjectIDs[assessedObjectType])}`);
-            assessedPromise = models[assessedObjectType].aggregate([{
-                $match: {
-                    _id: {
-                        $in: assessedObjectIDs[assessedObjectType]
+            assessedPromise = models[assessedObjectType].aggregate([initialMatch,
+                {
+                    $unwind: '$stix.assessed_objects'
+                },
+                {
+                    $lookup: {
+                        from: 'stix',
+                        localField: 'stix.assessed_objects.assessed_object_ref',
+                        foreignField: 'stix.id',
+                        as: 'attack_pattern'
                     }
-                }
-            },
-            {
-                $unwind: '$stix.assessed_objects'
-            },
-            {
-                $lookup: {
-                    from: 'stix',
-                    localField: 'stix.assessed_objects.assessed_object_ref',
-                    foreignField: 'stix.id',
-                    as: 'attack_pattern'
-                }
-            },
-            {
-                $unwind: '$attack_pattern'
-            },
-            {
-                $unwind: '$attack_pattern.stix.kill_chain_phases'
-            },
-            {
-                $project: {
-                    _id: 1,
-                    metaProperties: 1,
-                    stix: 1,
-                    kill_chain_phases: '$attack_pattern.stix.kill_chain_phases'
-                }
-            },
-            {
-                $group: {
-                    _id: '$_id',
-                    metaProperties: {
-                        $first: '$metaProperties'
-                    },
-                    stix: {
-                        $first: '$stix',
-                    },
-                    kill_chain_phases: {
-                        $addToSet: {
-                            phase_name: '$kill_chain_phases.phase_name',
-                            kill_chain_name: '$kill_chain_phases.kill_chain_name',
+                },
+                {
+                    $unwind: '$attack_pattern'
+                },
+                {
+                    $unwind: '$attack_pattern.stix.kill_chain_phases'
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        metaProperties: 1,
+                        stix: 1,
+                        kill_chain_phases: '$attack_pattern.stix.kill_chain_phases'
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        metaProperties: {
+                            $first: '$metaProperties'
+                        },
+                        stix: {
+                            $first: '$stix',
+                        },
+                        kill_chain_phases: {
+                            $addToSet: {
+                                phase_name: '$kill_chain_phases.phase_name',
+                                kill_chain_name: '$kill_chain_phases.kill_chain_name',
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        metaProperties: 1,
+                        stix: {
+                            type: 1,
+                            id: 1,
+                            name: 1,
+                            description: 1,
+                            created_by_ref: 1,
+                            created: 1,
+                            modified: 1,
+                            object_ref: 1,
+                            kill_chain_phases: '$kill_chain_phases'
                         }
                     }
                 }
-            },
-            {
-                $project: {
-                    _id: 1,
-                    metaProperties: 1,
-                    stix: {
-                        type: 1,
-                        id: 1,
-                        name: 1,
-                        description: 1,
-                        created_by_ref: 1,
-                        created: 1,
-                        modified: 1,
-                        object_ref: 1,
-                        kill_chain_phases: '$kill_chain_phases'
-                    }
-                }
-            }
             ]);
         }
         promises.push(assessedPromise);
