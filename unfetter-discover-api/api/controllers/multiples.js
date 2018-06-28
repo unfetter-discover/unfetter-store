@@ -1,8 +1,10 @@
+const lodash = require('lodash');
+
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
-const lodash = require('lodash');
 const SecurityHelper = require('../helpers/security_helper');
 const jsonApiConverter = require('../helpers/json_api_converter');
+const userHelpers = require('../helpers/user');
 
 const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const model = modelFactory.getModel('schemaless');
@@ -98,15 +100,12 @@ const addComment = (req, res) => {
             const commentObj = {
                 user: {
                     id: user._id,
-                    userName: user.userName
+                    userName: user.userName,
+                    avatar_url: userHelpers.getAvatarUrl(user)
                 },
                 submitted: new Date(),
                 comment
             };
-
-            if (user.github && user.github.avatar_url) {
-                commentObj.user.avatar_url = user.github.avatar_url;
-            }
 
             resultObj.metaProperties.comments.push(commentObj);
 
