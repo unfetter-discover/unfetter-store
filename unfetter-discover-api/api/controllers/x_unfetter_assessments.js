@@ -65,19 +65,85 @@ function getPromises(assessment) {
             });
     }
 
-    // Generate promises using the ASSESSED_OBJECT_TYPES enum so Promise.all methods get the return in the order expected
+     // Generate promises using the ASSESSED_OBJECT_TYPES enum so Promise.all methods get the return in the order expected
     // Don't bother running a mongo query for empty objects
     const promises = [];
+
     ASSESSED_OBJECT_QUERY_TYPES.forEach(assessedObjectType => {
         let assessedPromise;
-        if (assessedObjectIDs[assessedObjectType] === undefined || assessedObjectIDs[assessedObjectType].length === 0) {
-            assessedPromise = Promise.resolve([]);
-        } else {
-            assessedPromise = models[assessedObjectType].find({
+        const initialMatch = {
+            $match: {
                 _id: {
                     $in: assessedObjectIDs[assessedObjectType]
                 }
-            });
+            }
+        };
+        if (assessedObjectIDs[assessedObjectType] === undefined || assessedObjectIDs[assessedObjectType].length === 0) {
+            assessedPromise = Promise.resolve([]);
+        } else if (assessedObjectType !== ASSESSED_OBJECT_QUERY_TYPES[3]) { // capability
+            assessedPromise = models[assessedObjectType].aggregate(initialMatch);
+        } else {
+            assessedPromise = models[assessedObjectType].aggregate([initialMatch,
+                {
+                    $unwind: '$stix.assessed_objects'
+                },
+                {
+                    $lookup: {
+                        from: 'stix',
+                        localField: 'stix.assessed_objects.assessed_object_ref',
+                        foreignField: 'stix.id',
+                        as: 'attack_pattern'
+                    }
+                },
+                {
+                    $unwind: '$attack_pattern'
+                },
+                {
+                    $unwind: '$attack_pattern.stix.kill_chain_phases'
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        metaProperties: 1,
+                        stix: 1,
+                        kill_chain_phases: '$attack_pattern.stix.kill_chain_phases'
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        metaProperties: {
+                            $first: '$metaProperties'
+                        },
+                        stix: {
+                            $first: '$stix',
+                        },
+                        kill_chain_phases: {
+                            $addToSet: {
+                                phase_name: '$kill_chain_phases.phase_name',
+                                kill_chain_name: '$kill_chain_phases.kill_chain_name',
+                            }
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        metaProperties: 1,
+                        stix: {
+                            type: 1,
+                            id: 1,
+                            name: 1,
+                            description: 1,
+                            created_by_ref: 1,
+                            created: 1,
+                            modified: 1,
+                            object_ref: 1,
+                            kill_chain_phases: '$kill_chain_phases'
+                        }
+                    }
+                }
+            ]);
         }
         promises.push(assessedPromise);
     });
@@ -105,7 +171,7 @@ const assessedObjects = controller.getByIdCb((err, result, req, res, id) => { //
                 .map((returnProp, i) => {
                     const assessmentRisks = results[i]
                         .map(stix => {
-                            const stixObj = stix.toObject();
+                            const stixObj = stix;
                             const assessedData = assessmentObjects.find(assessmentObject => assessmentObject.stix.id === stix._id);
                             if (assessedData !== null && assessedData !== undefined && assessedData.risk !== undefined) {
                                 stixObj.risk = assessedData.risk;
@@ -170,15 +236,15 @@ function groupByKillChain(distinctKillChainPhaseNames, objects, isIndicator) {
 }
 
 // Will group the objects by the kill chain phase name, and will group the risk for each group.
-function calculateRiskPerKillChain(workingObjects, isIndicator) {
+function calculateRiskPerKillChain(workingObjects, useKillChainPhaseName) {
     let collectionName = 'groupings';
     let phaseName = 'groupingValue';
-    if (isIndicator) {
+    if (useKillChainPhaseName) {
         collectionName = 'kill_chain_phases';
         phaseName = 'phase_name';
     }
     const killChains = lodash.sortBy(lodash.uniqBy(lodash.flatMap(lodash.flatMapDeep(workingObjects, collectionName), phaseName)));
-    const groupedObjects = groupByKillChain(killChains, workingObjects, isIndicator);
+    const groupedObjects = groupByKillChain(killChains, workingObjects, useKillChainPhaseName);
     const returnObjects = [];
     lodash.forEach(groupedObjects, killChainGroup => {
         const returnObject = calculateRiskByQuestion(killChainGroup.objects);
@@ -219,31 +285,40 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => { /
             const courseOfActions = results[0]
                 .filter(doc => doc !== undefined)
                 .map(doc => ({
-                    ...doc.toObject().stix,
-                    ...doc.toObject().metaProperties
+                    ...doc.stix,
+                    ...doc.metaProperties
                 }));
             const coaRisks = [];
 
             const indicators = results[1]
                 .filter(doc => doc !== undefined)
                 .map(doc => ({
-                    ...doc.toObject().stix,
-                    ...doc.toObject().metaProperties
+                    ...doc.stix,
+                    ...doc.metaProperties
                 }));
             const indicatorRisks = [];
 
             const sensors = results[2]
                 .filter(doc => doc !== undefined)
                 .map(doc => ({
-                    ...doc.toObject().stix,
-                    ...doc.toObject().metaProperties
+                    ...doc.stix,
+                    ...doc.metaProperties
                 }));
             const sensorRisks = [];
+
+            const capabilities = results[3]
+                .filter(doc => doc !== undefined)
+                .map(doc => ({
+                    ...doc.stix,
+                    ...doc.metaProperties
+                }));
+            const capabilityRisks = [];
 
             const returnObject = {};
             returnObject.indicators = [];
             returnObject.sensors = [];
             returnObject.courseOfActions = [];
+            returnObject.capabilities = [];
             lodash.forEach(indicators, stix => {
                 const assessedObject = lodash.find(assessment.assessment_objects, o => o.stix.id === stix.id);
                 const stixObject = stix;
@@ -265,6 +340,13 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => { /
                 stixObject.questions = assessedObject.questions;
                 sensorRisks.push(stixObject);
             });
+            lodash.forEach(capabilities, stix => {
+                const assessedObject = lodash.find(assessment.assessment_objects, o => o.stix.id === stix.id);
+                const stixObject = stix;
+                stixObject.risk = assessedObject.risk;
+                stixObject.questions = assessedObject.questions;
+                capabilityRisks.push(stixObject);
+            });
             if (indicators.length > 0) {
                 returnObject.indicators = calculateRiskPerKillChain(indicatorRisks, true);
             }
@@ -274,6 +356,9 @@ const riskPerKillChain = controller.getByIdCb((err, result, req, res, id) => { /
 
             if (courseOfActions.length > 0) {
                 returnObject.courseOfActions = calculateRiskPerKillChain(coaRisks, false);
+            }
+            if (capabilities.length > 0) {
+                returnObject.capabilities = calculateRiskPerKillChain(capabilityRisks, true);
             }
             const requestedUrl = apiRoot + req.originalUrl;
             res.header('Content-Type', 'application/json');
@@ -322,12 +407,12 @@ const risk = controller.getByIdCb((err, result, req, res, id) => { // eslint-dis
 const riskByAttackPatternAndKillChain = (req, res) => {
     const id = req.swagger.params.id ? req.swagger.params.id.value : '';
     const isCapability = req.swagger.params.isCapability.value || false;
-    const attackPatternAggregations = AssessmentPipelineHelper.buildAttackPatternAggregationsPipeline(id, isCapability);
+    const attackPatternsByPhase = AssessmentPipelineHelper.buildAttackPatternsByPhasePipeline(id, isCapability);
     const assessedByAttackPattern = AssessmentPipelineHelper.buildAttackPatternByKillChainPipeline(id, isCapability);
     const attackPatternsByKillChain = AssessmentPipelineHelper.buildAttackPatternsByKillChainPipeline();
 
     Promise.all([
-        aggregationModel.aggregate(attackPatternAggregations),
+        aggregationModel.aggregate(attackPatternsByPhase),
         aggregationModel.aggregate(assessedByAttackPattern),
         aggregationModel.aggregate(attackPatternsByKillChain),
     ])
@@ -339,13 +424,6 @@ const riskByAttackPatternAndKillChain = (req, res) => {
                 const ABAP_POSITION = 1;
                 const APBKC_POSITION = 2;
                 returnObj.phases = results[PHASE_POSITION];
-
-                // TODO remove this, this is incorrect
-                // returnObj.totalRisk = results[PHASE_POSITION]
-                //   .map(res => res.avgRisk)
-                //   .reduce((prev, cur) => cur += prev, 0)
-                //   / results[PHASE_POSITION].length;
-
                 returnObj.assessedByAttackPattern = results[ABAP_POSITION];
                 returnObj.attackPatternsByKillChain = results[APBKC_POSITION];
 

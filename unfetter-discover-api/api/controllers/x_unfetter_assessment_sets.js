@@ -63,6 +63,7 @@ const latestAssessmentSetsByCreatorId = (req, res) => {
                 'stix.assessment_sets': {
                     $arrayElemAt: ['$stix.assessment_sets', 0]
                 },
+                'metaProperties.published': 1,
                 'stix.id': 1,
                 'stix.name': 1,
                 'stix.modified': 1,
@@ -75,6 +76,9 @@ const latestAssessmentSetsByCreatorId = (req, res) => {
                 _id: '$stix.id',
                 id: {
                     $push: '$stix.id'
+                },
+                published: {
+                    $first: '$metaProperties.published'
                 },
                 name: {
                     $first: '$stix.name'
@@ -137,6 +141,7 @@ const latestAssessmentSets = (req, res) => {
                 'stix.assessment_sets': {
                     $arrayElemAt: ['$stix.assessment_sets', 0]
                 },
+                'metaProperties.published': 1,
                 'stix.id': 1,
                 'stix.name': 1,
                 'stix.modified': 1,
@@ -149,6 +154,9 @@ const latestAssessmentSets = (req, res) => {
                 _id: '$stix.id',
                 id: {
                     $push: '$stix.id'
+                },
+                published: {
+                    $first: '$metaProperties.published'
                 },
                 name: {
                     $first: '$stix.name'
