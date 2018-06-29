@@ -137,8 +137,7 @@ function getPromises(assessment) {
                     $project: {
                         _id: 1,
                         metaProperties: 1,
-                        stix:
-                        {
+                        stix: {
                             type: 1,
                             id: 1,
                             name: 1,
