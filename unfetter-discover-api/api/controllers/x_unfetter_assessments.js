@@ -139,6 +139,7 @@ function getPromises(assessment) {
                             created: 1,
                             modified: 1,
                             object_ref: 1,
+                            asssessed_objects: '$stix.assessed_objects',
                             kill_chain_phases: '$kill_chain_phases'
                         }
                     }
