@@ -17,16 +17,8 @@ if __name__ == '__main__':
     client = MongoClient(MONGO_HOST, MONGO_PORT)
     db = client[UNFETTER_DATABASE]
     users_collection = db[UNFETTER_USERS_COLLECTION]
-    users_raw = users_collection.find({})
+    users_raw = users_collection.find({ 'registered': True })
     users = [user for user in users_raw]
-    print users[0]
-
-    print '\n***************\n\nRegistered Users:\n\n\tIndex - User Name - User Role'
-    for i in range(0, len(users)):
-        print '\t' + str(i) + ' -- ' + users[i][u'userName'] + ' -- ' + users[i][u'role']
-
-    print '\n***************\n'
-
     inp = 'y'
     first_go = True
     while inp == 'Y' or inp =='y':
@@ -37,7 +29,11 @@ if __name__ == '__main__':
 
         if inp != 'Y' and inp !='y':
             break
+        print '\n***************\n\nRegistered Users:\n\n\tIndex - User Name - User Role'
+        for i in range(0, len(users)):
+            print '\t' + str(i) + ' -- ' + users[i][u'userName'] + ' -- ' + users[i][u'role']
 
+        print '\n***************\n'
         user_index = int(raw_input('Enter the index of the user you wish to edit: '))
 
         print 'Enter the index of the role you wish this user to be:\n\tIndex - User Role'
