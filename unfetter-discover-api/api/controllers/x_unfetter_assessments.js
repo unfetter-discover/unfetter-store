@@ -106,6 +106,7 @@ function getPromises(assessment) {
                         _id: 1,
                         metaProperties: 1,
                         stix: 1,
+                        assessed_objects: '$stix.assessed_objects',
                         kill_chain_phases: '$attack_pattern.stix.kill_chain_phases'
                     }
                 },
@@ -123,14 +124,21 @@ function getPromises(assessment) {
                                 phase_name: '$kill_chain_phases.phase_name',
                                 kill_chain_name: '$kill_chain_phases.kill_chain_name',
                             }
-                        }
-                    }
+                        },
+                        assessed_objects: {
+                            $addToSet: {
+                                questions: '$assessed_objects.questions',
+                                assessed_object_ref: '$assessed_objects.assessed_object_ref',
+                            }
+                        },
+                    },
                 },
                 {
                     $project: {
                         _id: 1,
                         metaProperties: 1,
-                        stix: {
+                        stix:
+                        {
                             type: 1,
                             id: 1,
                             name: 1,
@@ -139,8 +147,8 @@ function getPromises(assessment) {
                             created: 1,
                             modified: 1,
                             object_ref: 1,
-                            asssessed_objects: '$stix.assessed_objects',
-                            kill_chain_phases: '$kill_chain_phases'
+                            asssessed_objects: '$assessed_objects',
+                            kill_chain_phases: '$kill_chain_phases',
                         }
                     }
                 }
