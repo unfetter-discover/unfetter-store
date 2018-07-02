@@ -33,10 +33,12 @@ const UserSchema = new mongoose.Schema({
     },
     email: {
         type: String,
+        sparse: true,
         unique: true
     },
     userName: {
         type: String,
+        sparse: true,
         unique: true
     },
     registered: {
@@ -58,7 +60,8 @@ const UserSchema = new mongoose.Schema({
             'ORG_LEADER',
             'ADMIN'
         ],
-        default: 'STANDARD_USER'
+        default: 'STANDARD_USER',
+        index: true
     },
     oauth: String,
     github: {
@@ -67,6 +70,7 @@ const UserSchema = new mongoose.Schema({
         },
         id: {
             type: String,
+            unique: true,
             sparse: true
         },
         avatar_url: {
@@ -79,6 +83,7 @@ const UserSchema = new mongoose.Schema({
         },
         id: {
             type: String,
+            unique: true,
             sparse: true
         },
         avatar_url: {
@@ -132,8 +137,4 @@ const UserSchema = new mongoose.Schema({
     }
 });
 
-UserSchema.index({ userName: 1 });
-UserSchema.index({ role: 1 });
-
 module.exports = mongoose.model('User', UserSchema, 'user');
-// const User = module.exports;
