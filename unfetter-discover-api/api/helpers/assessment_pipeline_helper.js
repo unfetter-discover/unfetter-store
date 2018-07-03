@@ -1,4 +1,34 @@
 /**
+ * @description - builds the pipeline for an assessment's summary aggregation generation
+ * @return Array
+ */
+const buildSummaryAggregationPipeline = (id = '', isCapability = false) => {
+    const initialMatcher = buildAssessmentInitialMatcherPipeline(id);
+    // capability vs other assessment types
+    const getRelevantAttackPatternInfo = isCapability === true ?
+        buildAssessmentCapabilityRelevantAttackPatternInfoPipeline() : buildAssessmentOtherRelevantAttackPatternInfoPipeline();
+
+    const pipeline = [
+        ...initialMatcher,
+        ...getRelevantAttackPatternInfo,
+        {
+            $group: {
+                _id: '$stix.assessment_objects.stix.id',
+                attackPatterns: {
+                    $addToSet: {
+                        attackPatternId: '$attackPatterns.stix.id',
+                        x_unfetter_sophistication_level: '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
+                        kill_chain_phases: '$attackPatterns.stix.kill_chain_phases'
+                    }
+                }
+            }
+        }
+    ];
+
+    return pipeline;
+};
+
+/**
  * @description - builds the pipeline for an assessments attack pattern risk by kill chain
  * @return Array
  */
@@ -113,6 +143,48 @@ const buildAssessmentInitialMatcherPipeline = (id = '') => {
 };
 
 /**
+ * @description - the pipeline phase to take a capability and generate relevant attack pattern info
+ * @return Array
+ */
+const buildAssessmentCapabilityRelevantAttackPatternInfoPipeline = () => {
+    const capabilityAssessmentReleventAttackPatternInfo = [
+        {
+            $lookup: {
+                from: 'stix',
+                localField: 'stix.assessment_objects.stix.id',
+                foreignField: 'stix.id',
+                as: 'relationships',
+            }
+        },
+        {
+            $unwind: '$relationships'
+        },
+        {
+            $unwind: '$relationships.stix.assessed_objects'
+        },
+        {
+            $match: {
+                'relationships.stix.assessed_objects.assessed_object_ref': {
+                    $regex: /^attack-pattern.*/
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'stix',
+                localField: 'relationships.stix.assessed_objects.assessed_object_ref',
+                foreignField: 'stix.id',
+                as: 'attackPatterns'
+            }
+        },
+        {
+            $unwind: '$attackPatterns'
+        },
+    ];
+    return capabilityAssessmentReleventAttackPatternInfo;
+};
+
+/**
  * @description - the pipeline phase to take a capability and generated its related attack patterns
  * @return Array
  */
@@ -163,6 +235,52 @@ const buildAssessmentCapabilityToAttackPatternPipeline = () => {
         },
     ];
     return capabilityAssessmentToAttackPatterns;
+};
+
+/**
+ * @description - the pipeline phase to take non-capability assessment data and generate relevant attack pattern info
+ * @returns Array
+ */
+const buildAssessmentOtherRelevantAttackPatternInfoPipeline = () => {
+    const otherAssessmentReleventAttackPatternInfo = [
+        {
+            $lookup: {
+                from: 'stix',
+                localField: 'stix.assessment_objects.stix.id',
+                foreignField: 'stix.source_ref',
+                as: 'relationships'
+            }
+        },
+        {
+            $unwind: '$relationships'
+        },
+        {
+            $match: {
+                'relationships.stix.target_ref': {
+                    $regex: /^attack-pattern.*/
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'stix',
+                localField: 'relationships.stix.target_ref',
+                foreignField: 'stix.id',
+                as: 'attackPatterns'
+            }
+        },
+        {
+            $unwind: '$attackPatterns'
+        },
+        {
+            $match: {
+                'attackPatterns.extendedProperties.x_unfetter_sophistication_level': {
+                    $ne: null
+                }
+            }
+        },
+    ];
+    return otherAssessmentReleventAttackPatternInfo;
 };
 
 /**
@@ -259,4 +377,5 @@ module.exports = {
     buildAttackPatternsByPhasePipeline,
     buildAttackPatternByKillChainPipeline,
     buildAttackPatternsByKillChainPipeline,
+    buildSummaryAggregationPipeline,
 };
