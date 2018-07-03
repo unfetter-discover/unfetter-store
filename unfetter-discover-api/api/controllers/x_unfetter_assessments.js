@@ -65,7 +65,7 @@ function getPromises(assessment) {
             });
     }
 
-     // Generate promises using the ASSESSED_OBJECT_TYPES enum so Promise.all methods get the return in the order expected
+    // Generate promises using the ASSESSED_OBJECT_TYPES enum so Promise.all methods get the return in the order expected
     // Don't bother running a mongo query for empty objects
     const promises = [];
 
@@ -466,67 +466,12 @@ const riskByAttackPatternAndKillChain = (req, res) => {
  */
 const summaryAggregations = (req, res) => {
     const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+    const isCapability = (req.swagger.params.isCapability && req.swagger.params.isCapability.value) || false;
 
-    const attackPatternsByAssessedObject = [{
-        $match: {
-            'stix.id': id
-        }
-    },
-    {
-        $unwind: '$stix.assessment_objects'
-    },
-    {
-        $lookup: {
-            from: 'stix',
-            localField: 'stix.assessment_objects.stix.id',
-            foreignField: 'stix.source_ref',
-            as: 'relationships'
-        }
-    },
-    {
-        $unwind: '$relationships'
-    },
-    {
-        $match: {
-            'relationships.stix.target_ref': {
-                $regex: /^attack-pattern.*/
-            }
-        }
-    },
-    {
-        $lookup: {
-            from: 'stix',
-            localField: 'relationships.stix.target_ref',
-            foreignField: 'stix.id',
-            as: 'attackPatterns'
-        }
-    },
-    {
-        $unwind: '$attackPatterns'
-    },
-    {
-        $match: {
-            'attackPatterns.extendedProperties.x_unfetter_sophistication_level': {
-                $ne: null
-            }
-        }
-    },
-    {
-        $group: {
-            _id: '$stix.assessment_objects.stix.id',
-            attackPatterns: {
-                $addToSet: {
-                    attackPatternId: '$attackPatterns.stix.id',
-                    x_unfetter_sophistication_level: '$attackPatterns.extendedProperties.x_unfetter_sophistication_level',
-                    kill_chain_phases: '$attackPatterns.stix.kill_chain_phases'
-                }
-            },
-        }
-    },
-    ];
+    const attackPatternsByPhase = AssessmentPipelineHelper.buildSummaryAggregationPipeline(id, isCapability);
 
     Promise.all([
-        aggregationModel.aggregate(attackPatternsByAssessedObject),
+        aggregationModel.aggregate(attackPatternsByPhase),
         models['attack-pattern'].find({
             'extendedProperties.x_unfetter_sophistication_level': {
                 $ne: null
@@ -879,7 +824,9 @@ const latestAssessmentsByCreatorId = (req, res) => {
         $match: {
             creator: id,
             'stix.type': 'x-unfetter-assessment',
-            'metaProperties.rollupId': { $exists: 1 }
+            'metaProperties.rollupId': {
+                $exists: 1
+            }
         }
     },
     {
@@ -946,13 +893,17 @@ const latestAssessments = (req, res) => {
     const matchStage = {
         $match: {
             'stix.type': 'x-unfetter-assessment',
-            'metaProperties.rollupId': { $exists: 1 }
+            'metaProperties.rollupId': {
+                $exists: 1
+            }
         }
     };
 
     // if not admin, add the security filter
     if (req.user && req.user.role !== 'ADMIN') {
-        matchStage.$match['stix.created_by_ref'] = { $in: orgIds };
+        matchStage.$match['stix.created_by_ref'] = {
+            $in: orgIds
+        };
     }
     // aggregate pipeline
     //  match on given user orgnizations and assessment type

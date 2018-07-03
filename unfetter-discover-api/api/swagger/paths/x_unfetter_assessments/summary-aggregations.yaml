@@ -12,13 +12,21 @@ get:
     type: string
     required: true
     format: JSON
+  - name: isCapability
+    in: query
+    type: boolean
+    description: boolean to query as the capability datamodel
   produces: 
   - application/json
   responses:
     "200":
       description: Success
       schema:
-        type: object     
+        type: object
+    "404":
+      description: Item Not Found
+      schema:
+        $ref: "#/definitions/NotFound" 
     default:
       description: Error
       schema:
