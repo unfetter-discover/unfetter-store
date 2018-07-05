@@ -19,7 +19,8 @@ template = {
     },
     "jwtSecret": "",
     "sessionSecret": "",
-    "unfetterUiCallbackURL": "https://%s/#/users/login-callback"
+    "unfetterUiCallbackURL": "https://%s/#/users/login-callback",
+    "apiRoot": "https://%s/api"
 }
 
 def update_ui_env(ui_cfg_file):
@@ -136,8 +137,13 @@ if __name__ == '__main__':
         private_config.pop('gitlab', None)
 
     if not at_least_one_service_configured:
-        print '\n\033[31mYou need to define at least one authentication service.\033[0m\n'
-        raise SystemExit
+        print '\n\033[31mWarning: You did not configure any authenication services, are you sure they are already configured?\033[0m\n'
+        # Dont exit in case person is just editing domain
+        # raise SystemExit
+
+    api_domain = str(raw_input('\nPlease enter the public domain that the Unfetter-Discover-API is hosted on: ')).strip()
+    if not file_exists or api_domain != '':
+        private_config['apiRoot'] = template['apiRoot'] % api_domain
 
     ui_domain = str(raw_input('\nPlease enter the public domain that the Unfetter-UI is hosted on: ')).strip()
     if not file_exists or ui_domain != '':

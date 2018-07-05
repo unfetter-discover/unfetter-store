@@ -2,6 +2,12 @@ process.env.RUN_MODE = process.env.RUN_MODE || 'DEMO';
 const mongoinit = require('./mongoinit.js');
 const serverinit = require('./serverinit.js');
 
+const config = require('../config/config');
+
+if (!process.env.API_ROOT && config.apiRoot) {
+    process.env.API_ROOT = config.apiRoot;
+}
+
 global.unfetter = global.unfetter || {};
 
 async function startServices() {
