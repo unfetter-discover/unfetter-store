@@ -1,11 +1,24 @@
-// Populate baseconfig with environment variables
-const envConfig = {};
+const configDefaults = require('./defaults');
+
+/**
+ *  The hierarchy of configurations is environment > config file > defaults
+ */
+
+const envVariablesToIncludeInConfig = [
+    {
+        envKey: 'API_ROOT',
+        configKey: 'apiRoot'
+    }
+];
+
 let config = {};
 
-if (process.env.API_ROOT) {
-    envConfig.apiRoot = process.env.API_ROOT;
+// Priority 1 / 3: Populate with defaults
+for (const configDefault of configDefaults) {
+    config[configDefault.configKey] = configDefault.configValue;
 }
 
+// Priority 2 / 3: Bring in config file
 if (process.env.RUN_MODE === 'UAC') {
     const fs = require('fs');
     const path = require('path');
@@ -28,16 +41,18 @@ if (process.env.RUN_MODE === 'UAC') {
     }
 
     config = {
-        ...privateConfig,
-        ...envConfig
+        ...config,
+        ...privateConfig
     };
-} else {
-    config = { ...envConfig };
 }
 
-// Fallback to defaults if not found in config or environment variables
-if (!config.apiRoot) {
-    config.apiRoot = 'https://localhost/api';
+// TODO - (Optionally) Bring in config file anyways for demo mode?
+
+// Priority 3 / 3: Overwrite with environment variables, if present
+for (const envVariable of envVariablesToIncludeInConfig) {
+    if (process.env[envVariable.envKey]) {
+        config[envVariable.configKey] = process.env[envVariable.envKey];
+    }
 }
 
 module.exports = config;
