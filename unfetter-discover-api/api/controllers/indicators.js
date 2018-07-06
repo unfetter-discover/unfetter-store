@@ -5,8 +5,9 @@ const dataHelper = require('../helpers/extended_data_helper');
 const sortArrayLength = require('../helpers/sort_by_array_length');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const SecurityHelper = require('../helpers/security_helper');
+const config = require('../config/config');
 
-const apiRoot = process.env.API_ROOT || 'https://localhost/api';
+const apiRoot = config.apiRoot;
 const aggregationModel = modelFactory.getAggregationModel('stix');
 const controller = new BaseController('indicator');
 

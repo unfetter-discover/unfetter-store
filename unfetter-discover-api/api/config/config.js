@@ -1,3 +1,11 @@
+// Populate baseconfig with environment variables
+const envConfig = {};
+let config = {};
+
+if (process.env.API_ROOT) {
+    envConfig.apiRoot = process.env.API_ROOT;
+}
+
 if (process.env.RUN_MODE === 'UAC') {
     const fs = require('fs');
     const path = require('path');
@@ -19,7 +27,17 @@ if (process.env.RUN_MODE === 'UAC') {
         privateConfig = JSON.parse(fs.readFileSync(privateConfigLocation, 'utf8'));
     }
 
-    module.exports = privateConfig;
+    config = {
+        ...privateConfig,
+        ...envConfig
+    };
 } else {
-    module.exports = {};
+    config = { ...envConfig };
 }
+
+// Fallback to defaults if not found in config or environment variables
+if (!config.apiRoot) {
+    config.apiRoot = 'https://localhost/api';
+}
+
+module.exports = config;

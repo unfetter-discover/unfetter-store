@@ -11,7 +11,7 @@ class GithubAuth extends AuthHelper {
         const githubStrategy = new GithubStrategy(
             {
                 ...config.github,
-                callbackURL: `${(env.API_ROOT || 'https://localhost/api')}/auth/github-callback`
+                callbackURL: `${config.apiRoot}/auth/github-callback`
             },
             (accessToken, refreshToken, profile, callback) => callback(null, profile)
         );

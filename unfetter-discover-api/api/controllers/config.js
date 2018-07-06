@@ -4,10 +4,11 @@ const parser = require('../helpers/url_parser');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const uuid = require('uuid');
 const lodash = require('lodash');
+const config = require('../config/config');
 
 const model = modelFactory.getModel('config');
 const controller = new BaseController('config');
-const apiRoot = process.env.API_ROOT || 'https://localhost/api';
+const apiRoot = config.apiRoot;
 
 module.exports = {
     get: (req, res) => {

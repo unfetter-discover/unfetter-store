@@ -11,7 +11,7 @@ const userModel = require('../models/user');
 const configModel = require('../models/config');
 const doauth = require('../helpers/auth_helpers');
 
-const apiRoot = process.env.API_ROOT || 'https://localhost/api';
+const apiRoot = config.apiRoot;
 
 const authSources = config.authServices || ['github'];
 const path = `${__dirname}/../helpers`;
