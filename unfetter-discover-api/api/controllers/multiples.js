@@ -5,8 +5,9 @@ const parser = require('../helpers/url_parser');
 const SecurityHelper = require('../helpers/security_helper');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const userHelpers = require('../helpers/user');
+const config = require('../config/config');
 
-const apiRoot = process.env.API_ROOT || 'https://localhost/api';
+const apiRoot = config.apiRoot;
 const model = modelFactory.getModel('schemaless');
 const aggregationModel = modelFactory.getAggregationModel('stix');
 const publishNotification = require('../controllers/shared/publish');

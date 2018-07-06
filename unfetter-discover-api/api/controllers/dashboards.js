@@ -4,8 +4,9 @@ const Relationship = require('../models/relationship');
 const IntrusionSet = require('../models/intrusion-set');
 const lodash = require('lodash');
 const randomColor = require('randomcolor');
+const config = require('../config/config');
 
-const apiRoot = process.env.API_ROOT || 'https://localhost/api';
+const apiRoot = config.apiRoot;
 
 const intrusionSetView = function intrusionSetViewFunc(req, res) {
     const id = req.swagger.params.intrusionSetIds.value || '';

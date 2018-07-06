@@ -5,10 +5,12 @@ const controller = new BaseController('x-unfetter-assessment');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const lodash = require('lodash');
 const modelFactory = require('./shared/modelFactory');
+const config = require('../config/config');
+
+const apiRoot = config.apiRoot;
 // NOTE: object return and query names are order dependent
 const ASSESSED_OBJECT_RETURN_TYPES = ['courseOfActions', 'indicators', 'sensors', 'capabilities'];
 const ASSESSED_OBJECT_QUERY_TYPES = ['course-of-action', 'indicator', 'x-unfetter-sensor', 'x-unfetter-object-assessment'];
-const apiRoot = process.env.API_ROOT || 'https://localhost/api';
 const models = {};
 
 ASSESSED_OBJECT_QUERY_TYPES.forEach(assessedObjectType => {

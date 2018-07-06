@@ -92,7 +92,7 @@ const storeRegistration = (user, res) => {
 
     // Unfetter open
     user.organizations.push({
-        id: 'identity--e240b257-5c42-402e-a0e8-7b81ecc1c09a',
+        id: global.unfetter.openIdentity._id,
         approved: true,
         role: 'STANDARD_USER'
     });

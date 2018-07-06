@@ -11,7 +11,7 @@ class GitlabAuth extends AuthHelper {
         const gitlabStrategy = new GitlabStrategy(
             {
                 ...config.gitlab,
-                callbackURL: `${(env.API_ROOT || 'https://localhost/api')}/auth/gitlab-callback`
+                callbackURL: `${config.apiRoot}/auth/gitlab-callback`
             },
             (accessToken, refreshToken, profile, cb) => cb(null, profile)
         );

@@ -6,8 +6,9 @@ const modelFactory = require('./modelFactory');
 const publish = require('./publish');
 const DataHelper = require('../../helpers/extended_data_helper');
 const SecurityHelper = require('../../helpers/security_helper');
+const config = require('../../config/config');
 
-const apiRoot = process.env.API_ROOT || 'https://localhost/api';
+const apiRoot = config.apiRoot;
 
 module.exports = class BaseController {
     constructor(type) {

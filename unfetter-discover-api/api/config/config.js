@@ -1,3 +1,24 @@
+const configDefaults = require('./defaults');
+
+/**
+ *  The hierarchy of configurations is environment > config file > defaults
+ */
+
+const envVariablesToIncludeInConfig = [
+    {
+        envKey: 'API_ROOT',
+        configKey: 'apiRoot'
+    }
+];
+
+let config = {};
+
+// Priority 1 / 3: Populate with defaults
+for (const configDefault of configDefaults) {
+    config[configDefault.configKey] = configDefault.configValue;
+}
+
+// Priority 2 / 3: Bring in config file
 if (process.env.RUN_MODE === 'UAC') {
     const fs = require('fs');
     const path = require('path');
@@ -19,7 +40,19 @@ if (process.env.RUN_MODE === 'UAC') {
         privateConfig = JSON.parse(fs.readFileSync(privateConfigLocation, 'utf8'));
     }
 
-    module.exports = privateConfig;
-} else {
-    module.exports = {};
+    config = {
+        ...config,
+        ...privateConfig
+    };
 }
+
+// TODO - (Optionally) Bring in config file anyways for demo mode?
+
+// Priority 3 / 3: Overwrite with environment variables, if present
+for (const envVariable of envVariablesToIncludeInConfig) {
+    if (process.env[envVariable.envKey]) {
+        config[envVariable.configKey] = process.env[envVariable.envKey];
+    }
+}
+
+module.exports = config;
