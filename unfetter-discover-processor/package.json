@@ -1,6 +1,6 @@
 {
   "name": "unfetter-discover-processor",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Records Processor for Unfetter Discover",
   "scripts": {
     "checkup": "npm run clean && npm run build && npm run lint && npm run docs && npm run coverage",
