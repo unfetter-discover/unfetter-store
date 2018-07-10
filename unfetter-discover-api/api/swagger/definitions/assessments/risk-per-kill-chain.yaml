@@ -12,4 +12,8 @@
       type: array
       items:
         $ref: ./risk-assessment-object.yaml
+    capabilities:
+      type: array
+      items:
+        $ref: ./risk-assessment-object.yaml
 

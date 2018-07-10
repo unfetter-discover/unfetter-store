@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const stixCommons = require('./stix-commons');
 
-const scoreVals = ['L', 'M', 'S', 'N/A', 'N'];
+const scoreVals = ['L', 'M', 'S', 'NA', 'N', ''];
 
 const StixSchema = {
     id: String,

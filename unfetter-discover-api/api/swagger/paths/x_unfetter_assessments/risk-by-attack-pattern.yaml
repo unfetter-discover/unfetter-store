@@ -11,6 +11,10 @@ get:
     description: Model ID
     type: string
     required: true
+  - name: isCapability
+    in: query
+    type: boolean
+    description: boolean to query as the capability datamodel
   produces: 
   - application/json
   responses:

@@ -1,4 +1,10 @@
 node_modules
 npm-debug.log
+
+# old files
 config/private-config.json
 config/private-config.email.json
+
+# current files
+config/private/private-config.json
+config/private/private-config.email.json

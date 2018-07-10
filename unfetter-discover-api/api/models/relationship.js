@@ -15,11 +15,13 @@ const StixSchema = {
     description: String,
     source_ref: {
         type: String,
-        required: [true, 'source_ref is required']
+        required: [true, 'source_ref is required'],
+        index: 1
     },
     target_ref: {
         type: String,
-        required: [true, 'target_ref is required']
+        required: [true, 'target_ref is required'],
+        index: 1
     },
     type: {
         type: String,

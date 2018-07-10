@@ -7,7 +7,7 @@ async function startServer() {
         const mongoMsg = await mongoInit();
         console.log(mongoMsg);
         const expressServer = await expressInit();
-        socketInit(expressServer);
+        const socketServer = socketInit(expressServer);
         
     } catch (error) {
         console.log('Unable to start Server: ', error);

@@ -1,12 +1,17 @@
 const GitlabStrategy = require('passport-gitlab').Strategy;
+const AuthHelper = require('../helpers/auth_helpers').AuthHelper;
 
-module.exports = {
+class GitlabAuth extends AuthHelper {
 
-    build: (config, env) => {
+    constructor() {
+        super('gitlab');
+    }
+
+    build(config, env) {
         const gitlabStrategy = new GitlabStrategy(
             {
                 ...config.gitlab,
-                callbackURL: `${(env.API_ROOT || 'https://localhost/api')}/auth/gitlab-callback`
+                callbackURL: `${config.apiRoot}/auth/gitlab-callback`
             },
             (accessToken, refreshToken, profile, cb) => cb(null, profile)
         );
@@ -18,26 +23,20 @@ module.exports = {
             console.log('Not using a proxy');
         }
         return gitlabStrategy;
-    },
+    }
 
-    options: {},
+    search(user) {
+        return { 'gitlab.id': user.id };
+    }
 
-    search: user => ({ 'gitlab.id': user.id }),
-
-    sync: (user, gitlabInfo, approved) => {
-        user.oauth = 'gitlab';
-        user.approved = approved;
-        if (!user.gitlab) {
-            user.gitlab = {
-                id: gitlabInfo.id,
-                userName: null,
-                avatar: null,
-            };
-        }
+    sync(user, gitlabInfo, approved) {
+        super.sync(user, gitlabInfo, approved);
         user.gitlab.userName = gitlabInfo.username;
         if (gitlabInfo._json.avatar_url) {
             user.gitlab.avatar_url = gitlabInfo._json.avatar_url;
         }
-    },
+    }
 
-};
+}
+
+(() => new GitlabAuth())();

@@ -71,6 +71,8 @@
   $ref: ./intrusion_sets/intrusion_sets.yaml
 /intrusion-sets/{id}:
   $ref: ./intrusion_sets/intrusion_set_by_id.yaml
+/intrusion-sets/attack-patterns-by-intrusion-set:
+  $ref: ./intrusion_sets/attack_patterns_by_intrusion_set.yml
 
 /malwares:
   $ref: ./malwares/malwares.yaml
@@ -120,6 +122,8 @@
   $ref: ./multiples/multiples.yaml
 /multiples/count:
   $ref: ./multiples/multiples_count.yaml
+/multiples/relationship-mapper:
+  $ref: ./multiples/multiples_relationship_mapper.yaml
 /multiples/{id}/comment:
   $ref: ./multiples/add_comment.yaml
 /multiples/{id}/like:

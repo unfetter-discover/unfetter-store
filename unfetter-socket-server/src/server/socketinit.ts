@@ -7,10 +7,8 @@ import { connections } from '../models/connections';
 import { Connection } from '../models/connection';
 import { WSMessageTypes } from '../models/messages';
 import { UserRoles } from '../models/user-roles.enum';
-import { NotificationRecieveTypes } from '../models/notifiction-recieve-types.enum';
-import notificationStoreModel from '../models/mongoose/notification-store';
 
-export default function socketInit(expressServer: Server) {
+export default function socketInit(expressServer: Server): socketIo.Server {
 
     const socketServer: socketIo.Server = socketIo(expressServer, {
         path: '/socket'
@@ -81,58 +79,61 @@ export default function socketInit(expressServer: Server) {
                 clientConnection.client.join('admin');
             }
 
-            clientConnection.client.on('message', (data: any) => {
-                const userId = clientConnection.user._id;
-                console.log(data);
-                switch (data.messageType) {
-                    case NotificationRecieveTypes.READ_NOTIFICATION:
-                        console.log('Reading notification');
-                        notificationStoreModel.findByIdAndUpdate(data.messageContent, { $set: { read: true } }, (err, result) => {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                console.log('Notification read');
-                            }
-                        });
-                        break;
-                    case NotificationRecieveTypes.DELETE_NOTIFICATION:
-                        console.log('Deleting notification');
-                        notificationStoreModel.findByIdAndRemove(data.messageContent, (err, result) => {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                console.log('Notification deleted');
-                            }
-                        });
-                        break;
-                    case NotificationRecieveTypes.READ_ALL_NOTIFICATIONS:
-                        console.log('Reading all notification');
-                        notificationStoreModel.update({ userId }, { $set: { read: true } }, { multi: true }, (err, result) => {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                console.log(result);
-                                console.log('All notifications read');
-                            }
-                        });
-                        break;
-                    case NotificationRecieveTypes.DELETE_ALL_NOTIFICATIONS:
-                        console.log('Deleting all notification');
-                        notificationStoreModel.remove({ userId }, (err) => {
-                            if (err) {
-                                console.log(err);
-                            } else {
-                                console.log('All notifications deleted');
-                            }
-                        });
-                        break;
-                    default:
-                        console.log('No action for message:\n', data);
-                }
-            });
+            // TODO delete this, moved notification handling to the API
+            // clientConnection.client.on('message', (data: any) => {
+            //     const userId = clientConnection.user._id;
+            //     console.log(data);
+            //     switch (data.messageType) {
+            //         case NotificationRecieveTypes.READ_NOTIFICATION:
+            //             console.log('Reading notification');
+            //             notificationStoreModel.findByIdAndUpdate(data.messageContent, { $set: { read: true } }, (err, result) => {
+            //                 if (err) {
+            //                     console.log(err);
+            //                 } else {
+            //                     console.log('Notification read');
+            //                 }
+            //             });
+            //             break;
+            //         case NotificationRecieveTypes.DELETE_NOTIFICATION:
+            //             console.log('Deleting notification');
+            //             notificationStoreModel.findByIdAndRemove(data.messageContent, (err, result) => {
+            //                 if (err) {
+            //                     console.log(err);
+            //                 } else {
+            //                     console.log('Notification deleted');
+            //                 }
+            //             });
+            //             break;
+            //         case NotificationRecieveTypes.READ_ALL_NOTIFICATIONS:
+            //             console.log('Reading all notification');
+            //             notificationStoreModel.update({ userId }, { $set: { read: true } }, { multi: true }, (err, result) => {
+            //                 if (err) {
+            //                     console.log(err);
+            //                 } else {
+            //                     console.log(result);
+            //                     console.log('All notifications read');
+            //                 }
+            //             });
+            //             break;
+            //         case NotificationRecieveTypes.DELETE_ALL_NOTIFICATIONS:
+            //             console.log('Deleting all notification');
+            //             notificationStoreModel.remove({ userId }, (err) => {
+            //                 if (err) {
+            //                     console.log(err);
+            //                 } else {
+            //                     console.log('All notifications deleted');
+            //                 }
+            //             });
+            //             break;
+            //         default:
+            //             console.log('No action for message:\n', data);
+            //     }
+            // });
 
         } else {
             console.log('User not found in connections array');
         }
     });
+
+    return socketServer;
 }

@@ -7,7 +7,7 @@ import fileinput
 
 # Schema
 template = {
-    "authServices": "github|gitlab",
+    "authServices": ["github"],
     "github": {
         "clientID": "",
         "clientSecret": ""
@@ -19,45 +19,33 @@ template = {
     },
     "jwtSecret": "",
     "sessionSecret": "",
-    "unfetterUiCallbackURL": "https://%s/#/users/login-callback"
+    "unfetterUiCallbackURL": "https://%s/#/users/login-callback",
+    "apiRoot": "https://%s/api"
 }
 
 def update_ui_env(ui_cfg_file):
     if os.path.isfile(ui_cfg_file):
         env_file = open(ui_cfg_file, 'r')
-        env_contents = env_file.read().replace('\n', '').replace("'", '"')
+        env_contents = env_file.read()
         env_file.close()
-        m = re.match(r'^\s*(.*)\s*=\s*(\{.*\}).*$', env_contents)
-        if m == None:
-            print """\n\033[31mCould not parse the run configuration file! Be sure to create it with this line:
-                    authServices: '{}'\033[0m\n""".format(json.dumps(services))
-        else:
-            env = m.group(2)
-            env = ''.join(env.split())
-            env = re.sub(r'([a-zA-Z_0-9]+):', r'"\1":', env).replace("'", '"')
-            env = json.loads(env)
-            env["authServices"] = services
-            dump = json.dumps(env, indent=4).replace('"', "'")
-            env_file = open(ui_cfg_file, 'w')
-            env_file.write(m.group(1).strip() + " = " + dump + ";\n")
-            env_file.close()
-            print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(ui_cfg_file)
+        env = json.loads(env_contents)
+        env["authServices"] = services
     else:
-        print """\n\033[31mRun configuration file does not exist... Creating.\033[0m\n"""
+        print """\n\033[33mRun configuration file does not exist... Creating.\033[0m"""
         env = {"authServices": services}
-        dump = json.dumps(env, indent=4).replace('"', "'")
-        env_file = open(ui_cfg_file, 'w')
-        env_file.write("export const runconfig = " + dump + ";\n")
-        env_file.close()
-
+    env_file = open(ui_cfg_file, 'w')
+    env_file.write(json.dumps(env, indent=4))
+    env_file.write('\n')
+    env_file.close()
+    print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(ui_cfg_file)
 
 if __name__ == '__main__':
 
     inp_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                            '../unfetter-discover-api/api/config/private-config.json')
+                            '../unfetter-discover-api/api/config/private/private-config.json')
     
     socket_server_config = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                            '../unfetter-socket-server/config/private-config.json')
+                            '../unfetter-socket-server/config/private/private-config.json')
 
     file_exists = False
 
@@ -77,7 +65,7 @@ if __name__ == '__main__':
     services = []
 
     use_github = str(raw_input(
-        '\nDo you wish to set the application up for Github authentication? [y/n]: ')).strip().lower()
+        '\nDo you wish to set the application up for Github authentication? [y/\033[4mn\033[0m]: ')).strip().lower()
     if use_github == 'y':
 
         services.append('github')
@@ -110,13 +98,13 @@ if __name__ == '__main__':
         private_config.pop('github', None)
 
     use_gitlab = str(raw_input(
-        '\nDo you wish to set the application up for Gitlab authentication? [y/n]: ')).strip().lower()
+        '\nDo you wish to set the application up for Gitlab authentication? [y/\033[4mn\033[0m]: ')).strip().lower()
     if use_gitlab == 'y':
 
         services.append('gitlab')
 
         gitlab_url = str(raw_input(
-            '\n\tEnter the URL of the Gitlab service [https://gitlab.com]: ')).strip()
+            '\n\tEnter the URL of the Gitlab service [\033[4mhttps://gitlab.com\033[0m]]: ')).strip()
         if file_exists and gitlab_url == '':
             gitlab_url = private_config['gitlab']['gitlabURL']
         if gitlab_url == '':
@@ -152,6 +140,10 @@ if __name__ == '__main__':
         print '\n\033[31mYou need to define at least one authentication service.\033[0m\n'
         raise SystemExit
 
+    api_domain = str(raw_input('\nPlease enter the public domain that the Unfetter-Discover-API is hosted on: ')).strip()
+    if not file_exists or api_domain != '':
+        private_config['apiRoot'] = template['apiRoot'] % api_domain
+
     ui_domain = str(raw_input('\nPlease enter the public domain that the Unfetter-UI is hosted on: ')).strip()
     if not file_exists or ui_domain != '':
         private_config['unfetterUiCallbackURL'] = template['unfetterUiCallbackURL'] % (ui_domain)
@@ -168,7 +160,8 @@ if __name__ == '__main__':
 
     print '\n\033[32mAll fields successfully entered.\033[0m\n'
 
-    write_to_file = str(raw_input('\nDo you wish for the configuration to be saved to file? [y/n]: ')).strip().lower()
+    write_to_file = str(raw_input(
+        '\nDo you wish for the configuration to be saved to file? [y/\033[4mn\033[0m]: ')).strip().lower()
     if write_to_file == 'y':
         try:
             private_config["authServices"] = services
@@ -185,13 +178,13 @@ if __name__ == '__main__':
             print '\n\033[32mConfiguration successfully written to ' + os.path.abspath(socket_server_config) + '\033[0m'
 
             write_to_ui = str(raw_input(
-                '\nDo you wish to update the unfetter-ui run configuration file? [y/n]: ')).strip().lower()
+                '\nDo you wish to update the unfetter-ui run configuration file? [y/\033[4mn\033[0m]: ')).strip().lower()
             if (write_to_ui == 'y'):
                 ui_path = str(raw_input(
-                    '\nPlease enter the path to the unfetter-ui directory [../../unfetter-ui]: ')).strip()
+                    '\nPlease enter the path to the unfetter-ui directory [\033[4m../../unfetter-ui\033[0m]]: ')).strip()
                 if ui_path == '':
                     ui_path = '../../unfetter-ui'
-                ui_cfg_file = os.path.join(ui_path + '/src/global/private-config.ts')
+                ui_cfg_file = os.path.join(ui_path + '/src/assets/config/local-settings.json')
                 try:
                     update_ui_env(ui_cfg_file)
                     print '\nBye!\033[0m\n\n'                    

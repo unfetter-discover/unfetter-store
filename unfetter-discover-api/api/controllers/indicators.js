@@ -5,8 +5,9 @@ const dataHelper = require('../helpers/extended_data_helper');
 const sortArrayLength = require('../helpers/sort_by_array_length');
 const jsonApiConverter = require('../helpers/json_api_converter');
 const SecurityHelper = require('../helpers/security_helper');
+const config = require('../config/config');
 
-const apiRoot = process.env.API_ROOT || 'https://localhost/api';
+const apiRoot = config.apiRoot;
 const aggregationModel = modelFactory.getAggregationModel('stix');
 const controller = new BaseController('indicator');
 
@@ -226,6 +227,39 @@ const search = (req, res) => {
         if (searchParameters.killChainPhases && searchParameters.killChainPhases.length) {
             filterObj['stix.kill_chain_phases.phase_name'] = { $in: searchParameters.killChainPhases };
         }
+        if (searchParameters.dataSources && searchParameters.dataSources.length) {
+            filterObj['extendedProperties.x_mitre_data_sources'] = {
+                $in: searchParameters.dataSources
+            };
+        }
+        if (searchParameters.observedData && searchParameters.observedData.length) {
+            const orArr = [];
+            searchParameters.observedData.forEach(observedDatum => {
+                if (observedDatum.action === '*') {
+                    orArr.push({
+                        'metaProperties.observedData': {
+
+                            $elemMatch: {
+                                name: observedDatum.name,
+                                property: observedDatum.property,
+                            }
+                        }
+                    });
+                } else {
+                    orArr.push({
+                        'metaProperties.observedData': {
+
+                            $elemMatch: {
+                                name: observedDatum.name,
+                                action: observedDatum.action,
+                                property: observedDatum.property,
+                            }
+                        }
+                    });
+                }
+            });
+            filterObj.$or = orArr;
+        }
         if (searchParameters.published && searchParameters.published.length) {
             // Mapping is there because mat-option insists on giving a string
             filterObj['metaProperties.published'] = { $in: searchParameters.published.map(p => p === 'true') };
@@ -251,6 +285,22 @@ const search = (req, res) => {
             promises.push(Promise.resolve([]));
         }
 
+        // Get relationships of attack patterns derived from instrusion sets if in params, or resolve []
+        if (searchParameters.intrusionSetAttackPatterns && searchParameters.intrusionSetAttackPatterns.length) {
+            const isApFilter = {
+                'stix.type': 'relationship',
+                'stix.relationship_type': 'indicates',
+                'stix.target_ref': {
+                    $in: searchParameters.intrusionSetAttackPatterns
+                }
+            };
+            promises.push(stixModel.find(isApFilter).select({
+                'stix.source_ref': 1
+            }).exec());
+        } else {
+            promises.push(Promise.resolve([]));
+        }
+
         // Get sensors if in params, or resovle []
         if (searchParameters.sensors && searchParameters.sensors.length) {
             const sensorFilter = {
@@ -266,7 +316,7 @@ const search = (req, res) => {
         // TODO get sensors, or determine if it should be done client side
 
         Promise.all(promises)
-            .then(([indicatorsRes, apRelationshipsRes, sensorsRes]) => {
+            .then(([indicatorsRes, apRelationshipsRes, isApRelationshipsRes, sensorsRes]) => {
                 let indicators = dataHelper.getEnhancedData(indicatorsRes, req.swagger.params);
 
                 // Server side filter of attack patterns
@@ -277,6 +327,20 @@ const search = (req, res) => {
                             .map(apRel => apRel.stix.source_ref);
 
                         indicators = indicators.filter(indicator => indicatorsRelatedToAps.includes(indicator.id));
+                    } else {
+                        // No relationships found, assign empty array
+                        indicators = [];
+                    }
+                }
+
+                // Don't check for length as [] is intended to return nothing
+                if (searchParameters.intrusionSetAttackPatterns) {
+                    if (isApRelationshipsRes.length) {
+                        const indicatorsRelatedToIsAps = isApRelationshipsRes
+                            .map(apRel => apRel.toObject())
+                            .map(apRel => apRel.stix.source_ref);
+
+                        indicators = indicators.filter(indicator => indicatorsRelatedToIsAps.includes(indicator.id));
                     } else {
                         // No relationships found, assign empty array
                         indicators = [];

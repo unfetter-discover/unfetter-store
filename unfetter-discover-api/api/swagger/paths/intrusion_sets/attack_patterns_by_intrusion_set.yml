@@ -1,0 +1,17 @@
+x-swagger-router-controller: intrusion_sets
+get:
+  tags:  
+  - STIX-Intrusion Set
+  description: Find all instances of the model matched by filter from the data source.
+  operationId: attackPatternsByIntrusionSet
+  produces: 
+  - application/vnd.api+json  
+  responses:
+    "200":
+      description: Success
+      schema:
+        type: object
+    default:
+      description: Error
+      schema:
+        $ref: "#/definitions/ErrorJsonApi"

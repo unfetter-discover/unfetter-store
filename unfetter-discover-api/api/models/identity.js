@@ -6,7 +6,8 @@ const StixSchema = {
     created_by_ref: String,
     name: {
         type: String,
-        required: [true, 'name is required']
+        required: [true, 'name is required'],
+        index: true
     },
     description: {
         type: String

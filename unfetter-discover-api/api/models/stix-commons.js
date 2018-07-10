@@ -9,7 +9,8 @@ stixCommons.kill_chain_phases = mongoose.Schema({
     },
     phase_name: {
         type: String,
-        required: [true, 'phase_name is required']
+        required: [true, 'phase_name is required'],
+        index: true
     }
 }, { _id: false });
 
@@ -39,30 +40,12 @@ stixCommons.metaProperties = mongoose.Schema({
     published: {
         type: Boolean,
         default: false
+    },
+    rollupId: {
+        type: String,
+        index: 1
     }
 }, { _id: false, strict: false });
-
-stixCommons.motivations = [
-    'accidental',
-    'coercion',
-    'dominance',
-    'ideology',
-    'notoriety',
-    'organizational-gain',
-    'personal-gain',
-    'personal-satisfaction',
-    'revenge',
-    'unpredictable'
-];
-
-stixCommons.resource_level = [
-    'individual',
-    'club',
-    'contest',
-    'team',
-    'organization',
-    'government'
-];
 
 stixCommons.mongoRoot = {
     _id: String,
@@ -70,11 +53,6 @@ stixCommons.mongoRoot = {
     extendedProperties: Object,
     metaProperties: stixCommons.metaProperties,
     creator: String
-};
-
-// TODO delete if not used
-stixCommons.discriminator = {
-    discriminatorKey: 'type'
 };
 
 stixCommons.baseStix = {
@@ -88,6 +66,10 @@ stixCommons.baseStix = {
         type: Date,
         default: Date.now,
         required: [true, 'modified is required']
+    },
+    created_by_ref: {
+        type: String,
+        index: 1
     },
     revoked: Boolean,
     version: String,
@@ -106,15 +88,11 @@ stixCommons.makeSchema = childSchema => {
         }
     };
     const schemaObj = new mongoose.Schema(schema);
-    schemaObj.index({ 'stix.name': 'text' });
-    schemaObj.index({ 'stix.name': 1 });
     schemaObj.index({ 'stix.type': 1 });
-    schemaObj.index({ 'stix.kill_chain_phases.phase_name': 1 });
-    schemaObj.index({ 'stix.created_by_ref': 1 });
-    schemaObj.index({ 'stix.target_ref': 1 });
-    schemaObj.index({ 'stix.target_ref': 'text' });
-    schemaObj.index({ 'stix.source_ref': 1 });
-    schemaObj.index({ 'stix.source_ref': 'text' });
+    schemaObj.index({ 'stix.created': -1 });
+    schemaObj.index({ 'stix.modified': -1 });
+    schemaObj.index({ 'stix.name': 'text' });
+
     return schemaObj;
 };
 

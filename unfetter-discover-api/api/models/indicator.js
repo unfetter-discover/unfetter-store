@@ -9,7 +9,9 @@ const StixSchema = {
     },
     labels: [String],
     name: {
-        type: String
+        type: String,
+        required: [true, 'name is required'],
+        index: true
     },
     description: {
         type: String

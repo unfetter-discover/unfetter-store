@@ -1,6 +1,6 @@
 {
   "name": "unfetter-ctf-ingest",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Ingest Cyber Threat Framework (CTF) data into Unfetter",
   "scripts": {
     "checkup": "npm run clean && npm run build && npm run lint && npm run docs && npm run coverage && npm run swagger:verify",

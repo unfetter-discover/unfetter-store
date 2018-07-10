@@ -33,7 +33,11 @@ export default class PatternHandlerService {
                 .map((obj) => PatternHandlerService.handlePattern(obj));
 
             if (promises.length) {
-                await Promise.all(promises);
+                try {                    
+                    await Promise.all(promises);
+                } catch (err) {
+                    reject(err);
+                }
             }
             resolve('All patterns processed');
         });       
@@ -83,39 +87,42 @@ export default class PatternHandlerService {
     private static async handlePattern(stix: IUFStix): Promise<any> {
         return new Promise(async (resolve, reject) => {
             const { pattern } = stix.stix;
-            const translations = await PatternHandlerService.getTranslations(pattern);
-
-            if (!stix.metaProperties) {
-                stix.metaProperties = {};
-            }
-
-            stix.metaProperties.validStixPattern = translations.validated;
-
-            if (translations['cim-splunk'] || translations['car-splunk'] || translations['car-elastic']) {                
-                stix.metaProperties.queries = {
-                    carElastic: {
-                        query: translations['car-elastic'],
-                        include: true
-                    },
-                    carSplunk: {
-                        query: translations['car-splunk'],
-                        include: true
-                    },
-                    cimSplunk: {
-                        query: translations['cim-splunk'],
-                        include: true
-                    }
-                };
-
-                // Assume that objects can only be retrieved if translations were recieved
-                const objects = await PatternHandlerService.getObjects(pattern);
-                if (objects.object) {
-                    stix.metaProperties.observedData = objects.object.map((obj) => ({ ...obj, action: '*' }))
+            try {                
+                const translations = await PatternHandlerService.getTranslations(pattern);
+                
+                if (!stix.metaProperties) {
+                    stix.metaProperties = {};
                 }
-
+                
+                stix.metaProperties.validStixPattern = translations.validated;
+                
+                if (translations['cim-splunk'] || translations['car-splunk'] || translations['car-elastic']) {                
+                    stix.metaProperties.queries = {
+                        carElastic: {
+                            query: translations['car-elastic'],
+                            include: true
+                        },
+                        carSplunk: {
+                            query: translations['car-splunk'],
+                            include: true
+                        },
+                        cimSplunk: {
+                            query: translations['cim-splunk'],
+                            include: true
+                        }
+                    };
+                    
+                    // Assume that objects can only be retrieved if translations were recieved
+                    const objects = await PatternHandlerService.getObjects(pattern);
+                    if (objects.object) {
+                        stix.metaProperties.observedData = objects.object.map((obj) => ({ ...obj, action: '*' }))
+                    }
+                    
+                }                
+                resolve('STIX processed');
+            } catch (err) {
+                reject(err);
             }
-
-            resolve('STIX processed');
         });
     }    
    

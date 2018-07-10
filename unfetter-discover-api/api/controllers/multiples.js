@@ -1,11 +1,15 @@
+const lodash = require('lodash');
+
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
-const lodash = require('lodash');
 const SecurityHelper = require('../helpers/security_helper');
 const jsonApiConverter = require('../helpers/json_api_converter');
+const userHelpers = require('../helpers/user');
+const config = require('../config/config');
 
-const apiRoot = process.env.API_ROOT || 'https://localhost/api';
+const apiRoot = config.apiRoot;
 const model = modelFactory.getModel('schemaless');
+const aggregationModel = modelFactory.getAggregationModel('stix');
 const publishNotification = require('../controllers/shared/publish');
 
 const get = (req, res) => {
@@ -97,15 +101,12 @@ const addComment = (req, res) => {
             const commentObj = {
                 user: {
                     id: user._id,
-                    userName: user.userName
+                    userName: user.userName,
+                    avatar_url: userHelpers.getAvatarUrl(user)
                 },
                 submitted: new Date(),
                 comment
             };
-
-            if (user.github && user.github.avatar_url) {
-                commentObj.user.avatar_url = user.github.avatar_url;
-            }
 
             resultObj.metaProperties.comments.push(commentObj);
 
@@ -612,6 +613,98 @@ const addInteraction = (req, res) => {
     }
 };
 
+const relationshipMapper = (req, res) => {
+    res.header('Content-Type', 'application/vnd.api+json');
+    try {
+        const $match = {
+            'stix.type': 'relationship'
+        };
+
+        const $addToSet = {
+            id: '$relatedObjects._id'
+        };
+
+        const sourcetype = req.swagger.params.sourcetype.value;
+        $match['stix.source_ref'] = new RegExp(`^${sourcetype}--`);
+
+        const targettype = req.swagger.params.targettype.value;
+        $match['stix.target_ref'] = new RegExp(`^${targettype}--`);
+
+        const fields = req.swagger.params.fields && req.swagger.params.fields.value ? JSON.parse(req.swagger.params.fields.value) : null;
+
+        if (fields && fields.length) {
+            for (const field of fields) {
+                const splitFields = field.split('.');
+                if (!splitFields || !splitFields.length || !(splitFields[0] === 'stix' || splitFields[0] === 'metaProperties')) {
+                    return res.status(403).json({
+                        errors: [{
+                            status: 403,
+                            source: '',
+                            title: 'Error',
+                            code: '',
+                            detail: 'You may only access fields in stix or metaProperties.'
+                        }]
+                    });
+                }
+
+                if (splitFields[0] === 'stix' && splitFields.length > 1) {
+                    $addToSet[splitFields.slice(1).join('_')] = `$relatedObjects.${field}`;
+                } else {
+                    $addToSet[splitFields.join('_')] = `$relatedObjects.${field}`;
+                }
+            }
+        } else {
+            $addToSet.name = '$relatedObjects.stix.name';
+        }
+
+        const aggregationQuery = [
+            { $match },
+            {
+                $lookup: {
+                    from: 'stix',
+                    localField: 'stix.target_ref',
+                    foreignField: 'stix.id',
+                    as: 'relatedObjects'
+                }
+            },
+            {
+                $unwind: '$relatedObjects'
+            },
+            {
+                $group: {
+                    _id: '$stix.source_ref',
+                    relatedObjects: { $addToSet }
+                }
+            }
+        ];
+
+        aggregationModel.aggregate(aggregationQuery, (err, results) => {
+            if (err) {
+                return res.status(500).json({
+                    errors: [{
+                        status: 500,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'An unknown error has occurred.'
+                    }]
+                });
+            }
+            return res.json({ data: results });
+        });
+    } catch (error) {
+        return res.status(400).json({
+            errors: [{
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'Malformed request'
+            }]
+        });
+    }
+};
+
 module.exports = {
     get,
     count,
@@ -620,5 +713,6 @@ module.exports = {
     removeLike,
     publish,
     addLabel,
-    addInteraction
+    addInteraction,
+    relationshipMapper
 };
