@@ -43,6 +43,16 @@ const getProcessorStatus = () => new Promise((resolve, reject) => {
 });
 
 /**
+ * @description Creates a GridFS bucket after successfully connected to mongo
+ */
+const createGlobalGrisFSBucket = db => {
+    const gridFSOpts = {
+        bucketName: 'attachments'
+    };
+    global.unfetter.gridFSBucket = new mongoose.mongo.GridFSBucket(db, gridFSOpts);
+};
+
+/**
  * @description populate global lookup values
  */
 const lookupGlobalValues = () => new Promise((resolve, reject) => {
@@ -124,10 +134,13 @@ module.exports = () => new Promise((resolve, reject) => {
         });
         db.on('connected', () => {
             console.log('connected to mongodb');
+
+            createGlobalGrisFSBucket(global.unfetter.conn.db);
+
             getProcessorStatus()
-                .then(_ => { // eslint-disable-line no-unused-vars
+                .then(() => {
                     lookupGlobalValues()
-                        .then(__ => resolve('Mongo DB running')) // eslint-disable-line no-unused-vars
+                        .then(() => resolve('Mongo DB running'))
                         .catch(errMsg => reject(errMsg));
                 })
                 .catch(err => reject(err));
