@@ -28,7 +28,9 @@ router.get('/file/:stixId/:fileId', (req, res) => {
         }
 
         const stixResultObj = stixResult[0].toObject();
-        const hasAttachment = stixResultObj.metaProperties && stixResultObj.metaProperties.attachments && stixResultObj.metaProperties.attachments.includes(fileId);
+        const hasAttachment = stixResultObj.metaProperties &&
+            stixResultObj.metaProperties.attachments &&
+            stixResultObj.metaProperties.attachments.map(att => att._id).includes(fileId);
         if (!hasAttachment) {
             return res.status(404).json({
                 errors: [{

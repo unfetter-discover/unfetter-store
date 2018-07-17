@@ -44,12 +44,13 @@ router.post('/files', multerHelpers.attachmentArray, (req, res) => {
     if (promises.length) {
         Promise.all(promises)
             .then(fileData => res.status(201).json(
-                    fileData.map(file => ({
+                {
+                    data: fileData.map(file => ({
                         type: 'attachment',
                         id: file._id,
                         attributes: file
                     }))
-                )
+                })
             )
             .catch(err => {
                 console.log(err);

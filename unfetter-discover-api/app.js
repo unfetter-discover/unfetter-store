@@ -32,11 +32,6 @@ app.use(bodyParser.urlencoded({
     limit: '5mb'
 }));
 
-// TODO add handling for GET param token MW
-app.use('/upload', require('./api/express-controllers/upload'));
-app.use('/download', require('./api/express-controllers/download'));
-
-
 // Use auth middleware when runmode is UAC, or as a safeguard when RUN_MODE isn't specified
 if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
     // Set passport strategy
@@ -76,6 +71,8 @@ if (!process.env.RUN_MODE || process.env.RUN_MODE === 'UAC') {
 }
 
 app.use('/pattern-handler', require('./api/express-controllers/pattern-handler'));
+app.use('/upload', require('./api/express-controllers/upload'));
+app.use('/download', require('./api/express-controllers/download'));
 
 // ~~~ Swagger ~~~
 
