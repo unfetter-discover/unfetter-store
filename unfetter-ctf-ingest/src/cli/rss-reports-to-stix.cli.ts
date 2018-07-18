@@ -19,7 +19,11 @@ export class RssReportsToStixCli {
                 // TODO: transform to stix 2.0
                 bundle.objects = resp;
                 fs.writeFileSync(outFile, bundle.toJson());
+                console.log('generated bundle', outFile);
                 return bundle;
+            })
+            .then(() => {
+                process.exit(0);
             })
             .catch((err) => console.log(err));
     }

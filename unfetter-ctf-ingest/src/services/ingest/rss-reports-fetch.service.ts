@@ -39,6 +39,7 @@ export class RssReportsFetchService {
             return Promise.reject('');
         }
 
+        console.log('fetching reports from', rssUrl);
         const items = await this.fetch(rssUrl);
         return this.stixAdapter.convertRssToStix(items);
     }
