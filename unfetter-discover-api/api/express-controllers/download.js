@@ -48,21 +48,9 @@ router.get('/file/:stixId/:fileId', (req, res) => {
                 });
             }
             const fileObj = fileResult.toObject();
-            const stream = bucket.openDownloadStream(idObj);
 
             res.setHeader('Content-disposition', `attachment; filename=${fileObj.filename}`);
-            stream.on('error', err => {
-                res.send(err);
-            });
-
-            stream.on('data', chunk => {
-                res.write(chunk);
-            });
-
-            stream.on('close', () => {
-                // On large files, there can be a lag effect on the chunks
-                setTimeout(() => res.end(), 100);
-            });
+            bucket.openDownloadStream(idObj).pipe(res);
         });
     })
     .limit(1);
