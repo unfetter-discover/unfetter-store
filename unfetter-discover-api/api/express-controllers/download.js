@@ -49,8 +49,24 @@ router.get('/file/:stixId/:fileId', (req, res) => {
             }
             const fileObj = fileResult.toObject();
 
-            res.setHeader('Content-disposition', `attachment; filename=${fileObj.filename}`);
-            bucket.openDownloadStream(idObj).pipe(res);
+            const stream = bucket.openDownloadStream(idObj);
+            stream.on('data', () => {
+                // Only set attachment headers if we have valid data
+                if (!res.getHeader('Content-disposition')) {
+                    res.setHeader('Content-disposition', `attachment; filename=${fileObj.filename}`);
+                }
+            });
+
+            stream.on('error', err => {
+                console.log(err);
+                return res.status(500).json({
+                    errors: [{
+                        status: 500, source: '', title: 'Error', code: '', detail: 'An error occured while attempting to retrieve the file'
+                    }]
+                });
+            });
+
+            stream.pipe(res);
         });
     })
     .limit(1);

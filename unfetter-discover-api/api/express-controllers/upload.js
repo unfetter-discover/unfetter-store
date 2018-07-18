@@ -4,16 +4,25 @@ const multerHelpers = require('../helpers/multer-helper');
 
 const router = express.Router();
 
-router.post('/files', multerHelpers.attachmentArray, (req, res) => {
-    const { files } = req;
-    const response = {
-        data: files.map(file => ({
-            type: 'attachment',
-            id: file._id,
-            attributes: file
-        }))
-    };
-    res.status(201).json(response);
+router.post('/files', (req, res) => {
+    multerHelpers.attachmentArray(req, res, err => {
+        if (err) {
+            return res.status(500).json({
+                errors: [{
+                    status: 500, source: '', title: 'Error', code: '', detail: 'An error occured while attempting to upload the files'
+                }]
+            });
+        }
+        const { files } = req;
+        const response = {
+            data: files.map(file => ({
+                type: 'attachment',
+                id: file._id,
+                attributes: file
+            }))
+        };
+        return res.status(201).json(response);
+    });
 });
 
 // TODO
