@@ -17,11 +17,10 @@ class DemoStrategy extends Strategy {
     constructor() {
         super();
         this.name = 'demo';
-        this.console = console;
     }
 
     authenticate(req, options) {
-        this.success(DEMO_USER, 'FINALLY??');
+        this.success(DEMO_USER);
     }
 
 }
@@ -39,7 +38,7 @@ class DemoAuth extends AuthHelper {
     }
 
     options() {
-        return { log: console.log };
+        return {};
     }
 
     search(user) {
