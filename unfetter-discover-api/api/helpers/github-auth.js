@@ -30,14 +30,16 @@ class GithubAuth extends AuthHelper {
     }
 
     search(user) {
-        return { 'github.id': user.id };
+        return { 'auth.service': 'github', 'auth.id': user.id };
     }
 
     sync(user, githubInfo, approved) {
         super.sync(user, githubInfo, approved);
-        user.github.userName = githubInfo.username;
+        user.auth.service = 'github';
+        user.auth.userName = githubInfo.username;
+        user.auth.marking_refs = [];
         if (githubInfo._json.avatar_url) {
-            user.github.avatar_url = githubInfo._json.avatar_url;
+            user.auth.avatar_url = githubInfo._json.avatar_url;
         }
     }
 
