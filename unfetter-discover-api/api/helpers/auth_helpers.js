@@ -154,13 +154,12 @@ const AuthHelper = class {
     }
 
     sync(user, loginInfo, approved) {
-        user.oauth = this.name;
         user.approved = approved;
-        if (!user[this.name]) {
-            user[this.name] = {
+        if (!user.auth) {
+            user.auth = {
                 id: loginInfo.id,
                 userName: null,
-                avatar: null,
+                avatar_url: null,
             };
         }
     }

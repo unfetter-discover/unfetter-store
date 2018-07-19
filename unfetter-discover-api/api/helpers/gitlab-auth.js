@@ -26,14 +26,16 @@ class GitlabAuth extends AuthHelper {
     }
 
     search(user) {
-        return { 'gitlab.id': user.id };
+        return { 'auth.service': 'gitlab', 'auth.id': user.id };
     }
 
     sync(user, gitlabInfo, approved) {
         super.sync(user, gitlabInfo, approved);
-        user.gitlab.userName = gitlabInfo.username;
+        user.auth.service = 'gitlab';
+        user.auth.userName = gitlabInfo.username;
+        user.auth.marking_refs = [];
         if (gitlabInfo._json.avatar_url) {
-            user.gitlab.avatar_url = gitlabInfo._json.avatar_url;
+            user.auth.avatar_url = gitlabInfo._json.avatar_url;
         }
     }
 
