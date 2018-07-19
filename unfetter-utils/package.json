@@ -10,7 +10,6 @@
   "author": "Unfetter",
   "license": "MIT",
   "dependencies": {
-    "mongodb": "^2.2.35",
     "mongoose": "^4.13.14",
     "node-fetch": "^1.7.3",
     "yargs": "^12.0.1"
