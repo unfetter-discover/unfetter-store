@@ -14,7 +14,7 @@ passportConfig.setStrategy = passport => {
             token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
         } else {
             token = ExtractJwt.fromUrlQueryParameter('authorization')(req);
-            if (token.match(/^Bearer /) !== null) {
+            if (token && token.match(/^Bearer /) !== null) {
                 token = token.split('Bearer ')[1].trim();
             }
         }
