@@ -6,6 +6,7 @@ const gunzipPipe = zlib.createGunzip();
 const attachmentsFilesModel = require('../models/attachments').files;
 const stixModel = require('../models/schemaless');
 const SecurityHelper = require('../helpers/security_helper');
+const config = require('../config/config');
 
 const router = express.Router();
 
@@ -13,7 +14,11 @@ const router = express.Router();
  * This will provide either the gzip verison of the file
  * -or- optionally will gunzip via a GET param.
  */
-router.get('/file/:stixId/:fileId', (req, res) => {
+router.get('/file/:stixId/:fileId', (req, res, next) => {
+    if (config.blockAttachments) {
+        next();
+        return;
+    }
     const { stixId, fileId } = req.params;
     const { gunzip } = req.query;
 
@@ -83,7 +88,6 @@ router.get('/file/:stixId/:fileId', (req, res) => {
             } else {
                 stream.pipe(res);
             }
-
         });
     })
     .limit(1);
