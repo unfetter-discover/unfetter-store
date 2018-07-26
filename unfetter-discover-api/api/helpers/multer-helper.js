@@ -1,10 +1,14 @@
 const multer = require('multer');
+const zlib = require('zlib');
+
+const gzip = zlib.createGzip();
 
 class GridFSStorageEngine {
     _handleFile(req, file, cb) {
         if (global.unfetter.gridFSBucket) {
             const creator = req.user && req.user._id ? req.user._id : null;
             file.stream
+                .pipe(gzip)
                 .pipe(
                     global.unfetter.gridFSBucket.openUploadStream(file.originalname, {
                         contentType: file.mimetype,
