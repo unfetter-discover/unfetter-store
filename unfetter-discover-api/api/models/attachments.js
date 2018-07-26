@@ -14,6 +14,10 @@ const mongoose = require('mongoose');
  *     "metadata": < any > ,
  * }
  */
-const attachmentsModel = new mongoose.Schema({}, { strict: false });
+const attachmentsFilesModel = new mongoose.Schema({}, { strict: false });
+const attachmentsChunksModel = new mongoose.Schema({}, { strict: false });
 
-module.exports = mongoose.model('attachments', attachmentsModel, 'attachments.files');
+module.exports = {
+    files: mongoose.model('attachmentfiles', attachmentsFilesModel, 'attachments.files'),
+    chunks: mongoose.model('attachmentchunks', attachmentsChunksModel, 'attachments.chunks')
+};
