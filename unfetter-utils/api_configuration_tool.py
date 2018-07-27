@@ -20,19 +20,24 @@ template = {
     "jwtSecret": "",
     "sessionSecret": "",
     "unfetterUiCallbackURL": "https://%s/#/users/login-callback",
-    "apiRoot": "https://%s/api"
+    "apiRoot": "https://%s/api",
+    "blockAttachments": False
 }
 
-def update_ui_env(ui_cfg_file):
+def update_ui_env(ui_cfg_file, config):
     if os.path.isfile(ui_cfg_file):
         env_file = open(ui_cfg_file, 'r')
         env_contents = env_file.read()
         env_file.close()
         env = json.loads(env_contents)
-        env["authServices"] = services
+        env["authServices"] = config["authServices"]
+        env["blockAttachments"] = config["blockAttachments"]
     else:
         print """\n\033[33mRun configuration file does not exist... Creating.\033[0m"""
-        env = {"authServices": services}
+        env = {
+            "authServices": config["authServices"],
+            "blockAttachments": config["blockAttachments"]
+        }
     env_file = open(ui_cfg_file, 'w')
     env_file.write(json.dumps(env, indent=4))
     env_file.write('\n')
@@ -136,7 +141,7 @@ if __name__ == '__main__':
     else:
         private_config.pop('gitlab', None)
 
-    if not at_least_one_service_configured:
+    if not file_exists and not at_least_one_service_configured:
         print '\n\033[31mYou need to define at least one authentication service.\033[0m\n'
         raise SystemExit
 
@@ -157,6 +162,13 @@ if __name__ == '__main__':
         'the Unfetter-Discover-API and Unfetter-Socket-Server will use to encrypt JSON Web Tokens: (hidden) ').strip()
     if not file_exists or jwt_secret != '':
         private_config['jwtSecret'] = jwt_secret
+
+    block_attachments = str(raw_input(
+        '\nDo you wish to disable the feature to allow users to upload attachments? [y/n]: ')).strip()
+    if len(block_attachments) > 0 and block_attachments[0].lower() == 'y':
+        private_config['blockAttachments'] = True
+    elif len(block_attachments) > 0 and block_attachments[0].lower() == 'n':
+        private_config['blockAttachments'] = False
 
     print '\n\033[32mAll fields successfully entered.\033[0m\n'
 
@@ -186,7 +198,7 @@ if __name__ == '__main__':
                     ui_path = '../../unfetter-ui'
                 ui_cfg_file = os.path.join(ui_path + '/src/assets/config/local-settings.json')
                 try:
-                    update_ui_env(ui_cfg_file)
+                    update_ui_env(ui_cfg_file, private_config)
                     print '\nBye!\033[0m\n\n'                    
                 except:
                     print '\033[31mError working with env file ', sys.exc_info(), '\033[0m'

@@ -1,10 +1,15 @@
 const express = require('express');
 
 const multerHelpers = require('../helpers/multer-helper');
+const config = require('../config/config');
 
 const router = express.Router();
 
-router.post('/files', (req, res) => {
+router.post('/files', (req, res, next) => {
+    if (config.blockAttachments) {
+        next();
+        return;
+    }
     multerHelpers.attachmentArray(req, res, err => {
         if (err) {
             return res.status(500).json({
