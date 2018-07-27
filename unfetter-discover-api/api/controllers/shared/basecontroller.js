@@ -490,6 +490,14 @@ module.exports = class BaseController {
                                 }
                             }
                         });
+                    } else if (relatedIds && relatedIds.length === 0) {
+                        relationshipModel.remove({ 'stix.source_ref': resultObj._id }, (delRelErr, delRelResults) => {
+                            if (delRelErr) {
+                                console.log('Error while attemping to delete relationships for ', newDocument._id, ': ', delRelErr);
+                            } else {
+                                console.log('Successfully deleted ', delRelResults.length, ' relationships for: ', newDocument._id);
+                            }
+                        });
                     }
 
                     if (existingAttachments) {
