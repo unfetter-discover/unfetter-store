@@ -108,7 +108,7 @@ services:
     - unfetter-socket-server
     links:
     - cti-stix-store-repository:repository
-    - unfetter-socket-server:socketserver
+    - unfetter-socket-server:unfetter-socket-server
     ports:
     - "49360:3000"
     - "5555:5555"
@@ -121,7 +121,7 @@ services:
     - CTF_PARSE_HOST=http://unfetter-ctf-ingest
     - PATTERN_HANDLER_DOMAIN = unfetter-pattern-handler
     - PATTERN_HANDLER_PORT = 5000
-    - SOCKET_SERVER_DOMAIN = socketserver
+    - SOCKET_SERVER_DOMAIN = unfetter-socket-server
     - SOCKET_SERVER_PORT = 3333
     - STIX_API_PROTOCOL=http
     - STIX_API_HOST=cti-stix-store
