@@ -1,6 +1,6 @@
 process.env.PATTERN_HANDLER_DOMAIN = process.env.PATTERN_HANDLER_DOMAIN || 'unfetter-pattern-handler';
 process.env.PATTERN_HANDLER_PORT = process.env.PATTERN_HANDLER_PORT || 5000;
-process.env.SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || 'socketserver';
+process.env.SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || 'unfetter-socket-server';
 process.env.SOCKET_SERVER_PORT = process.env.SOCKET_SERVER_PORT || 3333;
 const CTF_PARSE_HOST = process.env.CTF_PARSE_HOST || 'http://localhost';
 const CTF_PARSE_PORT = process.env.CTF_PARSE_PORT || 10010;
