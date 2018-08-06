@@ -1,8 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const zlib = require('zlib');
 
-const gunzipPipe = zlib.createGunzip();
 const attachmentsFilesModel = require('../models/attachments').files;
 const stixModel = require('../models/schemaless');
 const SecurityHelper = require('../helpers/security_helper');
@@ -10,17 +8,12 @@ const config = require('../config/config');
 
 const router = express.Router();
 
-/**
- * This will provide either the gzip verison of the file
- * -or- optionally will gunzip via a GET param.
- */
 router.get('/file/:stixId/:fileId', (req, res, next) => {
     if (config.blockAttachments) {
         next();
         return;
     }
     const { stixId, fileId } = req.params;
-    const { gunzip } = req.query;
 
     const bucket = global.unfetter.gridFSBucket;
     if (!bucket || !stixId || !fileId) {
@@ -68,10 +61,6 @@ router.get('/file/:stixId/:fileId', (req, res, next) => {
                 if (!res.getHeader('Content-disposition')) {
                     res.setHeader('Content-disposition', `attachment; filename=${fileObj.filename}`);
                 }
-                // Set gzip encoding so browsers will do the gunzip
-                if (!res.getHeader('Content-Encoding') && !gunzip) {
-                    res.setHeader('Content-Encoding', 'gzip');
-                }
             });
 
             stream.on('error', err => {
@@ -83,11 +72,7 @@ router.get('/file/:stixId/:fileId', (req, res, next) => {
                 });
             });
 
-            if (gunzip) {
-                stream.pipe(gunzipPipe).pipe(res);
-            } else {
-                stream.pipe(res);
-            }
+            stream.pipe(res);
         });
     })
     .limit(1);
