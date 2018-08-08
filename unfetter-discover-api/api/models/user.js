@@ -63,31 +63,26 @@ const UserSchema = new mongoose.Schema({
         default: 'STANDARD_USER',
         index: true
     },
-    oauth: String,
-    github: {
-        userName: {
-            type: String
+    auth: {
+        service: {
+            type: String,
+            required: true
         },
         id: {
             type: String,
-            unique: true,
-            sparse: true
+            required: true
         },
-        avatar_url: {
-            type: String
-        }
-    },
-    gitlab: {
         userName: {
-            type: String
-        },
-        id: {
             type: String,
-            unique: true,
-            sparse: true
+            required: true
         },
         avatar_url: {
-            type: String
+            type: String,
+            required: false,
+            sparse: true
+        },
+        marking_refs: {
+            type: [String]
         }
     },
     identity: {

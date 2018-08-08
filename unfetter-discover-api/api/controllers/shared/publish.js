@@ -1,4 +1,4 @@
-process.env.SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || 'socketserver';
+process.env.SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || 'unfetter-socket-server';
 process.env.SOCKET_SERVER_PORT = process.env.SOCKET_SERVER_PORT || 3333;
 
 const fetch = require('node-fetch');

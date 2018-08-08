@@ -8,13 +8,13 @@ import { Connection } from '../models/connection';
 import { WSMessageTypes } from '../models/messages';
 import { UserRoles } from '../models/user-roles.enum';
 
-export default function socketInit(expressServer: Server): socketIo.Server {
+export default function socketInit(expressServer: Server): SocketIO.Server {
 
-    const socketServer: socketIo.Server = socketIo(expressServer, {
+    const socketServer: SocketIO.Server = socketIo(expressServer, {
         path: '/socket'
     });
 
-    socketServer.use((client: socketIo.Socket, next: any) => {
+    socketServer.use((client: SocketIO.Socket, next: any) => {
         let errorMsg = '';
 
         if (client.handshake.query && client.handshake.query.token) {
@@ -62,7 +62,7 @@ export default function socketInit(expressServer: Server): socketIo.Server {
         }
     });
 
-    socketServer.on('connection', (client: socketIo.Socket) => {
+    socketServer.on('connection', (client: SocketIO.Socket) => {
         console.log('Number of connections on connect: ', connections.length);
         const clientConnection = connections.find((conn: Connection) => conn.client === client);
 

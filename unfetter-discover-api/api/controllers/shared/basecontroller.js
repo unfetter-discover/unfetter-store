@@ -328,6 +328,9 @@ module.exports = class BaseController {
         const type = this.type;
         const model = this.model;
         const relationshipModel = modelFactory.getModel('relationship');
+        const attachmentFilesModel = modelFactory.getModel('attachmentfiles');
+        const attachmentChunksModel = modelFactory.getModel('attachmentchunks');
+        const ObjectID = require('mongoose').mongo.ObjectID;
 
         return (req, res) => {
             res.header('Content-Type', 'application/vnd.api+json');
@@ -338,6 +341,8 @@ module.exports = class BaseController {
                 const relationshipsToAdd = [];
                 const relationshipsIdsToDelete = [];
                 let relatedIds;
+                let existingAttachments;
+                let incomingAttachments;
 
                 const query = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);
                 model.findById(query, (err, result) => {
@@ -354,6 +359,11 @@ module.exports = class BaseController {
                     // set the new values
                     const resultObj = result.toObject();
                     const incomingObj = req.swagger.params.data ? req.swagger.params.data.value.data.attributes : {};
+
+                    if (resultObj.metaProperties && resultObj.metaProperties.attachments && resultObj.metaProperties.attachments.length) {
+                        existingAttachments = resultObj.metaProperties.attachments;
+                    }
+
                     const has = Object.prototype.hasOwnProperty;
                     for (const key in incomingObj) {
                         if (has.call(incomingObj, key)) {
@@ -382,6 +392,10 @@ module.exports = class BaseController {
                             relatedIds = resultObj.metaProperties.relationships;
                             delete resultObj.metaProperties.relationships;
                         }
+                        if (resultObj.metaProperties.attachments && resultObj.metaProperties.attachments.length) {
+                            incomingAttachments = resultObj.metaProperties.attachments;
+                        }
+
                         const tempMeta = resultObj.metaProperties;
                         delete resultObj.metaProperties;
                         resultObj.metaProperties = tempMeta;
@@ -468,7 +482,7 @@ module.exports = class BaseController {
                                 if (relationshipsIdsToDelete.length) {
                                     relationshipModel.remove({ _id: { $in: relationshipsIdsToDelete } }, (delRelErr, delRelResults) => {
                                         if (delRelErr) {
-                                            console.log('Error while deleted relationships for ', newDocument._id, ': ', delRelErr);
+                                            console.log('Error while attemping to delete relationships for ', newDocument._id, ': ', delRelErr);
                                         } else {
                                             console.log('Successfully deleted ', delRelResults.length, ' relationships for: ', newDocument._id);
                                         }
@@ -476,6 +490,44 @@ module.exports = class BaseController {
                                 }
                             }
                         });
+                    } else if (relatedIds && relatedIds.length === 0) {
+                        relationshipModel.remove({ 'stix.source_ref': resultObj._id }, (delRelErr, delRelResults) => {
+                            if (delRelErr) {
+                                console.log('Error while attemping to delete relationships for ', newDocument._id, ': ', delRelErr);
+                            } else {
+                                console.log('Successfully deleted ', delRelResults.length, ' relationships for: ', newDocument._id);
+                            }
+                        });
+                    }
+
+                    if (existingAttachments) {
+                        const attachmentIdsToDelete = existingAttachments
+                            .map(eAtt => eAtt._id)
+                            .filter(eId => !incomingAttachments || !incomingAttachments.map(iAtt => iAtt._id).includes(eId))
+                            .map(eId => {
+                                try {
+                                    const idObj = new ObjectID(eId);
+                                    return idObj;
+                                } catch (_) {
+                                    return null;
+                                }
+                            });
+                        if (attachmentIdsToDelete.length) {
+                            attachmentFilesModel.remove({ _id: { $in: attachmentIdsToDelete } }, (delRelErr, delRelResults) => {
+                                if (delRelErr) {
+                                    console.log('Error while attemping to delete attachment files for ', newDocument._id, ': ', delRelErr);
+                                } else {
+                                    console.log('Successfully deleted ', delRelResults.length, ' attachment files for: ', newDocument._id);
+                                }
+                            });
+                            attachmentChunksModel.remove({ files_id: { $in: attachmentIdsToDelete } }, (delRelErr, delRelResults) => {
+                                if (delRelErr) {
+                                    console.log('Error while attemping to delete attachment chunks for ', newDocument._id, ': ', delRelErr);
+                                } else {
+                                    console.log('Successfully deleted ', delRelResults.length, ' attachment chunks for: ', newDocument._id);
+                                }
+                            });
+                        }
                     }
 
                     const findOneAndUpdateQuery = this.applySecurityFilterWhenNeeded({ _id: id }, type, req.user, false);

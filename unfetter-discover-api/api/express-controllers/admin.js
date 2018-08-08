@@ -1,6 +1,6 @@
 process.env.PATTERN_HANDLER_DOMAIN = process.env.PATTERN_HANDLER_DOMAIN || 'unfetter-pattern-handler';
 process.env.PATTERN_HANDLER_PORT = process.env.PATTERN_HANDLER_PORT || 5000;
-process.env.SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || 'socketserver';
+process.env.SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || 'unfetter-socket-server';
 process.env.SOCKET_SERVER_PORT = process.env.SOCKET_SERVER_PORT || 3333;
 const CTF_PARSE_HOST = process.env.CTF_PARSE_HOST || 'http://localhost';
 const CTF_PARSE_PORT = process.env.CTF_PARSE_PORT || 10010;
@@ -14,6 +14,7 @@ const router = express.Router();
 const emailAlert = require('../controllers/shared/email-alert');
 const userModel = require('../models/user');
 const webAnalyticsModel = require('../models/web-analytics');
+const publishNotification = require('../controllers/shared/publish');
 
 router.get('/users-pending-approval', (req, res) => {
     userModel.find({ registered: true, approved: false, locked: false }, (err, result) => {
@@ -190,6 +191,9 @@ router.post('/change-user-status', (req, res) => {
         if (requestData.role !== undefined) {
             user.role = requestData.role;
         }
+        if (requestData.organizations !== undefined) {
+            user.organizations = requestData.organizations;
+        }
         const newDocument = new userModel(user);
         const error = newDocument.validateSync();
         if (error) {
@@ -213,6 +217,9 @@ router.post('/change-user-status', (req, res) => {
                 });
             }
 
+            if (user.approved) {
+                publishNotification.notifyUser(user._id, 'USER_MESSAGE', 'Welcome to Unfetter!', 'Go to User Settings to find Organizations to join, set cyber framework, and more.', '/users/settings');
+            }
             // Alert user when approved
             if (SEND_EMAIL_ALERTS && user.approved) {
                 emailAlert.emailUser(user._id, user.email, 'REGISTRATION_APPROVAL', 'You were approved to user Unfetter', {});

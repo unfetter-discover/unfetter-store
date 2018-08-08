@@ -21,5 +21,5 @@ Please note that there is only a small overlap between environmental variables a
 | `PATTERN_HANDLER_DOMAIN` | default: unfetter-pattern-handler |
 | `PATTERN_HANDLER_PORT` | default: 5000 |
 | `RUN_MODE` | The run mode of Unfetter, no default value.  See: https://github.com/unfetter-discover/unfetter/wiki/Unfetter-Build-Types-&-Run-Modes#run-modes-1 |
-| `SOCKET_SERVER_URL` | default: socketserver |
+| `SOCKET_SERVER_URL` | default: unfetter-socket-server |
 | `SOCKET_SERVER_PORT` | default: 3333 |

@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const mongooseModel = {};
 mongooseModel['attack-pattern'] = require('../../models/attack-pattern');
+mongooseModel.attachmentfiles = require('../../models/attachments').files;
+mongooseModel.attachmentchunks = require('../../models/attachments').chunks;
 mongooseModel.campaign = require('../../models/campaign');
 mongooseModel['course-of-action'] = require('../../models/course-of-action');
 mongooseModel.identity = require('../../models/identity');

@@ -8,7 +8,18 @@ const passportConfig = {};
 
 passportConfig.setStrategy = passport => {
     const opts = {};
-    opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+    opts.jwtFromRequest = req => {
+        let token = null;
+        if (req.headers.authorization) {
+            token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+        } else {
+            token = ExtractJwt.fromUrlQueryParameter('authorization')(req);
+            if (token && token.match(/^Bearer /) !== null) {
+                token = token.split('Bearer ')[1].trim();
+            }
+        }
+        return token;
+    };
     opts.secretOrKey = config.jwtSecret;
     passport.use(new JwtStrategy(opts, (jwtPayload, done) => {
         userModel.findById(jwtPayload._id, (err, user) => {

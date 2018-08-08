@@ -25,8 +25,11 @@ export class RssToStixAdapter {
      * @return {Promise<Stix[]>} stix from given array
      */
     public async convertRssToStix(arr: FeedParser.Item[]): Promise<Stix[]> {
+        const systemIdentity = await this.lookupService.findSystemIdentity();
+        const systemIdentityId = systemIdentity.stix.id;
+        console.log('found id', systemIdentityId);
         const stixies = arr
-            .map((el) => this.mapItemToStix(el));
+            .map((el) => this.mapItemToStix(el, systemIdentityId));
         return Promise.all(stixies);
     }
 
@@ -34,7 +37,7 @@ export class RssToStixAdapter {
      * @description map item
      * @param {FeedParser.Item} item
      */
-    public async mapItemToStix(item: FeedParser.Item): Promise<Stix> {
+    private async mapItemToStix(item: FeedParser.Item, systemIdentityId: string): Promise<Stix> {
         const stix = new Stix();
         stix.type = 'report';
 
@@ -63,7 +66,7 @@ export class RssToStixAdapter {
             stix.external_references = stix.external_references || [];
             stix.external_references.push(externalRef);
         }
-        stix.created_by_ref = item.author;
+        stix.created_by_ref = systemIdentityId || item.author;
         const createdDate = item.date ? new Date(item.date) : new Date();
         stix.created = createdDate.toISOString();
         return stix;

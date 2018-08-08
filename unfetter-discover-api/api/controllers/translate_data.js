@@ -54,7 +54,6 @@ const translateDataSample = (req, res) => {
     const json = {
         systemName: 'sample-report-system',
         payload: {
-            id: '123',
             description: 'descrip',
             published: '2017-12-01',
             protection: {
@@ -63,7 +62,9 @@ const translateDataSample = (req, res) => {
             report: {
                 url: 'report.url',
                 id: 'https://reports.org/report.id',
-                description: 'report description'
+                description: 'sample external report description',
+                title: 'sample external report title',
+                author: 'external system author1'
             }
         }
     };
