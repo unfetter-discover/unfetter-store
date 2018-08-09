@@ -41,7 +41,7 @@
     "start": "npm run compileswagger && node api/server/server.js",
     "startdev": "npm run compileswagger && nodemon --watch ./api --ignore 'api/swagger/swagger*.*' -e js,yaml,json,yml api/server/server.js",
     "startdeploy": "npm run compileswagger && pm2-docker start api/server/server.js -i max",
-    "debugdev": "npm run compileswagger && nodemon --inspect=0.0.0.0:5555 --watch ./api --ignore 'api/swagger/swagger*.*' -e js,yaml,json,yml api/server/server.js",
+    "debugdev": "npm run compileswagger && nodemon --delay 300ms --inspect=0.0.0.0:5555 --watch ./api --ignore 'api/swagger/swagger*.*' -e js,yaml,json,yml api/server/server.js",
     "test": "npm run compileswagger && swagger project test",
     "lint": "eslint ./api/**"
   }
