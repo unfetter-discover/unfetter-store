@@ -9,7 +9,7 @@
     "clean": "rimraf dist/ tsdocs/ coverage/ .nyc_output/",
     "coverage": "nyc --extension .ts --reporter=lcov --reporter=text-lcov npm test && nyc report",
     "lint": "tsc -v && tslint src/**/*.ts",
-    "serve": "nodemon --inspect=0.0.0.0:6555 --nolazy dist/server/server.js",
+    "serve": "nodemon --delay 300ms --inspect=0.0.0.0:6555 --nolazy dist/server/server.js",
     "start": "npm run build && npm run watch",
     "start:deploy": "tsc && pm2-docker start dist/server/server.js",
     "test": "jasmine-ts --config=jasmine.json",

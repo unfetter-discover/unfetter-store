@@ -35,12 +35,23 @@ export default function socketInit(expressServer: Server): SocketIO.Server {
                                 client.disconnect();
                             } else {
                                 const userObj = mongoUser.toObject();
+                                const clientIndex = connections.length;
                                 connections.push({
                                     user: userObj,
                                     token,
                                     client,
                                     connected: false
                                 });
+
+                                client.on('disconnect', () => {
+                                    try {
+                                        connections.splice(clientIndex, 1);
+                                        console.log(`Removed user ${userObj._id} socket client ${client.client.id} from connections.  Remaining connections: ${connections.length}`);
+                                    } catch (error) {
+                                        console.log(error);
+                                    }
+                                });
+
                                 console.log(userObj.userName, 'successfully attempted websocket connection');
                                 next();
                             }
@@ -78,17 +89,7 @@ export default function socketInit(expressServer: Server): SocketIO.Server {
 
             if (clientConnection.user.role === UserRoles.ADMIN) {
                 clientConnection.client.join('admin');
-            }
-
-            clientConnection.client.on('disconnect', () => {
-                try {
-                    console.log(`Removing user ${clientConnection.user._id} socket client ${clientConnection.client.client.id} from connections`);
-                    connections.splice(clientIndex, 1);
-                    console.log(`Remaining connections: ${connections.length}`);
-                } catch (error) {
-                    console.log(error);
-                }
-            });
+            }            
 
         } else {
             console.log('User not found in connections array');
