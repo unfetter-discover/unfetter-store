@@ -133,6 +133,11 @@ router.post('/process-organization-applicant/:userId', (req, res) => {
 
         matchingOrg.role = organizations.role;
 
+        if (organizations.role === 'ORG_LEADER' && user.role === 'STANDARD_USER') {
+            console.log(`Promoting user ${user._id} (${user.userName}) to ORG_LEADER`);
+            user.role = organizations.role;
+        }
+
         const newDocument = new userModel(user);
         const error = newDocument.validateSync();
         if (error) {

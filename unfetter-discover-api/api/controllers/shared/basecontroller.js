@@ -285,6 +285,8 @@ module.exports = class BaseController {
                                     const identityObj = identityResult.toObject();
                                     if (obj.stix.type === 'indicator') {
                                         publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`, `/indicator-sharing/single/${newDocument._id}`);
+                                    } else if (obj.stix.type === 'relationship') {
+                                        console.log(`Skipping notification for relationship object ${newDocument._id}`);
                                     } else {
                                         publish.notifyOrg(req.user._id, obj.stix.created_by_ref, 'STIX', `New STIX by ${identityObj.stix.name}`, `New ${newDocument.stix.type}: ${newDocument.stix.name}`);
                                     }
