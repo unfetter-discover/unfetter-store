@@ -15,6 +15,7 @@ const emailAlert = require('../controllers/shared/email-alert');
 const userModel = require('../models/user');
 const webAnalyticsModel = require('../models/web-analytics');
 const publishNotification = require('../controllers/shared/publish');
+const stixModel = require('../models/schemaless');
 
 router.get('/users-pending-approval', (req, res) => {
     userModel.find({ registered: true, approved: false, locked: false }, (err, result) => {
@@ -133,6 +134,21 @@ router.post('/process-organization-applicant/:userId', (req, res) => {
 
         matchingOrg.role = organizations.role;
 
+        if (organizations.role === 'ORG_LEADER') {
+            stixModel.find({ _id: organizations.id }, (identityErr, identityResult) => {
+                if (identityErr) {
+                    return;
+                }
+                const orgObj = identityResult[0].toObject();
+                publishNotification.notifyUser(user._id, 'USER_MESSAGE', `You have become a leader of ${orgObj.stix.name}`, 'Go to the Organizations dashboard to manage the organization.', '/organizations');
+            });
+
+            if (user.role === 'STANDARD_USER') {
+                console.log(`Promoting user ${user._id} (${user.userName}) to ORG_LEADER`);
+                user.role = organizations.role;
+            }
+        }
+
         const newDocument = new userModel(user);
         const error = newDocument.validateSync();
         if (error) {
@@ -155,9 +171,11 @@ router.post('/process-organization-applicant/:userId', (req, res) => {
                     }]
                 });
             }
+            const newUserObj = newDocument.toObject();
+            publishNotification.updateUserObject(newUserObj);
             return res.json({
                 data: {
-                    attributes: newDocument.toObject()
+                    attributes: newUserObj
                 }
             });
         });

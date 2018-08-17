@@ -4,8 +4,11 @@ process.env.SOCKET_SERVER_PORT = process.env.SOCKET_SERVER_PORT || 3333;
 const fetch = require('node-fetch');
 
 const NOTIFICATION_TYPES = [
+    'COMMENT',
     'ORGANIZATION',
-    'COMMENT'
+    'STIX',
+    'USER_MESSAGE',
+    'USER_OBJECT'
 ];
 
 class CreateNotification {
@@ -111,10 +114,27 @@ const sendStixId = (stixId, type) => {
         .catch(err => console.log('Error!', err));
 };
 
+const updateUserObject = userObject => {
+    const body = JSON.stringify(new CreateNotification(userObject._id.toString(), null, 'USER_OBJECT', null, userObject, null, null, null));
+    fetch(`https://${process.env.SOCKET_SERVER_URL}:${process.env.SOCKET_SERVER_PORT}/publish/update/user`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json'
+        },
+        body
+    })
+        .then(res => { // eslint-disable-line no-unused-vars
+            console.log('Publish API recieved notification for stixid update');
+        })
+        .catch(err => console.log('Error!', err));
+};
+
 module.exports = {
     notifyUser,
     notifyOrg,
     notifyAdmin,
     updateSocialForAll,
-    sendStixId
+    sendStixId,
+    updateUserObject
 };

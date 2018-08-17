@@ -65,6 +65,26 @@ router.post('/notification/user', (req: Request, res: Response) => {
     }
 });
 
+router.post('/update/user', (req: Request, res: Response) => {
+    if (isDefinedJsonApi(req, ['userId'], ['notification'])) {
+        const { userId, notification }: UserNotification = req.body.data.attributes;
+        const appNotification = new CreateAppNotification(WSMessageTypes.USER_OBJECT, notification);
+        const userSessions = findConnectionsByUserId(userId);
+
+        if (userSessions && userSessions.length) {
+            // In case the same user has multiple session objects
+            userSessions.forEach((connection: Connection) => {
+                console.log('Sending message to: ', userId);
+                connection.client.send(appNotification);
+            });
+        } 
+              
+    } else {
+        console.log('Malformed request to', req.url);
+        return res.status(400).json(new CreateJsonApiError('400', req.url, 'Malformed request'));
+    }
+});
+
 // Email alert only, to user
 router.post('/email/user', (req: Request, res: Response) => {
     if (SEND_EMAIL_ALERTS && isDefinedJsonApi(req, ['userEmail'])) {
