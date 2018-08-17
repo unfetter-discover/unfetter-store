@@ -1,9 +1,26 @@
 from pymongo import MongoClient
+import argparse
 
-# ~~~ Adjust these variables as needed ~~~
+parser = argparse.ArgumentParser(description='Use this script to change the Unfetter role of users')
 
-MONGO_HOST = 'localhost'
-MONGO_PORT = 27018 # This assumes Unfetter's docker-compose.development.yml port mapping
+parser.add_argument(
+    '--host',
+    dest='host',
+    help='The host for MongoDB [default: localhost]',
+    default='localhost')
+
+parser.add_argument(
+    '--port',
+    dest='port',
+    type=int,
+    help='The port for MongoDB [default: 27018]',
+    default=27018)
+
+args = parser.parse_args()
+
+MONGO_HOST = args.host
+MONGO_PORT = args.port
+
 UNFETTER_DATABASE = 'stix'
 UNFETTER_USERS_COLLECTION = 'user'
 UNFETTER_USER_ROLES = [
