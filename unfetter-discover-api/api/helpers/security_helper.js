@@ -75,19 +75,34 @@ const applySecurityFilter = (query, user, read = true) => {
             return 1;
         });
 
-    let securityFilter;
+    const securityFilter = { $and: [] };
 
     // Apply more exceptions mode for applying read permissions
     if (read) {
-        securityFilter = {
+        securityFilter.$and.push({
             $or: [
                 { 'metaProperties.published': true },
                 { 'stix.created_by_ref': { $exists: true, $in: orgIds } }
             ]
-        };
+        });
     } else {
-        securityFilter = { 'stix.created_by_ref': { $exists: true, $in: orgIds } };
+        securityFilter.$and.push({ 'stix.created_by_ref': { $exists: true, $in: orgIds } });
     }
+
+    // Add data access control
+    const markings = JSON.stringify((user.auth && user.auth.marking_refs) ? user.auth.marking_refs : []);
+    console.log('markings:', user.auth.marking_refs, markings);
+    securityFilter.$and.push({
+        $or: [
+            { 'stix.object_marking_refs': { $exists: false } },
+            { 'stix.object_marking_refs': { $size: 0 } },
+            { $where: `function() {
+                const markings = '${markings}';
+                return this.stix.object_marking_refs.every(marking => markings.includes(marking));
+            }` }
+        ]
+    });
+    console.log('filter:', securityFilter);
 
     return { ...query, ...securityFilter };
 };
