@@ -44,20 +44,20 @@ const UserSchema = mongoose.Schema({
  * Under the new document model, we recognize Unfetter will not be managing users' multiple login services. An Unfetter
  * user will only be linked to a single authentication service. The UI should not have to be informed of which service
  * you used to log in with (a process that happens in the discover-api). With that in mind, the User model now only has
- * a login (open to a better name) property:
- * - login {
+ * an auth (open to a better name) property:
+ * - auth {
  * --- service      only keeping this for re-authentication purposes
  * --- id           the ID the service knows you by; we could munge service and id together, but I like cleaner data :)
  * --- userName     the userid you identified yourself as with the service (e.g., your GitHub account name)
  * --- avatar_url   optional
- * --- auths        (open to a better name) a list of strings of what data you can access
+ * --- marking_refs (open to a better name) a list of strings of what data you can access
  * }
  * 
- * The `auths` list would correspond to the `object_marking_refs` (and potentially `granular_markings`) on a STIX
- * domain object. Note the `auths` list does not include restrictions based on whatever Unfetter organizations you are
- * a member of.
+ * The `marking_refs` list would correspond to the `object_marking_refs` (and potentially `granular_markings`) on a
+ * STIX domain object. Note the `marking_refs` list does not include restrictions based on whatever Unfetter
+ * organizations you are a member of, as that is handled by a separate filter.
  * 
- * This function will remove the `auth` property, and convert the `github` or `gitlab` property into a `login`
+ * This function will remove the `oauth` property, and convert the `github` or `gitlab` property into an `auth`
  * property, adding `'github'` or `'gitlab'`, respectively, as the value of the `service` property. _If it finds both
  * properties_ in the user document, it will **have** to choose one (it will go with GitHub, since it has tenure),
  * because of the uniqueness constraints on the schema (`email` and `userName`, specifically). We could add a
