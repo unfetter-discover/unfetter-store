@@ -1,0 +1,14 @@
+version: "3.3"
+services:
+  unfetter-user-promotion:
+    build: .
+    container_name: unfetter-user-promotion
+    image: unfetter-user-promotion
+    entrypoint:
+      - tail
+      - -f
+      - /dev/null 
+networks:
+ default:
+    external:
+      name: unfetter_network

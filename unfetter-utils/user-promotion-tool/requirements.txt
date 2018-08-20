@@ -1,0 +1,2 @@
+pymongo==3.5.1
+argparse==1.4.0
