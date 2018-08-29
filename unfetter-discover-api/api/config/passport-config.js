@@ -37,7 +37,7 @@ passportConfig.setStrategy = passport => {
 
 passportConfig.jwtStandard = (req, res, next) => {
     const user = req.user;
-    if (!user || !user.approved) {
+    if (!user || !user.approved || user.locked) {
         return res.status(403).json({
             errors: [{
                 status: 403,
