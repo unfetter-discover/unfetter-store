@@ -1,7 +1,8 @@
 {
   "extends": "airbnb-base",
   "plugins": [
-    "import"
+    "import",
+    "chai-friendly"
   ],
   "rules": {
     "no-underscore-dangle": 0,
@@ -47,9 +48,11 @@
     "new-cap": "off",
     "no-unused-vars": "warn",
     "no-param-reassign": "warn",
-    "camelcase": "warn"
+    "camelcase": "warn",
+    "no-unused-expressions": 0,
+    "chai-friendly/no-unused-expressions": 2
   },
   "env": {
-    "jasmine": true
+    "mocha": true
   }
 }

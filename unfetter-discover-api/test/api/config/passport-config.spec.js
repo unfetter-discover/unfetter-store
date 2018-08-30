@@ -1,6 +1,8 @@
 process.env.RUN_MODE = 'TEST';
 
-const should = require('should');
+const chai = require('chai');
+
+const expect = chai.expect;
 
 const passportConfig = require('../../../api/config/passport-config');
 
@@ -25,7 +27,7 @@ describe('passportConfig', () => {
     describe('jwtStandard', () => {
         it('should response with an error if no user', () => {
             const retVal = passportConfig.jwtStandard(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response with an error if user is not approved', () => {
@@ -34,7 +36,7 @@ describe('passportConfig', () => {
                 locked: false
             };
             const retVal = passportConfig.jwtStandard(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response with an error if user is locked', () => {
@@ -43,7 +45,7 @@ describe('passportConfig', () => {
                 locked: true
             };
             const retVal = passportConfig.jwtStandard(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response invoke callback with approved unlocked user', done => {
@@ -53,8 +55,7 @@ describe('passportConfig', () => {
             };
             let retVal;
             const callback = () => {
-                should.equal(true, true);
-                should.not.exist(retVal);
+                expect(retVal).to.be.undefined;
                 done();
             };
             retVal = passportConfig.jwtStandard(mockReq, mockRes, callback);
@@ -64,7 +65,7 @@ describe('passportConfig', () => {
     describe('jwtAdmin', () => {
         it('should response with an error if no user', () => {
             const retVal = passportConfig.jwtAdmin(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response with an error if user is not approved', () => {
@@ -74,7 +75,7 @@ describe('passportConfig', () => {
                 role: 'ADMIN'
             };
             const retVal = passportConfig.jwtStandard(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response with an error if user is locked', () => {
@@ -84,7 +85,7 @@ describe('passportConfig', () => {
                 role: 'ADMIN'
             };
             const retVal = passportConfig.jwtAdmin(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response with an error if user is not an admin', () => {
@@ -94,7 +95,7 @@ describe('passportConfig', () => {
                 role: 'NOT_ADMIN'
             };
             const retVal = passportConfig.jwtAdmin(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response invoke callback with approved unlocked admin user', done => {
@@ -105,8 +106,8 @@ describe('passportConfig', () => {
             };
             let retVal;
             const callback = () => {
-                should.equal(true, true);
-                should.not.exist(retVal);
+                
+                expect(retVal).to.be.undefined;
                 done();
             };
             retVal = passportConfig.jwtAdmin(mockReq, mockRes, callback);
@@ -115,7 +116,7 @@ describe('passportConfig', () => {
     describe('jwtOrganizations', () => {
         it('should response with an error if no user', () => {
             const retVal = passportConfig.jwtOrganizations(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response with an error if user is not approved', () => {
@@ -125,7 +126,7 @@ describe('passportConfig', () => {
                 role: 'ADMIN'
             };
             const retVal = passportConfig.jwtOrganizations(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response with an error if user is locked', () => {
@@ -135,7 +136,7 @@ describe('passportConfig', () => {
                 role: 'ADMIN'
             };
             const retVal = passportConfig.jwtOrganizations(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response with an error if user is a standard user', () => {
@@ -145,7 +146,7 @@ describe('passportConfig', () => {
                 role: 'STANDARD_USER'
             };
             const retVal = passportConfig.jwtOrganizations(mockReq, mockRes, () => {});
-            should.exist(retVal);
+            expect(retVal).to.exist;
         });
 
         it('should response invoke callback with approved unlocked admin user', done => {
@@ -156,8 +157,7 @@ describe('passportConfig', () => {
             };
             let retVal;
             const callback = () => {
-                should.equal(true, true);
-                should.not.exist(retVal);
+                expect(retVal).to.be.undefined;
                 done();
             };
             retVal = passportConfig.jwtOrganizations(mockReq, mockRes, callback);
@@ -171,8 +171,7 @@ describe('passportConfig', () => {
             };
             let retVal;
             const callback = () => {
-                should.equal(true, true);
-                should.not.exist(retVal);
+                expect(retVal).to.be.undefined;
                 done();
             };
             retVal = passportConfig.jwtOrganizations(mockReq, mockRes, callback);
