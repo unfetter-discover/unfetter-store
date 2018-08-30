@@ -251,7 +251,6 @@ router.post('/change-user-status', (req, res) => {
                     emailAlert.emailUser(user._id, user.email, 'REGISTRATION_APPROVAL', 'You were approved to user Unfetter', {});
                 }
             }
-            
             publishNotification.updateUserObject(newUserObj);
 
             return res.json({
