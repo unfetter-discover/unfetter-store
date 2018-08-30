@@ -1,3 +1,5 @@
+process.env.RUN_MODE = 'TEST';
+
 const should = require('should');
 
 const passportConfig = require('../../../api/config/passport-config');
@@ -5,7 +7,6 @@ const passportConfig = require('../../../api/config/passport-config');
 describe('passportConfig', () => {
     let mockReq;
     let mockRes;
-    
     beforeEach(() => {
         mockReq = {
             user: null
@@ -111,7 +112,6 @@ describe('passportConfig', () => {
             retVal = passportConfig.jwtAdmin(mockReq, mockRes, callback);
         });
     });
-    
     describe('jwtOrganizations', () => {
         it('should response with an error if no user', () => {
             const retVal = passportConfig.jwtOrganizations(mockReq, mockRes, () => {});
