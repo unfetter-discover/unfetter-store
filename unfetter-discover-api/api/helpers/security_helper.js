@@ -91,7 +91,6 @@ const applySecurityFilter = (query, user, read = true) => {
 
     // Add data access control
     const markings = JSON.stringify((user.auth && user.auth.marking_refs) ? user.auth.marking_refs : []);
-    console.log('markings:', user.auth.marking_refs, markings);
     securityFilter.$and.push({
         $or: [
             { 'stix.object_marking_refs': { $exists: false } },
