@@ -200,6 +200,7 @@ router.post('/change-user-status', (req, res) => {
             });
         }
         const user = result.toObject();
+        const oldUserData = { ...user };
         if (requestData.approved !== undefined) {
             user.approved = requestData.approved;
         }
@@ -235,17 +236,27 @@ router.post('/change-user-status', (req, res) => {
                 });
             }
 
-            if (user.approved) {
+            const newUserObj = newDocument.toObject();
+
+            // User promoted to admin
+            if (oldUserData.role !== 'ADMIN' && newDocument.role === 'ADMIN') {
+                publishNotification.notifyUser(user._id, 'USER_MESSAGE', 'You have become an administrator', 'Go to the Admin dashboard to administer Unfetter.', '/admin');
+            }
+
+            // User approved
+            if (!oldUserData.approved && newDocument.approved) {
                 publishNotification.notifyUser(user._id, 'USER_MESSAGE', 'Welcome to Unfetter!', 'Go to User Settings to find Organizations to join, set cyber framework, and more.', '/users/settings');
+
+                if (SEND_EMAIL_ALERTS) {
+                    emailAlert.emailUser(user._id, user.email, 'REGISTRATION_APPROVAL', 'You were approved to user Unfetter', {});
+                }
             }
-            // Alert user when approved
-            if (SEND_EMAIL_ALERTS && user.approved) {
-                emailAlert.emailUser(user._id, user.email, 'REGISTRATION_APPROVAL', 'You were approved to user Unfetter', {});
-            }
+            
+            publishNotification.updateUserObject(newUserObj);
 
             return res.json({
                 data: {
-                    attributes: newDocument.toObject()
+                    attributes: newUserObj
                 }
             });
         });
