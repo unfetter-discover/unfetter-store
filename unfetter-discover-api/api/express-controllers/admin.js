@@ -15,6 +15,7 @@ const emailAlert = require('../controllers/shared/email-alert');
 const userModel = require('../models/user');
 const webAnalyticsModel = require('../models/web-analytics');
 const publishNotification = require('../controllers/shared/publish');
+const stixModel = require('../models/schemaless');
 
 router.get('/users-pending-approval', (req, res) => {
     userModel.find({ registered: true, approved: false, locked: false }, (err, result) => {
@@ -133,6 +134,21 @@ router.post('/process-organization-applicant/:userId', (req, res) => {
 
         matchingOrg.role = organizations.role;
 
+        if (organizations.role === 'ORG_LEADER') {
+            stixModel.find({ _id: organizations.id }, (identityErr, identityResult) => {
+                if (identityErr) {
+                    return;
+                }
+                const orgObj = identityResult[0].toObject();
+                publishNotification.notifyUser(user._id, 'USER_MESSAGE', `You have become a leader of ${orgObj.stix.name}`, 'Go to the Organizations dashboard to manage the organization.', '/organizations');
+            });
+
+            if (user.role === 'STANDARD_USER') {
+                console.log(`Promoting user ${user._id} (${user.userName}) to ORG_LEADER`);
+                user.role = organizations.role;
+            }
+        }
+
         const newDocument = new userModel(user);
         const error = newDocument.validateSync();
         if (error) {
@@ -155,9 +171,11 @@ router.post('/process-organization-applicant/:userId', (req, res) => {
                     }]
                 });
             }
+            const newUserObj = newDocument.toObject();
+            publishNotification.updateUserObject(newUserObj);
             return res.json({
                 data: {
-                    attributes: newDocument.toObject()
+                    attributes: newUserObj
                 }
             });
         });
@@ -182,6 +200,7 @@ router.post('/change-user-status', (req, res) => {
             });
         }
         const user = result.toObject();
+        const oldUserData = { ...user };
         if (requestData.approved !== undefined) {
             user.approved = requestData.approved;
         }
@@ -217,17 +236,26 @@ router.post('/change-user-status', (req, res) => {
                 });
             }
 
-            if (user.approved) {
+            const newUserObj = newDocument.toObject();
+
+            // User promoted to admin
+            if (oldUserData.role !== 'ADMIN' && newDocument.role === 'ADMIN') {
+                publishNotification.notifyUser(user._id, 'USER_MESSAGE', 'You have become an administrator', 'Go to the Admin dashboard to administer Unfetter.', '/admin');
+            }
+
+            // User approved
+            if (!oldUserData.approved && newDocument.approved) {
                 publishNotification.notifyUser(user._id, 'USER_MESSAGE', 'Welcome to Unfetter!', 'Go to User Settings to find Organizations to join, set cyber framework, and more.', '/users/settings');
+
+                if (SEND_EMAIL_ALERTS) {
+                    emailAlert.emailUser(user._id, user.email, 'REGISTRATION_APPROVAL', 'You were approved to user Unfetter', {});
+                }
             }
-            // Alert user when approved
-            if (SEND_EMAIL_ALERTS && user.approved) {
-                emailAlert.emailUser(user._id, user.email, 'REGISTRATION_APPROVAL', 'You were approved to user Unfetter', {});
-            }
+            publishNotification.updateUserObject(newUserObj);
 
             return res.json({
                 data: {
-                    attributes: newDocument.toObject()
+                    attributes: newUserObj
                 }
             });
         });

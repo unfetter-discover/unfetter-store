@@ -37,7 +37,7 @@ passportConfig.setStrategy = passport => {
 
 passportConfig.jwtStandard = (req, res, next) => {
     const user = req.user;
-    if (!user || !user.approved) {
+    if (!user || !user.approved || user.locked) {
         return res.status(403).json({
             errors: [{
                 status: 403,
@@ -54,7 +54,7 @@ passportConfig.jwtStandard = (req, res, next) => {
 passportConfig.jwtAdmin = (req, res, next) => {
     const user = req.user;
     // Verify they have admin role
-    if (!user || !user.approved || user.role !== 'ADMIN') {
+    if (!user || !user.approved || user.locked || user.role !== 'ADMIN') {
         return res.status(403).json({
             errors: [{
                 status: 403,
@@ -71,7 +71,7 @@ passportConfig.jwtAdmin = (req, res, next) => {
 passportConfig.jwtOrganizations = (req, res, next) => {
     const user = req.user;
     // Verify they have admin or org leader role
-    if (!user || !user.approved || (user.role !== 'ADMIN' && user.role !== 'ORG_LEADER')) {
+    if (!user || !user.approved || user.locked || (user.role !== 'ADMIN' && user.role !== 'ORG_LEADER')) {
         return res.status(403).json({
             errors: [{
                 status: 403,

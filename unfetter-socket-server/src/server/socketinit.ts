@@ -35,12 +35,23 @@ export default function socketInit(expressServer: Server): SocketIO.Server {
                                 client.disconnect();
                             } else {
                                 const userObj = mongoUser.toObject();
+                                const clientIndex = connections.length;
                                 connections.push({
                                     user: userObj,
                                     token,
                                     client,
                                     connected: false
                                 });
+
+                                client.on('disconnect', () => {
+                                    try {
+                                        connections.splice(clientIndex, 1);
+                                        console.log(`Removed user ${userObj._id} socket client ${client.client.id} from connections.  Remaining connections: ${connections.length}`);
+                                    } catch (error) {
+                                        console.log(error);
+                                    }
+                                });
+
                                 console.log(userObj.userName, 'successfully attempted websocket connection');
                                 next();
                             }
@@ -50,7 +61,7 @@ export default function socketInit(expressServer: Server): SocketIO.Server {
                 .catch((err) => {
                     errorMsg = 'Malformed or invalid token sent';
                     console.log(errorMsg);
-                    next(errorMsg);
+                    next(new Error(errorMsg));
                     client.disconnect();
                 });
 
@@ -63,8 +74,9 @@ export default function socketInit(expressServer: Server): SocketIO.Server {
     });
 
     socketServer.on('connection', (client: SocketIO.Socket) => {
-        console.log('Number of connections on connect: ', connections.length);
-        const clientConnection = connections.find((conn: Connection) => conn.client === client);
+        console.log(`Number of connections on connect: ${connections.length}`);
+        const clientIndex = connections.findIndex((conn: Connection) => conn.client.client.id === client.client.id); 
+        const clientConnection = connections[clientIndex] || null;
 
         if (clientConnection) {
 
@@ -77,58 +89,7 @@ export default function socketInit(expressServer: Server): SocketIO.Server {
 
             if (clientConnection.user.role === UserRoles.ADMIN) {
                 clientConnection.client.join('admin');
-            }
-
-            // TODO delete this, moved notification handling to the API
-            // clientConnection.client.on('message', (data: any) => {
-            //     const userId = clientConnection.user._id;
-            //     console.log(data);
-            //     switch (data.messageType) {
-            //         case NotificationRecieveTypes.READ_NOTIFICATION:
-            //             console.log('Reading notification');
-            //             notificationStoreModel.findByIdAndUpdate(data.messageContent, { $set: { read: true } }, (err, result) => {
-            //                 if (err) {
-            //                     console.log(err);
-            //                 } else {
-            //                     console.log('Notification read');
-            //                 }
-            //             });
-            //             break;
-            //         case NotificationRecieveTypes.DELETE_NOTIFICATION:
-            //             console.log('Deleting notification');
-            //             notificationStoreModel.findByIdAndRemove(data.messageContent, (err, result) => {
-            //                 if (err) {
-            //                     console.log(err);
-            //                 } else {
-            //                     console.log('Notification deleted');
-            //                 }
-            //             });
-            //             break;
-            //         case NotificationRecieveTypes.READ_ALL_NOTIFICATIONS:
-            //             console.log('Reading all notification');
-            //             notificationStoreModel.update({ userId }, { $set: { read: true } }, { multi: true }, (err, result) => {
-            //                 if (err) {
-            //                     console.log(err);
-            //                 } else {
-            //                     console.log(result);
-            //                     console.log('All notifications read');
-            //                 }
-            //             });
-            //             break;
-            //         case NotificationRecieveTypes.DELETE_ALL_NOTIFICATIONS:
-            //             console.log('Deleting all notification');
-            //             notificationStoreModel.remove({ userId }, (err) => {
-            //                 if (err) {
-            //                     console.log(err);
-            //                 } else {
-            //                     console.log('All notifications deleted');
-            //                 }
-            //             });
-            //             break;
-            //         default:
-            //             console.log('No action for message:\n', data);
-            //     }
-            // });
+            }            
 
         } else {
             console.log('User not found in connections array');
