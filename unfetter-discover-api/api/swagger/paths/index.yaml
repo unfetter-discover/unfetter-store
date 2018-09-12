@@ -170,6 +170,11 @@
 /x-unfetter-sensors/{id}:
   $ref: ./x_unfetter_sensors/x_unfetter_sensor_by_id.yaml
 
+/x-unfetter-threat-boards:
+  $ref: ./x_unfetter_threat_boards/x_unfetter_threat_boards.yaml
+/x-unfetter-threat-boards/{id}:
+  $ref: ./x_unfetter_threat_boards/x_unfetter_threat_board_by_id.yaml
+
 # Other
 
 /ctf/upload:

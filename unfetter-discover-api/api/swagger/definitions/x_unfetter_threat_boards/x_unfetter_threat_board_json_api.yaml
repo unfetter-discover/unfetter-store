@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    id: 
+      type: string
+    type:
+      type: string
+      example: "x-unfetter-threat-board"
+    attributes:
+      $ref: "#/definitions/XUnfetterThreatBoard"
+    links:
+        $ref: "#/definitions/Links"
