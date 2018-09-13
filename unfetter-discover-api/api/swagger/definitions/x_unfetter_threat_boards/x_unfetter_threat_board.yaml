@@ -1,7 +1,9 @@
   type: object
   properties:
-    article:
-      type: object
+    articles:
+      type: array
+      items:
+        type: object
     boundaries:
       type: object
       properties:
@@ -53,6 +55,10 @@
       items:
         type: string
         default: "marking-definition-id"
+    reports:
+      type: array
+      items:
+        type: string
     revoked:
       type: boolean
       default: false
