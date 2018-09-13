@@ -7,7 +7,6 @@ const server = require('../../../app');
 // Controllers
 const attackPattern = require('./examples/attack_pattern');
 const campaign = require('./examples/campaign');
-const capability = require('./examples/x_unfetter_capability');
 const courseOfAction = require('./examples/course_of_action');
 const identity = require('./examples/identity');
 const indicator = require('./examples/indicator');
@@ -17,21 +16,22 @@ const markingDefinition = require('./examples/marking_definition');
 const observedData = require('./examples/observed_data');
 const relationship = require('./examples/relationship');
 const report = require('./examples/report');
-const sensor = require('./examples/sensor');
 const sighting = require('./examples/sighting');
 const threatActor = require('./examples/threat_actor');
 const tool = require('./examples/tool');
-const xUnfetterAssessment = require('./examples/x_unfetter_assessment');
 
-const xUnfetterObjectAssessment = require('./examples/x_unfetter_object_assessment');
+const xUnfetterAssessment = require('./examples/x_unfetter_assessment');
 const xUnfetterAssessmentGroup = require('./examples/x_unfetter_assessment_group');
 const xUnfetterAssessmentSet = require('./examples/x_unfetter_assessment_set');
+const XUnfetterCapability = require('./examples/x_unfetter_capability');
+const xUnfetterObjectAssessment = require('./examples/x_unfetter_object_assessment');
+const XUnfetterSensor = require('./examples/x_unfetter_sensor');
+const xUnfetterThreatBoard = require('./examples/x_unfetter_threat_board');
 
 
 const controllers = [
     attackPattern,
     campaign,
-    capability,
     courseOfAction,
     identity,
     indicator,
@@ -41,14 +41,16 @@ const controllers = [
     observedData,
     relationship,
     report,
-    sensor,
     sighting,
     threatActor,
     tool,
     xUnfetterAssessment,
-    xUnfetterObjectAssessment,
     xUnfetterAssessmentGroup,
-    xUnfetterAssessmentSet
+    xUnfetterAssessmentSet,
+    XUnfetterCapability,
+    xUnfetterObjectAssessment,
+    XUnfetterSensor,
+    xUnfetterThreatBoard
 ];
 
 describe('stix controllers', () => {
@@ -267,4 +269,3 @@ describe('stix controllers', () => {
         }); // End controller test
     } // End controllers for loop
 }); // End stix controllers test
-
