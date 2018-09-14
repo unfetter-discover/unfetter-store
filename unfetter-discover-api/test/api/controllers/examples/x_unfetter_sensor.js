@@ -1,4 +1,4 @@
-var sensor = {
+const sensor = {
     endpoint: 'x-unfetter-sensors',
     type: 'x-unfetter-sensor',
     attributes: {

@@ -345,6 +345,17 @@ XUnfetterSensorsJsonApiSingleItem:
 XUnfetterSensor:
   $ref: ./x_unfetter_sensors/x_unfetter_sensor.yaml  
 
+XUnfetterThreatBoardJsonApi:
+  $ref: ./x_unfetter_threat_boards/x_unfetter_threat_board_json_api.yaml
+XUnfetterThreatBoardsJsonApi:
+  $ref: ./x_unfetter_threat_boards/x_unfetter_threat_boards_json_api.yaml
+XUnfetterThreatBoardCreateUpdate:
+  $ref: ./x_unfetter_threat_boards/x_unfetter_threat_board_create_update.yaml
+XUnfetterThreatBoardsJsonApiSingleItem:
+  $ref: ./x_unfetter_threat_boards/x_unfetter_threat_boards_json_api_single_item.yaml
+XUnfetterThreatBoard:
+  $ref: ./x_unfetter_threat_boards/x_unfetter_threat_board.yaml
+
 XUnfetterCapabilityJsonApi:
   $ref: ./x_unfetter_capabilities/x_unfetter_capability_json_api.yaml
 XUnfetterCapabilitiesJsonApi:
