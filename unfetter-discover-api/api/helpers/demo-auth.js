@@ -3,7 +3,6 @@
  * pattern of performing redirects after the authentication is complete.
  */
 
-// const util = require('util');
 const Strategy = require('passport-strategy').Strategy;
 const AuthHelper = require('../helpers/auth_helpers').AuthHelper;
 
@@ -19,7 +18,7 @@ class DemoStrategy extends Strategy {
         this.name = 'demo';
     }
 
-    authenticate(req, options) {
+    authenticate() {
         this.success(DEMO_USER);
     }
 
@@ -45,7 +44,8 @@ class DemoAuth extends AuthHelper {
         return { 'auth.id': user.id };
     }
 
-    sync(user, demoInfo, approved) {
+    sync(data, demoInfo) {
+        const user = data;
         super.sync(user, demoInfo, true);
         user.auth.service = 'demo';
         user.auth.userName = demoInfo.username;

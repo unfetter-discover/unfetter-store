@@ -33,7 +33,8 @@ class GithubAuth extends AuthHelper {
         return { 'auth.service': 'github', 'auth.id': user.id };
     }
 
-    sync(user, githubInfo, approved) {
+    sync(data, githubInfo, approved) {
+        const user = data;
         super.sync(user, githubInfo, approved);
         user.auth.service = 'github';
         user.auth.userName = githubInfo.username;

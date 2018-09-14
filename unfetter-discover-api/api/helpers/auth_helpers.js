@@ -22,48 +22,51 @@ const setErrorResponse = (res, status, detail) => res.status(500).json({
     }]
 });
 
-const handleLoginCallback = (authUser, source, service, res) => {
+const handleLoginCallback = (authUser, source, service, response) => {
     console.log(`(${new Date().toISOString()}) Received ${source} user:\n${JSON.stringify(authUser, null, 2)}`);
     if (!authUser) {
-        return setEmptyResponse(res);
+        return setEmptyResponse(response);
     }
+    userModel.find(service.search(authUser), (err, result) => {
+        handleUserSearch(authUser, source, service, response, err, result);
+    });
+};
+
+const handleUserSearch = (authUser, source, service, response, err, result) => {
     let user = {};
     const uiCallbackURL = config.unfetterUiCallbackURL;
-    userModel.find(service.search(authUser),
-        (err, result) => {
-            if (err) {
-                return setErrorResponse(res, 500, 'An unknown error has occurred.');
-            } else if (!result || (result.length === 0)) {
-                // Unknown user
-                service.sync(user, authUser, false);
-                console.log(`(${new Date().toISOString()}) First login attempt by ${source} id# ${authUser.id}`);
-                startRegistration(user, res, token => {
-                    res.redirect(`${uiCallbackURL}/${encodeURIComponent(token)}/false/${source}`);
-                });
-            } else {
-                // Known user
-                user = result[0].toObject();
-                service.sync(user, authUser, user.approved);
-                const token = jwt.sign(user, config.jwtSecret, {
-                    expiresIn: global.unfetter.JWT_DURATION_SECONDS
-                });
-                markingDefinitions.find({ 'stix.definition_type': ['tlp', 'statement'] }, (err, results) => {
-                    user.auth.marking_refs = results.map(ref => ref.stix.id);
-                    console.log(`(${new Date().toISOString()}) ${token}`);
-                    console.log(`(${new Date().toISOString()}) Returning ${source} user:\n${JSON.stringify(user, null, 2)}`);
-                    userModel.findByIdAndUpdate(user._id, user,
-                        (updateErr, updateResult) => {
-                            if (updateErr || !updateResult) {
-                                console.log('We could not update the user document', updateErr);
-                                return setErrorResponse(res, 500, 'An unknown error has occurred.');
-                            }
-                            res.redirect(`${uiCallbackURL}/${encodeURIComponent(token)}/${user.registered}/${source}`);
-                        }
-                    );
-                });
-            }
-        }
-    );
+    if (err) {
+        return setErrorResponse(response, 500, 'An unknown error has occurred.');
+    } else if (!result || (result.length === 0)) {
+        // Unknown user
+        service.sync(user, authUser, false);
+        console.log(`(${new Date().toISOString()}) First login attempt by ${source} id# ${authUser.id}`);
+        startRegistration(user, response, token => {
+            response.redirect(`${uiCallbackURL}/${encodeURIComponent(token)}/false/${source}`);
+        });
+    } else {
+        // Known user
+        user = result[0].toObject();
+        service.sync(user, authUser, user.approved);
+        const token = jwt.sign(user, config.jwtSecret, {
+            expiresIn: global.unfetter.JWT_DURATION_SECONDS
+        });
+        markingDefinitions.find({ 'stix.definition_type': ['tlp', 'statement'] }, (mderr, results) => {
+            user.auth.marking_refs = results.map(ref => ref.stix.id);
+            const json = JSON.stringify(user, null, 2);
+            console.log(`(${new Date().toISOString()}) ${token}`);
+            console.log(`(${new Date().toISOString()}) Returning ${source} user:\n${json}`);
+            userModel.findByIdAndUpdate(user._id, user,
+                (updateErr, updateResult) => {
+                    if (updateErr || !updateResult) {
+                        console.log('We could not update the user document', updateErr);
+                        return setErrorResponse(response, 500, 'An unknown error has occurred.');
+                    }
+                    response.redirect(`${uiCallbackURL}/${encodeURIComponent(token)}/${user.registered}/${source}`);
+                }
+            );
+        });
+    }
 };
 
 const startRegistration = (user, res, cb) => {
@@ -87,7 +90,8 @@ const startRegistration = (user, res, cb) => {
     });
 };
 
-const storeRegistration = (user, res) => {
+const storeRegistration = (registration, res) => {
+    const user = registration;
     user.registered = true;
     user.identity.id = generateId('identity');
     if (!user.organizations) {
@@ -145,7 +149,13 @@ const AuthHelper = class {
         this.name = name;
     }
 
-    build(config, env) {
+    build(cfg, env) {
+        console.error(`
+            Cannot generate authentication helper for ${this.name} without builder code.
+            Override build method on this helper, and redeploy.
+            Configuration: ${JSON.stringify(cfg)}
+            Environment: ${JSON.stringify(env)}
+        `);
         return null;
     }
 
@@ -154,10 +164,11 @@ const AuthHelper = class {
     }
 
     search(user) {
-        return null;
+        return user || null;
     }
 
-    sync(user, loginInfo, approved) {
+    sync(data, loginInfo, approved) {
+        const user = data;
         user.approved = approved;
         if (!user.auth) {
             user.auth = {
