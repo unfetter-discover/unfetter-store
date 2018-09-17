@@ -11,6 +11,7 @@ const passportConfig = require('../config/passport-config');
 const userModel = require('../models/user');
 const configModel = require('../models/config');
 const doauth = require('../helpers/auth_helpers');
+const userHelpers = require('../helpers/user');
 
 const apiRoot = config.apiRoot;
 
@@ -149,7 +150,8 @@ router.get('/get-user-list',
                             _id: user._id,
                             userName: user.userName,
                             firstName: user.firstName,
-                            lastName: user.lastName
+                            lastName: user.lastName,
+                            avatar_url: userHelpers.getAvatarUrl(user)
                         }
                     }));
                 return res.json({ data });
