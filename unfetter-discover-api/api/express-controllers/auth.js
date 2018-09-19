@@ -7,9 +7,11 @@ const passport = require('passport');
 const jwt = require('jsonwebtoken');
 
 const config = require('../config/config');
+const passportConfig = require('../config/passport-config');
 const userModel = require('../models/user');
 const configModel = require('../models/config');
 const doauth = require('../helpers/auth_helpers');
+const userHelpers = require('../helpers/user');
 
 const apiRoot = config.apiRoot;
 
@@ -114,6 +116,7 @@ router.post('/finalize-registration',
 
 router.get('/profile/:id',
     passport.authenticate('jwt', { session: false }),
+    (req, res, next) => passportConfig.jwtStandard(req, res, next),
     (req, res) => {
         const userId = req.params.id;
         userModel.findById(userId,
@@ -127,8 +130,39 @@ router.get('/profile/:id',
     }
 );
 
+/**
+ * Returns only the basic information about users, as this is not an admin route
+ */
+router.get('/get-user-list',
+    passport.authenticate('jwt', { session: false }),
+    (req, res, next) => passportConfig.jwtStandard(req, res, next),
+    (req, res) => {
+        userModel.find({ approved: true, locked: false },
+            (error, results) => {
+                if (error || !results) {
+                    return doauth.setErrorResponse(res, 500, 'An unknown error has occurred.');
+                }
+                const data = results
+                    .map(result => result.toObject())
+                    .map(user => ({
+                        _id: user._id,
+                        attributes: {
+                            _id: user._id,
+                            userName: user.userName,
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            avatar_url: userHelpers.getAvatarUrl(user)
+                        }
+                    }));
+                return res.json({ data });
+            }
+        );
+    }
+);
+
 router.post('/profile/preferences/:id',
     passport.authenticate('jwt', { session: false }),
+    (req, res, next) => passportConfig.jwtStandard(req, res, next),
     (req, res) => {
         const userId = req.params.id.trim();
         const requestingUser = req.user._id.toString().trim();
