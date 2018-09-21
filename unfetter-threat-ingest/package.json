@@ -1,0 +1,56 @@
+{
+    "name": "unfetter-threat-ingest",
+    "version": "0.3.11",
+    "description": "Continuously polls data from configured feeds matching custom threat boards for ingest into Unfetter's Mongo database",
+    "scripts": {
+        "build": "npm run build-ts",
+        "build-ts": "tsc",
+        "start": "npm run build && npm run watch",
+        "start:dev": "nodemon dist/server/server.js",
+        "watch": "concurrently -k -p \"{time} [{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" -t \"YYYY-MM-DDTHH:mm:ss.SSSZZ\" \"npm run watch-ts\" \"npm run start:dev\"",
+        "watch-ts": "tsc -w",
+        "checkup": "npm run clean && npm run build && npm run lint && npm run docs && npm run coverage",
+        "clean": "rimraf dist/ tsdocs/ coverage/ .nyc_output/",
+        "lint": "tsc -v && tslint src/**/*.ts",
+        "docs": "typedoc --out tsdocs --ignoreCompilerErrors --exclude '**/*.spec.ts' src/",
+        "coverage": "nyc --extension .ts --reporter=lcov --reporter=text-lcov npm test && nyc report",
+        "test": "jasmine-ts --config=jasmine.json"
+    },
+    "keywords": [
+        "unfetter",
+        "threat",
+        "feed"
+    ],
+    "nyc": {
+        "exclude": [
+            "src/**/*.spec.ts"
+        ]
+    },
+    "author": "Unfetter",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.16.3",
+        "mongoose": "^4.13.14",
+        "rxjs": "^6.3.2",
+        "rxjs-tslint": "^0.1.5",
+        "uuid": "^3.3.2",
+        "xml2js": "^0.4.19",
+        "yargs": "^12.0.2"
+    },
+    "devDependencies": {
+        "@types/express": "^4.16.0",
+        "@types/mongoose": "^5.2.15",
+        "@types/uuid": "^3.4.4",
+        "@types/xml2js": "^0.4.3",
+        "@types/yargs": "^12.0.0",
+        "concurrently": "^4.0.1",
+        "jasmine": "^3.2.0",
+        "nodemon": "^1.18.4",
+        "nyc": "^13.0.1",
+        "rimraf": "^2.6.2",
+        "ts-node": "^7.0.1",
+        "tslint": "^5.11.0",
+        "typedoc": "^0.12.0",
+        "typescript": "^3.0.3"
+    }
+}
