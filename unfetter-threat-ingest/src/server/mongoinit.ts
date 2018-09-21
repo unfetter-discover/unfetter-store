@@ -2,99 +2,151 @@ import mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 import * as modelFactory from '../models/modelFactory';
-const configModel = modelFactory.getModel('config');
+
+import * as yargs from 'yargs';
+import { DaemonState, StatusEnum, PromisedService } from '../models/server-state';
+
+export type MongoConnection = PromisedService<mongoose.Connection>;
+type PromiseResolve = (value: MongoConnection) => void;
+type PromiseReject = (reason?: any) => void;
+
+const connect = (state: DaemonState, options: yargs.Arguments, resolve: PromiseResolve, reject: PromiseReject) => {
+    mongoose.connect(`mongodb://${options['mongo-host']}:${options['mongo-port']}/${options['mongo-database']}`, {
+        server: {
+            poolSize: 12,
+            reconnectTries: 100,
+            socketOptions: {
+                keepAlive: 300000,
+                connectTimeoutMS: 30000
+            }
+        }
+    });
+
+    state.db.conn = mongoose.connection;
+    const db: mongoose.Connection = state.db.conn;
+    db.on('error', () => {
+        console.error(console, 'Database connection error');
+        reject(new Error('Error connecting to Mongo'));
+    });
+    db.on('connected', () => {
+        console.log('Connected to Mongo');
+        lookupConfiguration(state, options)
+            .then(() => resolve(new PromisedService('Mongo DB running', db)))
+            .catch((errMsg) => reject(errMsg));
+    });
+    db.on('disconnected', () => {
+        console.warn('Disconnected from Mongo');
+        state.db.conn = undefined;
+    });
+
+    state.db.status.next(StatusEnum.RUNNING);
+};
 
 /**
  * @description populate global configuration
  */
-const lookupConfiguration = (argv: any) => new Promise((resolve, reject) => {
-    const defaults = {
-        'refresh.interval': argv['refresh-interval'] * 60 * 1000,
-    };
-    const configuration: any = Object.assign({}, defaults);
-    const promises = [];
-    console.log('Looking up configuration...');
-    promises.push(configModel.find({ configGroups: 'feed' }, { configKey: 1, configValue: 1, _id: 0 }).exec());
-    Promise.all(promises)
-        .then(([configurations]) => {
-            const feedsConfiguration = configurations
-                .forEach((configItem: any) => {
-                    const configObject = configItem.toObject();
-                    configuration[configObject.configKey] = configObject.configValue;
-                });
-            argv.state.configuration = configuration;
-            if (argv.debug) {
-                console.debug('Read configuration from Mongo:', argv.state.configuration);
+const lookupConfiguration = (state: DaemonState, options: yargs.Arguments) => new Promise((resolve, reject) => {
+    if (options.debug) {
+        console.debug('Looking up configuration');
+    }
+    const ConfigModel = modelFactory.getModel('config');
+    const configuration: any = Object.assign({}, options);
+    ConfigModel.find({ configGroups: 'feed' }, { configKey: 1, configValue: 1, _id: 0 }, (err, configurations) => {
+        if (err) {
+            reject(new Error(`Unable to get configurations: ${err}`));
+        } else if (!configurations) {
+            reject(new Error('No feed configuration data found'))
+        } else {
+            configurations.forEach((configItem: any) => {
+                const configObject = configItem.toObject();
+                configuration[configObject.configKey] = configObject.configValue;
+            });
+            validateConfiguration(configuration);
+            state.configuration = configuration;
+            if (state.configuration.debug) {
+                console.debug('Read configuration from Mongo:', state.configuration);
             }
             resolve('Configuration received');
-        })
-        .catch((err) => reject(new Error(`Unable to get configurations: ${err}`)));
+        }
+        state.db.refreshTimer = setTimeout(() => onRefresh(state, options),
+                (state.configuration['refresh-interval'] || options['refresh-interval']) * 60 * 1000);
+    });
 });
 
-const refreshConfiguration = (argv: any) => {
-    if (argv.debug) {
-        console.log('Reloading configuration.');
+const onRefresh = (state: DaemonState, options: yargs.Arguments) => {
+    if (state.db.refreshTimer) {
+        clearTimeout(state.db.refreshTimer);
+        state.db.refreshTimer = undefined;
     }
-    lookupConfiguration(argv)
-        .then(() => {
-            if (argv.debug) {
-                console.log('Configuration refreshed.');
-            }
-        })
-        .catch((errMsg) => {
-            console.error('Configuration was not refreshed:', errMsg);
-        });
-    argv.state.refreshTimer = setTimeout(() => {
-        refreshConfiguration(argv);
-    }, argv['refresh-interval'] * 60 * 1000);
+    if (!state.db.conn) {
+        connect(state, options, (service) => console.log(service.response), (err) => console.warn);
+    } else {
+        if (options.debug) {
+            console.debug('Reloading configuration');
+        }
+        lookupConfiguration(state, options)
+            .then(() => {
+                if (state.configuration.debug) {
+                    console.debug('Configuration refreshed');
+                }
+            })
+            .catch((errMsg) => {
+                console.error('Configuration was not refreshed:', errMsg);
+            });
+    }
 }
 
-const shutdownDatabase = (db: mongoose.Connection, argv: any, code: number = 0) => {
-    if (argv.state.refreshTimer) {
-        clearTimeout(argv.state.refreshTimer);
+const onShutdown = (state: DaemonState) => {
+    if (state.db.refreshTimer) {
+        clearTimeout(state.db.refreshTimer);
+        state.db.refreshTimer = undefined;
     }
-    db.close(() => {
-        console.log('Safely closed MongoDB Connection');
-    });
+    if (state.db.conn) {
+        state.db.status.next(StatusEnum.STOPPING);
+        state.db.conn.close(() => {
+            state.db.conn = undefined;
+            console.log('Safely closed MongoDB Connection');
+            state.db.status.next(StatusEnum.SHUTDOWN);
+        });
+    } else {
+        state.db.status.next(StatusEnum.SHUTDOWN);
+    }
 };
 
-export default function initializeMongo(argv: any): Promise<{}> {
+const validateConfiguration = (config: any) => {
+    if (!config['refresh-interval'] || (config['refresh-interval'] <= 0)) {
+        config['refresh-interval'] = 30;
+    }
+    if (!config['poll-interval'] || (config['poll-interval'] <= 0)) {
+        config['poll-interval'] = 3;
+    }
+}
+
+const validateOptions = (options: yargs.Arguments) => {
+    if (!options['mongo-host']) {
+        options['mongo-host'] = 'localhost';
+    }
+    if (!options['mongo-port'] || (options['mongo-port'] <= 0)) {
+        options['mongo-port'] = 27017;
+    }
+    if (!options['mongo-database']) {
+        options['mongo-database'] = 'stix';
+    }
+}
+
+export default function initializeMongo(state: DaemonState, options: yargs.Arguments): Promise<MongoConnection> {
     return new Promise((resolve, reject) => {
-        mongoose.set('debug', argv.debug);
+        mongoose.set('debug', options.debug);
 
-        argv.state = argv.state || {};
-        if (argv.state.conn === undefined) {
-            mongoose.connect(`mongodb://${argv['mongo-host']}:${argv['mongo-port']}/${argv['mongo-database']}`, {
-                server: {
-                    poolSize: 12,
-                    reconnectTries: 100,
-                    socketOptions: {
-                        keepAlive: 300000,
-                        connectTimeoutMS: 30000
-                    }
-                }
-            });
+        if (state.db.conn === undefined) {
+            state.db.status.next(StatusEnum.INITIALIZING);
 
-            argv.state.conn = mongoose.connection;
-            const db: mongoose.Connection = argv.state.conn;
-            db.on('error', () => {
-                console.error(console, 'Database connection error:');
-                reject(new Error('Error connecting to Mongo'));
-            });
-            db.on('connected', () => {
-                console.log('Connected to Mongo');
-                lookupConfiguration(argv)
-                    .then(() => resolve('Mongo DB running'))
-                    .catch((errMsg) => reject(errMsg));
-            });
-            db.on('disconnected', () => console.log('Disconnected from Mongo'));
-
-            argv.state.refreshTimer = setTimeout(() => {
-                refreshConfiguration(argv);
-            }, argv['refresh-interval'] * 60 * 1000);
-
-            process.on('SIGINT', () => shutdownDatabase(db, argv));
-            process.on('SIGTERM', () => shutdownDatabase(db, argv, -9));
+            connect(state, options, resolve, reject);
         }
+
+        state.db.refresh = onRefresh;
+
+        process.on('SIGINT', () => onShutdown(state));
+        process.on('SIGTERM', () => onShutdown(state));
     });
 }

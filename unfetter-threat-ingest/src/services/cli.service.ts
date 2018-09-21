@@ -28,10 +28,13 @@ yargs
     .hide('server-cert')
     .default('server-cert', 'server.crt')
 
+    .describe('refresh-interval', 'Reread the configuration every N minutes')
+    .default('refresh-interval', 30 /* every 30 minutes */)
+
     .number('i')
-    .alias('i', 'refresh-interval')
-    .describe('i', 'Reread the configuration every N minutes')
-    .default('i', 30 /* 30 minutes */)
+    .alias('i', 'poll-interval')
+    .describe('i', 'Update feed data every N minutes')
+    .default('i', 10 /* every 10 minutes */)
 
     .boolean('debug')
     .alias('debug', 'verbose')

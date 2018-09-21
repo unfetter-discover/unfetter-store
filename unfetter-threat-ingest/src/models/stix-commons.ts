@@ -1,8 +1,23 @@
-const mongoose = require('mongoose');
+import * as mongoose from 'mongoose';
 
-const stixCommons = {};
+export const stixCommons: any = {};
 
-stixCommons.kill_chain_phases = mongoose.Schema({
+stixCommons.metaProperties = new mongoose.Schema({
+    published: {
+        type: Boolean,
+        default: false
+    }
+}, { _id: false, strict: false });
+
+stixCommons.mongoRoot = {
+    _id: String,
+    organization: String,
+    extendedProperties: Object,
+    metaProperties: stixCommons.metaProperties,
+    creator: String
+};
+
+stixCommons.kill_chain_phases = new mongoose.Schema({
     kill_chain_name: {
         type: String,
         required: [true, 'kill_chain_name is required']
@@ -14,7 +29,7 @@ stixCommons.kill_chain_phases = mongoose.Schema({
     }
 }, { _id: false });
 
-stixCommons.granular_markings = mongoose.Schema({
+stixCommons.granular_markings = new mongoose.Schema({
     selectors: {
         type: [String],
         required: [true, 'selectors are required']
@@ -25,7 +40,7 @@ stixCommons.granular_markings = mongoose.Schema({
     }
 }, { _id: false });
 
-stixCommons.external_references = mongoose.Schema({
+stixCommons.external_references = new mongoose.Schema({
     source_name: {
         type: String,
         required: [true, 'Source name is required']
@@ -35,25 +50,6 @@ stixCommons.external_references = mongoose.Schema({
     hashes: Object,
     external_id: String
 }, { _id: false });
-
-stixCommons.metaProperties = mongoose.Schema({
-    published: {
-        type: Boolean,
-        default: false
-    },
-    rollupId: {
-        type: String,
-        index: 1
-    }
-}, { _id: false, strict: false });
-
-stixCommons.mongoRoot = {
-    _id: String,
-    organization: String,
-    extendedProperties: Object,
-    metaProperties: stixCommons.metaProperties,
-    creator: String
-};
 
 stixCommons.baseStix = {
     id: String,
@@ -73,13 +69,13 @@ stixCommons.baseStix = {
     },
     revoked: Boolean,
     version: String,
-    labels: { type: Array, default: void 0 },
-    external_references: { type: [stixCommons.external_references], default: void 0 },
-    object_marking_refs: { type: Array, default: void 0 },
-    granular_markings: { type: [stixCommons.granular_markings], default: void 0 },
+    labels: { type: Array, default: [] },
+    external_references: { type: [stixCommons.external_references], default: [] },
+    object_marking_refs: { type: Array, default: [] },
+    granular_markings: { type: [stixCommons.granular_markings], default: [] },
 };
 
-stixCommons.makeSchema = childSchema => {
+stixCommons.makeSchema = (childSchema: any) => {
     const schema = {
         ...stixCommons.mongoRoot,
         stix: {
@@ -92,8 +88,5 @@ stixCommons.makeSchema = childSchema => {
     schemaObj.index({ 'stix.created': -1 });
     schemaObj.index({ 'stix.modified': -1 });
     schemaObj.index({ 'stix.name': 'text' });
-
     return schemaObj;
 };
-
-module.exports = stixCommons;
