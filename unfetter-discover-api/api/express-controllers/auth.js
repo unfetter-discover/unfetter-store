@@ -151,7 +151,9 @@ router.get('/get-user-list',
                             userName: user.userName,
                             firstName: user.firstName,
                             lastName: user.lastName,
-                            avatar_url: userHelpers.getAvatarUrl(user)
+                            avatar_url: userHelpers.getAvatarUrl(user),
+                            organizationIds: user.organizations
+                                && user.organizations.filter(org => org.approved).map(org => org.id)
                         }
                     }));
                 return res.json({ data });
