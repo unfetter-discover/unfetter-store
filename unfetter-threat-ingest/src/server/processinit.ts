@@ -39,7 +39,7 @@ const poll = (state: DaemonState) => {
      * Query for current reports and threat boards.
      */
     const promises = [];
-    promises.push(ReportModel.find({}, {'stix.name': 1, _id: 0}).exec());
+    promises.push(ReportModel.find({'stix.type': 'report'}).exec());
     promises.push(ThreatBoardModel.find({'stix.type': 'x-unfetter-threat-board'}).exec());
     Promise.all(promises)
         .then(([currentReports, boards]) => {
@@ -54,12 +54,16 @@ const poll = (state: DaemonState) => {
                 return;
             } else if (!boards) {
                 /*
-                 * No threat boards in the database. Maybe you should add one, either injecting into Mongo or using the
-                 * UI. After doing so, you can wait for the next polling interval, or call endpoint /resync/boards.
-                 * Again, if using the UI, the UI should follow up with a call to that endpoint.
+                 * No threat boards in the database. Maybe you should add one, either injecting into Mongo or
+                 * using the UI. After doing so, you can wait for the next polling interval, or call endpoint
+                 * /resync/boards. Again, if using the UI, the UI should follow up with a call to that endpoint.
                  */
                 console.warn('No threat board data found');
             } else {
+                const reports = currentReports.map((report: any) => {
+                    return {name: report.stix.name, source: report['_doc']['metaProperties']['_doc']['source']};
+                });
+
                 /*
                  * Split the returned boards into ones that are brand new, and those we have polled for before.
                  * 
@@ -74,47 +78,73 @@ const poll = (state: DaemonState) => {
                 // if (polledBoards.length) {
                 //     pollReports(polledBoards, currentReports, state);
                 // }
-                // TODO make the feed polling asynchronous, but combine the whole polling to be synchronous.
-                state.configuration.feedSources.forEach((feed: any) => {
-                    pollReports(feed, boards, currentReports, state);
+                const polls = state.configuration.feedSources.map((feed: any) => {
+                    return pollReports(feed, boards, reports, state);
                 });
+                Promise.all(polls)
+                    .then((polledReports) => {
+                        console.log('All feed polls have completed.');
+                        const saves = [].concat(...polledReports).map((report) => {
+                            const persist = new ReportModel(report);
+                            return new Promise((resolve, reject) => {
+                                persist.save((err, doc: any) => {
+                                    if (err) {
+                                        reject(err);
+                                    } else {
+                                        if (state.configuration.debug) {
+                                            console.debug('Persisted new report', report);
+                                        }
+                                        resolve(true);
+                                    }
+                                });
+                            });
+                        });
+                        Promise.all(saves)
+                            .then(() => {
+                                /*
+                                 * After all that, update each board to show they were recently polled for.
+                                 */
+                                boards.forEach((board) => {
+                                    (board as any).metaProperties.lastPolled = Date.now();
+                                    board.save((err, tb) => {
+                                        if (err) {
+                                            console.warn(`Could not update threat board '${(board as any).stix.name}':`, err);
+                                        } else {
+                                            if (state.configuration.debug) {
+                                                console.debug('Updated board', tb);
+                                            }
+                                        }
+                                    });
 
-                /*
-                 * After all that, update each board to show they were recently polled for.
-                 * 
-                 * TODO this is not happening synchronously after the above block. Hence, we have a later save.
-                 */
-                boards.forEach((board) => {
-                    (board as any).metaProperties.lastPolled = Date.now();
-                    console.debug('Updating board:', board);
-                    board.save((err, tb) => {
-                        if (err) {
-                            console.warn(`Could not update threat board '${(board as any).stix.name}':`, err);
-                        }
-                    });
-                });
-                if (state.configuration.debug) {
-                    console.debug('Updated last poll time on boards', boards.map((board: any) => board.stix.name));
-                }
+                                    // @TODO send notification to each "user" of the board (using socket server)
+                                });
+                            })
+                    })
+                    .catch((err) => console.log('Error finishing feed polls:', err));
             }
-
+        })
+        .catch((err) => console.log('Encountered an error querying the database:', err))
+        .finally(() => {
             /*
              * Create a time to run the poll again after a configured number of minutes.
              */
             state.processor.pollTimer = setTimeout(() => poll(state),
                     state.configuration['poll-interval'] * 60 * 1000);
+
         });
 };
 
 /**
  * Query a feeds for the given board criteria.
  */
-const pollReports = async (feed: any, boards: Document[], currentReports: Document[], state: DaemonState) => {
+const pollReports = async (feed: any, boards: Document[], currentReports: any[], state: DaemonState) => {
     const httpsOptions = getSecureQueryOptions(state);
     const options = (typeof feed.source === 'string') ? feed.source : {...feed.source};
     if (feed.source.protocol === 'https:') { // will be false if the source is just a string
         Object.assign(options, httpsOptions);
     }
+
+    const reports: any[] = [];
     await pollFeed(options)
         .then((data) => {
             if (state.processor.status.getValue() !== StatusEnum.RUNNING) {
@@ -132,7 +162,35 @@ const pollReports = async (feed: any, boards: Document[], currentReports: Docume
                  */
                 console.warn(`Received no data from feed '${feed.name}'`);
             } else {
-                handleResponse(feed, data, currentReports, boards, state);
+                handleResponse(feed, data, currentReports, boards, state)
+                    .then((feedReports: any[]) => {
+                        (feedReports || [])
+                            /*
+                            * Weed out all the reports we know about already.
+                            * 
+                            * TODO We need something better than comparing just the name
+                            */
+                            .filter((report) => ![...currentReports].some((current) => {
+                                return (current.name === report.stix.name)
+                                        && (current.source === report.metaProperties.source);
+                            }))
+                            /*
+                            * Compare reports to the boards we were passed to see if any of them appear to be of possible
+                            * interest to the board watchers (high likelihood of false positive, but that's what we
+                            * want[?]). If any match, save them.
+                            */
+                            .forEach((report) => {
+                                const matches = findMatchingBoards(report, boards, state);
+                                if (matches && matches.length) {
+                                    report._id = report.stix.id = `report--${uuid.v4()}`;
+                                    matches.forEach((board: any) => board.stix.reports.push(report._id));
+                                    reports.push(report);
+                                }
+                            });
+                    })
+                    .catch(() => {
+                        // ignore the rejection, we already logged it
+                    });
             }
         })
         .catch((reason) => {
@@ -145,6 +203,7 @@ const pollReports = async (feed: any, boards: Document[], currentReports: Docume
              */
             console.warn(`Could not poll feed '${feed.name}':`, reason);
         });
+    return reports;
 };
 
 /**
@@ -194,7 +253,7 @@ const pollFeed = (options: any) => {
 /**
  * Fire the request to parse the given XML into JSON and wait.
  */
-const handleResponse = async (feed: any, data: any, currentReports: Document[], boards: Document[], state: DaemonState) => {
+const handleResponse = (feed: any, data: any, currentReports: any[], boards: Document[], state: DaemonState) => {
     let promise: Promise<{}>;
 
     /*
@@ -205,34 +264,7 @@ const handleResponse = async (feed: any, data: any, currentReports: Document[], 
         promise = parseXMLReports(feed, data, state);
     }
 
-    await (promise || Promise.resolve([]))
-        .then((reports: any[]) => {
-            (reports || [])
-                /*
-                 * Weed out all the reports we know about already.
-                 * 
-                 * TODO We need something better than comparing just the name
-                 */
-                .filter((report) => !currentReports.some((current: any) => current.stix.name === report.stix.name))
-                /*
-                 * Compare reports to the boards we were passed to see if any of them appear to be of possible
-                 * interest to the board watchers (high likelihood of false positive, but that's what we
-                 * want[?]). If any match, save them.
-                 */
-                .forEach((report) => {
-                    const matches = findMatchingBoards(report, boards, state);
-                    if (matches && matches.length) {
-                        saveReport(report, matches);
-                        if (state.configuration.debug) {
-                            console.debug('Persisted new report', report, 'for boards',
-                                    matches.map((board: any) => board.stix.name));
-                        }
-                    }
-                });
-        })
-        .catch(() => {
-            // ignore the rejection, we already logged it
-        });
+    return (promise || Promise.resolve([]))
 }
 
 /**
@@ -352,7 +384,7 @@ const parseFeedReport = (feed: any, article: any, state: DaemonState) => {
                 convertReportNode(article, property, feed.parser.convert.metaProperties, state);
     });
     if (state.configuration.debug) {
-        console.log('feed item', report);
+        console.log(`Read '${feed.name}' feed item:`, report);
     }
     return report.stix.name ? report : undefined;
 };
@@ -392,7 +424,7 @@ const convertReportNode = (item: any, node: string, converts: any, state: Daemon
     /*
      * If we have no converter for this element, just search on its name.
      */
-    if (!converts && !converts[node]) {
+    if (!converts || !converts[node]) {
         const val = item[node] || undefined;
         return (val && isArray && !Array.isArray(val)) ? [val] : val;
     }
@@ -488,50 +520,6 @@ const findMatchingBoards = (report: any, boards: Document[], state: DaemonState)
     });
     return matches;
 };
-
-/**
- * We like this report. We want to keep this report.
- * 
- * TODO we need to fire a notification using the socket server after the report is added to each board.
- */
-const saveReport = async (report: any, matchingBoards: Document[]) => {
-    report._id = report.stix.id = `report--${uuid.v4()}`;
-    const persist = new ReportModel(report);
-    await new Promise(
-        (resolve, reject) => {
-            persist.save((err, doc: any) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
-        })
-        .then(() => matchingBoards.forEach((board) => updateBoard(board, report)))
-        .catch((err) => {
-            console.error('Could not save report:', err);
-        });
-};
-
-const updateBoard = async (board: Document, report: any) => {
-    (board as any).stix.reports.push(report._id);
-    await new Promise(
-        (resolve, reject) => {
-            board.save((err, doc) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            })
-        })
-        .then(() => {
-            // @TODO send notification to each "user" of the board (using socket server)
-        })
-        .catch((err) => {
-            console.error('Could not update board:', err);
-        });
-}
 
 /**
  * When requested, put a stop to all feed polling, and shut the processor down.
