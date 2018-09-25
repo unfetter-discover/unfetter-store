@@ -21,9 +21,27 @@ export class PromisedService<T> {
     }
 }
 
+export interface FeedSource {
+    name: string;
+    source: string | {
+        protocol: string;
+        host: string;
+        port: number;
+        path: string;
+    };
+    parser: any;
+    active?: boolean;
+}
+
+export interface DaemonConfiguration {
+    [key: string]: any;
+    feedSources?: FeedSource[];
+    debug?: boolean;
+}
+
 export class DaemonState {
 
-    public configuration: any = {};
+    public configuration: DaemonConfiguration = {};
 
     public readonly db: {
         conn?: Connection;

@@ -39,7 +39,7 @@ const poll = (state: DaemonState) => {
      * Query for current reports and threat boards.
      */
     const promises = [];
-    promises.push(ReportModel.find({}, {'stix.name': 1, _id: 0}).exec());
+    promises.push(ReportModel.find({'stix.type': 'report'}).exec());
     promises.push(ThreatBoardModel.find({'stix.type': 'x-unfetter-threat-board'}).exec());
     Promise.all(promises)
         .then(([currentReports, boards]) => {
@@ -60,6 +60,11 @@ const poll = (state: DaemonState) => {
                  */
                 console.warn('No threat board data found');
             } else {
+                const reports = currentReports.map((report: any) => {
+                    return {name: report.stix.name, source: report['_doc']['metaProperties']['_doc']['source']};
+                });
+                console.log('mapped reports:', reports);
+
                 /*
                  * Split the returned boards into ones that are brand new, and those we have polled for before.
                  * 
@@ -74,42 +79,48 @@ const poll = (state: DaemonState) => {
                 // if (polledBoards.length) {
                 //     pollReports(polledBoards, currentReports, state);
                 // }
-                // TODO make the feed polling asynchronous, but combine the whole polling to be synchronous.
-                state.configuration.feedSources.forEach((feed: any) => {
-                    pollReports(feed, boards, currentReports, state);
+                const polls = state.configuration.feedSources.map((feed: any) => {
+                    return pollReports(feed, boards, reports, state);
                 });
-
-                /*
-                 * After all that, update each board to show they were recently polled for.
-                 * 
-                 * TODO this is not happening synchronously after the above block. Hence, we have a later save.
-                 */
-                boards.forEach((board) => {
-                    (board as any).metaProperties.lastPolled = Date.now();
-                    console.debug('Updating board:', board);
-                    board.save((err, tb) => {
-                        if (err) {
-                            console.warn(`Could not update threat board '${(board as any).stix.name}':`, err);
-                        }
-                    });
-                });
-                if (state.configuration.debug) {
-                    console.debug('Updated last poll time on boards', boards.map((board: any) => board.stix.name));
-                }
+                (async () => {
+                    await Promise.all(polls)
+                        .then(() => console.log('All feed polls have completed.'))
+                        .catch((err) => console.log('Error finishing feed pools:', err))
+                        .finally(() => {
+                            /*
+                             * After all that, update each board to show they were recently polled for.
+                             */
+                            // boards.forEach((board) => {
+                            //     (board as any).metaProperties.lastPolled = Date.now();
+                            //     console.debug('Updating board:', board);
+                            //     board.save((err, tb) => {
+                            //         if (err) {
+                            //             console.warn(`Could not update threat board '${(board as any).stix.name}':`, err);
+                            //         }
+                            //     });
+                            // });
+                            // if (state.configuration.debug) {
+                            //     console.debug('Updated last poll time on boards', boards.map((board: any) => board.stix.name));
+                            // }
+                        });
+                })();
             }
-
+        })
+        .catch((err) => console.log('Encountered an error querying the database:', err))
+        .finally(() => {
             /*
              * Create a time to run the poll again after a configured number of minutes.
              */
             state.processor.pollTimer = setTimeout(() => poll(state),
                     state.configuration['poll-interval'] * 60 * 1000);
+
         });
 };
 
 /**
  * Query a feeds for the given board criteria.
  */
-const pollReports = async (feed: any, boards: Document[], currentReports: Document[], state: DaemonState) => {
+const pollReports = async (feed: any, boards: Document[], currentReports: any[], state: DaemonState) => {
     const httpsOptions = getSecureQueryOptions(state);
     const options = (typeof feed.source === 'string') ? feed.source : {...feed.source};
     if (feed.source.protocol === 'https:') { // will be false if the source is just a string
@@ -194,7 +205,7 @@ const pollFeed = (options: any) => {
 /**
  * Fire the request to parse the given XML into JSON and wait.
  */
-const handleResponse = async (feed: any, data: any, currentReports: Document[], boards: Document[], state: DaemonState) => {
+const handleResponse = async (feed: any, data: any, currentReports: any[], boards: Document[], state: DaemonState) => {
     let promise: Promise<{}>;
 
     /*
@@ -213,7 +224,10 @@ const handleResponse = async (feed: any, data: any, currentReports: Document[], 
                  * 
                  * TODO We need something better than comparing just the name
                  */
-                .filter((report) => !currentReports.some((current: any) => current.stix.name === report.stix.name))
+                .filter((report) => ![...currentReports].some((current) => {
+                    return (current.name === report.stix.name)
+                            && (current.source === report.metaProperties.source);
+                }))
                 /*
                  * Compare reports to the boards we were passed to see if any of them appear to be of possible
                  * interest to the board watchers (high likelihood of false positive, but that's what we
@@ -392,7 +406,7 @@ const convertReportNode = (item: any, node: string, converts: any, state: Daemon
     /*
      * If we have no converter for this element, just search on its name.
      */
-    if (!converts && !converts[node]) {
+    if (!converts || !converts[node]) {
         const val = item[node] || undefined;
         return (val && isArray && !Array.isArray(val)) ? [val] : val;
     }
@@ -508,29 +522,28 @@ const saveReport = async (report: any, matchingBoards: Document[]) => {
             });
         })
         .then(() => matchingBoards.forEach((board) => updateBoard(board, report)))
-        .catch((err) => {
-            console.error('Could not save report:', err);
-        });
+        .catch((err) => console.error('Could not save report:', err));
 };
 
-const updateBoard = async (board: Document, report: any) => {
-    (board as any).stix.reports.push(report._id);
-    await new Promise(
-        (resolve, reject) => {
-            board.save((err, doc) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            })
-        })
-        .then(() => {
-            // @TODO send notification to each "user" of the board (using socket server)
-        })
-        .catch((err) => {
-            console.error('Could not update board:', err);
-        });
+const updateBoard = async (board: any, report: any) => {
+    console.log(`i want to update '${board.stix.name}'`, board);
+    board.stix.reports.push(report._id);
+    // await new Promise(
+    //     (resolve, reject) => {
+    //         board.save((err, doc) => {
+    //             if (err) {
+    //                 reject(err);
+    //             } else {
+    //                 resolve();
+    //             }
+    //         })
+    //     })
+    //     .then(() => {
+    //         // @TODO send notification to each "user" of the board (using socket server)
+    //     })
+    //     .catch((err) => {
+    //         console.error('Could not update board:', err);
+    //     });
 }
 
 /**
