@@ -1,5 +1,5 @@
 import { combineLatest } from 'rxjs';
-import argv from '../services/cli.service';
+import argv from './cli.service';
 import initializeMongo from './mongoinit';
 import initializeRESTServer from './expressinit';
 import initializeProcessor from './processinit';
@@ -41,7 +41,7 @@ async function startServices() {
         console.log('REST Server initialization:', expressServer.response);
 
         const processor = await initializeProcessor(state, argv);
-        console.log('Ingest Processor initilization:', processor.response);
+        console.log('Ingest Processor initialization:', processor.response);
 
         state.status = StatusEnum.RUNNING;
     } catch (error) {

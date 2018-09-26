@@ -3,8 +3,8 @@ FROM node:10.1-alpine
 LABEL MAINTAINER="unfetter"
 LABEL Description="Node program that loads threat feed data into MongoDB"
 
-ENV WORKING_DIRECTORY /usr/src/app
-
+# Create Application Directory
+ENV WORKING_DIRECTORY /usr/src/unfetter-threat-ingest
 RUN mkdir -p $WORKING_DIRECTORY
 WORKDIR $WORKING_DIRECTORY
 
