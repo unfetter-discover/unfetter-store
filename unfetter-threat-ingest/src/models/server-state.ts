@@ -2,6 +2,7 @@ import { Server } from 'https';
 import { Connection } from 'mongoose';
 import { BehaviorSubject } from 'rxjs';
 import * as yargs from 'yargs';
+import { ThreatFeedParsers } from '../processor/threat-feed-parser';
 
 export type RefreshFunction = (state: DaemonState, options?: yargs.Arguments) => void;
 
@@ -21,9 +22,29 @@ export class PromisedService<T> {
     }
 }
 
+export type ProcessorService = PromisedService<any>;
+
+export interface FeedSource {
+    name: string;
+    source: string | {
+        protocol: string;
+        host: string;
+        port: number;
+        path: string;
+    };
+    parser: any;
+    active?: boolean;
+}
+
+export interface DaemonConfiguration {
+    [key: string]: any;
+    feedSources?: FeedSource[];
+    debug?: boolean;
+}
+
 export class DaemonState {
 
-    public configuration: any = {};
+    public configuration: DaemonConfiguration = {};
 
     public readonly db: {
         conn?: Connection;
@@ -32,7 +53,7 @@ export class DaemonState {
         status: BehaviorSubject<StatusEnum>;
     } = {
         refresh: () => {},
-        status: new BehaviorSubject(StatusEnum.UNINITIALIZED)
+        status: new BehaviorSubject(StatusEnum.UNINITIALIZED),
     };
 
     public readonly rest: {
@@ -41,16 +62,17 @@ export class DaemonState {
         status: BehaviorSubject<StatusEnum>;
     } = {
         refresh: () => {},
-        status: new BehaviorSubject(StatusEnum.UNINITIALIZED)
+        status: new BehaviorSubject(StatusEnum.UNINITIALIZED),
     };
 
     public readonly processor: {
         pollTimer?: NodeJS.Timer;
         refresh: RefreshFunction;
         status: BehaviorSubject<StatusEnum>;
+        parsers?: ThreatFeedParsers;
     } = {
         refresh: () => {},
-        status: new BehaviorSubject(StatusEnum.UNINITIALIZED)
+        status: new BehaviorSubject(StatusEnum.UNINITIALIZED),
     };
 
     public status: StatusEnum = StatusEnum.UNINITIALIZED;
