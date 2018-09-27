@@ -1,8 +1,11 @@
 import * as https from 'https';
 import * as uuid from 'uuid';
+import fetch from 'node-fetch';
 import { Document } from 'mongoose';
+
 import { DaemonState, StatusEnum } from '../models/server-state';
 import ReportJSON from './report-json';
+import { ObjectId } from 'bson';
 
 export default class ThreatFeedProcessor {
 
@@ -128,7 +131,10 @@ export default class ThreatFeedProcessor {
                 const matches = this.findMatchingBoards(report, this.boards, this.state);
                 if (matches && matches.length) {
                     report.stix.id = `report--${uuid.v4()}`;
-                    matches.forEach((board: any) => board.stix.reports.push(report.stix.id));
+                    matches.forEach((board: any) => {
+                        this.notifyBoard(board, report);
+                        board.stix.reports.push(report.stix.id);
+                    });
                     reports.push(report);
                 }
             });
@@ -152,5 +158,49 @@ export default class ThreatFeedProcessor {
         });
         return matches;
     };
+
+    /**
+     * Send a notification to users of the given threat board that the given report is a possible match.
+     */
+    private notifyBoard(board: any, report: ReportJSON) {
+        const host = this.state.configuration['socket-server-host'];
+        const port = this.state.configuration['socket-server-port'];
+        const reference = `'${report.stix.name}' read from '${report.metaProperties.source}'`;
+        const body = JSON.stringify({
+            data: {
+                attributes: {
+                    userId: new ObjectId(0),
+                    orgId: board.stix.created_by_ref,
+                    notification: {
+                        type: 'STIX',
+                        heading: `Potential threat report match for ${board.stix.name}`,
+                        body: `New report ${reference} may meet criteria for this threat board`,
+                        link: `/threat-beta/board/${board._id}`,
+                        stixId: null
+                    },
+                    emailData: null
+                }
+            }
+        });
+        console.debug('passing to websocket server:', body);
+        fetch(`https://${host}:${port}/publish/notification/organization`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                body
+            })
+            .then((response) => {
+                if (response.status === 200) {
+                    console.log(`Websocket received board notification for '${board.stix.created_by_ref}'`);
+                } else {
+                    console.log(`Websocket rejected board notification for '${board.stix.created_by_ref}':`,
+                            response.status, response.statusText);
+                }
+            })
+            .catch((err) => console.log('Error!', err));
+    }
 
 }

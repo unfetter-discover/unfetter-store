@@ -21,6 +21,15 @@ yargs
     .describe('mongo-database', 'Database for MongoDB')
     .default('mongo-database', process.env.MONGO_DB || 'stix')
 
+    .alias('socket-server-host', 'ss-host')
+    .describe('socket-server-host', 'Host name and/or IP address for the websocket server')
+    .default('socket-server-host', process.env.SERVER_SOCKET_HOST || 'localhost')
+
+    .number('socket-server-port')
+    .alias('socket-server-port', 'ss-port')
+    .describe('socket-server-port', 'Port for the websocket server')
+    .default('socket-server-port', process.env.SERVER_SOCKET_PORT || 3333)
+
     .hide('cert-dir')
     .default('cert-dir', '/etc/pki/tls/certs')
     .hide('server-key')
