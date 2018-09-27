@@ -1,7 +1,7 @@
 import mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
-import * as modelFactory from '../models/modelFactory';
+import * as modelFactory from '../models/model-factory';
 
 import * as yargs from 'yargs';
 import { DaemonState, StatusEnum, PromisedService } from '../models/server-state';
