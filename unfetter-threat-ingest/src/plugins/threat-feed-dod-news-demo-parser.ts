@@ -49,7 +49,6 @@ class ThreatFeedDodNewsParser extends ThreatFeedXMLParser {
     };
 
     private isInReport = (report: ReportJSON, entry: any) => {
-        console.debug('comparing', entry.stix.name, 'to', report.stix.labels);
         return report.stix.labels.includes(entry.stix.name);
     }
 
