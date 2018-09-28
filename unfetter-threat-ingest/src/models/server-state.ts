@@ -2,6 +2,7 @@ import { Server } from 'https';
 import { Connection } from 'mongoose';
 import { BehaviorSubject } from 'rxjs';
 import * as yargs from 'yargs';
+
 import { ThreatFeedParsers } from '../processor/threat-feed-parser';
 
 export type RefreshFunction = (state: DaemonState, options?: yargs.Arguments) => void;

@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as vm from 'vm';
+import { Document } from 'mongoose';
 
 import ReportJSON from './report-json';
 import { DaemonState, FeedSource } from '../models/server-state';
-import { Document } from 'mongoose';
 
 /**
  * Threat feed parsers read in data from a feed that is expected to follow a certain type, such as XML. They can be
@@ -25,6 +25,11 @@ import { Document } from 'mongoose';
  */
 export abstract class ThreatFeedParser {
 
+    /**
+     * All parsers should have some arbitrary type, such as "xml", that is unique from all other parsers in the system.
+     * If you give the parser a non-distinct name, it may not get loaded at all. Default parsers are loaded first, so
+     * definitely do not give your parser the same name as a default one.
+     */
     protected constructor(
         private _type: string,
     ) {
@@ -35,7 +40,20 @@ export abstract class ThreatFeedParser {
 
     public get type() { return this._type; };
 
+    /**
+     * This is the one method you are required to override. Take the given, full response body from the given feed,
+     * and parse it out into ReportJSON objects. The state is provided mostly for its debug configuration value.
+     */
     public abstract parse(data: string, feed: any, state: DaemonState): Promise<ReportJSON[]>;
+
+    /**
+     * This method compares the read report against the given board's boundaries. You are not required to override this
+     * method, but the default behavior only compares the board's start and end date rangae against the publish date of
+     * the report. So if you want to give this feed a chance of providing some decent relevance of the report to a
+     * board; then, a) try to extract some kind of detail out of the report, and b) match it up against a malware,
+     * or target, or intrusion set.
+     */
+    public match = (report: ReportJSON, board: any): boolean => null;
 
 }
 
@@ -78,7 +96,6 @@ export class ThreatFeedParsers {
                         const content = fs.readFileSync(`${path}/${entry}`);
                         const parser = vm.runInNewContext(content.toString(), { require, console, exports: {} });
                         if (parser && parser.type && (type === parser.type.toLowerCase())) {
-                            console.debug(`Found '${type}' parser`, entry);
                             this.parsers[type] = parser;
                         } else {
                             console.warn(`Not a valid '${type}' parser:`, entry);

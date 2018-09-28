@@ -37,9 +37,15 @@ const poll = (state: DaemonState) => {
      */
     const promises = [];
     promises.push(ReportModel.find({'stix.type': 'report'}).exec());
-    promises.push(ThreatBoardModel.find({'stix.type': 'x-unfetter-threat-board'}).exec());
+    promises.push(ThreatBoardModel
+        .find({'stix.type': 'x-unfetter-threat-board'})
+        .populate('stix.boundaries.intrusion_sets')
+        .populate('stix.boundaries.targets')
+        .populate('stix.boundaries.malware')
+        .exec());
     Promise.all(promises)
         .then(([currentReports, boards]) => {
+            console.log('boards', JSON.stringify(boards, null, 2));
             if (state.processor.status.getValue() !== StatusEnum.RUNNING) {
                 /*
                  * If this block gets executed, it is because we were querying the database when the service was shut
@@ -142,7 +148,9 @@ export default function initializeProcessor(state: DaemonState, options: yargs.A
             state.processor.status.next(StatusEnum.INITIALIZING);
 
             state.processor.parsers = new ThreatFeedParsers();
-            console.log('parsers:', state.processor.parsers['parsers']);
+            if (state.configuration.debug) {
+                console.debug('Feed parsers:', state.processor.parsers['parsers']);
+            }
 
             state.processor.refresh = poll;
             state.processor.status.next(StatusEnum.RUNNING);
