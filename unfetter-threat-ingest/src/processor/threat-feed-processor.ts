@@ -2,10 +2,11 @@ import * as https from 'https';
 import * as uuid from 'uuid';
 import fetch from 'node-fetch';
 import { Document } from 'mongoose';
-
-import { DaemonState, StatusEnum } from '../models/server-state';
-import ReportJSON from './report-json';
 import { ObjectId } from 'bson';
+
+import ReportJSON from './report-json';
+import { ThreatFeedParser } from './threat-feed-parser';
+import { DaemonState, StatusEnum } from '../models/server-state';
 
 export default class ThreatFeedProcessor {
 
@@ -93,15 +94,16 @@ export default class ThreatFeedProcessor {
             console.warn(`Received no data from feed '${this.feed.name}'`);
         } else {
             let promise: Promise<ReportJSON[]>;
+            let parser: ThreatFeedParser;
             if (this.feed.parser && this.feed.parser.type) {
-                const parser = this.state.processor.parsers.getParser(this.feed.parser.type);
+                parser = this.state.processor.parsers.getParser(this.feed.parser.type);
                 if (parser) {
                     promise = parser.parse(data, this.feed, this.state);
                 }
             }
             (promise || Promise.resolve([]))
                 .then((feedReports: any[]) => {
-                    this.processReports(feedReports, reports);
+                    this.processReports(feedReports, reports, parser);
                 })
                 .catch(() => {
                     // ignore the rejection, we already logged it
@@ -112,7 +114,7 @@ export default class ThreatFeedProcessor {
     /**
      * 
      */
-    private processReports(feedReports: ReportJSON[], reports: ReportJSON[]) {
+    private processReports(feedReports: ReportJSON[], reports: ReportJSON[], parser: ThreatFeedParser) {
         (feedReports || [])
             /*
              * Weed out all the reports we know about already.
@@ -128,8 +130,13 @@ export default class ThreatFeedProcessor {
              * want[?]). If any match, save them.
              */
             .forEach((report) => {
-                const matches = this.findMatchingBoards(report, this.boards, this.state);
-                if (matches && matches.length) {
+                const matches = this.boards.reduce((matched: Document[], board) => {
+                    if ((parser.match || this.findMatchingBoards)(report, board)) {
+                        matched.push(board);
+                    }
+                    return matched;
+                }, []);
+                if (matches.length) {
                     report.stix.id = `report--${uuid.v4()}`;
                     matches.forEach((board: any) => {
                         this.notifyBoard(board, report);
@@ -147,16 +154,9 @@ export default class ThreatFeedProcessor {
      * 
      * TODO We will need something more sophisticated down the road.
      */
-    private findMatchingBoards(report: any, boards: Document[], state: DaemonState) {
-        const matches: Document[] = [];
-        boards.forEach((board: any) => {
-            if ((board.stix.boundaries.start_date <= report.stix.published) &&
-                    (!board.stix.boundaries.end_date ||
-                            (board.stix.boundaries.end_date >= report.stix.published))) {
-                matches.push(board);
-            }
-        });
-        return matches;
+    private findMatchingBoards(report: any, board: any) {
+        return ((board.stix.boundaries.start_date <= report.stix.published) &&
+                (!board.stix.boundaries.end_date || (board.stix.boundaries.end_date >= report.stix.published)));
     };
 
     /**

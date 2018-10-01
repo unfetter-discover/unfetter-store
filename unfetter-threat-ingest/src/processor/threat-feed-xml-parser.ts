@@ -5,10 +5,10 @@ import ReportJSON from './report-json';
 
 const XMLParser = new xml2js.Parser();
 
-class ThreatFeedXMLParser extends ThreatFeedParser {
+export class ThreatFeedXMLParser extends ThreatFeedParser {
 
-    constructor() {
-        super('XML');
+    constructor(_type: string) {
+        super(_type || 'XML');
     }
 
     public parse(data: string, feed: any, state: DaemonState): Promise<ReportJSON[]> {
@@ -244,4 +244,4 @@ class ThreatFeedXMLParser extends ThreatFeedParser {
 
 }
 
-(() => new ThreatFeedXMLParser())();
+(() => new ThreatFeedXMLParser(null))();
