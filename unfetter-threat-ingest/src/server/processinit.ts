@@ -121,8 +121,6 @@ const afterPolling = (polledReports: any[], boards: Document[], state: DaemonSta
                         }
                     }
                 });
-
-                // @TODO send notification to each "user" of the board (using socket server)
             });
         })
 }

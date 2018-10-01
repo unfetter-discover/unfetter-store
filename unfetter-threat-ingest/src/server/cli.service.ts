@@ -21,14 +21,18 @@ yargs
     .describe('mongo-database', 'Database for MongoDB')
     .default('mongo-database', process.env.MONGO_DB || 'stix')
 
+    .boolean('fire-notification')
+    .describe('fire-notifications', 'Whether to send notifications of report ingests to the websocket server')
+    .default('fire-notifications', true)
+
     .alias('socket-server-host', 'ss-host')
     .describe('socket-server-host', 'Host name and/or IP address for the websocket server')
-    .default('socket-server-host', process.env.SERVER_SOCKET_HOST || 'localhost')
+    .default('socket-server-host', process.env.SOCKET_SERVER_HOST || 'localhost')
 
     .number('socket-server-port')
     .alias('socket-server-port', 'ss-port')
     .describe('socket-server-port', 'Port for the websocket server')
-    .default('socket-server-port', process.env.SERVER_SOCKET_PORT || 3333)
+    .default('socket-server-port', process.env.SOCKET_SERVER_PORT || 3333)
 
     .hide('cert-dir')
     .default('cert-dir', '/etc/pki/tls/certs')
@@ -54,7 +58,7 @@ yargs
         if (fs.existsSync(path)) {
             return JSON.parse(fs.readFileSync(path, 'utf-8'));
         }
-        if (path !== 'config/.env') {
+        if (!/config\/.env$/.test(path)) {
             console.error(`Configuration file not found at path '${path}'. Proceeding without it.`)
         }
     })
@@ -63,6 +67,7 @@ yargs
     .default('c', 'config/.env')
 
     .group(['mongo-host', 'mongo-port', 'mongo-database'], 'Mongo Options:')
+    .group(['fire-notifications', 'socket-server-host', 'socket-server-port'], 'Websocket Options:')
     .group(['p', 'i', 'c', 'debug'], 'Service Options:')
 
     .alias('v', 'version')

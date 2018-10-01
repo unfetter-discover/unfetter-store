@@ -163,44 +163,45 @@ export default class ThreatFeedProcessor {
      * Send a notification to users of the given threat board that the given report is a possible match.
      */
     private notifyBoard(board: any, report: ReportJSON) {
-        const host = this.state.configuration['socket-server-host'];
-        const port = this.state.configuration['socket-server-port'];
-        const reference = `'${report.stix.name}' read from '${report.metaProperties.source}'`;
-        const body = JSON.stringify({
-            data: {
-                attributes: {
-                    userId: new ObjectId(0),
-                    orgId: board.stix.created_by_ref,
-                    notification: {
-                        type: 'STIX',
-                        heading: `Potential threat report match for ${board.stix.name}`,
-                        body: `New report ${reference} may meet criteria for this threat board`,
-                        link: `/threat-beta/board/${board._id}`,
-                        stixId: null
+        if (this.state.configuration['fire-notifications'] !== true) {
+            const host = this.state.configuration['socket-server-host'];
+            const port = this.state.configuration['socket-server-port'];
+            const reference = `'${report.stix.name}' read from '${report.metaProperties.source}'`;
+            const body = JSON.stringify({
+                data: {
+                    attributes: {
+                        userId: new ObjectId(0),
+                        orgId: board.stix.created_by_ref,
+                        notification: {
+                            type: 'STIX',
+                            heading: `Potential threat report match for ${board.stix.name}`,
+                            body: `New report ${reference} may meet criteria for this threat board`,
+                            link: `/threat-beta/board/${board._id}`,
+                            stixId: null
+                        },
+                        emailData: null
+                    }
+                }
+            });
+            fetch(`https://${host}:${port}/publish/notification/organization`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json'
                     },
-                    emailData: null
-                }
-            }
-        });
-        console.debug('passing to websocket server:', body);
-        fetch(`https://${host}:${port}/publish/notification/organization`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json'
-                },
-                body
-            })
-            .then((response) => {
-                if (response.status === 200) {
-                    console.log(`Websocket received board notification for '${board.stix.created_by_ref}'`);
-                } else {
-                    console.log(`Websocket rejected board notification for '${board.stix.created_by_ref}':`,
-                            response.status, response.statusText);
-                }
-            })
-            .catch((err) => console.log('Error!', err));
+                    body
+                })
+                .then((response) => {
+                    if (response.status === 200) {
+                        console.log(`Websocket received board notification for '${board.stix.created_by_ref}'`);
+                    } else {
+                        console.log(`Websocket rejected board notification for '${board.stix.created_by_ref}':`,
+                                response.status, response.statusText);
+                    }
+                })
+                .catch((err) => console.log('Error!', err));
+        }
     }
 
 }

@@ -79,7 +79,7 @@ const onRefresh = (state: DaemonState, options: yargs.Arguments) => {
         state.db.refreshTimer = undefined;
     }
     if (!state.db.conn) {
-        connect(state, options, (service) => console.log(service.response), (err) => console.warn);
+        connect(state, options, (service) => console.log(service.response), (err) => console.warn(err));
     } else {
         if (options.debug) {
             console.debug('Reloading configuration');
