@@ -20,10 +20,13 @@ COPY package.json $WORKING_DIRECTORY
 
 RUN npm --loglevel error i -g ts-node@6.0.0 typescript@2.8.3
 RUN npm --loglevel error install
-# Remove unneeded dependencies that scan as high risk
-#RUN find / -name "cb-never*.tgz" -delete && \
-#    rm -rf /usr/share/man && \
-#    rm -rf /tmp/* && \
-#    rm -rf /var/cache/apk/*
 
-ADD . $WORKING_DIRECTORY
+# Remove unneeded dependencies that scan as high risk
+RUN find / -name "cb-never*.tgz" -delete && \
+    rm -rf /usr/share/man && \
+    rm -rf /tmp/* && \
+    rm -rf /var/cache/apk/*
+
+COPY . $WORKING_DIRECTORY
+
+EXPOSE 5010

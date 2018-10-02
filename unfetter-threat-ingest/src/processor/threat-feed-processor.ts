@@ -10,12 +10,22 @@ import { DaemonState, StatusEnum } from '../models/server-state';
 
 export default class ThreatFeedProcessor {
 
+    private parser: ThreatFeedParser;
+
     constructor(
         private feed: any,
         private boards: Document[],
         private currentReports: any[],
         private state: DaemonState,
     ) {
+        if (this.feed.parser && this.feed.parser.type) {
+            this.parser = this.state.processor.parsers.getParser(this.feed.parser.type);
+            if (this.parser) {
+                console.debug(`Using parser for '${this.feed.parser.type}'`, this.parser.constructor.name);
+            } else {
+                console.warn(`Found no parser for '${this.feed.parser.type}'`);
+            }
+        }
     }
 
     public async poll() {
@@ -51,6 +61,7 @@ export default class ThreatFeedProcessor {
      * Fire the given request to a feed source.
      */
     private pollFeed(options: any) {
+        console.debug('calling feed', options);
         return new Promise((resolve, reject) => {
             const request = https.get(options, (res) => {
                 let output = '';
@@ -94,16 +105,12 @@ export default class ThreatFeedProcessor {
             console.warn(`Received no data from feed '${this.feed.name}'`);
         } else {
             let promise: Promise<ReportJSON[]>;
-            let parser: ThreatFeedParser;
-            if (this.feed.parser && this.feed.parser.type) {
-                parser = this.state.processor.parsers.getParser(this.feed.parser.type);
-                if (parser) {
-                    promise = parser.parse(data, this.feed, this.state);
-                }
+            if (this.parser) {
+                promise = this.parser.parse(data, this.feed, this.state);
             }
             (promise || Promise.resolve([]))
                 .then((feedReports: any[]) => {
-                    this.processReports(feedReports, reports, parser);
+                    this.processReports(feedReports, reports);
                 })
                 .catch(() => {
                     // ignore the rejection, we already logged it
@@ -114,7 +121,7 @@ export default class ThreatFeedProcessor {
     /**
      * 
      */
-    private processReports(feedReports: ReportJSON[], reports: ReportJSON[], parser: ThreatFeedParser) {
+    private processReports(feedReports: ReportJSON[], reports: ReportJSON[]) {
         (feedReports || [])
             /*
              * Weed out all the reports we know about already.
@@ -131,7 +138,7 @@ export default class ThreatFeedProcessor {
              */
             .forEach((report) => {
                 const matches = this.boards.reduce((matched: Document[], board) => {
-                    if ((parser.match || this.findMatchingBoards)(report, board)) {
+                    if ((this.parser.match || this.findMatchingBoards)(report, board)) {
                         matched.push(board);
                     }
                     return matched;
@@ -155,52 +162,53 @@ export default class ThreatFeedProcessor {
      * TODO We will need something more sophisticated down the road.
      */
     private findMatchingBoards(report: any, board: any) {
-        return ((board.stix.boundaries.start_date <= report.stix.published) &&
-                (!board.stix.boundaries.end_date || (board.stix.boundaries.end_date >= report.stix.published)));
+        return ((board.stix.boundaries.start_date.getTime() <= report.stix.published) &&
+                (!board.stix.boundaries.end_date || (board.stix.boundaries.end_date.getTime() >= report.stix.published)));
     };
 
     /**
      * Send a notification to users of the given threat board that the given report is a possible match.
      */
     private notifyBoard(board: any, report: ReportJSON) {
-        const host = this.state.configuration['socket-server-host'];
-        const port = this.state.configuration['socket-server-port'];
-        const reference = `'${report.stix.name}' read from '${report.metaProperties.source}'`;
-        const body = JSON.stringify({
-            data: {
-                attributes: {
-                    userId: new ObjectId(0),
-                    orgId: board.stix.created_by_ref,
-                    notification: {
-                        type: 'STIX',
-                        heading: `Potential threat report match for ${board.stix.name}`,
-                        body: `New report ${reference} may meet criteria for this threat board`,
-                        link: `/threat-beta/board/${board._id}`,
-                        stixId: null
+        if (this.state.configuration['fire-notifications'] !== true) {
+            const host = this.state.configuration['socket-server-host'];
+            const port = this.state.configuration['socket-server-port'];
+            const reference = `'${report.stix.name}' read from '${report.metaProperties.source}'`;
+            const body = JSON.stringify({
+                data: {
+                    attributes: {
+                        userId: new ObjectId(0),
+                        orgId: board.stix.created_by_ref,
+                        notification: {
+                            type: 'STIX',
+                            heading: `Potential threat report match for ${board.stix.name}`,
+                            body: `New report ${reference} may meet criteria for this threat board`,
+                            link: `/threat-beta/board/${board._id}`,
+                            stixId: null
+                        },
+                        emailData: null
+                    }
+                }
+            });
+            fetch(`https://${host}:${port}/publish/notification/organization`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json'
                     },
-                    emailData: null
-                }
-            }
-        });
-        console.debug('passing to websocket server:', body);
-        fetch(`https://${host}:${port}/publish/notification/organization`,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json'
-                },
-                body
-            })
-            .then((response) => {
-                if (response.status === 200) {
-                    console.log(`Websocket received board notification for '${board.stix.created_by_ref}'`);
-                } else {
-                    console.log(`Websocket rejected board notification for '${board.stix.created_by_ref}':`,
-                            response.status, response.statusText);
-                }
-            })
-            .catch((err) => console.log('Error!', err));
+                    body
+                })
+                .then((response) => {
+                    if (response.status === 200) {
+                        console.log(`Websocket received board notification for '${board.stix.created_by_ref}'`);
+                    } else {
+                        console.log(`Websocket rejected board notification for '${board.stix.created_by_ref}':`,
+                                response.status, response.statusText);
+                    }
+                })
+                .catch((err) => console.log('Error!', err));
+        }
     }
 
 }

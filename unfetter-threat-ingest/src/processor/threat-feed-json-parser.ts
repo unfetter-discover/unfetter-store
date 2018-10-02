@@ -1,76 +1,57 @@
-import * as xml2js from 'xml2js';
 import { ThreatFeedParser } from './threat-feed-parser';
 import { DaemonState } from '../models/server-state';
 import ReportJSON from './report-json';
 
-const XMLParser = new xml2js.Parser();
-
-export class ThreatFeedXMLParser extends ThreatFeedParser {
+export class ThreatFeedJSONParser extends ThreatFeedParser {
 
     constructor(_type: string) {
-        super(_type || 'XML');
+        super(_type || 'JSON');
     }
 
     public parse(data: string, feed: any, state: DaemonState): Promise<ReportJSON[]> {
         return new Promise((resolve, reject) => {
-            xml2js.parseString(data, {
-                trim: true,             // trim all strings (but not -all- embedded whitespace`)
-                explicitArray: false,   // don't automatically convert all node values to arrays, it's bloody annoying
-                attrkey: 'attributes',  // use explicit node name for attributes, rather than cryptic '$'
-            }, (err, json) => {
-                if (err) {
+            try {
+                const json = JSON.parse(data);
+                /*
+                 * Find the node that has our reports.
+                 */
+                const root = this.locateRoot(json, feed.parser.root);
+                if (!root) {
                     /*
-                     * Well this is bad, the result was not XML.
-                     * Again, we should be managing "bad" feeds, but moving on...
+                     * Couldn't find the root node, alert the press.
                      */
-                    console.warn(`Could not parse output from feed '${feed.name}': `, err, data);
-                    reject();
-                } else if (!json) {
-                    /*
-                     * That's... odd. You sure you had nothing to say?...
-                     */
-                    console.warn(`Somehow parsed an empty response from feed '${feed.name}'`);
-                    reject();
+                    if (state.configuration.debug) {
+                        console.debug(`could not find root node ${feed.parser.root}`, data);
+                        reject();
+                    }
                 } else {
-                    /*
-                     * Find the node that has our reports.
-                     */
-                    const root = this.locateRoot(json, feed.parser.root);
-                    if (!root) {
+                    const articles = this.locateArticles(root, feed.parser.articles);
+                    if (!articles) {
                         /*
-                         * Couldn't find the root node, alert the press.
+                         * Couldn't find the child report node(s), alert the military.
                          */
                         if (state.configuration.debug) {
-                            console.debug(`Feed '${feed.name}', could not find root node ${feed.parser.root}`,
-                                    JSON.stringify(json));
-                            reject();
+                            console.debug(`could not find articles node ${feed.parser.articles}`, data);
                         }
                     } else {
-                        const articles = this.locateArticles(root, feed.parser.articles);
-                        if (!articles) {
-                            /*
-                             * Couldn't find the child report node(s), alert the military.
-                             */
-                            if (state.configuration.debug) {
-                                console.debug(`Feed '${feed.name}', could not find articles node ${feed.parser.articles}`,
-                                        JSON.stringify(root));
+                        /*
+                         * Yea!, we found some reports. Now try to convert them, and pass them to the callback.
+                         */
+                        const reports: ReportJSON[] = [];
+                        articles.forEach((item: any) => {
+                            const report = this.parseFeedReport(feed, item, state);
+                            if (report !== undefined) {
+                                reports.push(report);
                             }
-                        } else {
-                            /*
-                             * Yea!, we found some reports. Now try to convert them, and pass them to the callback.
-                             */
-                            const reports: ReportJSON[] = [];
-                            articles.forEach((item: any) => {
-                                const report = this.parseFeedReport(feed, item, state);
-                                if (report !== undefined) {
-                                    reports.push(report);
-                                }
-                            });
-                            resolve(reports);
-                        }
+                        });
+                        resolve(reports);
                     }
                 }
-            });
+                resolve(json);
+            } catch (err) {
+                console.warn(`Could not parse output from feed '${feed.name}': `, err, data);
+                reject();
+            }
         });
     }
 
@@ -227,14 +208,8 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
     private getValueFromPath(nodepath: string, node: any) {
         if (node) {
             nodepath.split('/').forEach((path: string, index: number, splits: string[]) => {
-                const [step, attribute] = path.split('@', 2);
-                node = (node && step) ? node[step] : node;
-                if ((index === splits.length - 1) && attribute) {
-                    if (node && node.attributes && node.attributes[attribute]) {
-                        node = node.attributes[attribute];
-                    } else {
-                        node = null;
-                    }
+                if (node) {
+                    node = node[path];
                 }
             });
         }
@@ -243,4 +218,4 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
 
 }
 
-(() => new ThreatFeedXMLParser(null))();
+(() => new ThreatFeedJSONParser(null))();

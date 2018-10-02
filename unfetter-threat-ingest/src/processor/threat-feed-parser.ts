@@ -5,6 +5,8 @@ import { Document } from 'mongoose';
 import ReportJSON from './report-json';
 import { DaemonState, FeedSource } from '../models/server-state';
 
+export type DefaultMatchFunction = (report: ReportJSON, board: any) => boolean;
+
 /**
  * Threat feed parsers read in data from a feed that is expected to follow a certain type, such as XML. They can be
  * strict or lenient. The result is that they return data in a Report JSON format (see interface).
@@ -53,7 +55,7 @@ export abstract class ThreatFeedParser {
      * board; then, a) try to extract some kind of detail out of the report, and b) match it up against a malware,
      * or target, or intrusion set.
      */
-    public match = (report: ReportJSON, board: any): boolean => null;
+    public match: null | DefaultMatchFunction = null;
 
 }
 

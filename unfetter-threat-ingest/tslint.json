@@ -17,6 +17,7 @@
             false,
             "always-prefix"
         ],
+        "member-ordering": false,
         "no-unused-variable": false,
         "no-empty": false,
         "prefer-const": false,
@@ -33,7 +34,7 @@
         ],
         "max-line-length": [
             true,
-            300
+            150
         ],
         "max-classes-per-file": false,
         "no-string-literal": false,
