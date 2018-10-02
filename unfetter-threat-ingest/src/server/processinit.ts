@@ -45,7 +45,10 @@ const poll = (state: DaemonState) => {
         .exec());
     Promise.all(promises)
         .then(([currentReports, boards]) => {
-            console.log('boards', JSON.stringify(boards, null, 2));
+            console.debug('polling for boards',
+                    state.configuration.debug
+                            ? JSON.stringify(boards, null, 2)
+                            : boards.map((board: any) => board.stix.name));
             if (state.processor.status.getValue() !== StatusEnum.RUNNING) {
                 /*
                  * If this block gets executed, it is because we were querying the database when the service was shut
@@ -89,7 +92,7 @@ const poll = (state: DaemonState) => {
 };
 
 const afterPolling = (polledReports: any[], boards: Document[], state: DaemonState) => {
-    console.log('All feed polls have completed.');
+    console.log('All feed polls have completed. Persisting:', polledReports.length);
     const saves = polledReports.map((report) => {
         const persist = new ReportModel({...report, _id: report.stix.id});
         return new Promise((resolve, reject) => {
@@ -123,6 +126,7 @@ const afterPolling = (polledReports: any[], boards: Document[], state: DaemonSta
                 });
             });
         })
+        .catch((reason) => console.log('Report save failed????', reason))
 }
 
 /**

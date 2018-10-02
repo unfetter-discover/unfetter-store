@@ -41,7 +41,8 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
                          * Couldn't find the root node, alert the press.
                          */
                         if (state.configuration.debug) {
-                            console.debug(`could not find root node ${feed.parser.root}`, JSON.stringify(json));
+                            console.debug(`Feed '${feed.name}', could not find root node ${feed.parser.root}`,
+                                    JSON.stringify(json));
                             reject();
                         }
                     } else {
@@ -51,7 +52,7 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
                              * Couldn't find the child report node(s), alert the military.
                              */
                             if (state.configuration.debug) {
-                                console.debug(`could not find articles node ${feed.parser.articles}`,
+                                console.debug(`Feed '${feed.name}', could not find articles node ${feed.parser.articles}`,
                                         JSON.stringify(root));
                             }
                         } else {
@@ -224,21 +225,19 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
      * and find the resulting element.
      */
     private getValueFromPath(nodepath: string, node: any) {
-        nodepath.split('/').forEach((path: string, index: number, splits: string[]) => {
-            const [step, attribute] = path.split('@', 2);
-            if (node && node[step]) {
-                node = node[step];
+        if (node) {
+            nodepath.split('/').forEach((path: string, index: number, splits: string[]) => {
+                const [step, attribute] = path.split('@', 2);
+                node = (node && step) ? node[step] : node;
                 if ((index === splits.length - 1) && attribute) {
-                    if (node.attributes && node.attributes[attribute]) {
+                    if (node && node.attributes && node.attributes[attribute]) {
                         node = node.attributes[attribute];
                     } else {
                         node = null;
                     }
                 }
-            } else {
-                node = null;
-            }
-        });
+            });
+        }
         return node;
     }
 

@@ -10,12 +10,22 @@ import { DaemonState, StatusEnum } from '../models/server-state';
 
 export default class ThreatFeedProcessor {
 
+    private parser: ThreatFeedParser;
+
     constructor(
         private feed: any,
         private boards: Document[],
         private currentReports: any[],
         private state: DaemonState,
     ) {
+        if (this.feed.parser && this.feed.parser.type) {
+            this.parser = this.state.processor.parsers.getParser(this.feed.parser.type);
+            if (this.parser) {
+                console.debug(`Using parser for '${this.feed.parser.type}'`, this.parser.constructor.name);
+            } else {
+                console.warn(`Found no parser for '${this.feed.parser.type}'`);
+            }
+        }
     }
 
     public async poll() {
@@ -51,6 +61,7 @@ export default class ThreatFeedProcessor {
      * Fire the given request to a feed source.
      */
     private pollFeed(options: any) {
+        console.debug('calling feed', options);
         return new Promise((resolve, reject) => {
             const request = https.get(options, (res) => {
                 let output = '';
@@ -94,16 +105,12 @@ export default class ThreatFeedProcessor {
             console.warn(`Received no data from feed '${this.feed.name}'`);
         } else {
             let promise: Promise<ReportJSON[]>;
-            let parser: ThreatFeedParser;
-            if (this.feed.parser && this.feed.parser.type) {
-                parser = this.state.processor.parsers.getParser(this.feed.parser.type);
-                if (parser) {
-                    promise = parser.parse(data, this.feed, this.state);
-                }
+            if (this.parser) {
+                promise = this.parser.parse(data, this.feed, this.state);
             }
             (promise || Promise.resolve([]))
                 .then((feedReports: any[]) => {
-                    this.processReports(feedReports, reports, parser);
+                    this.processReports(feedReports, reports);
                 })
                 .catch(() => {
                     // ignore the rejection, we already logged it
@@ -114,7 +121,7 @@ export default class ThreatFeedProcessor {
     /**
      * 
      */
-    private processReports(feedReports: ReportJSON[], reports: ReportJSON[], parser: ThreatFeedParser) {
+    private processReports(feedReports: ReportJSON[], reports: ReportJSON[]) {
         (feedReports || [])
             /*
              * Weed out all the reports we know about already.
@@ -131,7 +138,7 @@ export default class ThreatFeedProcessor {
              */
             .forEach((report) => {
                 const matches = this.boards.reduce((matched: Document[], board) => {
-                    if ((parser.match || this.findMatchingBoards)(report, board)) {
+                    if ((this.parser.match || this.findMatchingBoards)(report, board)) {
                         matched.push(board);
                     }
                     return matched;
@@ -155,8 +162,8 @@ export default class ThreatFeedProcessor {
      * TODO We will need something more sophisticated down the road.
      */
     private findMatchingBoards(report: any, board: any) {
-        return ((board.stix.boundaries.start_date <= report.stix.published) &&
-                (!board.stix.boundaries.end_date || (board.stix.boundaries.end_date >= report.stix.published)));
+        return ((board.stix.boundaries.start_date.getTime() <= report.stix.published) &&
+                (!board.stix.boundaries.end_date || (board.stix.boundaries.end_date.getTime() >= report.stix.published)));
     };
 
     /**

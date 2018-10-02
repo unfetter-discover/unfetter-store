@@ -41,8 +41,8 @@ class ThreatFeedDodNewsParser extends ThreatFeedXMLParser {
      * See class comment.
      */
     public match = (report: ReportJSON, board: any): boolean => {
-        return ((board.stix.boundaries.start_date <= report.stix.published) &&
-                (!board.stix.boundaries.end_date || (board.stix.boundaries.end_date >= report.stix.published)) &&
+        return ((board.stix.boundaries.start_date.getTime() <= report.stix.published) &&
+                (!board.stix.boundaries.end_date || (board.stix.boundaries.end_date.getTime() >= report.stix.published)) &&
                 (board.stix.boundaries.targets.some((target: any) => this.isInReport(report, target)) ||
                     board.stix.boundaries.malware.some((malware: any) => this.isInReport(report, malware)) ||
                     board.stix.boundaries.intrusion_sets.some((intrusion: any) => this.isInReport(report, intrusion))));
