@@ -3,7 +3,7 @@
     articles:
       type: array
       items:
-        type: object
+        type: string
     boundaries:
       type: object
       properties:

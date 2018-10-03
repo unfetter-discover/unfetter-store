@@ -20,6 +20,7 @@ const sighting = require('./examples/sighting');
 const threatActor = require('./examples/threat_actor');
 const tool = require('./examples/tool');
 
+const xUnfetterArticle = require('./examples/x_unfetter_article');
 const xUnfetterAssessment = require('./examples/x_unfetter_assessment');
 const xUnfetterAssessmentGroup = require('./examples/x_unfetter_assessment_group');
 const xUnfetterAssessmentSet = require('./examples/x_unfetter_assessment_set');
@@ -50,7 +51,8 @@ const controllers = [
     XUnfetterCapability,
     xUnfetterObjectAssessment,
     XUnfetterSensor,
-    xUnfetterThreatBoard
+    xUnfetterThreatBoard,
+    xUnfetterArticle
 ];
 
 describe('stix controllers', () => {
