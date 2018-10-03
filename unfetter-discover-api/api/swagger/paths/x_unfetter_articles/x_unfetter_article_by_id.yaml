@@ -1,4 +1,4 @@
-x-swagger-router-controller: x_unfetter_articless
+x-swagger-router-controller: x_unfetter_articles
 get:
   tags:
   
