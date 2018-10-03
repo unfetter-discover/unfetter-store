@@ -139,6 +139,11 @@
 
 # Unfetter STIX routes
 
+/x-unfetter-articles:
+  $ref: ./x_unfetter_articles/x_unfetter_articles.yaml
+/x-unfetter-articles/{id}:
+  $ref: ./x_unfetter_articles/x_unfetter_article_by_id.yaml
+
 /x-unfetter-assessments/:
   $ref: ./x_unfetter_assessments/assessments.yaml
 /x-unfetter-assessments/{id}:

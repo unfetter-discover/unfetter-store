@@ -356,6 +356,17 @@ XUnfetterThreatBoardsJsonApiSingleItem:
 XUnfetterThreatBoard:
   $ref: ./x_unfetter_threat_boards/x_unfetter_threat_board.yaml
 
+XUnfetterArticleJsonApi:
+  $ref: ./x_unfetter_articles/x_unfetter_article_json_api.yaml
+XUnfetterArticlesJsonApi:
+  $ref: ./x_unfetter_articles/x_unfetter_articles_json_api.yaml
+XUnfetterArticleCreateUpdate:
+  $ref: ./x_unfetter_articles/x_unfetter_article_create_update.yaml
+XUnfetterArticlesJsonApiSingleItem:
+  $ref: ./x_unfetter_articles/x_unfetter_articles_json_api_single_item.yaml
+XUnfetterArticle:
+  $ref: ./x_unfetter_articles/x_unfetter_article.yaml
+
 XUnfetterCapabilityJsonApi:
   $ref: ./x_unfetter_capabilities/x_unfetter_capability_json_api.yaml
 XUnfetterCapabilitiesJsonApi:
