@@ -7,6 +7,7 @@ import { ObjectId } from 'bson';
 import ReportJSON from './report-json';
 import { ThreatFeedParser } from './threat-feed-parser';
 import { DaemonState, StatusEnum } from '../models/server-state';
+import { isArray } from 'util';
 
 export default class ThreatFeedProcessor {
 
@@ -147,7 +148,13 @@ export default class ThreatFeedProcessor {
                     report.stix.id = `report--${uuid.v4()}`;
                     matches.forEach((board: any) => {
                         this.notifyBoard(board, report);
-                        board.stix.reports.push(report.stix.id);
+                        if (!board.metaProperties) {
+                            board.metaProperties = {};
+                        }
+                        if (!isArray(board.metaProperties['potential-reports'])) {
+                            board.metaProperties['potential-reports'] = [];
+                        }
+                        board.metaProperties['potential-reports'].push(report.stix.id);
                     });
                     reports.push(report);
                 }

@@ -114,6 +114,9 @@ const afterPolling = (polledReports: any[], boards: Document[], state: DaemonSta
              * After all that, update each board to show they were recently polled for.
              */
             boards.forEach((board) => {
+                if (!(board as any).metaProperties) {
+                    (board as any).metaProperties = {};
+                }
                 (board as any).metaProperties.lastPolled = Date.now();
                 board.save((err, tb) => {
                     if (err) {
@@ -126,7 +129,7 @@ const afterPolling = (polledReports: any[], boards: Document[], state: DaemonSta
                 });
             });
         })
-        .catch((reason) => console.log('Report save failed????', reason))
+        .catch((reason) => console.log('Board save failed????', reason))
 }
 
 /**
