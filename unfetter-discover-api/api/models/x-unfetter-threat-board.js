@@ -3,7 +3,7 @@ const stixCommons = require('./stix-commons');
 
 const StixSchema = {
     articles: {
-        type: Array,
+        type: [String],
         default: void 0
     },
     boundaries: {

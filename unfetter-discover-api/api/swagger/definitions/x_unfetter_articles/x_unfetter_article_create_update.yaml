@@ -6,43 +6,18 @@
           properties:        
             type:
               type: string
-              enum: ['x-unfetter-threat-board']
+              enum: ['x-unfetter-article']
             attributes:
               type: object
-              properties:            
-                articles:
-                  type: array
-                  items:
-                    type: string
-                boundaries:
-                  type: object
-                  properties:
-                    end_date:
-                      type: string
-                      format: date-time
-                    intrusion_sets:
-                      type: array
-                      items:
-                        type: string
-                    malware:
-                      type: array
-                      items:
-                        type: string 
-                    start_date:
-                      type: string
-                      format: date-time
-                    targets:
-                      type: array
-                      items:
-                        type: string
+              properties:   
+                content:
+                  type: string        
                 created: 
                   type: string
                   format: date-time
                 created_by_ref:
                   type: string
-                  default: "identity-id"
-                description:
-                  type: string
+                  default: "identity-id"                
                 external_references:
                   type: array
                   items:
@@ -65,10 +40,10 @@
                   items:
                     type: string
                     default: "marking-definition-id"
-                reports:
-                  type: array
-                  items:
-                    type: string
                 revoked:
                   type: boolean
                   default: false
+                sources:
+                  type: array
+                  items:
+                    type: string
