@@ -61,7 +61,9 @@ export default class ThreatFeedProcessor {
      * Fire the given request to a feed source.
      */
     private pollFeed(options: any) {
-        console.debug('calling feed', options);
+        if (this.state.configuration.debug) {
+            console.debug('calling feed', options);
+        }
         return new Promise((resolve, reject) => {
             const request = https.get(options, (res) => {
                 let output = '';
@@ -145,9 +147,10 @@ export default class ThreatFeedProcessor {
                 }, []);
                 if (matches.length) {
                     report.stix.id = `report--${uuid.v4()}`;
-                    matches.forEach((board: any) => {
-                        this.notifyBoard(board, report);
-                        board.stix.reports.push(report.stix.id);
+                    matches.forEach((match) => {
+                        const board: any = match;
+                        this.notifyBoard(match, report);
+                        board.metaProperties.potentials.push(report.stix.id);
                     });
                     reports.push(report);
                 }
@@ -170,7 +173,7 @@ export default class ThreatFeedProcessor {
      * Send a notification to users of the given threat board that the given report is a possible match.
      */
     private notifyBoard(board: any, report: ReportJSON) {
-        if (this.state.configuration['fire-notifications'] !== true) {
+        if (this.state.configuration['fire-notifications'] === true) {
             const host = this.state.configuration['socket-server-host'];
             const port = this.state.configuration['socket-server-port'];
             const reference = `'${report.stix.name}' read from '${report.metaProperties.source}'`;

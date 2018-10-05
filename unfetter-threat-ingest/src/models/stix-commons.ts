@@ -10,6 +10,10 @@ stixCommons.metaProperties = new mongoose.Schema({
     lastPolled: {
         type: Number,
         required: false
+    },
+    potentials: {
+        type: [String],
+        default: []
     }
 }, { _id: false, strict: false });
 
