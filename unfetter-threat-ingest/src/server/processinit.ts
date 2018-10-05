@@ -113,14 +113,12 @@ const afterPolling = (polledReports: any[], boards: Document[], state: DaemonSta
             /*
              * After all that, update each board to show they were recently polled for.
              */
-            boards.forEach((board) => {
-                if (!(board as any).metaProperties) {
-                    (board as any).metaProperties = {};
-                }
-                (board as any).metaProperties.lastPolled = Date.now();
-                board.save((err, tb) => {
+            boards.forEach((boardDoc) => {
+                const board: any = boardDoc;
+                board.metaProperties.lastPolled = Date.now();
+                boardDoc.save((err, tb) => {
                     if (err) {
-                        console.warn(`Could not update threat board '${(board as any).stix.name}':`, err);
+                        console.warn(`Could not update threat board '${(boardDoc as any).stix.name}':`, err);
                     } else {
                         if (state.configuration.debug) {
                             console.debug('Updated board', tb);
