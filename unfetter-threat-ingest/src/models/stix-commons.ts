@@ -8,7 +8,7 @@ stixCommons.metaProperties = new mongoose.Schema({
         default: false
     },
     lastPolled: {
-        type: Number,
+        type: Date,
         required: false
     },
     potentials: {
@@ -73,7 +73,8 @@ stixCommons.baseStix = {
     },
     created_by_ref: {
         type: String,
-        index: 1
+        index: 1,
+        required: false
     },
     revoked: Boolean,
     version: String,
