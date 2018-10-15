@@ -148,6 +148,7 @@ router.get('/get-user-list',
                         _id: user._id,
                         attributes: {
                             _id: user._id,
+                            id: user.identity.id,
                             userName: user.userName,
                             firstName: user.firstName,
                             lastName: user.lastName,
