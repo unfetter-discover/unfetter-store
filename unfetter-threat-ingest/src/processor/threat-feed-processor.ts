@@ -150,6 +150,9 @@ export default class ThreatFeedProcessor {
                     matches.forEach((match) => {
                         const board: any = match;
                         this.notifyBoard(match, report);
+                        if (!board.metaProperties.potentials) {
+                            board.metaProperties.potentials = [];
+                        }
                         board.metaProperties.potentials.push(report.stix.id);
                     });
                     reports.push(report);

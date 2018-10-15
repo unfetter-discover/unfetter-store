@@ -13,7 +13,7 @@ stixCommons.metaProperties = new mongoose.Schema({
     },
     potentials: {
         type: [String],
-        default: []
+        required: false
     }
 }, { _id: false, strict: false });
 

@@ -14,10 +14,7 @@ const StixSchema = {
         required: [true, 'name is required']
     },
     description: String,
-    created_by_ref: {
-        type: String,
-        required: false
-    },
+    created_by_ref: String,
     boundaries: {
         start_date: {
             type: Date,
