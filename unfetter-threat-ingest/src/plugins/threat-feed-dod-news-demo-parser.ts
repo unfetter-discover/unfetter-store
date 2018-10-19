@@ -41,15 +41,16 @@ class ThreatFeedDodNewsParser extends ThreatFeedXMLParser {
      * See class comment.
      */
     public match = (report: ReportJSON, board: any): boolean => {
-        return ((board.stix.boundaries.start_date.getTime() <= report.stix.published) &&
-                (!board.stix.boundaries.end_date || (board.stix.boundaries.end_date.getTime() >= report.stix.published)) &&
-                (board.stix.boundaries.targets.some((target: any) => this.isInReport(report, target)) ||
-                    board.stix.boundaries.malware.some((malware: any) => this.isInReport(report, malware)) ||
-                    board.stix.boundaries.intrusion_sets.some((intrusion: any) => this.isInReport(report, intrusion))));
+        const bounds = board.stix.boundaries;
+        return ((bounds.start_date.getTime() <= report.stix.published) &&
+                (!bounds.end_date || (bounds.end_date.getTime() >= report.stix.published)) &&
+                (bounds.targets.some((target: any) => this.isInReport(report, target)) ||
+                        bounds.malware.some((malware: any) => this.isInReport(report, malware.stix.name)) ||
+                        bounds.intrusion_sets.some((intrusion: any) => this.isInReport(report, intrusion.stix.name))));
     };
 
     private isInReport = (report: ReportJSON, entry: any) => {
-        return report.stix.labels.includes(entry.stix.name);
+        return report.stix.labels.includes(entry);
     }
 
 }
