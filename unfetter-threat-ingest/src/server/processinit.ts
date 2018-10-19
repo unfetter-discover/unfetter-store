@@ -40,7 +40,6 @@ const poll = (state: DaemonState) => {
     promises.push(ThreatBoardModel
         .find({'stix.type': 'x-unfetter-threat-board'})
         .populate('stix.boundaries.intrusion_sets')
-        .populate('stix.boundaries.targets')
         .populate('stix.boundaries.malware')
         .exec());
     Promise.all(promises)
