@@ -44,7 +44,12 @@ const onHeartbeat = (req: express.Request, res: express.Response, state: DaemonS
     if (state.configuration.debug) {
         console.debug('heartbeat');
     }
-    res.json({ success: true, service: 'unfetter-threat-ingest', state: JSON.parse(`${state}`) });
+    res.json({
+        success: true,
+        service: 'unfetter-threat-ingest',
+        state: JSON.parse(`${state}`),
+        status: state.status.toLocaleUpperCase(),
+    });
 };
 
 const onResyncConfig = (req: express.Request, res: express.Response, state: DaemonState) => {
@@ -85,11 +90,11 @@ const onShutdown = (state: DaemonState) => {
 export default function initializeRESTService(state: DaemonState, options: yargs.Arguments): Promise<RESTServer> {
     state.rest.status.next(StatusEnum.INITIALIZING);
 
-    const app: any = express();
+    const app = express();
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
-    app.use('/resync/config', (req: express.Request, res: express.Response) => onResyncConfig(req, res, state));
-    app.use('/resync/boards', (req: express.Request, res: express.Response) => onResyncBoards(req, res, state));
+    app.get('/resync/config', (req: express.Request, res: express.Response) => onResyncConfig(req, res, state));
+    app.get('/resync/boards', (req: express.Request, res: express.Response) => onResyncBoards(req, res, state));
     app.get('/heartbeat', (req: express.Request, res: express.Response) => onHeartbeat(req, res, state));
 
     // catch 404 and forward to error handler

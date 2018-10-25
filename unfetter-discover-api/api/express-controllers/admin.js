@@ -2,6 +2,8 @@ process.env.PATTERN_HANDLER_DOMAIN = process.env.PATTERN_HANDLER_DOMAIN || 'unfe
 process.env.PATTERN_HANDLER_PORT = process.env.PATTERN_HANDLER_PORT || 5000;
 process.env.SOCKET_SERVER_URL = process.env.SOCKET_SERVER_URL || 'unfetter-socket-server';
 process.env.SOCKET_SERVER_PORT = process.env.SOCKET_SERVER_PORT || 3333;
+process.env.THREAT_INGEST_URL = process.env.THREAT_INGEST_URL || 'unfetter-threat-ingest';
+process.env.THREAT_INGEST_PORT = process.env.THREAT_INGEST_PORT || 5010;
 const CTF_PARSE_HOST = process.env.CTF_PARSE_HOST || 'http://localhost';
 const CTF_PARSE_PORT = process.env.CTF_PARSE_PORT || 10010;
 const SEND_EMAIL_ALERTS = process.env.SEND_EMAIL_ALERTS || false;
@@ -457,6 +459,10 @@ router.get('/heartbeat', (req, res) => {
         {
             service: 'unfetter-ctf-ingest',
             url: `${CTF_PARSE_HOST}:${CTF_PARSE_PORT}/heartbeat`
+        },
+        {
+            service: 'unfetter-threat-ingest',
+            url: `https://${process.env.THREAT_INGEST_URL}:${process.env.THREAT_INGEST_PORT}/heartbeat`
         }
     ];
 

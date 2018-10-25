@@ -86,7 +86,7 @@ export class DaemonState {
                 return '(Mongo connection)';
             } else if (value instanceof Server) {
                 return '(HTTPS Server)';
-            } else if (/Timer$/.test(key)) {
+            } else if (/Timer$/.test(key) && value) {
                 return `${value._idleTimeout}ms`;
             } else {
                 return value;
