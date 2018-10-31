@@ -40,7 +40,7 @@ const ALLOW_FILE_TYPES = [
     'application/pdf'
 ];
 
-router.post('/extract-text/:fileType', async (req, res) => {
+router.post('/extract-text-from-url/:fileType', async (req, res) => {
     const { fileType } = req.params;
     const { url } = req.body.data.attributes;
 
@@ -88,6 +88,49 @@ router.post('/extract-text/:fileType', async (req, res) => {
             data: {
                 attributes: {
                     url,
+                    ext: bufferFileType.ext,
+                    contentType: bufferFileType.mime,
+                    extractedText
+                }
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            errors: [{
+                status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
+            }]
+        });
+    }
+});
+
+router.post('/extract-text-from-file/:fileType', multerHelpers.inMemory('document'), async (req, res) => {
+    const { fileType } = req.params;
+
+    if (!req.file || !req.file.buffer || !fileType) {
+        return res.status(400).json({
+            errors: [{
+                status: 400, source: '', title: 'Error', code: '', detail: 'File not supplied on an element named document'
+            }]
+        });
+    }
+
+    const { buffer } = req.file;
+    try {
+        const bufferFileType = getFileType(buffer);
+        if (bufferFileType.ext !== fileType && bufferFileType.mime !== fileType) {
+            return res.status(500).json({
+                errors: [{
+                    status: 500, source: '', title: 'Error', code: '', detail: 'The provided URL did not contain the correct file type.'
+                }]
+            });
+        }
+
+        const { text } = await pdfParse(buffer);
+        const extractedText = text;
+        return res.json({
+            data: {
+                attributes: {
+                    fileName: req.file.originalname,
                     ext: bufferFileType.ext,
                     contentType: bufferFileType.mime,
                     extractedText
