@@ -5,10 +5,48 @@ import ReportJSON from './report-json';
 
 const XMLParser = new xml2js.Parser();
 
+export type Converter = (values: any[], isArray: boolean) => any;
+
 export class ThreatFeedXMLParser extends ThreatFeedParser {
+
+    protected converters: {[type: string]: Converter} = {
+
+        'boolean': (values: any[], isArray: boolean) => {
+            const vals = values.map((v) =>
+                ['true', 'yes', 'on', '1'].includes((v || '').toString().toLocaleLowerCase()));
+            return isArray ? vals : vals.reduce((tf, v) => tf || v, false);
+        },
+
+        'integer': (values: any[], isArray: boolean) => {
+            const vals = values.map((v) => Number.parseInt((v || '').toString()));
+            return isArray ? vals : vals.filter((v) => (v !== null) && !Number.isNaN(v));
+        },
+
+        'float': (values: any[], isArray: boolean) => {
+            const vals = values.map((v) => Number.parseFloat((v || '').toString()));
+            return isArray ? vals : vals.filter((v) => (v !== null) && !Number.isNaN(v));
+        },
+
+        'date': (values: any[], isArray: boolean) => {
+            const vals = values.map((v) => {
+                let val = Date.parse((v || '').toString());
+                if (Number.isNaN(val)) {
+                    val = Number.parseInt((v || '').toString());
+                }
+                if (!Number.isNaN(val)) {
+                    return new Date(val);
+                }
+                return null;
+            });
+            return isArray ? vals : vals.filter((v) => v !== null);
+        },
+
+    };
 
     constructor(_type: string) {
         super(_type || 'XML');
+        this.converters['bool'] = this.converters['boolean'];
+        this.converters['int'] = this.converters['integer'];
     }
 
     public parse(data: string, feed: any, state: DaemonState): Promise<ReportJSON[]> {
@@ -100,7 +138,7 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
         let articles = root;
         if (articleNodes) {
             if (root[articleNodes]) {
-                articles = root[articleNodes];
+                articles = [].concat(root[articleNodes]);
             } else {
                 articles = null;
             }
@@ -111,7 +149,7 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
     /**
      * Extract a STIX report from the given article. At the very least, we expect it to give us a name.
      */
-    private parseFeedReport(feed: any, article: any, state: DaemonState) {
+    protected parseFeedReport(feed: any, article: any, state: DaemonState) {
         const report: ReportJSON = {
             stix: {
                 id: null,
@@ -198,26 +236,15 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
         /*
          * Retrieve the value at the element path, convert if necessary.
          */
-        let value = this.getValueFromPath(convert.element, item);
-        if (value && convert.type) {
-            switch ((convert.type as string).toLocaleLowerCase()) {
-                case 'bool':
-                case 'boolean':
-                    value = ['true', 'yes', 'on', '1'].includes(value.toString().toLocaleLowerCase());
-                    break;
-                case 'int':
-                case 'integer':
-                    value = Number.parseInt(value.toString());
-                    break;
-                case 'float':
-                    value = Number.parseFloat(value.toString());
-                    break;
-                case 'date':
-                    value = Date.parse(value.toString());
-                    break;
+        let values = [].concat(this.getValueFromPath(convert.element, item));
+        let value = values;
+        if (values && convert.type) {
+            const type = convert.type.toLocaleLowerCase();
+            if (this.converters[type]) {
+                value = this.converters[type](values, isArray);
             }
         }
-        return (value && isArray && !Array.isArray(value)) ? [value] : value;
+        return (value && value.length && !isArray) ? value[0] : value;
     }
 
     /**
@@ -227,16 +254,31 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
     private getValueFromPath(nodepath: string, node: any) {
         if (node) {
             nodepath.split('/').forEach((path: string, index: number, splits: string[]) => {
-                const [step, attribute] = path.split('@', 2);
+                const [step, splitType, attribute, equals, value] = path.split(/([.@=])/, 5);
                 node = (node && step) ? node[step] : node;
-                if ((index === splits.length - 1) && attribute) {
-                    if (node && node.attributes && node.attributes[attribute]) {
-                        node = node.attributes[attribute];
-                    } else {
-                        node = null;
-                    }
+                if (Array.isArray(node)) {
+                    node = node.map((n) => this.matchNode(n, step, attribute, value, false, splitType === '.'))
+                        .filter((n) => (n !== null) && (n !== undefined));
+                } else {
+                    node = this.matchNode(node, step, attribute, value,
+                            (index === splits.length - 1) && !!attribute, splitType === '.');
                 }
             });
+        }
+        return node;
+    }
+
+    private matchNode(node: any, step: string, attribute: string, value: string, isLast: boolean, isClass: boolean) {
+        if (isClass) {
+            value = attribute;
+            attribute = 'class';
+        }
+        if (node && attribute && node.attributes && node.attributes[attribute]) {
+            if (value !== undefined) {
+                node = (node.attributes[attribute] === value) ? node['_'] : null;
+            } else if (isLast) {
+                node = node.attributes[attribute];
+            }
         }
         return node;
     }
