@@ -32,7 +32,7 @@ describe('xml parser', () => {
     };
     const mockState = {
         configuration: {
-            debug: true,
+            debug: false,
         }
     } as DaemonState;
 
