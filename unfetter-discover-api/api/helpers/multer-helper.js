@@ -31,8 +31,11 @@ const upload = multer({
     storage
 });
 
+const inMemory = controlname => (multer({ storage: multer.memoryStorage() })).single(controlname);
+
 module.exports = {
     upload,
     attachmentArray: upload.array('attachments'),
-    singleAttachment: upload.single('attachment')
+    singleAttachment: upload.single('attachment'),
+    inMemory
 };
