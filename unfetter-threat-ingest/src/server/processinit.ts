@@ -126,7 +126,7 @@ const afterPolling = (polledReports: any[], boards: Document[], state: DaemonSta
                 });
             });
         })
-        .catch((reason) => console.log('Board save failed????', reason))
+        .catch((reason) => console.log('Reports save failed????', reason))
 }
 
 /**
