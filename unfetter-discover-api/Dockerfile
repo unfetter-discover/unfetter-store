@@ -1,7 +1,12 @@
 FROM node:10.1-alpine
-
+#ARG CONFIG_ARRAY='frank and beans,how to divid,up'
+ARG CONFIG_ARRAY=''
 LABEL MAINTAINER="unfetter"
 LABEL Description="REST endpoints and Swagger documentation"
+
+#RUN if [ $CONFIG_ARRAY != "" ] then; for item in ${CONFIG_ARRAY}; do npm config ${item}; done; fi
+RUN IFS=","; for item in ${CONFIG_ARRAY}; do echo "npm config ${item}"; done;
+RUN IFS=","; for item in ${CONFIG_ARRAY}; do eval "npm config ${item}"; done;
 
 ENV WORKING_DIRECTORY /usr/share/unfetter-discover-api
 # Create Application Directory
@@ -13,6 +18,8 @@ COPY docker/set-npm-repo.sh $WORKING_DIRECTORY
 RUN chmod 700 $WORKING_DIRECTORY/*.sh
 RUN $WORKING_DIRECTORY/set-linux-repo.sh
 RUN $WORKING_DIRECTORY/set-npm-repo.sh
+
+
 
 # Install packages
 RUN npm --loglevel error install -g multi-file-swagger && npm --loglevel error install -g pm2 && npm --loglevel error install -g json2yaml && npm --loglevel error install -g swagger && apk add --update curl
@@ -44,5 +51,10 @@ RUN swagger validate ./api/swagger/swagger.yaml
 EXPOSE 3000
 # Open debugging ports
 EXPOSE 5555
+
+
+
+
+
 # Start Application
 CMD [ "npm --loglevel error", "start" ]
