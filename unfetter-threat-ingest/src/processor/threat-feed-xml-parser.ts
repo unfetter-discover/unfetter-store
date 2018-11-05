@@ -256,12 +256,13 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
             nodepath.split('/').forEach((path: string, index: number, splits: string[]) => {
                 const [step, splitType, attribute, equals, value] = path.split(/([.@=])/, 5);
                 node = (node && step) ? node[step] : node;
+                const isLast = index === splits.length - 1;
+                const isClass = splitType === '.';
                 if (Array.isArray(node)) {
-                    node = node.map((n) => this.matchNode(n, step, attribute, value, false, splitType === '.'))
+                    node = node.map((n) => this.matchNode(n, step, attribute, value, isLast, isClass))
                         .filter((n) => (n !== null) && (n !== undefined));
                 } else {
-                    node = this.matchNode(node, step, attribute, value,
-                            (index === splits.length - 1) && !!attribute, splitType === '.');
+                    node = this.matchNode(node, step, attribute, value, isLast, isClass);
                 }
             });
         }
@@ -274,7 +275,7 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
             attribute = 'class';
         }
         if (node && attribute && node.attributes && node.attributes[attribute]) {
-            if (value !== undefined) {
+            if ((value !== undefined) && (value !== null)) {
                 node = (node.attributes[attribute] === value) ? node['_'] : null;
             } else if (isLast) {
                 node = node.attributes[attribute];
