@@ -1,12 +1,11 @@
 FROM node:10.1-alpine
 #ARG CONFIG_ARRAY='frank and beans,how to divid,up'
 ARG CONFIG_ARRAY=''
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
 LABEL MAINTAINER="unfetter"
 LABEL Description="REST endpoints and Swagger documentation"
 
-#RUN if [ $CONFIG_ARRAY != "" ] then; for item in ${CONFIG_ARRAY}; do npm config ${item}; done; fi
-RUN IFS=","; for item in ${CONFIG_ARRAY}; do echo "npm config ${item}"; done;
-RUN IFS=","; for item in ${CONFIG_ARRAY}; do eval "npm config ${item}"; done;
 
 ENV WORKING_DIRECTORY /usr/share/unfetter-discover-api
 # Create Application Directory
@@ -18,6 +17,17 @@ COPY docker/set-npm-repo.sh $WORKING_DIRECTORY
 RUN chmod 700 $WORKING_DIRECTORY/*.sh
 RUN $WORKING_DIRECTORY/set-linux-repo.sh
 RUN $WORKING_DIRECTORY/set-npm-repo.sh
+
+
+# Calls to variables
+RUN echo "\n\n"
+RUN [ -z "${HTTP_PROXY}" ] && echo "No HTTP Proxy" || npm config --global set http-proxy ${HTTP_PROXY}
+RUN [ -z "${HTTPS_PROXY}" ] && echo "No HTTPS Proxy" || npm config --global set https-proxy ${HTTPS_PROXY}
+
+
+RUN IFS=","; for item in ${CONFIG_ARRAY}; do echo "npm config ${item}"; done;
+RUN IFS=","; for item in ${CONFIG_ARRAY}; do eval "npm config ${item}"; done;
+
 
 
 
