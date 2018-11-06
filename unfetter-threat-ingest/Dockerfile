@@ -4,7 +4,7 @@ LABEL MAINTAINER="unfetter"
 LABEL Description="Node program that loads threat feed data into MongoDB"
 
 # Create Application Directory
-ENV WORKING_DIRECTORY /usr/src/unfetter-threat-ingest
+ENV WORKING_DIRECTORY /usr/share/unfetter-threat-ingest
 RUN mkdir -p $WORKING_DIRECTORY
 WORKDIR $WORKING_DIRECTORY
 
@@ -23,6 +23,7 @@ RUN npm --loglevel error install
 
 # Remove unneeded dependencies that scan as high risk
 RUN find / -name "cb-never*.tgz" -delete && \
+    rm -rf $WORKING_DIRECTORY/dist && \
     rm -rf /usr/share/man && \
     rm -rf /tmp/* && \
     rm -rf /var/cache/apk/*
