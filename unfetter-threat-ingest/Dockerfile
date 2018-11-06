@@ -23,11 +23,11 @@ RUN npm --loglevel error install
 
 # Remove unneeded dependencies that scan as high risk
 RUN find / -name "cb-never*.tgz" -delete && \
-    rm -rf $WORKING_DIRECTORY/dist && \
     rm -rf /usr/share/man && \
     rm -rf /tmp/* && \
     rm -rf /var/cache/apk/*
 
 COPY . $WORKING_DIRECTORY
+RUN npm run clean && npm run build
 
 EXPOSE 5010
