@@ -52,7 +52,7 @@
     "@types/camelcase": "^4.1.0",
     "@types/feedparser": "^2.2.1",
     "@types/istanbul": "^0.4.29",
-    "@types/jasmine": "^2.8.0",
+    "@types/jasmine": "2.8.8",
     "@types/mongoose": "^4.7.35",
     "@types/mongodb": "^2.2.20",
     "@types/node": "^9.4.7",
