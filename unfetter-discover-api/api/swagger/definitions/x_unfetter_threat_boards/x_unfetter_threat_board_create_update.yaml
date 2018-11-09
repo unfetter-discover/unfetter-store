@@ -1,0 +1,74 @@
+  allOf:
+    - $ref: '#/definitions/StixCommon'
+    - properties:
+       data:
+          type: object
+          properties:        
+            type:
+              type: string
+              enum: ['x-unfetter-threat-board']
+            attributes:
+              type: object
+              properties:            
+                articles:
+                  type: array
+                  items:
+                    type: string
+                boundaries:
+                  type: object
+                  properties:
+                    end_date:
+                      type: string
+                      format: date-time
+                    intrusion_sets:
+                      type: array
+                      items:
+                        type: string
+                    malware:
+                      type: array
+                      items:
+                        type: string 
+                    start_date:
+                      type: string
+                      format: date-time
+                    targets:
+                      type: array
+                      items:
+                        type: string
+                created: 
+                  type: string
+                  format: date-time
+                created_by_ref:
+                  type: string
+                  default: "identity-id"
+                description:
+                  type: string
+                external_references:
+                  type: array
+                  items:
+                    $ref: "#/definitions/ExternalReference"
+                granular_markings:
+                  type: array
+                  items:
+                    $ref: "#/definitions/GranularMarking"
+                labels:
+                  type: array
+                  items:
+                    type: string
+                modified:
+                  type: string
+                  format: date-time
+                name:
+                  type: string
+                object_marking_refs:
+                  type: array
+                  items:
+                    type: string
+                    default: "marking-definition-id"
+                reports:
+                  type: array
+                  items:
+                    type: string
+                revoked:
+                  type: boolean
+                  default: false

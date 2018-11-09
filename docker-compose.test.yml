@@ -22,6 +22,7 @@ services:
      - /tmp/certs/server.crt
     volumes:
      - ./certs/:/tmp/certs
+
   unfetter-ctf-ingest:
     build: unfetter-ctf-ingest
     container_name: unfetter-ctf-ingest
@@ -98,6 +99,36 @@ services:
     links:
      - cti-stix-store-repository:repository
 
+  unfetter-threat-ingest:
+    build: unfetter-threat-ingest
+    container_name: unfetter-threat-ingest
+    image: unfetter/unfetter-threat-ingest
+    ports:
+      - "5010:5010"
+    environment:
+#      - THREAT_INGEST_PORT=5010
+      - MONGO_HOST=repository
+      - MONGO_PORT=27017
+#      - MONGO_DB=stix
+#      - SERVER_SOCKET_HOST=localhost
+#      - SERVER_SOCKET_PORT=3333
+    entrypoint:
+      - npm
+      - run
+      - start
+#      - --debug
+#      - --cert-dir=/etc/pki/tls/certs
+#      - --server-key=server.key
+#      - --server-cert=server.crt
+#      - --fire-notifications=false
+    depends_on:
+      - cti-stix-store-repository
+      - unfetter-socket-server
+    links:
+      - cti-stix-store-repository:repository
+    volumes:
+      - ./certs/:/etc/pki/tls/certs
+
   unfetter-discover-api:
     build: unfetter-discover-api
     container_name: unfetter-discover-api
@@ -139,5 +170,3 @@ services:
     - npm
     - run
     - debugdev
-
-  

@@ -29,7 +29,8 @@ class GitlabAuth extends AuthHelper {
         return { 'auth.service': 'gitlab', 'auth.id': user.id };
     }
 
-    sync(user, gitlabInfo, approved) {
+    sync(data, gitlabInfo, approved) {
+        const user = data;
         super.sync(user, gitlabInfo, approved);
         user.auth.service = 'gitlab';
         user.auth.userName = gitlabInfo.username;

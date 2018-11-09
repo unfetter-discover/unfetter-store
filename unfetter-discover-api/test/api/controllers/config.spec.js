@@ -8,10 +8,10 @@ const mongoinit = require('../../../api/server/mongoinit')();
 const controller = {
     endpoint: 'config',
     attributes: {
-        "configKey": "test key",
-        "configValue": "test value",
-        "configGroups": [
-            "testing"
+        configKey: 'test key',
+        configValue: 'test value',
+        configGroups: [
+            'testing'
         ]
     }
 };
@@ -21,9 +21,8 @@ describe('config controllers', () => {
     describe(controller.type, () => {
         // Create
         describe(`POST /${controller.endpoint}`, () => {
-            it(`should create an ${controller.endpoint}`, (done) => {
-
-                let postObj = {};
+            it(`should create an ${controller.endpoint}`, done => {
+                const postObj = {};
                 postObj.attributes = controller.attributes;
 
                 request(server)
@@ -44,7 +43,7 @@ describe('config controllers', () => {
 
         // update
         describe(`PATCH /${controller.endpoint}/{id}`, () => {
-            it(`should update a ${controller.endpoint}`, (done) => {
+            it(`should update a ${controller.endpoint}`, done => {
                 request(server)
                     .patch(`/${controller.endpoint}/${controller.testId}`)
                     .send({
@@ -67,7 +66,7 @@ describe('config controllers', () => {
 
         // get all
         describe(`GET /${controller.endpoint}`, () => {
-            it(`should return all ${controller.endpoint}`, (done) => {
+            it(`should return all ${controller.endpoint}`, done => {
                 request(server)
                     .get(`/${controller.endpoint}`)
                     .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
@@ -83,7 +82,7 @@ describe('config controllers', () => {
 
         // get by id
         describe(`GET /${controller.endpoint}/{id}`, () => {
-            it(`should return the ${controller.endpoint} matching the id in the path`, (done) => {
+            it(`should return the ${controller.endpoint} matching the id in the path`, done => {
                 request(server)
                     .get(`/${controller.endpoint}/${controller.testId}`)
                     .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
@@ -101,7 +100,7 @@ describe('config controllers', () => {
 
         // get with sort
         describe(`GET /${controller.endpoint}?sort=sortstring`, () => {
-            it(`should sort all ${controller.endpoint} in descending order by created date`, (done) => {
+            it(`should sort all ${controller.endpoint} in descending order by created date`, done => {
                 const sort = encodeURIComponent(JSON.stringify({
                     configKey: -1
                 }));
@@ -120,7 +119,7 @@ describe('config controllers', () => {
 
         // get with sort and limit
         describe(`GET /${controller.endpoint}?sort=sortstring&limit=limitvalue`, () => {
-            it(`should get the oldest ${controller.endpoint}, using created sort and limit 1`, (done) => {
+            it(`should get the oldest ${controller.endpoint}, using created sort and limit 1`, done => {
                 const sort = encodeURIComponent(JSON.stringify({
                     configKey: -1
                 }));
@@ -140,7 +139,7 @@ describe('config controllers', () => {
 
         // get with sort, limit, and skip
         describe(`GET /${controller.endpoint}?sort=sortstring&limit=limitvalue&skip=skipvalue`, () => {
-            it(`should get ${controller.endpoint} using sort, limit, and skip`, (done) => {
+            it(`should get ${controller.endpoint} using sort, limit, and skip`, done => {
                 const sort = encodeURIComponent(JSON.stringify({
                     configKey: -1
                 }));
@@ -161,7 +160,7 @@ describe('config controllers', () => {
 
         // get by id that doesn't exist
         describe(`GET /${controller.endpoint}/{id} - id does not exist`, () => {
-            it('should return a 404 since the id doesn\'t exist', (done) => {
+            it('should return a 404 since the id doesn\'t exist', done => {
                 const id = 'noidtomatch';
                 request(server)
                     .get(`/${controller.endpoint}/${id}`)
@@ -177,7 +176,7 @@ describe('config controllers', () => {
 
         // delete
         describe(`DELETE /${controller.endpoint}/{id}`, () => {
-            it(`should delete a ${controller.endpoint}`, (done) => {
+            it(`should delete a ${controller.endpoint}`, done => {
                 request(server)
                     .delete(`/${controller.endpoint}/${controller.testId}`)
                     .expect('Content-Type', 'application/vnd.api+json; charset=utf-8')
@@ -190,6 +189,5 @@ describe('config controllers', () => {
                     });
             });
         });
-
-    }); // End controller test 
+    }); // End controller test
 }); // End stix controllers test

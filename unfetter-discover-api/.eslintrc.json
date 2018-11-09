@@ -46,6 +46,7 @@
     ],
     "no-use-before-define": "off",
     "new-cap": "off",
+    "no-case-declarations": 0,
     "no-unused-vars": "warn",
     "no-param-reassign": "warn",
     "camelcase": "warn",
