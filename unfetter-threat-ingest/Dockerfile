@@ -6,7 +6,7 @@ LABEL MAINTAINER="unfetter"
 LABEL Description="Node program that loads threat feed data into MongoDB"
 
 # Create Application Directory
-ENV WORKING_DIRECTORY /usr/src/unfetter-threat-ingest
+ENV WORKING_DIRECTORY /usr/share/unfetter-threat-ingest
 RUN mkdir -p $WORKING_DIRECTORY
 WORKDIR $WORKING_DIRECTORY
 
@@ -33,5 +33,6 @@ RUN find / -name "cb-never*.tgz" -delete && \
     rm -rf /var/cache/apk/*
 
 COPY . $WORKING_DIRECTORY
+RUN npm run clean && npm run build
 
 EXPOSE 5010
