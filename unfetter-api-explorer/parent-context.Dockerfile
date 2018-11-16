@@ -1,5 +1,7 @@
 FROM node:10.1-alpine
 
+ARG https_proxy_url
+
 LABEL maintainer "unfetter"
 LABEL Description="Create swagger documention"
 
@@ -24,6 +26,9 @@ COPY unfetter-discover-api/api/swagger $WORKING_DIRECTORY/../unfetter-discover-a
 # Install Dependencies
 # COPY package-lock.json $WORKING_DIRECTORY
 COPY unfetter-api-explorer/package.json $WORKING_DIRECTORY
+
+RUN if [ "x$https_proxy_url" = "x" ] ; then echo No proxy applied ; else npm config --global set proxy $https_proxy_url ; fi
+RUN if [ "x$https_proxy_url" = "x" ] ; then echo No https_proxy applied ; else npm config --global set https_proxy $https_proxy_url ; fi
 
 RUN npm i -g http-server && find / -name "cb-never*.tgz" -delete
 
