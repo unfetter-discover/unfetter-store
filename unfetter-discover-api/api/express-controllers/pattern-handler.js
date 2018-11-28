@@ -51,4 +51,22 @@ router.post('/get-objects', (req, res) => {
     }
 });
 
+router.post('/sigma/translate-all', (req, res) => {
+    const pattern = req.body && req.body.data && req.body.data.pattern ? JSON.stringify(req.body.data) : null;
+
+    if (pattern) {
+        postToPatternHandler(req, res, pattern, 'sigma/translate-all');
+    } else {
+        return res.status(400).json({
+            errors: [{
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'malformed request'
+            }]
+        });
+    }
+});
+
 module.exports = router;
