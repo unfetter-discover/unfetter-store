@@ -211,7 +211,7 @@ const search = (req, res) => {
         break;
     }
     if (searchParameters) {
-        const promises = [];
+        const promises = [];       
 
         // Get filtered indicators
         const filterObj = { 'stix.type': 'indicator' };
@@ -260,13 +260,32 @@ const search = (req, res) => {
             });
             filterObj.$or = orArr;
         }
+
         if (searchParameters.published && searchParameters.published.length) {
             // Mapping is there because mat-option insists on giving a string
             filterObj['metaProperties.published'] = { $in: searchParameters.published.map(p => p === 'true') };
         }
 
-        if (searchParameters.validStixPattern) {
+        if (searchParameters.validStixPattern && !searchParameters.validSigma) {
             filterObj['metaProperties.validStixPattern'] = true;
+        } else if (!searchParameters.validStixPattern && searchParameters.validSigma) {
+            filterObj['metaProperties.validSigma'] = true;
+        } else if (searchParameters.validStixPattern && searchParameters.validSigma) {
+            const clause = [{ 'metaProperties.validSigma': true }, { 'metaProperties.validStixPattern': true }];
+            if (filterObj.$or) {
+                const orCopy = filterObj.$or;
+                delete filterObj.$or;
+                filterObj.$and = [
+                    {
+                        $or: orCopy
+                    },
+                    {
+                        $or: clause
+                    }
+                ];
+            } else {
+                filterObj.$or = clause;
+            }
         }
 
         promises.push(stixModel.find(SecurityHelper.applySecurityFilter(filterObj, req.user)).sort(sortObj).exec());
