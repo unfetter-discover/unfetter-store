@@ -211,8 +211,7 @@ const search = (req, res) => {
         break;
     }
     if (searchParameters) {
-        const promises = [];       
-
+        const promises = [];
         // Get filtered indicators
         const filterObj = { 'stix.type': 'indicator' };
         if (searchParameters.indicatorName && searchParameters.indicatorName !== '') {
