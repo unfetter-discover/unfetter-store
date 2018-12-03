@@ -1,5 +1,7 @@
 import * as https from 'https';
+import * as http from 'http';
 import * as uuid from 'uuid';
+import * as fs from 'fs';
 import fetch from 'node-fetch';
 import { Document } from 'mongoose';
 import { ObjectId } from 'bson';
@@ -8,9 +10,15 @@ import ReportJSON from './report-json';
 import { ThreatFeedParser } from './threat-feed-parser';
 import { DaemonState, StatusEnum } from '../models/server-state';
 
+interface Protocol {
+    get: (url: string | any, callback?: (res: http.IncomingMessage) => void) => http.ClientRequest;
+};
+
 export default class ThreatFeedProcessor {
 
     private parser: ThreatFeedParser;
+
+    private urlParser = /(https?:)\/\/(.*?)(:\d+)?(\/.*)/;
 
     constructor(
         private feed: any,
@@ -30,27 +38,44 @@ export default class ThreatFeedProcessor {
 
     public async poll() {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-        const HTTPSOptions = {
-            // requestCert: true,
-            // rejectUnauthorized: false,
-            // key: fs.readFileSync(`${state.configuration['cert-dir']}/${state.configuration['server-key']}`),
-            // cert: fs.readFileSync(`${state.configuration['cert-dir']}/${state.configuration['server-cert']}`),
-            // ca: fs.readFileSync('/Users/carltonanderson/Documents/VeriSignUniversalRootCertificationAuthority.crt'),
-        };
-        const options = (typeof this.feed.source === 'string') ? this.feed.source : {...this.feed.source};
-        if (this.feed.source.protocol === 'https:') { // will be false if the source is just a string
-            Object.assign(options, HTTPSOptions);
+        let protocol: Protocol = http;
+        let request: string | any = null;
+        if (typeof this.feed.source === 'string') {
+            const parsed = this.urlParser.exec(this.feed.source);
+            if (parsed && (parsed.length === 5)) {
+                request = {
+                    protocol: parsed[1].toLocaleLowerCase(),
+                    hostname: parsed[2],
+                    port: Number.parseInt(parsed[3]),
+                    path: parsed[4]
+                };
+            } else {
+                request = this.feed.source; // if it doesn't parse, try it anyway, but it probably won't work
+            }
+        } else {
+            request = {...this.feed.source};
+        }
+        if ((typeof this.feed.source !== 'string') && this.feed.options) {
+            ['headers', 'auth', 'passphrase', 'requestCert', 'rejectUnauthorized'].forEach((option) => {
+                if (this.feed.options[option]) {
+                    request[option] = this.feed.options[option];
+                }
+            });
+            ['ca', 'cert', 'key'].forEach((option) => {
+                if (this.feed.options[option]) {
+                    request[option] = fs.readFileSync(this.feed.options[option]);
+                }
+            });
         }
         const reports: ReportJSON[] = [];
-        await this.pollFeed(options)
+        await this.pollFeed(protocol, request)
             .then((data) => this.handlePollResolve(data, reports))
             .catch((reason) => {
                 /*
                  * Something went wrong trying to contact the feed source.
                  * 
-                 * TODO We should probably be keeping track of these, deactivating them if they keep giving us errors,
-                 *      only retrying after many cybermoons to see if they've come back. Also send admins a notice,
-                 *      they should know to keep an eye on this.
+                 * TODO We should probably be keeping track of these, deactivating them if they keep giving us errors, only retrying after many
+                 *      cybermoons to see if they've come back. Also send admins a notice, they should know to keep an eye on this.
                  */
                 console.warn(`Could not poll feed '${this.feed.name}':`, reason);
             });
@@ -60,12 +85,12 @@ export default class ThreatFeedProcessor {
     /**
      * Fire the given request to a feed source.
      */
-    private pollFeed(options: any) {
+    private pollFeed(protocol: Protocol, req: any) {
         if (this.state.configuration.debug) {
-            console.debug('calling feed', options);
+            console.debug('calling feed', req);
         }
         return new Promise((resolve, reject) => {
-            const request = https.get(options, (res) => {
+            const request = protocol.get(req, (res) => {
                 let output = '';
                 res.on('data', (chunk) => {
                     output += chunk;
@@ -134,9 +159,8 @@ export default class ThreatFeedProcessor {
                 return (current.name === report.stix.name) && (current.source === report.metaProperties.source);
             }))
             /*
-             * Compare reports to the boards we were passed to see if any of them appear to be of possible
-             * interest to the board watchers (high likelihood of false positive, but that's what we
-             * want[?]). If any match, save them.
+             * Compare reports to the boards we were passed to see if any of them appear to be of possible interest to the board watchers
+             * (high likelihood of false positive, but that's what we want[?]). If any match, save them.
              */
             .forEach((report) => {
                 const matches = this.boards.reduce((matched: Document[], board) => {
@@ -161,9 +185,8 @@ export default class ThreatFeedProcessor {
     }
 
     /**
-     * Locate any boards that might be interested in the given report. This is a very basic search, trying to match up
-     * the threat board's start and end dates with the report's publish date, and hoping to find a label in the report
-     * that matches one of the boards other boundaries.
+     * Locate any boards that might be interested in the given report. This is a very basic search, trying to match up the threat board's start and
+     * end dates with the report's publish date, and hoping to find a label in the report that matches one of the boards other boundaries.
      * 
      * TODO We will need something more sophisticated down the road.
      */
@@ -209,7 +232,7 @@ export default class ThreatFeedProcessor {
                     if (response.status === 200) {
                         console.log(`Websocket received board notification for '${board.stix.created_by_ref}'`);
                     } else {
-                        console.log(`Websocket rejected board notification for '${board.stix.created_by_ref}':`,
+                        console.warn(`Websocket rejected board notification for '${board.stix.created_by_ref}':`,
                                 response.status, response.statusText);
                     }
                 })

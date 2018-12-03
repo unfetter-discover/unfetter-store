@@ -17,14 +17,13 @@ import ThreatFeedProcessor from '../processor/threat-feed-processor';
  */
 const poll = (state: DaemonState) => {
     /*
-     * If there are no feed sources configured, bail on this loop. If you see this problem, update the database with
-     * feed sources, then either wait for the configuration to be reloaded, or call endpoint /resync/config. If the
-     * UI allows us to add new sources, then the UI should follow up with a call to that endpoint.
+     * If there are no feed sources configured, bail on this loop. If you see this problem, update the database with feed sources, then either wait
+     * for the configuration to be reloaded, or call endpoint /resync/config. If the UI allows us to add new sources, then the UI should follow up
+     * with a call to that endpoint.
      */
     if (!state.configuration.feedSources || !state.configuration.feedSources.length) {
         console.warn('No threat feed sources configured. Please update database information.')
-        state.processor.pollTimer = setTimeout(() => poll(state),
-                state.configuration['poll-interval'] * 60 * 1000);
+        state.processor.pollTimer = setTimeout(() => poll(state), state.configuration['poll-interval'] * 60 * 1000);
         return;
     }
 
@@ -45,13 +44,11 @@ const poll = (state: DaemonState) => {
     Promise.all(promises)
         .then(([currentReports, boards]) => {
             console.debug('polling for boards',
-                    state.configuration.debug
-                            ? JSON.stringify(boards, null, 2)
-                            : boards.map((board: any) => board.stix.name));
+                    state.configuration.debug ? JSON.stringify(boards, null, 2) : boards.map((board: any) => board.stix.name));
             if (state.processor.status.getValue() !== StatusEnum.RUNNING) {
                 /*
-                 * If this block gets executed, it is because we were querying the database when the service was shut
-                 * down. Stop doing anything else, so we can exit cleanly, if necessary.
+                 * If this block gets executed, it is because we were querying the database when the service was shut down.
+                 * Stop doing anything else, so we can exit cleanly, if necessary.
                  */
                 if (state.configuration.debug) {
                     console.debug('Shutting down mid-stream polling.')
@@ -59,9 +56,9 @@ const poll = (state: DaemonState) => {
                 return;
             } else if (!boards) {
                 /*
-                 * No threat boards in the database. Maybe you should add one, either injecting into Mongo or
-                 * using the UI. After doing so, you can wait for the next polling interval, or call endpoint
-                 * /resync/boards. Again, if using the UI, the UI should follow up with a call to that endpoint.
+                 * No threat boards in the database. Maybe you should add one, either injecting into Mongo or using the UI. After doing so, you can
+                 * wait for the next polling interval, or call endpoint /resync/boards. Again, if using the UI, the UI should follow up with a call
+                 * to that endpoint.
                  */
                 console.warn('No threat board data found');
             } else {
@@ -84,9 +81,7 @@ const poll = (state: DaemonState) => {
             /*
              * Create a time to run the poll again after a configured number of minutes.
              */
-            state.processor.pollTimer = setTimeout(() => poll(state),
-                    state.configuration['poll-interval'] * 60 * 1000);
-
+            state.processor.pollTimer = setTimeout(() => poll(state), state.configuration['poll-interval'] * 60 * 1000);
         });
 };
 

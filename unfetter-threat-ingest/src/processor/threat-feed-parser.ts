@@ -8,29 +8,27 @@ import { DaemonState, FeedSource } from '../models/server-state';
 export type DefaultMatchFunction = (report: ReportJSON, board: any) => boolean;
 
 /**
- * Threat feed parsers read in data from a feed that is expected to follow a certain type, such as XML. They can be
- * strict or lenient. The result is that they return data in a Report JSON format (see interface).
+ * Threat feed parsers read in data from a feed that is expected to follow a certain type, such as XML. They can be strict or lenient. The result is
+ * that they return data in a Report JSON format (see interface).
  * 
- * If someone has unique parsing needs, even if the content of the feed matches an existing parser, such as XML, they
- * should create a new parser, with a distinct type (say, 'xml-myfeed', or whatever unique name you like), and set
- * the feed configuration to use that new type. An example of a custom parser would be knowing that a particular feed
- * provides associations to existing STIX objects, and adds relationships
+ * If someone has unique parsing needs, even if the content of the feed matches an existing parser, such as XML, they should create a new parser,
+ * with a distinct type (say, 'xml-myfeed', or whatever unique name you like), and set the feed configuration to use that new type. An example of a
+ * custom parser would be knowing that a particular feed provides associations to existing STIX objects, and adds relationships.
  * 
- * Parsers are automatically loaded. First, the system will check the processor directory and any subdirectories. That
- * directory will contain "standard" parsers. The simple XML parser is one. Next, it will search for a dist/plugins
- * directory and any subdirectories. That directory does not normally exist, but site deployments of the service should
- * feel free to inject such a path with whatever custom parsers you need.
+ * Parsers are automatically loaded. First, the system will check the processor directory and any subdirectories. That directory will contain
+ * "standard" parsers. The simple XML parser is one. Next, it will search for a dist/plugins directory and any subdirectories. That directory does
+ * not normally exist, but site deployments of the service should feel free to inject such a path with whatever custom parsers you need.
  * 
- * There is currently no means to associate reports with other STIX data. So a report that is relevant to certain
- * malware or attack patterns cannot have those relationships ingested along with it. This is something we really
- * need to address, possibly modifying the report definition to include a relationships list.
+ * There is currently no means to associate reports with other STIX data. So a report that is relevant to certain malware or attack patterns cannot
+ * have those relationships ingested along with it. This is something we really need to address, possibly modifying the report definition to include
+ * a relationships list.
  */
 export abstract class ThreatFeedParser {
 
     /**
-     * All parsers should have some arbitrary type, such as "xml", that is unique from all other parsers in the system.
-     * If you give the parser a non-distinct name, it may not get loaded at all. Default parsers are loaded first, so
-     * definitely do not give your parser the same name as a default one.
+     * All parsers should have some arbitrary type, such as "xml", that is unique from all other parsers in the system. If you give the parser a
+     * non-distinct name, it may not get loaded at all. Default parsers are loaded first, so definitely do not give your parser the same name as
+     * a default one.
      */
     protected constructor(
         private _type: string,
@@ -43,26 +41,24 @@ export abstract class ThreatFeedParser {
     public get type() { return this._type; };
 
     /**
-     * This is the one method you are required to override. Take the given, full response body from the given feed,
-     * and parse it out into ReportJSON objects. The state is provided mostly for its debug configuration value.
+     * This is the one method you are required to override. Take the given, full response body from the given feed, and parse it out into
+     * ReportJSON objects. The state is provided mostly for its debug configuration value.
      */
     public abstract parse(data: string, feed: any, state: DaemonState): Promise<ReportJSON[]>;
 
     /**
-     * This method compares the read report against the given board's boundaries. You are not required to override this
-     * method, but the default behavior only compares the board's start and end date rangae against the publish date of
-     * the report. So if you want to give this feed a chance of providing some decent relevance of the report to a
-     * board; then, a) try to extract some kind of detail out of the report, and b) match it up against a malware,
-     * or target, or intrusion set.
+     * This method compares the read report against the given board's boundaries. You are not required to override this method, but the default
+     * behavior only compares the board's start and end date rangae against the publish date of the report. So if you want to give this feed a
+     * chance of providing some decent relevance of the report to a board; then, a) try to extract some kind of detail out of the report, and
+     * b) match it up against a malware, or target, or intrusion set.
      */
     public match: null | DefaultMatchFunction = null;
 
 }
 
 /**
- * A collection of threat feed parsers. This object attempts to load ThreatFeedParser definitions from here, and
- * deployed into the service dynamically at runtime, allowing sites with unique requirements to parse data, their
- * way, from desired feeds.
+ * A collection of threat feed parsers. This object attempts to load ThreatFeedParser definitions from here, and deployed into the service
+ * dynamically at runtime, allowing sites with unique requirements to parse data, their way, from desired feeds.
  * 
  * You do not need to make an instance of this class. The ingest service will instantiate it on its own.
  */
