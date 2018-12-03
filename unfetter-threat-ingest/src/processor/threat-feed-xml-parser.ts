@@ -9,6 +9,12 @@ export type Converter = (values: any[], isArray: boolean) => any;
 
 export class ThreatFeedXMLParser extends ThreatFeedParser {
 
+    protected parseConfiguration: any = {
+        trim: true,             // trim all strings (but not -all- embedded whitespace`)
+        explicitArray: false,   // don't automatically convert all node values to arrays, it's bloody annoying
+        attrkey: 'attributes',  // use explicit node name for attributes, rather than cryptic '$'
+    };
+
     protected converters: {[type: string]: Converter} = {
 
         'boolean': (values: any[], isArray: boolean) => {
@@ -50,11 +56,7 @@ export class ThreatFeedXMLParser extends ThreatFeedParser {
 
     public parse(data: string, feed: any, state: DaemonState): Promise<ReportJSON[]> {
         return new Promise((resolve, reject) => {
-            xml2js.parseString(data, {
-                trim: true,             // trim all strings (but not -all- embedded whitespace`)
-                explicitArray: false,   // don't automatically convert all node values to arrays, it's bloody annoying
-                attrkey: 'attributes',  // use explicit node name for attributes, rather than cryptic '$'
-            }, (err, json) => {
+            xml2js.parseString(data, this.parseConfiguration, (err, json) => {
                 if (err) {
                     /*
                      * Well this is bad, the result was not XML. Again, we should be managing "bad" feeds, but moving on...

@@ -21,7 +21,7 @@ yargs
     .describe('mongo-database', 'Database for MongoDB')
     .default('mongo-database', process.env.MONGO_DB || 'stix')
 
-    .boolean('fire-notification')
+    .boolean('fire-notifications')
     .describe('fire-notifications', 'Whether to send notifications of report ingests to the websocket server')
     .default('fire-notifications', true)
 
