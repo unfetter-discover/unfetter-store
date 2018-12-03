@@ -43,6 +43,7 @@ export default class ThreatFeedProcessor {
         if (typeof this.feed.source === 'string') {
             const parsed = this.urlParser.exec(this.feed.source);
             if (parsed && (parsed.length === 5)) {
+                protocol = https;
                 request = {
                     protocol: parsed[1].toLocaleLowerCase(),
                     hostname: parsed[2],
