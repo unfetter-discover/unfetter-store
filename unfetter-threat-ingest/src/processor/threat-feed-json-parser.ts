@@ -56,8 +56,8 @@ export class ThreatFeedJSONParser extends ThreatFeedParser {
     }
 
     /**
-     * If the feed is configured with a root node, try to find it. If we can't, we return null. This can be a slash (/)
-     * delimited path (no leading or trailing slash).
+     * If the feed is configured with a root node, try to find it. If we can't, we return null. This can be a slash-delimited (/) path (no leading or
+     * trailing slash).
      */
     private locateRoot(json: any, rootPath: string) {
         let root = json;
@@ -74,8 +74,8 @@ export class ThreatFeedJSONParser extends ThreatFeedParser {
     }
 
     /**
-     * If the feed is configured with the name of an element at the top of the root node that contains all our
-     * child nodes, try to find it. If we can't, we return null.
+     * If the feed is configured with the name of an element at the top of the root node that contains all our child nodes, try to find it.
+     * If we can't, we return null.
      */
     private locateArticles(root: any, articleNodes: string) {
         let articles = root;
@@ -92,7 +92,7 @@ export class ThreatFeedJSONParser extends ThreatFeedParser {
     /**
      * Extract a STIX report from the given article. At the very least, we expect it to give us a name.
      */
-    private parseFeedReport(feed: any, article: any, state: DaemonState) {
+    protected parseFeedReport(feed: any, article: any, state: DaemonState) {
         const report: ReportJSON = {
             stix: {
                 id: null,
@@ -106,8 +106,7 @@ export class ThreatFeedJSONParser extends ThreatFeedParser {
             }
         };
         Object.keys(feed.parser.convert.metaProperties).forEach((property) => {
-            (report.metaProperties as any)[property] =
-                    this.convertReportNode(article, property, feed.parser.convert.metaProperties, state);
+            (report.metaProperties as any)[property] = this.convertReportNode(article, property, feed.parser.convert.metaProperties, state);
         });
         if (state.configuration.debug) {
             console.log(`Read '${feed.name}' feed item:`, report);
@@ -116,33 +115,28 @@ export class ThreatFeedJSONParser extends ThreatFeedParser {
     }
 
     /**
-     * Here's a fun part of the feed configuration. As you may have guessed by now, the feed information consists of
-     * a name, a source (which may be a URL string or an entire request options object), and a parser object that
-     * contains a type ('xml' is the only value currently recognized), a path to the root element, and the name of
-     * the articles element that contains the list of reports the feed returns.
+     * Here's a fun part of the feed configuration. As you may have guessed by now, the feed information consists of a name, a source (which may be a
+     * URL string or an entire request options object), and a parser object that contains a type ('xml' is the only value currently recognized), a
+     * path to the root element, and the name of the articles element that contains the list of reports the feed returns.
      * 
-     * The parser object also has a convert element that lists each STIX element on a report: name, description,
-     * labels, published, as well as a metaProperties element that lists anything else on the feed we want to add
-     * to the report:
+     * The parser object also has a convert element that lists each STIX element on a report: name, description, labels, published, as well as a
+     * metaProperties element that lists anything else on the feed we want to add to the report:
      * 
-     * - If the property is missing from the feed.parser.convert object, then the property is searched by its name in
-     *   the article, and it is expected that whatever datatype it is, that will be what is found. If missing, the
-     *   value is set to undefined.
+     * - If the property is missing from the feed.parser.convert object, then the property is searched by its name in the article, and it is expected
+     *   that whatever datatype it is, that will be what is found. If missing, the value is set to undefined.
      * 
-     * - If the property is a string, then the article node is searched for an element with that string name instead.
-     *   Again, it is expected to return whatever datatype you expect of it, without conversion. If missing the value
-     *   is set to undefined. Like the root path, this string can also be a path, to a deeply nested node, and can also
-     *   point to an attribute (such as "div/a@href"). At this time, we cannot handle arrays in the path (although a
-     *   path that yields an array is perfectly fine).
+     * - If the property is a string, then the article node is searched for an element with that string name instead. Again, it is expected to return
+     *   whatever datatype you expect of it, without conversion. If missing the value is set to undefined. Like the root path, this string can also
+     *   be a path, to a deeply nested node, and can also point to an attribute (such as "div/a@href"). At this time, we cannot handle arrays in the
+     *   path (although a path that yields an array is perfectly fine).
      * 
-     * - The property can also be an object that contains at least an "element" property. The element property is used
-     *   just like if the property were a string, so again it can be a path to your nested report value. There are two
-     *   other properties supported at this time: "arity" and "type". The type property allows you to perform a simple
-     *   conversion from a string to boolean, integer, float or Date objects. We have no other converters at this time,
-     *   but will need to add a means of plugging new converters in at runtime. The arity property simply tells us the
+     * - The property can also be an object that contains at least an "element" property. The element property is used just like if the property were
+     *   a string, so again it can be a path to your nested report value. There are two other properties supported at this time: "arity" and "type".
+     *   The type property allows you to perform a simple conversion from a string to boolean, integer, float or Date objects. We have no other
+     *   converters at this time, but will need to add a means of plugging new converters in at runtime. The arity property simply tells us the
      *   element is an array, even if we do not receive an array for the element (we only retrieved a single item).
      */
-    private convertReportNode(item: any, node: string, converts: any, state: DaemonState, isArray: boolean = false) {
+    protected convertReportNode(item: any, node: string, converts: any, state: DaemonState, isArray: boolean = false) {
         /*
          * Determine if this node is expected to be an array.
          */
@@ -202,8 +196,7 @@ export class ThreatFeedJSONParser extends ThreatFeedParser {
     }
 
     /**
-     * Split the given slash-delimited path, which may end with an @-separated attribute, and traverse the node to try
-     * and find the resulting element.
+     * Split the given slash-delimited path, which may end with an @-separated attribute, and traverse the node to try and find the resulting element.
      */
     private getValueFromPath(nodepath: string, node: any) {
         if (node) {
