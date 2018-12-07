@@ -3,8 +3,8 @@ const lodash = require('lodash');
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
 const SecurityHelper = require('../helpers/security_helper');
+const socialHelper = require('../helpers/social_helper');
 const jsonApiConverter = require('../helpers/json_api_converter');
-const userHelpers = require('../helpers/user');
 const config = require('../config/config');
 
 const apiRoot = config.apiRoot;
@@ -97,17 +97,7 @@ const addComment = (req, res) => {
             if (resultObj.metaProperties.comments === undefined) {
                 resultObj.metaProperties.comments = [];
             }
-
-            const commentObj = {
-                user: {
-                    id: user._id,
-                    userName: user.userName,
-                    avatar_url: userHelpers.getAvatarUrl(user)
-                },
-                submitted: new Date(),
-                comment
-            };
-
+            const commentObj = socialHelper.makeComment(comment, user._id);
             resultObj.metaProperties.comments.push(commentObj);
 
             const newDocument = new model(resultObj);
