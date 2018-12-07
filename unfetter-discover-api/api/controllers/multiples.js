@@ -98,6 +98,7 @@ const addComment = (req, res) => {
                 resultObj.metaProperties.comments = [];
             }
             const commentObj = socialHelper.makeComment(comment, user._id);
+            commentObj.replies = [];
             resultObj.metaProperties.comments.push(commentObj);
 
             const newDocument = new model(resultObj);
@@ -128,7 +129,7 @@ const addComment = (req, res) => {
                     const requestedUrl = apiRoot + req.originalUrl;
                     const obj = newDocument.toObject();
 
-                    // Notifify user if its another user leaving a comment
+                    // Notify user if its another user leaving a comment
                     if (req.user && req.user._id && obj.creator && req.user._id.toString() !== obj.creator.toString()) {
                         if (newDocument.stix.type === 'indicator') {
                             publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
@@ -153,6 +154,165 @@ const addComment = (req, res) => {
         return res.status(400).json({
             errors: [{
                 status: 400, source: '', title: 'Error', code: '', detail: 'malformed request'
+            }]
+        });
+    }
+};
+
+const addReply = (req, res) => {
+    res.header('Content-Type', 'application/vnd.api+json');
+
+    // get the old item
+    if (req.swagger.params.id.value !== undefined &&
+        req.swagger.params.data !== undefined &&
+        req.swagger.params.data.value.data.attributes !== undefined &&
+        req.swagger.params.data.value.data.attributes.reply !== undefined) {
+        const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+        const commentId = req.swagger.params.commentId ? req.swagger.params.commentId.value : '';
+        const reply = req.swagger.params.data.value.data.attributes.reply;
+
+        let user;
+        if (process.env.RUN_MODE === 'DEMO') {
+            user = {
+                _id: '1234',
+                userName: 'Demo-User',
+                firstName: 'Demo',
+                lastName: 'User'
+            };
+        } else {
+            user = req.user;
+        }
+
+        model.findById({
+            _id: id
+        }, (err, result) => {
+            if (err || !result) {
+                return res.status(500).json({
+                    errors: [{
+                        status: 500,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'An unknown error has occurred.'
+                    }]
+                });
+            }
+            const resultObj = result.toObject();
+            if (resultObj.metaProperties === undefined) {
+                resultObj.metaProperties = {};
+            }
+
+            if (resultObj.metaProperties.comments === undefined) {
+                return res.status(404).json({
+                    errors: [{
+                        status: 404,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'This object does not have comments, thus it can not be the right id'
+                    }]
+                });
+            }
+
+            const foundComment = resultObj.metaProperties.comments.find(comment => comment._id.toString() === commentId);
+
+            if (!foundComment) {
+                return res.status(404).json({
+                    errors: [{
+                        status: 404,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'Can not find comment object'
+                    }]
+                });
+            }
+
+            const replyObj = socialHelper.makeComment(reply, user._id);
+            if (!foundComment.replies) {
+                foundComment.replies = [];
+            }
+            foundComment.replies.unshift(replyObj);
+
+            const newDocument = new model(resultObj);
+            const error = newDocument.validateSync();
+            if (error) {
+                const errors = [];
+                lodash.forEach(error.errors, field => {
+                    errors.push(field.message);
+                });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: errors
+                    }]
+                });
+            }
+
+            // guard pass complete
+            model.findOneAndUpdate({
+                _id: id
+            }, newDocument, {
+                new: true
+            }, (errUpdate, resultUpdate) => {
+                if (errUpdate) {
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500,
+                            source: '',
+                            title: 'Error',
+                            code: '',
+                            detail: 'An unknown error has occurred.'
+                        }]
+                    });
+                }
+
+                if (resultUpdate) {
+                    const requestedUrl = apiRoot + req.originalUrl;
+                    const obj = newDocument.toObject();
+
+                    // TODO
+                    // Notify user if its another user leaving a comment
+                    // if (req.user && req.user._id && obj.creator && req.user._id.toString() !== obj.creator.toString()) {
+                    //     if (newDocument.stix.type === 'indicator') {
+                    //         publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
+                    //     } else {
+                    //         publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100));
+                    //     }
+                    // }
+
+                    // // Update comment for all, if stricter UAC is added, confirm comment is for Unfetter open before update all
+                    // publishNotification.updateSocialForAll('COMMENT', commentObj, resultObj._id);
+
+                    return res.status(200).json({
+                        links: {
+                            self: requestedUrl,
+                        },
+                        data: {
+                            attributes: { ...obj.stix,
+                                ...obj.extendedProperties,
+                                metaProperties: obj.metaProperties
+                            }
+                        }
+                    });
+                }
+
+                return res.status(404).json({
+                    message: `Unable to update the item.  No item found with id ${id}`
+                });
+            });
+        });
+    } else {
+        return res.status(400).json({
+            errors: [{
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'malformed request'
             }]
         });
     }
@@ -699,6 +859,7 @@ module.exports = {
     get,
     count,
     addComment,
+    addReply,
     addLike,
     removeLike,
     publish,
