@@ -99,7 +99,7 @@ const addComment = (req, res) => {
             }
             const commentObj = socialHelper.makeComment(comment, user._id);
             commentObj.replies = [];
-            resultObj.metaProperties.comments.push(commentObj);
+            resultObj.metaProperties.comments.unshift(commentObj);
 
             const newDocument = new model(resultObj);
             const error = newDocument.validateSync();
