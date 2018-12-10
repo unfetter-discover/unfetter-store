@@ -81,15 +81,15 @@ const addComment = (req, res) => {
             user = req.user;
         }
 
-        model.findById({ _id: id }, (err, result) => {
-            if (err || !result) {
+        model.find(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, results) => {
+            if (err || !results || !results.length) {
                 return res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             }
-            const resultObj = result.toObject();
+            const resultObj = results[0].toObject();
             if (resultObj.metaProperties === undefined) {
                 resultObj.metaProperties = {};
             }
@@ -151,7 +151,8 @@ const addComment = (req, res) => {
 
                 return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
             });
-        });
+        })
+        .limit(1);
     } else {
         return res.status(400).json({
             errors: [{
@@ -185,9 +186,9 @@ const addReply = (req, res) => {
             user = req.user;
         }
 
-        model.findById({
+        model.findById(SecurityHelper.applySecurityFilter({
             _id: id
-        }, (err, result) => {
+        }, req.user), (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
@@ -216,7 +217,7 @@ const addReply = (req, res) => {
                 });
             }
 
-            const foundComment = resultObj.metaProperties.comments.find(comment => comment._id.toString() === commentId);
+            const foundComment = resultObj.metaProperties.comments.find(comment => comment._id && comment._id.toString() === commentId);
 
             if (!foundComment) {
                 return res.status(404).json({
@@ -343,15 +344,15 @@ const addLike = (req, res) => {
             user = req.user;
         }
 
-        model.findById({ _id: id }, (err, result) => {
-            if (err || !result) {
+        model.find(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, results) => {
+            if (err || !results || !results.length) {
                 return res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             }
-            const resultObj = result.toObject();
+            const resultObj = results[0].toObject();
             if (resultObj.metaProperties === undefined) {
                 resultObj.metaProperties = {};
             }
@@ -414,7 +415,7 @@ const addLike = (req, res) => {
 
                 return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
             });
-        });
+        }).limit(1);
     } else {
         return res.status(400).json({
             errors: [{
@@ -442,15 +443,15 @@ const removeLike = (req, res) => {
             user = req.user;
         }
 
-        model.findById({ _id: id }, (err, result) => {
-            if (err || !result) {
+        model.find(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, results) => {
+            if (err || !results || !results.length) {
                 return res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             }
-            const resultObj = result.toObject();
+            const resultObj = results[0].toObject();
             if (resultObj.metaProperties === undefined) {
                 resultObj.metaProperties = {};
             }
@@ -507,7 +508,8 @@ const removeLike = (req, res) => {
 
                 return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
             });
-        });
+        })
+        .limit(1);
     } else {
         return res.status(400).json({
             errors: [{
@@ -606,7 +608,7 @@ const addLabel = (req, res) => {
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
         const newLabel = req.swagger.params.data.value.data.attributes.label;
 
-        model.findById({ _id: id }, (err, result) => {
+        model.findById(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
@@ -684,7 +686,7 @@ const addInteraction = (req, res) => {
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
         const user = req.user;
 
-        model.findById({ _id: id }, (err, result) => {
+        model.findById(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
