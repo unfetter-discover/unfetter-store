@@ -286,7 +286,7 @@ const addReply = (req, res) => {
                             }
                         }
 
-                        // // Update reply for all, if stricter UAC is added, confirm reply is for Unfetter open before update all
+                        // Update reply for all, if stricter UAC is added, confirm reply is for Unfetter open before update all
                         publishNotification.updateSocialForAll('REPLY', {
                             commentId,
                             ...replyObj
