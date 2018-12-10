@@ -129,17 +129,19 @@ const addComment = (req, res) => {
                     const requestedUrl = apiRoot + req.originalUrl;
                     const obj = newDocument.toObject();
 
-                    // Notify user if its another user leaving a comment
-                    if (req.user && req.user._id && obj.creator && req.user._id.toString() !== obj.creator.toString()) {
-                        if (newDocument.stix.type === 'indicator') {
-                            publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
-                        } else {
-                            publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100));
+                    if (process.env.RUN_MODE !== 'DEMO') {
+                        // Notify user if its another user leaving a comment
+                        if (req.user && req.user._id && obj.creator && req.user._id.toString() !== obj.creator.toString()) {
+                            if (newDocument.stix.type === 'indicator') {
+                                publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
+                            } else {
+                                publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100));
+                            }
                         }
-                    }
 
-                    // Update comment for all, if stricter UAC is added, confirm comment is for Unfetter open before update all
-                    publishNotification.updateSocialForAll('COMMENT', commentObj, resultObj._id);
+                        // Update comment for all, if stricter UAC is added, confirm comment is for Unfetter open before update all
+                        publishNotification.updateSocialForAll('COMMENT', commentObj, resultObj._id);
+                    }
 
                     return res.status(200).json({
                         links: { self: requestedUrl, },
@@ -274,18 +276,23 @@ const addReply = (req, res) => {
                     const requestedUrl = apiRoot + req.originalUrl;
                     const obj = newDocument.toObject();
 
-                    // TODO notify poster of comment
-                    // Notify user if its another user leaving a reply
-                    // if (req.user && req.user._id && obj.creator && req.user._id.toString() !== obj.creator.toString()) {
-                    //     if (newDocument.stix.type === 'indicator') {
-                    //         publishNotification.notifyUser(obj.creator, 'REPLY', `${user.userName} replied on ${resultObj.stix.name}`, reply.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
-                    //     } else {
-                    //         publishNotification.notifyUser(obj.creator, 'REPLY', `${user.userName} replied on ${resultObj.stix.name}`, reply.slice(0, 100));
-                    //     }
-                    // }
+                    if (process.env.RUN_MODE !== 'DEMO') {
+                        // Notify commenter of reply
+                        if (req.user && req.user._id && foundComment.user && foundComment.user.id && req.user._id.toString() !== foundComment.user.id.toString()) {
+                            if (newDocument.stix.type === 'indicator') {
+                                // TODO get replier name
+                                publishNotification.notifyUser(foundComment.user.id.toString(), 'REPLY', `${user.userName} replied to your comment on ${resultObj.stix.name}`, reply.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
+                            } else {
+                                publishNotification.notifyUser(foundComment.user.id.toString(), 'REPLY', `${user.userName} replied to your comment on ${resultObj.stix.name}`, reply.slice(0, 100));
+                            }
+                        }
 
-                    // // Update reply for all, if stricter UAC is added, confirm reply is for Unfetter open before update all
-                    publishNotification.updateSocialForAll('REPLY', { commentId, ...replyObj }, resultObj._id);
+                        // // Update reply for all, if stricter UAC is added, confirm reply is for Unfetter open before update all
+                        publishNotification.updateSocialForAll('REPLY', {
+                            commentId,
+                            ...replyObj
+                        }, resultObj._id);
+                    }
 
                     return res.status(200).json({
                         links: {
