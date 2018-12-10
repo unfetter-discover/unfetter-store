@@ -280,7 +280,6 @@ const addReply = (req, res) => {
                         // Notify commenter of reply
                         if (req.user && req.user._id && foundComment.user && foundComment.user.id && req.user._id.toString() !== foundComment.user.id.toString()) {
                             if (newDocument.stix.type === 'indicator') {
-                                // TODO get replier name
                                 publishNotification.notifyUser(foundComment.user.id.toString(), 'REPLY', `${user.userName} replied to your comment on ${resultObj.stix.name}`, reply.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
                             } else {
                                 publishNotification.notifyUser(foundComment.user.id.toString(), 'REPLY', `${user.userName} replied to your comment on ${resultObj.stix.name}`, reply.slice(0, 100));
