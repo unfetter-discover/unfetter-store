@@ -126,6 +126,8 @@
   $ref: ./multiples/multiples_relationship_mapper.yaml
 /multiples/{id}/comment:
   $ref: ./multiples/add_comment.yaml
+/multiples/{id}/{commentId}/reply:
+  $ref: ./multiples/add_reply.yaml
 /multiples/{id}/like:
   $ref: ./multiples/add_like.yaml
 /multiples/{id}/publish:
