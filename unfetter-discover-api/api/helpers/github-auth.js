@@ -7,6 +7,29 @@ class GithubAuth extends AuthHelper {
         super('github');
     }
 
+    /**
+     * Builds a GitHub passport strategy with the given configuration. Note that it uses passport-github, not passport-github2.
+     *
+     * Options include:
+     * - clientID and clientSecret: You set these up in GitHub, under your Settings/Developer Settings tab.
+     * - scope: Permission scopes on the request. You shouldn't need this, since the only thing Unfetter really needs is to authenticate, and if the
+     *       user grants access to their profile, all we look for is an avatar to display.
+     * - userAgent: If the API request needs to include a User Agent string. You probably won't need this.
+     * - authorizationURL: The URL for GitHub. You only need this if you have your own GitHub instance; otherwise, it goes out to the public GitHub
+     *       repo (https://github.com/login/oauth/authorize).
+     * - tokenURL: Unfortunately, if you have to override the authorizationURL option, you will also have to override this one. The default is
+     *       https://github.com/login/oath/access_token.
+     * - customHeaders: Any special headers you need to pass through to the OAuth module (can include "User-Agent" mentioned above).
+     *
+     * DO NOT SET the callbackURL. This property tells GitHub where to redirects after authenticating you. This option is set for you, as it points
+     * to Unfetter's own callback endpoint.
+     *
+     * It is unfortunate that the passport OAuth2 module does not take into account the possibility of needing authentication when contacting a
+     * custom GitHub endpoint. The only way around this appears to be by copying and modifying oauth2.js inside node-auth, and adding them to the
+     * request options in the _request() method (https://github.com/ciaranj/node-auth, lib/oauth2.js, ~ line 112), then injecting the modified
+     * code into your node_modules directory. For this reason, we've added that modified oauth2.js file in this directory, and suggest setting a
+     * flag in the Unfetter Ansible deployment to move this file into the appropriate path of the docker container.
+     */
     build(config, env) {
         const githubStrategy = new GithubStrategy(
             {

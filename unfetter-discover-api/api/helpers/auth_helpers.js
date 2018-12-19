@@ -39,8 +39,8 @@ const handleUserSearch = (authUser, source, service, response, err, result) => {
         return setErrorResponse(response, 500, 'An unknown error has occurred.');
     } else if (!result || (result.length === 0)) {
         // Unknown user
-        service.sync(user, authUser, false);
         console.log(`(${new Date().toISOString()}) First login attempt by ${source} id# ${authUser.id}`);
+        service.sync(user, authUser, false);
         startRegistration(user, response, token => {
             response.redirect(`${uiCallbackURL}/${encodeURIComponent(token)}/false/${source}`);
         });
@@ -159,14 +159,23 @@ const AuthHelper = class {
         return null;
     }
 
+    /**
+     * Strategy-based configuration options.
+     */
     options() {
         return null;
     }
 
+    /**
+     * What to pass to the Mongo find() query specification to search for a known Unfetter user.
+     */
     search(user) {
         return user || null;
     }
 
+    /**
+     * When receiving a response from the authentication strategy, how do we convert the response to an Unfetter user object.
+     */
     sync(data, loginInfo, approved) {
         const user = data;
         user.approved = approved;
