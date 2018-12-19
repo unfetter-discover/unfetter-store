@@ -3,8 +3,8 @@ const lodash = require('lodash');
 const modelFactory = require('./shared/modelFactory');
 const parser = require('../helpers/url_parser');
 const SecurityHelper = require('../helpers/security_helper');
+const socialHelper = require('../helpers/social_helper');
 const jsonApiConverter = require('../helpers/json_api_converter');
-const userHelpers = require('../helpers/user');
 const config = require('../config/config');
 
 const apiRoot = config.apiRoot;
@@ -81,15 +81,15 @@ const addComment = (req, res) => {
             user = req.user;
         }
 
-        model.findById({ _id: id }, (err, result) => {
-            if (err || !result) {
+        model.find(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, results) => {
+            if (err || !results || !results.length) {
                 return res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             }
-            const resultObj = result.toObject();
+            const resultObj = results[0].toObject();
             if (resultObj.metaProperties === undefined) {
                 resultObj.metaProperties = {};
             }
@@ -97,18 +97,9 @@ const addComment = (req, res) => {
             if (resultObj.metaProperties.comments === undefined) {
                 resultObj.metaProperties.comments = [];
             }
-
-            const commentObj = {
-                user: {
-                    id: user._id,
-                    userName: user.userName,
-                    avatar_url: userHelpers.getAvatarUrl(user)
-                },
-                submitted: new Date(),
-                comment
-            };
-
-            resultObj.metaProperties.comments.push(commentObj);
+            const commentObj = socialHelper.makeComment(comment, user._id);
+            commentObj.replies = [];
+            resultObj.metaProperties.comments.unshift(commentObj);
 
             const newDocument = new model(resultObj);
             const error = newDocument.validateSync();
@@ -138,17 +129,19 @@ const addComment = (req, res) => {
                     const requestedUrl = apiRoot + req.originalUrl;
                     const obj = newDocument.toObject();
 
-                    // Notifify user if its another user leaving a comment
-                    if (req.user && req.user._id && obj.creator && req.user._id.toString() !== obj.creator.toString()) {
-                        if (newDocument.stix.type === 'indicator') {
-                            publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
-                        } else {
-                            publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100));
+                    if (process.env.RUN_MODE !== 'DEMO') {
+                        // Notify user if its another user leaving a comment
+                        if (req.user && req.user._id && obj.creator && req.user._id.toString() !== obj.creator.toString()) {
+                            if (newDocument.stix.type === 'indicator') {
+                                publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
+                            } else {
+                                publishNotification.notifyUser(obj.creator, 'COMMENT', `${user.userName} commented on ${resultObj.stix.name}`, comment.slice(0, 100));
+                            }
                         }
-                    }
 
-                    // Update comment for all, if stricter UAC is added, confirm comment is for Unfetter open before update all
-                    publishNotification.updateSocialForAll('COMMENT', commentObj, resultObj._id);
+                        // Update comment for all, if stricter UAC is added, confirm comment is for Unfetter open before update all
+                        publishNotification.updateSocialForAll('COMMENT', commentObj, resultObj._id);
+                    }
 
                     return res.status(200).json({
                         links: { self: requestedUrl, },
@@ -158,11 +151,175 @@ const addComment = (req, res) => {
 
                 return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
             });
-        });
+        })
+        .limit(1);
     } else {
         return res.status(400).json({
             errors: [{
                 status: 400, source: '', title: 'Error', code: '', detail: 'malformed request'
+            }]
+        });
+    }
+};
+
+const addReply = (req, res) => {
+    res.header('Content-Type', 'application/vnd.api+json');
+
+    // get the old item
+    if (req.swagger.params.id.value !== undefined &&
+        req.swagger.params.data !== undefined &&
+        req.swagger.params.data.value.data.attributes !== undefined &&
+        req.swagger.params.data.value.data.attributes.reply !== undefined) {
+        const id = req.swagger.params.id ? req.swagger.params.id.value : '';
+        const commentId = req.swagger.params.commentId ? req.swagger.params.commentId.value : '';
+        const reply = req.swagger.params.data.value.data.attributes.reply;
+
+        let user;
+        if (process.env.RUN_MODE === 'DEMO') {
+            user = {
+                _id: '1234',
+                userName: 'Demo-User',
+                firstName: 'Demo',
+                lastName: 'User'
+            };
+        } else {
+            user = req.user;
+        }
+
+        model.findById(SecurityHelper.applySecurityFilter({
+            _id: id
+        }, req.user), (err, result) => {
+            if (err || !result) {
+                return res.status(500).json({
+                    errors: [{
+                        status: 500,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'An unknown error has occurred.'
+                    }]
+                });
+            }
+            const resultObj = result.toObject();
+            if (resultObj.metaProperties === undefined) {
+                resultObj.metaProperties = {};
+            }
+
+            if (resultObj.metaProperties.comments === undefined) {
+                return res.status(404).json({
+                    errors: [{
+                        status: 404,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'This object does not have comments, thus it can not be the right id'
+                    }]
+                });
+            }
+
+            const foundComment = resultObj.metaProperties.comments.find(comment => comment._id && comment._id.toString() === commentId);
+
+            if (!foundComment) {
+                return res.status(404).json({
+                    errors: [{
+                        status: 404,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: 'Can not find comment object'
+                    }]
+                });
+            }
+
+            const replyObj = socialHelper.makeComment(reply, user._id);
+            if (!foundComment.replies) {
+                foundComment.replies = [];
+            }
+            foundComment.replies.unshift(replyObj);
+
+            const newDocument = new model(resultObj);
+            const error = newDocument.validateSync();
+            if (error) {
+                const errors = [];
+                lodash.forEach(error.errors, field => {
+                    errors.push(field.message);
+                });
+                return res.status(400).json({
+                    errors: [{
+                        status: 400,
+                        source: '',
+                        title: 'Error',
+                        code: '',
+                        detail: errors
+                    }]
+                });
+            }
+
+            // guard pass complete
+            model.findOneAndUpdate({
+                _id: id
+            }, newDocument, {
+                new: true
+            }, (errUpdate, resultUpdate) => {
+                if (errUpdate) {
+                    return res.status(500).json({
+                        errors: [{
+                            status: 500,
+                            source: '',
+                            title: 'Error',
+                            code: '',
+                            detail: 'An unknown error has occurred.'
+                        }]
+                    });
+                }
+
+                if (resultUpdate) {
+                    const requestedUrl = apiRoot + req.originalUrl;
+                    const obj = newDocument.toObject();
+
+                    if (process.env.RUN_MODE !== 'DEMO') {
+                        // Notify commenter of reply
+                        if (req.user && req.user._id && foundComment.user && foundComment.user.id && req.user._id.toString() !== foundComment.user.id.toString()) {
+                            if (newDocument.stix.type === 'indicator') {
+                                publishNotification.notifyUser(foundComment.user.id.toString(), 'REPLY', `${user.userName} replied to your comment on ${resultObj.stix.name}`, reply.slice(0, 100), `/indicator-sharing/single/${newDocument._id}`);
+                            } else {
+                                publishNotification.notifyUser(foundComment.user.id.toString(), 'REPLY', `${user.userName} replied to your comment on ${resultObj.stix.name}`, reply.slice(0, 100));
+                            }
+                        }
+
+                        // Update reply for all, if stricter UAC is added, confirm reply is for Unfetter open before update all
+                        publishNotification.updateSocialForAll('REPLY', {
+                            commentId,
+                            ...replyObj
+                        }, resultObj._id);
+                    }
+
+                    return res.status(200).json({
+                        links: {
+                            self: requestedUrl,
+                        },
+                        data: {
+                            attributes: { ...obj.stix,
+                                ...obj.extendedProperties,
+                                metaProperties: obj.metaProperties
+                            }
+                        }
+                    });
+                }
+
+                return res.status(404).json({
+                    message: `Unable to update the item.  No item found with id ${id}`
+                });
+            });
+        });
+    } else {
+        return res.status(400).json({
+            errors: [{
+                status: 400,
+                source: '',
+                title: 'Error',
+                code: '',
+                detail: 'malformed request'
             }]
         });
     }
@@ -187,15 +344,15 @@ const addLike = (req, res) => {
             user = req.user;
         }
 
-        model.findById({ _id: id }, (err, result) => {
-            if (err || !result) {
+        model.find(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, results) => {
+            if (err || !results || !results.length) {
                 return res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             }
-            const resultObj = result.toObject();
+            const resultObj = results[0].toObject();
             if (resultObj.metaProperties === undefined) {
                 resultObj.metaProperties = {};
             }
@@ -258,7 +415,7 @@ const addLike = (req, res) => {
 
                 return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
             });
-        });
+        }).limit(1);
     } else {
         return res.status(400).json({
             errors: [{
@@ -286,15 +443,15 @@ const removeLike = (req, res) => {
             user = req.user;
         }
 
-        model.findById({ _id: id }, (err, result) => {
-            if (err || !result) {
+        model.find(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, results) => {
+            if (err || !results || !results.length) {
                 return res.status(500).json({
                     errors: [{
                         status: 500, source: '', title: 'Error', code: '', detail: 'An unknown error has occurred.'
                     }]
                 });
             }
-            const resultObj = result.toObject();
+            const resultObj = results[0].toObject();
             if (resultObj.metaProperties === undefined) {
                 resultObj.metaProperties = {};
             }
@@ -351,7 +508,8 @@ const removeLike = (req, res) => {
 
                 return res.status(404).json({ message: `Unable to update the item.  No item found with id ${id}` });
             });
-        });
+        })
+        .limit(1);
     } else {
         return res.status(400).json({
             errors: [{
@@ -450,7 +608,7 @@ const addLabel = (req, res) => {
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
         const newLabel = req.swagger.params.data.value.data.attributes.label;
 
-        model.findById({ _id: id }, (err, result) => {
+        model.findById(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
@@ -528,7 +686,7 @@ const addInteraction = (req, res) => {
         const id = req.swagger.params.id ? req.swagger.params.id.value : '';
         const user = req.user;
 
-        model.findById({ _id: id }, (err, result) => {
+        model.findById(SecurityHelper.applySecurityFilter({ _id: id }, req.user), (err, result) => {
             if (err || !result) {
                 return res.status(500).json({
                     errors: [{
@@ -709,6 +867,7 @@ module.exports = {
     get,
     count,
     addComment,
+    addReply,
     addLike,
     removeLike,
     publish,

@@ -7,6 +7,7 @@ const NOTIFICATION_TYPES = [
     'COMMENT',
     'ORGANIZATION',
     'STIX',
+    'REPLY',
     'USER_MESSAGE',
     'USER_OBJECT'
 ];

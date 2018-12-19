@@ -1,5 +1,7 @@
 FROM node:10.1-alpine
 
+ARG https_proxy_url
+
 LABEL MAINTAINER="unfetter"
 LABEL Description="REST endpoints and Swagger documentation"
 
@@ -13,6 +15,11 @@ COPY docker/set-npm-repo.sh $WORKING_DIRECTORY
 RUN chmod 700 $WORKING_DIRECTORY/*.sh
 RUN $WORKING_DIRECTORY/set-linux-repo.sh
 RUN $WORKING_DIRECTORY/set-npm-repo.sh
+
+RUN if [ "x$https_proxy_url" = "x" ] ; then echo No proxy applied ; else npm config --global set proxy $https_proxy_url ; fi
+RUN if [ "x$https_proxy_url" = "x" ] ; then echo No https_proxy applied ; else npm config --global set https_proxy $https_proxy_url ; fi
+ENV HTTP_PROXY "$https_proxy_url"
+ENV HTTPS_PROXY "$https_proxy_url"
 
 # Install packages
 RUN npm --loglevel error install -g multi-file-swagger && npm --loglevel error install -g pm2 && npm --loglevel error install -g json2yaml && npm --loglevel error install -g swagger && apk add --update curl
