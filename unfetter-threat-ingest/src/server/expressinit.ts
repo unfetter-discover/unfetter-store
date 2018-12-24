@@ -87,7 +87,7 @@ const onShutdown = (state: DaemonState) => {
     }
 }
 
-export default function initializeRESTService(state: DaemonState, options: yargs.Arguments): Promise<RESTServer> {
+export default function initializeRESTService(state: DaemonState, options: yargs.Arguments<any>): Promise<RESTServer> {
     state.rest.status.next(StatusEnum.INITIALIZING);
 
     const app = express();
