@@ -139,7 +139,7 @@ const onShutdown = (state: DaemonState) => {
 /**
  * Start the service up, and prep the first firing of the feed polling.
  */
-export default function initializeProcessor(state: DaemonState, options: yargs.Arguments): Promise<ProcessorService> {
+export default function initializeProcessor(state: DaemonState, options: yargs.Arguments<any>): Promise<ProcessorService> {
     return new Promise((resolve, reject) => {
         if (state.processor.status.getValue() === StatusEnum.UNINITIALIZED) {
             state.processor.status.next(StatusEnum.INITIALIZING);

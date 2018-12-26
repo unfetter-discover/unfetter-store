@@ -10,7 +10,7 @@ export type MongoConnection = PromisedService<mongoose.Connection>;
 type PromiseResolve = (value: MongoConnection) => void;
 type PromiseReject = (reason?: any) => void;
 
-const connect = (state: DaemonState, options: yargs.Arguments, resolve: PromiseResolve, reject: PromiseReject) => {
+const connect = (state: DaemonState, options: yargs.Arguments<any>, resolve: PromiseResolve, reject: PromiseReject) => {
     mongoose.connect(`mongodb://${options['mongo-host']}:${options['mongo-port']}/${options['mongo-database']}`, {
         server: {
             poolSize: 12,
@@ -45,7 +45,7 @@ const connect = (state: DaemonState, options: yargs.Arguments, resolve: PromiseR
 /**
  * @description populate global configuration
  */
-const lookupConfiguration = (state: DaemonState, options: yargs.Arguments) => new Promise((resolve, reject) => {
+const lookupConfiguration = (state: DaemonState, options: yargs.Arguments<any>) => new Promise((resolve, reject) => {
     if (options.debug) {
         console.debug('Looking up configuration');
     }
@@ -73,7 +73,7 @@ const lookupConfiguration = (state: DaemonState, options: yargs.Arguments) => ne
     });
 });
 
-const onRefresh = (state: DaemonState, options: yargs.Arguments) => {
+const onRefresh = (state: DaemonState, options: yargs.Arguments<any>) => {
     if (state.db.refreshTimer) {
         clearTimeout(state.db.refreshTimer);
         state.db.refreshTimer = undefined;
@@ -122,7 +122,7 @@ const validateConfiguration = (config: any) => {
     }
 }
 
-const validateOptions = (options: yargs.Arguments) => {
+const validateOptions = (options: yargs.Arguments<any>) => {
     if (!options['mongo-host']) {
         options['mongo-host'] = 'localhost';
     }
@@ -134,7 +134,7 @@ const validateOptions = (options: yargs.Arguments) => {
     }
 }
 
-export default function initializeMongo(state: DaemonState, options: yargs.Arguments): Promise<MongoConnection> {
+export default function initializeMongo(state: DaemonState, options: yargs.Arguments<any>): Promise<MongoConnection> {
     return new Promise((resolve, reject) => {
         mongoose.set('debug', options.debug);
 
