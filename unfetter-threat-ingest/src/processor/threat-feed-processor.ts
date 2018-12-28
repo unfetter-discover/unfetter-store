@@ -48,7 +48,7 @@ export default class ThreatFeedProcessor {
                     protocol: parsed[1].toLocaleLowerCase(),
                     hostname: parsed[2],
                     port: Number.parseInt(parsed[3]) || 443,
-                    path: `/${parsed[4].replace(/s/g, '%20')}`
+                    path: `${parsed[4].replace(/\s/g, '%20')}`
                 };
             } else {
                 request = this.feed.source; // if it doesn't parse, try it anyway, but it probably won't work
@@ -56,7 +56,7 @@ export default class ThreatFeedProcessor {
         } else {
             request = {...this.feed.source};
         }
-        if ((typeof this.feed.source !== 'string') && this.feed.options) {
+        if ((typeof request !== 'string') && this.feed.options) {
             ['headers', 'auth', 'passphrase', 'requestCert', 'rejectUnauthorized'].forEach((option) => {
                 if (this.feed.options[option]) {
                     request[option] = this.feed.options[option];
